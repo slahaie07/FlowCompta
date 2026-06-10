@@ -11,7 +11,45 @@ dotenv.config();
 // --- DATABASE LOCALE (AUTO-VIABILITÉ) ---
 const DB_PATH = path.join(process.cwd(), 'local_db.json');
 if (!fs.existsSync(DB_PATH)) {
-  fs.writeFileSync(DB_PATH, JSON.stringify({ users: [], profiles: [], transactions: [], invoices: [] }, null, 2));
+  const initialData = { 
+    users: [
+      { id: 'admin_id', email: 'admin@comptaflow.ca', password: 'admin', role: 'admin' },
+      { id: 'test_id', email: 'client@test.ca', password: 'password', role: 'client' }
+    ], 
+    profiles: [
+      { 
+        id: 'admin_id', 
+        displayName: 'Samuel L. (Admin)', 
+        companyName: 'Cabinet ComptaFlow', 
+        email: 'admin@comptaflow.ca', 
+        isAdmin: true, 
+        role: 'admin',
+        incomeBracket: 'N/A',
+        employeeCount: 'N/A',
+        needs: { bookkeeping: true, payroll: true, taxes: true, rentabilite: true, consultation: true },
+        activeMode: 'business'
+      },
+      {
+        id: 'test_id',
+        displayName: 'Client Démo',
+        companyName: 'Boutique Inc.',
+        email: 'client@test.ca',
+        incomeBracket: '100k-500k',
+        employeeCount: '1-5',
+        needs: { bookkeeping: true, taxes: true },
+        role: 'client',
+        activeMode: 'business'
+      }
+    ], 
+    transactions: [
+      { id: 't1', user_id: 'test_id', amount: 1250.50, description: 'Vente Service A', type: 'sale', date: Date.now() - 86400000, status: 'reconciled' },
+      { id: 't2', user_id: 'test_id', amount: 450.00, description: 'Fournitures Bureau', type: 'purchase', date: Date.now() - 172800000, status: 'pending' }
+    ], 
+    invoices: [
+      { id: 'i1', user_id: 'test_id', number: 'FAC-2026-001', clientName: 'Jean Tremblay', amount: 500, status: 'paid', date: Date.now() }
+    ] 
+  };
+  fs.writeFileSync(DB_PATH, JSON.stringify(initialData, null, 2));
 }
 
 const getDb = () => JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
@@ -68,10 +106,47 @@ async function startServer() {
     const profileData = req.body;
     const db = getDb();
     const index = db.profiles.findIndex((p: any) => p.id === profileData.id);
-    if (index !== -1) db.profiles[index] = profileData;
+    if (index !== -1) db.profiles[index] = { ...db.profiles[index], ...profileData };
     else db.profiles.push(profileData);
     saveDb(db);
     res.json({ success: true });
+  });
+
+  // --- GESTION DES TRANSACTIONS ---
+  app.get('/api/transactions', (req, res) => {
+    const { userId, isAdmin } = req.query;
+    const db = getDb();
+    if (isAdmin === 'true') return res.json(db.transactions);
+    res.json(db.transactions.filter((t: any) => t.user_id === userId));
+  });
+
+  app.post('/api/transactions', (req, res) => {
+    const db = getDb();
+    const newTx = { id: `tx_${Date.now()}`, ...req.body };
+    db.transactions.push(newTx);
+    saveDb(db);
+    res.json(newTx);
+  });
+
+  // --- GESTION DES FACTURES ---
+  app.get('/api/invoices', (req, res) => {
+    const { userId } = req.query;
+    const db = getDb();
+    res.json(db.invoices.filter((i: any) => i.user_id === userId));
+  });
+
+  app.post('/api/invoices', (req, res) => {
+    const db = getDb();
+    const newInv = { id: `inv_${Date.now()}`, ...req.body };
+    db.invoices.push(newInv);
+    saveDb(db);
+    res.json(newInv);
+  });
+
+  // --- GESTION ADMIN CLIENTS ---
+  app.get('/api/admin/clients', (req, res) => {
+    const db = getDb();
+    res.json(db.profiles.filter((p: any) => p.role === 'client'));
   });
 
   // 3. Webhook de réception post-paiement (Stripe vers n8n)

@@ -3,6 +3,8 @@ import { supabase } from '../lib/supabase';
 import { Transaction } from '../types';
 import { toast } from 'sonner';
 
+import { internalApi } from '../lib/api';
+
 export function useTransactions(userId?: string, isAdmin: boolean = false) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -10,7 +12,7 @@ export function useTransactions(userId?: string, isAdmin: boolean = false) {
   useEffect(() => {
     fetchTransactions();
 
-    // Real-time subscription
+    // Real-time subscription (Supabase only)
     const channel = supabase
       .channel('schema-db-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
@@ -25,28 +27,35 @@ export function useTransactions(userId?: string, isAdmin: boolean = false) {
 
   const fetchTransactions = async () => {
     try {
-      let query = supabase
-        .from('transactions')
-        .select('*')
-        .order('date', { ascending: false });
+      let data = [];
+      const { data: { user } } = await supabase.auth.getUser();
+      const targetId = userId || user?.id || (JSON.parse(localStorage.getItem('cf_user') || '{}').id);
 
-      if (!isAdmin) {
-        const { data: { user } } = await supabase.auth.getUser();
-        const targetId = userId || user?.id;
-
-        if (!targetId) {
-          setLoading(false);
-          return;
-        }
-        query = query.eq('user_id', targetId);
+      if (!isAdmin && !targetId) {
+        setLoading(false);
+        return;
       }
 
-      const { data, error } = await query;
+      // 1. Tentative Supabase
+      try {
+        let query = supabase
+          .from('transactions')
+          .select('*')
+          .order('date', { ascending: false });
 
-      if (error) throw error;
+        if (!isAdmin) query = query.eq('user_id', targetId);
+        
+        const { data: supabaseData, error } = await query;
+        if (supabaseData && !error) data = supabaseData;
+        else throw new Error("Supabase fail");
+      } catch (e) {
+        // 2. Fallback API Interne
+        data = await internalApi.fetchTransactions(targetId, isAdmin);
+      }
+
       setTransactions(data || []);
     } catch (e) {
-      console.error("Transactions real-time error:", e);
+      console.error("Transactions error:", e);
       setTransactions([]);
     } finally {
       setLoading(false);
@@ -56,16 +65,25 @@ export function useTransactions(userId?: string, isAdmin: boolean = false) {
   const addTransaction = async (data: Omit<Transaction, 'id' | 'userId'>) => {
     try {
       const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error("Auth required");
+      const uid = user.user?.id || (JSON.parse(localStorage.getItem('cf_user') || '{}').id);
       
-      const { error } = await supabase.from('transactions').insert({
-        ...data,
-        user_id: user.user.id
-      });
-      if (error) throw error;
+      if (!uid) throw new Error("Auth required");
+      
+      const newTx = { ...data, user_id: uid };
+
+      // 1. Supabase
+      try {
+        const { error } = await supabase.from('transactions').insert(newTx);
+        if (error) throw error;
+      } catch (e) {
+        // 2. API Interne
+        await internalApi.addTransaction(newTx);
+      }
+      
+      fetchTransactions();
     } catch (e) {
-      console.error("Supabase insert error:", e);
-      toast.error("Erreur d'enregistrement. Vérifiez que les tables SQL sont créées.");
+      console.error("Insert error:", e);
+      toast.error("Erreur d'enregistrement.");
     }
   };
 

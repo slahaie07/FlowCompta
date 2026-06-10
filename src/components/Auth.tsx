@@ -102,42 +102,48 @@ export function Auth({ onAuthentication }: AuthProps) {
 
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                 <button 
-                  onClick={() => setView('login')}
-                  className="group relative p-6 md:p-10 rounded-3xl md:rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-gold/30 hover:bg-gold/5 transition-all duration-500 text-center space-y-4 md:space-y-6"
+                  type="button"
+                  onClick={() => { console.log('Login clicked'); setView('login'); }}
+                  className="group relative p-6 md:p-10 rounded-3xl md:rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-gold/30 hover:bg-gold/5 transition-all duration-500 text-center space-y-4 md:space-y-6 z-30 cursor-pointer"
                 >
-                   <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gold/10 flex items-center justify-center text-gold mx-auto group-hover:scale-110 transition-transform">
+                   <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gold/10 flex items-center justify-center text-gold mx-auto group-hover:scale-110 transition-transform pointer-events-none">
                       <LogIn size={28} className="md:size-[32px]" />
                    </div>
-                   <div className="space-y-2">
+                   <div className="space-y-2 pointer-events-none">
                       <h3 className="text-xl md:text-2xl font-serif text-silver">Déjà Client</h3>
                       <p className="text-sm text-slate-500 font-light italic">Accédez à votre espace sécurisé</p>
                    </div>
-                   <div className="pt-2 md:pt-4 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                   <div className="pt-2 md:pt-4 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                       <div className="px-6 py-2 rounded-full border border-gold/50 text-gold text-[10px] uppercase font-bold tracking-widest">Entrer</div>
                    </div>
                 </button>
 
                 <button 
-                  onClick={() => setView('register')}
-                  className="group relative p-6 md:p-10 rounded-3xl md:rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-sapphire/30 hover:bg-sapphire/5 transition-all duration-500 text-center space-y-4 md:space-y-6"
+                  type="button"
+                  onClick={() => { console.log('Register clicked'); setView('register'); }}
+                  className="group relative p-6 md:p-10 rounded-3xl md:rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-sapphire/30 hover:bg-sapphire/5 transition-all duration-500 text-center space-y-4 md:space-y-6 z-30 cursor-pointer"
                 >
-                   <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-sapphire/10 flex items-center justify-center text-sapphire-light mx-auto group-hover:scale-110 transition-transform">
+                   <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-sapphire/10 flex items-center justify-center text-sapphire-light mx-auto group-hover:scale-110 transition-transform pointer-events-none">
                       <UserPlus size={28} className="md:size-[32px]" />
                    </div>
-                   <div className="space-y-2">
+                   <div className="space-y-2 pointer-events-none">
                       <h3 className="text-xl md:text-2xl font-serif text-silver">Nouveau Client</h3>
                       <p className="text-sm text-slate-500 font-light italic">Démarrer l'onboarding complet</p>
                    </div>
-                   <div className="pt-2 md:pt-4 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                   <div className="pt-2 md:pt-4 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                       <div className="px-6 py-2 rounded-full border border-sapphire/50 text-sapphire-light text-[10px] uppercase font-bold tracking-widest">S'inscrire</div>
                    </div>
                 </button>
              </div>
           </motion.div>
         ) : (
-          <motion.div key="form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="z-10 w-full max-w-md">
+          <motion.div key="form" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }} className="z-10 w-full max-w-md">
             <Card className="p-10 relative" glow={view === 'login' ? 'gold' : 'sapphire'}>
-              <button onClick={() => { setView('choice'); setError(''); setEmailSent(false); }} className="absolute left-6 top-6 text-slate-500 hover:text-silver flex items-center gap-2 text-xs uppercase font-bold tracking-widest transition-colors">
+              <button 
+                type="button"
+                onClick={() => { setView('choice'); setError(''); setEmailSent(false); }} 
+                className="absolute left-6 top-6 text-slate-500 hover:text-silver flex items-center gap-2 text-xs uppercase font-bold tracking-widest transition-colors z-20 cursor-pointer"
+              >
                  <ArrowLeft size={14} /> Retour
               </button>
 
@@ -156,6 +162,12 @@ export function Auth({ onAuthentication }: AuthProps) {
                         {view === 'login' ? "Identification Sécurisée" : "Création de Dossier Fiscal"}
                       </p>
                     </div>
+
+                    {view === 'login' && (
+                      <div className="p-3 bg-gold/5 border border-gold/10 rounded-xl text-[10px] text-gold/60 uppercase font-bold tracking-widest">
+                        Démo : Utilisez 'admin' / 'admin'
+                      </div>
+                    )}
 
                     {error && (
                       <div className="p-4 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-left">

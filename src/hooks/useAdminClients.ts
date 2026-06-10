@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { ClientRecord } from '../types';
 
+import { internalApi } from '../lib/api';
+
 export function useAdminClients(isAdmin: boolean) {
   const [clients, setClients] = useState<ClientRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -10,17 +12,25 @@ export function useAdminClients(isAdmin: boolean) {
     if (!isAdmin) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'client');
+      let data = [];
+      // 1. Supabase
+      try {
+        const { data: supabaseData, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('role', 'client');
 
-      if (error) throw error;
+        if (supabaseData && !error) data = supabaseData;
+        else throw new Error("Supabase fail");
+      } catch (e) {
+        // 2. API Interne
+        data = await internalApi.fetchAdminClients();
+      }
 
-      const mapped = data.map(p => ({
+      const mapped = data.map((p: any) => ({
         id: p.id,
-        displayName: p.display_name || 'Inconnu',
-        companyName: p.company_name || 'Particulier',
+        displayName: p.display_name || p.displayName || 'Inconnu',
+        companyName: p.company_name || p.companyName || 'Particulier',
         status: 'Actif',
         documents: 0,
         lastActive: 'Récemment',

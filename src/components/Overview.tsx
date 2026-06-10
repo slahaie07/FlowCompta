@@ -44,7 +44,7 @@ export function Overview({ userData, isLoading, currentMode }: { userData: UserD
             <h2 className="text-2xl md:text-3xl font-serif text-silver">Votre dossier est <span className="text-green-400 italic">en règle</span></h2>
             <p className="text-slate-400 mt-2 max-w-md font-light leading-relaxed text-sm">
                {currentMode === 'business' 
-                 ? 'Vos obligations fiscales pour S. Lahaie Technologies sont à jour. Prochaine étape : Rapport TPS de juillet.'
+                 ? `Vos obligations fiscales pour ${userData.companyName || 'votre entreprise'} sont à jour. Prochaine étape : Rapport TPS de juillet.`
                  : 'Vos déductions personnelles pour l\'année fiscale 2025 ont été optimisées.'}
             </p>
           </div>

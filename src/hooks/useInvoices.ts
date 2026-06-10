@@ -4,6 +4,8 @@ import { Invoice } from '../types';
 import { communicationService } from '../lib/communication';
 import { toast } from 'sonner';
 
+import { internalApi } from '../lib/api';
+
 export function useInvoices(userId?: string) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,20 +17,29 @@ export function useInvoices(userId?: string) {
   const fetchInvoices = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      const targetId = userId || user?.id;
+      const targetId = userId || user?.id || (JSON.parse(localStorage.getItem('cf_user') || '{}').id);
 
       if (!targetId) {
         setLoading(false);
         return;
       }
 
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .eq('user_id', targetId)
-        .order('date', { ascending: false });
+      let data = [];
+      // 1. Supabase
+      try {
+        const { data: supabaseData, error } = await supabase
+          .from('invoices')
+          .select('*')
+          .eq('user_id', targetId)
+          .order('date', { ascending: false });
+        
+        if (supabaseData && !error) data = supabaseData;
+        else throw new Error("Supabase fail");
+      } catch (e) {
+        // 2. API Interne
+        data = await internalApi.fetchInvoices(targetId);
+      }
       
-      if (error) throw error;
       setInvoices(data || []);
     } catch (e) {
       console.error(e);
@@ -41,22 +52,29 @@ export function useInvoices(userId?: string) {
   const addInvoice = async (data: Omit<Invoice, 'id' | 'userId'>) => {
     try {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) throw new Error("Non authentifié");
+      const uid = userData.user?.id || (JSON.parse(localStorage.getItem('cf_user') || '{}').id);
+      
+      if (!uid) throw new Error("Non authentifié");
 
       const newInvoice = {
         ...data,
-        user_id: userData.user.id
+        user_id: uid
       };
 
-      const { error } = await supabase.from('invoices').insert(newInvoice);
-      if (error) throw error;
+      // 1. Supabase
+      try {
+        const { error } = await supabase.from('invoices').insert(newInvoice);
+        if (error) throw error;
+      } catch (e) {
+        // 2. API Interne
+        await internalApi.addInvoice(newInvoice);
+      }
 
       await communicationService.notifyAdminOfInvoice(newInvoice);
-      
       fetchInvoices();
     } catch (e) {
-      console.error("Erreur réelle Supabase :", e);
-      toast.error("Erreur de base de données. Assurez-vous d'avoir exécuté le script SQL.");
+      console.error("Erreur réelle :", e);
+      toast.error("Erreur de base de données.");
     }
   };
 
