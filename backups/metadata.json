@@ -1,0 +1,6 @@
+{
+  "name": "Comptaflow",
+  "description": "Portail client et tableau de bord de gestion pour cabinet d'experts-comptables.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,109 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function existing() {
+      return resource.data;
+    }
+    function incoming() {
+      return request.resource.data;
+    }
+
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.keys().hasAll(['displayName', 'email', 'createdAt']) &&
+               data.displayName is string && data.displayName.size() <= 128 &&
+               data.email is string && data.email.size() <= 256 &&
+               data.createdAt is number &&
+               (!data.keys().hasAny(['companyName']) || (data.companyName is string && data.companyName.size() <= 128)) &&
+               (!data.keys().hasAny(['neq']) || (data.neq is string && data.neq.size() <= 32)) &&
+               (!data.keys().hasAny(['nas']) || (data.nas is string && data.nas.size() <= 32)) &&
+               (!data.keys().hasAny(['incomeBracket']) || (data.incomeBracket is string && data.incomeBracket.size() <= 64)) &&
+               (!data.keys().hasAny(['employeeCount']) || (data.employeeCount is number || data.employeeCount is string)) &&
+               (!data.keys().hasAny(['isAdmin']) || data.isAdmin is bool) &&
+               (!data.keys().hasAny(['photoUrl']) || (data.photoUrl is string && data.photoUrl.size() <= 512));
+      }
+
+      allow get: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn() && request.auth.uid == userId && isValidUser(incoming());
+      allow update: if isSignedIn() && request.auth.uid == userId && isValidUser(incoming()) && incoming().createdAt == existing().createdAt;
+      
+      match /clientNeeds/{needId} {
+        function isValidClientNeed(data) {
+           return data.keys().hasAll(['userId', 'type', 'isActive']) &&
+                  data.userId is string && data.userId == userId &&
+                  data.type is string && data.type.size() <= 64 &&
+                  data.isActive is bool;
+        }
+
+        allow read: if isSignedIn() && request.auth.uid == userId;
+        allow create: if isSignedIn() && request.auth.uid == userId && isValidClientNeed(incoming());
+        allow update: if isSignedIn() && request.auth.uid == userId && isValidClientNeed(incoming()) && incoming().userId == existing().userId;
+        allow delete: if isSignedIn() && request.auth.uid == userId;
+      }
+
+      match /documents/{documentId} {
+        function isValidDocument(data) {
+           return data.keys().hasAll(['userId', 'fileName', 'fileSize', 'uploadDate', 'status']) &&
+                  data.userId is string && data.userId == userId &&
+                  data.fileName is string && data.fileName.size() <= 256 &&
+                  data.fileSize is number &&
+                  data.uploadDate is number &&
+                  data.status is string && data.status.size() <= 32 &&
+                  (!data.keys().hasAny(['mimeType']) || (data.mimeType is string && data.mimeType.size() <= 128)) &&
+                  (!data.keys().hasAny(['metadata']) || (data.metadata is string && data.metadata.size() <= 4096));
+        }
+
+        allow read: if isSignedIn() && request.auth.uid == userId;
+        allow create: if isSignedIn() && request.auth.uid == userId && isValidDocument(incoming());
+        allow update: if isSignedIn() && request.auth.uid == userId && isValidDocument(incoming()) && incoming().uploadDate == existing().uploadDate && incoming().userId == existing().userId;
+        allow delete: if isSignedIn() && request.auth.uid == userId;
+      }
+
+      match /transactions/{transactionId} {
+        function isValidTransaction(data) {
+           return data.keys().hasAll(['userId', 'type', 'amount', 'date', 'status']) &&
+                  data.userId is string && data.userId == userId &&
+                  data.type in ['sale', 'purchase'] &&
+                  data.amount is number &&
+                  data.date is number &&
+                  data.status in ['pending', 'reconciled', 'error'];
+        }
+
+        allow read: if isSignedIn() && request.auth.uid == userId;
+        allow create: if isSignedIn() && request.auth.uid == userId && isValidTransaction(incoming());
+        allow update: if isSignedIn() && request.auth.uid == userId && isValidTransaction(incoming()) && incoming().userId == existing().userId;
+        allow delete: if isSignedIn() && request.auth.uid == userId;
+      }
+    }
+
+    match /newsUpdates/{updateId} {
+      allow read: if isSignedIn();
+      allow write: if false; // Admin only via console or future admin logic
+    }
+
+    match /chats/{chatId}/messages/{messageId} {
+      function isValidMessage(data) {
+        return data.keys().hasAll(['senderType', 'content', 'timestamp', 'chatId', 'senderId']) &&
+               data.senderType is string && data.senderType.size() <= 32 &&
+               data.content is string && data.content.size() <= 4096 &&
+               data.timestamp is number &&
+               data.chatId is string && data.chatId == chatId &&
+               data.senderId is string && data.senderId.size() <= 128 &&
+               (!data.keys().hasAny(['recipientId']) || (data.recipientId is string && data.recipientId.size() <= 128)) &&
+               (!data.keys().hasAny(['readBy']) || (data.readBy is list));
+      }
+
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidMessage(incoming());
+      allow update: if isSignedIn() && isValidMessage(incoming()) && incoming().senderId == existing().senderId && incoming().timestamp == existing().timestamp;
+      allow delete: if isSignedIn() && request.auth.uid == existing().senderId;
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "hosting": {
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "authorizedDomains": [
+          "localhost",
+          "able-depth-djwpf.firebaseapp.com",
+          "able-depth-djwpf.web.app",
+          "flowcompta.surge.sh"
+        ]
+      }
+    }
+  }
+}
