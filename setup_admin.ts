@@ -26,8 +26,8 @@ async function setupAdmin() {
   if (authError) {
     if (authError.message.includes('already registered')) {
       console.log('ℹ️ L\'utilisateur existe déjà dans Auth, récupération de l\'ID...');
-      const { data: users } = await supabaseAdmin.auth.admin.listUsers();
-      const existingUser = users.users.find(u => u.email === email);
+      const { data: users } = await supabaseAdmin.auth.admin.listUsers() as any;
+      const existingUser = users?.users?.find((u: any) => u.email === email);
       userId = existingUser?.id || '';
     } else {
       console.error('❌ Erreur Auth:', authError.message);

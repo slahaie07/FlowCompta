@@ -166,7 +166,7 @@ export function Vault({ isLoading: dashboardLoading }: { isLoading: boolean }) {
   );
 }
 
-function DocumentCard({ doc, onDownload }: { doc: any, onDownload: () => void | Promise<void> }) {
+function DocumentCard({ doc, onDownload }: { key?: any; doc: any; onDownload: () => void | Promise<void> }) {
   return (
     <Card className="p-10 bg-white/[0.02] border-gold/20 flex flex-col justify-between h-56 group hover:scale-[1.02] hover:border-gold/50 transition-all duration-700 cursor-pointer relative overflow-hidden" onClick={() => onDownload()}>
        <div className="absolute top-0 right-0 w-24 h-24 bg-gold/5 blur-2xl rounded-full -mr-12 -mt-12 group-hover:bg-gold/10 transition-colors" />

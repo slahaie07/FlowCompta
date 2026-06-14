@@ -4,6 +4,7 @@ import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { ChangelogBox } from './ChangelogBox';
+import { motion } from 'motion/react';
 
 export function Overview({ userData, isLoading, currentMode }: { userData: UserData, isLoading: boolean, currentMode: AppMode }) {
   if (isLoading) {

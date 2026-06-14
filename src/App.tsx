@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { UserData, Message } from './types';
 
@@ -117,6 +117,8 @@ function AppContent() {
           isProfileComplete ? (
             <Dashboard 
               userData={userData} 
+              adminMessages={adminMessages}
+              onSendMessage={handleOnSendMessage}
               onLogout={logout}
               currentMode={mode}
               onToggleMode={toggleMode}
@@ -132,12 +134,13 @@ function AppContent() {
 }
 
 export default function App() {
+  const Router = window.location.protocol === 'file:' ? HashRouter : BrowserRouter;
   return (
     <div className="w-full min-h-screen font-sans text-silver selection:bg-sapphire/30 selection:text-white bg-midnight overflow-x-hidden">
       <ErrorBoundary>
-        <BrowserRouter>
+        <Router>
           <AppContent />
-        </BrowserRouter>
+        </Router>
       </ErrorBoundary>
     </div>
   );

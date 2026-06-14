@@ -48,20 +48,21 @@ export interface UserNeeds {
 }
 
 export interface UserData {
-  displayName: string;
-  companyName: string;
+  id?: string;
+  displayName?: string;
+  companyName?: string;
   email: string;
   neq?: string;
   nas?: string;
-  incomeBracket: string;
-  employeeCount: number | string;
-  needs: UserNeeds;
+  incomeBracket?: string;
+  employeeCount?: number | string;
+  needs?: UserNeeds | string[] | any;
   isAdmin?: boolean;
   createdAt?: number;
   activeMode?: AppMode;
   initialProfileType?: 'personal' | 'business';
   province?: string;
-  language: 'fr' | 'en' | 'ar';
+  language?: 'fr' | 'en' | 'ar';
 }
 
 export interface ClientRecord {
@@ -72,9 +73,10 @@ export interface ClientRecord {
   documents: number;
   lastActive: string;
   email?: string;
+  needs?: any;
 }
 
-export type DocumentCategory = 'fiscal' | 'payroll' | 'bank' | 'deliverable' | 'internal' | 'general';
+export type DocumentCategory = 'fiscal' | 'payroll' | 'bank' | 'deliverable' | 'internal' | 'general' | 'tax' | 'legal';
 export type DocumentSource = 'client' | 'admin';
 
 export interface Document {
@@ -94,6 +96,9 @@ export interface Document {
     emetteur?: string;
     description?: string;
     montant_total?: number;
+    categorie_depense?: string;
+    tps?: number;
+    tvq?: number;
   };
 }
 

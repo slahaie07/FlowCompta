@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
 import { supabase } from '../../lib/supabase';
 
 export function MarketingAnalytics() {
@@ -12,7 +13,7 @@ export function MarketingAnalytics() {
   useEffect(() => {
     fetchLeads();
     const sub = supabase.channel('marketing_realtime')
-      .on('postgres_changes', { event: 'INSERT', table: 'marketing_leads' }, (payload) => {
+      .on('postgres_changes' as any, { event: 'INSERT', schema: 'public', table: 'marketing_leads' }, (payload: any) => {
         setLeads(prev => [payload.new, ...prev]);
       })
       .subscribe();

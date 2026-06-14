@@ -4,13 +4,13 @@ import { Transaction } from '../types';
 import { toast } from 'sonner';
 
 const MOCK_TRANSACTIONS: Transaction[] = [
-  { id: 'tx_1', userId: 'mock_client_id', date: '2026-06-12', description: 'Facture Client #1024 - Tremblay Tech', amount: 4500.00, type: 'credit', category: 'Revenus d\'entreprise' },
-  { id: 'tx_2', userId: 'mock_client_id', date: '2026-06-11', description: 'Abonnement AWS Cloud Services', amount: -342.50, type: 'debit', category: 'Hébergement & Cloud' },
-  { id: 'tx_3', userId: 'mock_client_id', date: '2026-06-10', description: 'Stripe Payout - Tremblay Tech Inc.', amount: 8200.00, type: 'credit', category: 'Revenus d\'entreprise' },
-  { id: 'tx_4', userId: 'mock_client_id', date: '2026-06-08', description: 'Frais de Cabinet - ComptaFlow Elite', amount: -249.00, type: 'debit', category: 'Honoraires professionnels' },
-  { id: 'tx_5', userId: 'mock_client_id', date: '2026-06-05', description: 'Déplacement Client - Uber Québec', amount: -42.80, type: 'debit', category: 'Transport & Déplacements' },
-  { id: 'tx_6', userId: 'mock_client_id', date: '2026-06-02', description: 'Abonnement GitHub Enterprise', amount: -99.00, type: 'debit', category: 'Logiciels & SaaS' },
-  { id: 'tx_7', userId: 'mock_client_id', date: '2026-05-30', description: 'Restauration Affaires - Le Saint-Amour', amount: -185.40, type: 'debit', category: 'Repas & Représentation' }
+  { id: 'tx_1', userId: 'mock_client_id', date: new Date('2026-06-12').getTime(), description: 'Facture Client #1024 - Tremblay Tech', amount: 4500.00, type: 'sale', category: 'Revenus d\'entreprise', status: 'reconciled', context: 'business' },
+  { id: 'tx_2', userId: 'mock_client_id', date: new Date('2026-06-11').getTime(), description: 'Abonnement AWS Cloud Services', amount: 342.50, type: 'purchase', category: 'Hébergement & Cloud', status: 'reconciled', context: 'business' },
+  { id: 'tx_3', userId: 'mock_client_id', date: new Date('2026-06-10').getTime(), description: 'Stripe Payout - Tremblay Tech Inc.', amount: 8200.00, type: 'sale', category: 'Revenus d\'entreprise', status: 'reconciled', context: 'business' },
+  { id: 'tx_4', userId: 'mock_client_id', date: new Date('2026-06-08').getTime(), description: 'Frais de Cabinet - ComptaFlow Elite', amount: 249.00, type: 'purchase', category: 'Honoraires professionnels', status: 'reconciled', context: 'business' },
+  { id: 'tx_5', userId: 'mock_client_id', date: new Date('2026-06-05').getTime(), description: 'Déplacement Client - Uber Québec', amount: 42.80, type: 'purchase', category: 'Transport & Déplacements', status: 'reconciled', context: 'business' },
+  { id: 'tx_6', userId: 'mock_client_id', date: new Date('2026-06-02').getTime(), description: 'Abonnement GitHub Enterprise', amount: 99.00, type: 'purchase', category: 'Logiciels & SaaS', status: 'reconciled', context: 'business' },
+  { id: 'tx_7', userId: 'mock_client_id', date: new Date('2026-05-30').getTime(), description: 'Restauration Affaires - Le Saint-Amour', amount: 185.40, type: 'purchase', category: 'Repas & Représentation', status: 'reconciled', context: 'business' }
 ];
 
 export function useTransactions(userId?: string, isAdmin: boolean = false) {

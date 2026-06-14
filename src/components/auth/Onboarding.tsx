@@ -8,6 +8,7 @@ import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Badge } from '../ui/Badge';
+import { useNavigate } from 'react-router-dom';
 import { calculateCanadianTaxes, formatCAD, ProvinceCode } from '../../lib/financeUtils';
 import { t, LanguageCode } from '../../lib/i18n';
 import { communicationService } from '../../lib/communication';
@@ -19,6 +20,7 @@ interface OnboardingProps {
 }
 
 export function Onboarding({ initialEmail, onComplete }: OnboardingProps) {
+  const navigate = useNavigate();
   const [step, setStep] = useState(0); 
   const [isProcessing, setIsProcessing] = useState(false);
   const [profileType, setProfileType] = useState<'personal' | 'business' | null>(null);

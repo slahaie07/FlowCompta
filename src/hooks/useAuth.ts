@@ -61,6 +61,7 @@ export function useAuth() {
 
       if (data) {
         setUserData({
+          id: data.id || uid,
           displayName: data.display_name,
           companyName: data.company_name,
           email: email,
@@ -75,6 +76,7 @@ export function useAuth() {
       } else {
         // Nouvel utilisateur sans profil (attente onboarding)
         setUserData({
+          id: uid,
           email: email,
           isAdmin: isAdminEmail(email),
         } as UserData);
@@ -90,6 +92,7 @@ export function useAuth() {
     const mockSession = {
       user: { id: isAdmin ? 'mock_admin_id' : 'mock_client_id', email },
       userData: {
+        id: isAdmin ? 'mock_admin_id' : 'mock_client_id',
         displayName: isAdmin ? 'Auditeur Suprême' : 'Samuel Tremblay',
         companyName: isAdmin ? 'Comptaflow Cabinet' : 'Tremblay Tech Inc.',
         email: email,

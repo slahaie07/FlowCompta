@@ -1,6 +1,7 @@
-import { TrendingUp, Users, DollarSign, Activity, ArrowUpRight, ArrowDownRight, Target, Zap } from 'lucide-react';
+import { TrendingUp, Users, DollarSign, Activity, ArrowUpRight, ArrowDownRight, Target, Zap, ShieldCheck } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
 
 export function SaasMetricsDashboard() {
   // Données de prévision générées par le module "saas-revenue-growth-metrics"

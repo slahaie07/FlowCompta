@@ -5,9 +5,9 @@ import { communicationService } from '../lib/communication';
 import { toast } from 'sonner';
 
 const MOCK_INVOICES: Invoice[] = [
-  { id: 'inv_1', userId: 'mock_client_id', date: '2026-06-01', dueDate: '2026-07-01', clientName: 'Tremblay Tech Inc.', number: 'INV-2026-001', amount: 4500.00, status: 'payé' },
-  { id: 'inv_2', userId: 'mock_client_id', date: '2026-06-08', dueDate: '2026-07-08', clientName: 'Tremblay Tech Inc.', number: 'INV-2026-002', amount: 249.00, status: 'en_attente' },
-  { id: 'inv_3', userId: 'mock_client_id', date: '2026-05-15', dueDate: '2026-06-15', clientName: 'Tremblay Tech Inc.', number: 'INV-2025-098', amount: 1250.00, status: 'en_retard' }
+  { id: 'inv_1', userId: 'mock_client_id', date: new Date('2026-06-01').getTime(), dueDate: new Date('2026-07-01').getTime(), clientName: 'Tremblay Tech Inc.', number: 'INV-2026-001', amount: 4500.00, status: 'paid', items: [] },
+  { id: 'inv_2', userId: 'mock_client_id', date: new Date('2026-06-08').getTime(), dueDate: new Date('2026-07-08').getTime(), clientName: 'Tremblay Tech Inc.', number: 'INV-2026-002', amount: 249.00, status: 'pending', items: [] },
+  { id: 'inv_3', userId: 'mock_client_id', date: new Date('2026-05-15').getTime(), dueDate: new Date('2026-06-15').getTime(), clientName: 'Tremblay Tech Inc.', number: 'INV-2025-098', amount: 1250.00, status: 'overdue', items: [] }
 ];
 
 export function useInvoices(userId?: string) {

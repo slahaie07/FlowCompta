@@ -42,7 +42,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleAutoRecover = () => {
-    this.setState({ isRecovering: true });
+    (this as any).setState({ isRecovering: true });
     
     // Simulation d'une purge de cache local avant rechargement
     setTimeout(() => {
@@ -54,7 +54,7 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-noir flex items-center justify-center p-6">
-          <Card className="max-w-md w-full p-10 text-center space-y-6" glow="error">
+          <Card className="max-w-md w-full p-10 text-center space-y-6" glow="sapphire">
             <div className="w-20 h-20 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mx-auto text-red-500 animate-pulse">
               <AlertTriangle size={32} />
             </div>
@@ -79,6 +79,6 @@ export class ErrorBoundary extends Component<Props, State> {
       );
     }
 
-    return this.props.children;
+    return (this as any).props.children;
   }
 }

@@ -56,6 +56,22 @@ export const ExportService = {
     this.downloadFile(rows, "AGY_Sage_Import.csv", "text/csv");
   },
 
+  exportTransactions(transactions: any[], clientName: string) {
+    const data = transactions.map(t => ({
+      Date: new Date(t.date).toLocaleDateString(),
+      Description: t.description,
+      Catégorie: t.category || 'Général',
+      Type: t.type === 'sale' ? 'Revenu' : 'Dépense',
+      Montant: t.amount,
+      Status: t.status
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Transactions");
+    XLSX.writeFile(wb, `Export_${clientName.replace(/\s+/g, '_')}_${Date.now()}.xlsx`);
+  },
+
   downloadFile(content: string, filename: string, type: string) {
     const blob = new Blob([content], { type });
     const url = window.URL.createObjectURL(blob);

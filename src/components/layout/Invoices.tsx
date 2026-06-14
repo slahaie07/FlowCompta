@@ -1,4 +1,4 @@
-import { Plus, FileText, Download, Calendar, DollarSign, ArrowRight, MoreVertical } from 'lucide-react';
+import { Plus, FileText, Download, Calendar, DollarSign, ArrowRight, MoreVertical, Clock } from 'lucide-react';
 import { useState } from 'react';
 import { useInvoices } from '../../hooks/useInvoices';
 import { Card } from '../ui/Card';
