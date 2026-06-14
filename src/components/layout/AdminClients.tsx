@@ -1,5 +1,5 @@
-import React from 'react';
-import { Users, FileText, CheckCircle, Clock, ExternalLink, Download, UploadCloud, FileSpreadsheet, Calculator, Database, Server } from 'lucide-react';
+import React, { useState } from 'react';
+import { Users, FileText, CheckCircle, Clock, ExternalLink, Download, UploadCloud, FileSpreadsheet, Calculator, Database, Server, Plus, X } from 'lucide-react';
 import { ClientRecord } from '../../types';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
@@ -9,10 +9,26 @@ import { ExportService } from '../../lib/exportUtils';
 import { useTransactions } from '../../hooks/useTransactions';
 import { toast } from 'sonner';
 
-export function AdminClients({ clients, isAdmin }: { clients: ClientRecord[], isAdmin?: boolean }) {
+export function AdminClients({ 
+  clients, 
+  isAdmin, 
+  onAddClient 
+}: { 
+  clients: ClientRecord[], 
+  isAdmin?: boolean, 
+  onAddClient?: (newClient: Omit<ClientRecord, 'id' | 'documents' | 'lastActive'>) => Promise<boolean> 
+}) {
   const { uploadDocument, documents } = useDocuments();
   const { transactions } = useTransactions(undefined, isAdmin);
   
+  // Modal State
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newClientName, setNewClientName] = useState('');
+  const [newCompanyName, setNewCompanyName] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [newStatus, setNewStatus] = useState('En attente');
+  const [newNeeds, setNewNeeds] = useState({ bookkeeping: true, taxes: true });
+
   const handleAdminExport = (client: ClientRecord) => {
     const clientTrans = transactions.filter(t => t.userId === client.id);
     ExportService.exportTransactions(clientTrans, client.displayName);
@@ -39,15 +55,8 @@ export function AdminClients({ clients, isAdmin }: { clients: ClientRecord[], is
     }
   };
 
-  /**
-   * 🏛️ EXPORT UNIVERSEL AGY
-   */
   const handleUniversalExport = (client: ClientRecord, format: 'excel' | 'qb' | 'sage') => {
-    // Note: Dans une version réelle, on filtrerait les documents du client spécifique
-    // Pour ce build, on utilise ExportService
     toast.info(`Préparation de l'export ${format.toUpperCase()}...`);
-    
-    // Simulation de récupération des docs du client pour l'export
     const clientDocs = documents.filter(d => d.userId === client.id);
     
     if (clientDocs.length === 0) {
@@ -69,15 +78,69 @@ export function AdminClients({ clients, isAdmin }: { clients: ClientRecord[], is
      if (success) toast.success("Document livré avec succès dans le coffre-fort du client !");
   };
 
-  const enAttente = clients.filter(c => c.status === 'En attente' || c.status.includes('Nouveau')).length;
-  const enRegle = clients.filter(c => c.status === 'En règle').length;
+  const handleCreateClient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newClientName || !newEmail) {
+      toast.error("Veuillez saisir au moins le nom et le courriel.");
+      return;
+    }
+    if (onAddClient) {
+      const needsArray = [];
+      if (newNeeds.bookkeeping) needsArray.push('Tenue de livres');
+      if (newNeeds.taxes) needsArray.push('Impôts');
+      
+      const success = await onAddClient({
+        displayName: newClientName,
+        companyName: newCompanyName || 'Particulier',
+        email: newEmail,
+        status: newStatus,
+        needs: needsArray
+      });
+
+      if (success) {
+        setShowAddModal(false);
+        setNewClientName('');
+        setNewCompanyName('');
+        setNewEmail('');
+        setNewStatus('En attente');
+      }
+    }
+  };
+
+  const renderNeeds = (client: ClientRecord) => {
+    if (!client.needs) return <span className="text-slate-600 text-xs italic">Consultation</span>;
+    if (Array.isArray(client.needs)) {
+      if (client.needs.length === 0) return <span className="text-slate-600 text-xs italic">Consultation</span>;
+      return client.needs.map(n => <Badge key={n} variant="default" className="text-[9px]">{n}</Badge>);
+    }
+    if (typeof client.needs === 'object') {
+      const badges = [];
+      if (client.needs.bookkeeping) badges.push(<Badge key="tenue" variant="default" className="text-[9px]">Tenue</Badge>);
+      if (client.needs.taxes) badges.push(<Badge key="impots" variant="default" className="text-[9px]">Impôts</Badge>);
+      if (client.needs.t1) badges.push(<Badge key="t1" variant="default" className="text-[9px]">T1</Badge>);
+      if (client.needs.t2) badges.push(<Badge key="t2" variant="default" className="text-[9px]">T2</Badge>);
+      if (badges.length === 0) return <span className="text-slate-600 text-xs italic">Consultation</span>;
+      return badges;
+    }
+    return <Badge variant="default" className="text-[9px]">{String(client.needs)}</Badge>;
+  };
+
+  const enAttente = clients.filter(c => c.status === 'En attente' || c.status.includes('Nouveau') || c.status.includes('attente')).length;
+  const enRegle = clients.filter(c => c.status === 'En règle' || c.status === 'Actif').length;
   const aReviser = clients.filter(c => c.status === 'À réviser').length;
 
   return (
     <div className="space-y-8">
-      <header>
-        <h1 className="text-3xl font-serif font-medium text-silver tracking-tight">Gestion des <span className="text-gold italic">Mandats Clients.</span></h1>
-        <p className="text-slate-400 mt-1.5 text-sm font-light uppercase tracking-widest">Pilotage des dossiers et conformité</p>
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <h1 className="text-3xl font-serif font-medium text-silver tracking-tight">Gestion des <span className="text-gold italic">Mandats Clients.</span></h1>
+          <p className="text-slate-400 mt-1.5 text-sm font-light uppercase tracking-widest">Pilotage des dossiers et conformité</p>
+        </div>
+        {onAddClient && (
+          <Button variant="gold" className="gap-2 h-12 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-glow" onClick={() => setShowAddModal(true)}>
+            <Plus size={16} /> Nouveau Client
+          </Button>
+        )}
       </header>
 
       {/* Summary Cards */}
@@ -128,13 +191,11 @@ export function AdminClients({ clients, isAdmin }: { clients: ClientRecord[], is
                   </td>
                   <td className="px-8 py-6">
                     <div className="flex flex-wrap gap-2">
-                       {client.needs.bookkeeping && <Badge variant="default" className="text-[9px]">Tenue</Badge>}
-                       {client.needs.taxes && <Badge variant="default" className="text-[9px]">Impôts</Badge>}
-                       {!client.needs.bookkeeping && !client.needs.taxes && <span className="text-slate-600 text-xs italic">Consultation</span>}
+                       {renderNeeds(client)}
                     </div>
                   </td>
                   <td className="px-8 py-6">
-                    <Badge variant={client.status === 'En règle' ? 'success' : (client.status === 'À réviser' ? 'error' : 'warning')}>
+                    <Badge variant={client.status === 'En règle' || client.status === 'Actif' ? 'success' : (client.status === 'À réviser' ? 'error' : 'warning')}>
                       {client.status}
                     </Badge>
                   </td>
@@ -164,6 +225,105 @@ export function AdminClients({ clients, isAdmin }: { clients: ClientRecord[], is
           </table>
         </div>
       </Card>
+
+      {/* Add Client Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-[100] bg-noir/90 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in duration-300">
+          <div className="max-w-xl w-full">
+            <Card className="p-8 premium-border-gold relative" glow="gold">
+              <button 
+                onClick={() => setShowAddModal(false)} 
+                className="absolute top-6 right-6 w-10 h-10 rounded-full flex items-center justify-center bg-white/5 text-slate-400 hover:text-gold transition-all"
+              >
+                <X size={20} />
+              </button>
+              
+              <h3 className="text-2xl font-serif font-bold text-ivoire italic mb-6">Nouveau <span className="text-gold">Mandat Client</span></h3>
+              
+              <form onSubmit={handleCreateClient} className="space-y-5">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-400">Nom Complet</label>
+                  <input 
+                    type="text" 
+                    required 
+                    placeholder="ex: Jean Tremblay" 
+                    className="w-full h-12 bg-midnight border border-white/10 rounded-xl px-4 text-silver text-sm outline-none focus:border-gold/50 transition-all"
+                    value={newClientName}
+                    onChange={e => setNewClientName(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-400">Raison Sociale (Optionnel)</label>
+                  <input 
+                    type="text" 
+                    placeholder="ex: Tremblay Holdings Inc." 
+                    className="w-full h-12 bg-midnight border border-white/10 rounded-xl px-4 text-silver text-sm outline-none focus:border-gold/50 transition-all"
+                    value={newCompanyName}
+                    onChange={e => setNewCompanyName(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-400">Courriel</label>
+                  <input 
+                    type="email" 
+                    required 
+                    placeholder="ex: jean@tremblay.ca" 
+                    className="w-full h-12 bg-midnight border border-white/10 rounded-xl px-4 text-silver text-sm outline-none focus:border-gold/50 transition-all"
+                    value={newEmail}
+                    onChange={e => setNewEmail(e.target.value)}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-400">Statut Dossier</label>
+                    <select 
+                      className="w-full h-12 bg-midnight border border-white/10 rounded-xl px-4 text-silver text-sm outline-none focus:border-gold/50 transition-all"
+                      value={newStatus}
+                      onChange={e => setNewStatus(e.target.value)}
+                    >
+                      <option value="En règle">En règle</option>
+                      <option value="En attente">En attente</option>
+                      <option value="À réviser">À réviser</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-400 block">Besoins du Mandat</label>
+                    <div className="flex gap-4 items-center h-10">
+                      <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={newNeeds.bookkeeping} 
+                          onChange={e => setNewNeeds(prev => ({ ...prev, bookkeeping: e.target.checked }))}
+                          className="accent-gold"
+                        />
+                        Tenue
+                      </label>
+                      <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={newNeeds.taxes} 
+                          onChange={e => setNewNeeds(prev => ({ ...prev, taxes: e.target.checked }))}
+                          className="accent-gold"
+                        />
+                        Impôts
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6 flex justify-end gap-4">
+                  <Button variant="ghost" type="button" onClick={() => setShowAddModal(false)} className="h-12 px-6 text-xs uppercase font-bold text-slate-500">Annuler</Button>
+                  <Button variant="gold" type="submit" className="h-12 px-10 text-xs uppercase font-bold shadow-glow">Enregistrer Client</Button>
+                </div>
+              </form>
+            </Card>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

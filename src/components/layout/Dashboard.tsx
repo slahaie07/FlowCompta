@@ -41,7 +41,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
-  const { clients: adminClients } = useAdminClients(!!userData.isAdmin);
+  const { clients: adminClients, addClient } = useAdminClients(!!userData.isAdmin);
   const { transactions } = useTransactions(undefined, userData.isAdmin);
   
   const [isVaultUnlocked, setIsVaultUnlocked] = useState(false);
@@ -203,7 +203,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
                 <Route path="intelligence" element={<EliteIntelligence transactions={transactions} userData={userData} />} />
                 <Route path="core" element={<AGY_Elite_Core />} />
                 <Route path="partners" element={<ElitePartnerHub />} />
-                <Route path="admin_clients" element={<AdminClients clients={adminClients} isAdmin={userData.isAdmin} />} />
+                <Route path="admin_clients" element={<AdminClients clients={adminClients} isAdmin={userData.isAdmin} onAddClient={addClient} />} />
                 <Route path="messaging" element={<Messaging userData={userData} />} />
                 <Route path="vault" element={
                   !isVaultUnlocked ? <BiometricVerification onVerified={() => setIsVaultUnlocked(true)} /> : <Vault isLoading={false} />

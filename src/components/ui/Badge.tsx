@@ -4,6 +4,7 @@ interface BadgeProps {
   children: React.ReactNode;
   variant?: 'default' | 'success' | 'warning' | 'error' | 'info' | 'gold';
   className?: string;
+  key?: React.Key;
 }
 
 export const Badge = ({ children, variant = 'default', className = '' }: BadgeProps) => {

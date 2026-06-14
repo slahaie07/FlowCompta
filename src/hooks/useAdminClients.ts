@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { ClientRecord } from '../types';
+import { toast } from 'sonner';
 
 const MOCK_CLIENTS: ClientRecord[] = [
   { id: 'mock_client_1', displayName: 'Samuel Tremblay', companyName: 'Tremblay Tech Inc.', status: 'Actif', documents: 8, lastActive: 'Il y a 5 min', email: 'samuel@tremblaytech.ca', needs: ['T2', 'Tenue de livres'] },
@@ -22,7 +23,24 @@ export function useAdminClients(isAdmin: boolean) {
       const isMock = !userData.user || userData.user.id.startsWith('mock_');
 
       if (isMock) {
-        setClients(MOCK_CLIENTS);
+        const storedMockClientsStr = localStorage.getItem('comptaflow_mock_clients');
+        let combined = [...MOCK_CLIENTS];
+        if (storedMockClientsStr) {
+          try {
+            const storedMockClients = JSON.parse(storedMockClientsStr);
+            storedMockClients.forEach((newC: ClientRecord) => {
+              const idx = combined.findIndex(c => c.email === newC.email);
+              if (idx >= 0) {
+                combined[idx] = newC;
+              } else {
+                combined.unshift(newC); // New clients at top
+              }
+            });
+          } catch(e) {
+            console.error(e);
+          }
+        }
+        setClients(combined);
         return;
       }
 
@@ -37,7 +55,7 @@ export function useAdminClients(isAdmin: boolean) {
         id: p.id,
         displayName: p.display_name || p.displayName || 'Inconnu',
         companyName: p.company_name || p.companyName || 'Particulier',
-        status: 'Actif',
+        status: p.status || 'Actif',
         documents: p.id === 'mock_client_id' ? 4 : Math.floor(Math.random() * 10) + 1,
         lastActive: 'Récemment',
         email: p.email,
@@ -53,9 +71,58 @@ export function useAdminClients(isAdmin: boolean) {
     }
   };
 
+  const addClient = async (newClient: Omit<ClientRecord, 'id' | 'documents' | 'lastActive'>) => {
+    const clientId = `client_${Date.now()}`;
+    const clientRecord: ClientRecord = {
+      ...newClient,
+      id: clientId,
+      documents: 0,
+      lastActive: 'À l\'instant'
+    };
+
+    // Check if mock
+    const { data: userData } = await supabase.auth.getUser();
+    const isMock = !userData.user || userData.user.id.startsWith('mock_');
+
+    if (isMock) {
+      const storedMockClientsStr = localStorage.getItem('comptaflow_mock_clients');
+      let list = [];
+      if (storedMockClientsStr) {
+        try {
+          list = JSON.parse(storedMockClientsStr);
+        } catch(e) {
+          console.error(e);
+        }
+      }
+      list.push(clientRecord);
+      localStorage.setItem('comptaflow_mock_clients', JSON.stringify(list));
+      await fetchClients();
+      toast.success("Nouveau client enregistré localement (Mémoire active).");
+      return true;
+    } else {
+      const { error } = await supabase.from('profiles').insert({
+        id: clientId,
+        display_name: newClient.displayName,
+        company_name: newClient.companyName,
+        email: newClient.email,
+        role: 'client',
+        needs: newClient.needs,
+        status: newClient.status
+      });
+
+      if (error) {
+        toast.error("Erreur de création du client.");
+        return false;
+      }
+      toast.success("Nouveau client créé dans Supabase.");
+      await fetchClients();
+      return true;
+    }
+  };
+
   useEffect(() => {
     fetchClients();
   }, [isAdmin]);
 
-  return { clients, loading, refreshClients: fetchClients };
+  return { clients, loading, refreshClients: fetchClients, addClient };
 }

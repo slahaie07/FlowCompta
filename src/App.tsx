@@ -32,9 +32,64 @@ function AppContent() {
   const handleOnboardingComplete = async (data: UserData, quoteValue: number) => {
     if (!user) return;
 
-    try {
-      const confirmationId = `CF-${Date.now().toString().slice(-6)}-${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
+    const confirmationId = `CF-${Date.now().toString().slice(-6)}-${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
+    const isMock = user.id.startsWith('mock_');
 
+    if (isMock) {
+      const localSession = localStorage.getItem('comptaflow_mock_session');
+      if (localSession) {
+        try {
+          const parsed = JSON.parse(localSession);
+          parsed.userData = {
+            ...parsed.userData,
+            displayName: data.displayName,
+            companyName: data.companyName,
+            incomeBracket: data.incomeBracket,
+            employeeCount: data.employeeCount,
+            needs: data.needs,
+            createdAt: Date.now()
+          };
+          localStorage.setItem('comptaflow_mock_session', JSON.stringify(parsed));
+        } catch (e) {
+          console.error("Erreur de sauvegarde mock session :", e);
+        }
+      }
+
+      const localClients = localStorage.getItem('comptaflow_mock_clients');
+      let clientList = [];
+      if (localClients) {
+        try {
+          clientList = JSON.parse(localClients);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      const newClientRecord = {
+        id: user.id,
+        displayName: data.displayName,
+        companyName: data.companyName,
+        status: 'En attente',
+        documents: 0,
+        lastActive: 'À l\'instant',
+        email: user.email,
+        needs: data.needs || ['Tenue de livres']
+      };
+
+      const existingIdx = clientList.findIndex((c: any) => c.email === user.email);
+      if (existingIdx >= 0) {
+        clientList[existingIdx] = newClientRecord;
+      } else {
+        clientList.unshift(newClientRecord);
+      }
+      localStorage.setItem('comptaflow_mock_clients', JSON.stringify(clientList));
+
+      await refreshProfile();
+      navigate('/success');
+      return;
+    }
+
+    try {
       // Synchronisation avec la base de donnees réelle
       const { error } = await supabase.from('profiles').upsert({
         id: user.id,
