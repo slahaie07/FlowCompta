@@ -1,0 +1,47 @@
+# 🏛️ Cabinet Comptaflow — Workflow de Déploiement Continu (CI/CD)
+# Ce workflow compile l'application et déploie le client statique HTML sur Cloudflare Pages.
+
+name: Cloudflare Pages Deployment
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+
+    steps:
+      - name: 📥 Récupérer le code source (Checkout)
+        uses: actions/checkout@v4
+
+      - name: 🟢 Configurer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Installer les dépendances
+        run: npm ci
+
+      - name: ⚡ Compiler l'application (Vite + React)
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: 🚀 Déployer sur Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: comptaflow-platform
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
