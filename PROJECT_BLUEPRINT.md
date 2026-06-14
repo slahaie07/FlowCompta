@@ -1,7 +1,7 @@
-# 🏗️ COMPTAFLOW - MASTER BLUEPRINT (VERSION CLOUD AUTONOME)
+# 🏗️ Comptaflow - MASTER BLUEPRINT (VERSION CLOUD AUTONOME)
 > Dernière mise à jour : 10 Juin 2026 - Certification Totale
 
-Ce document est la source suprême d'intelligence du projet. Il décrit l'architecture "Zéro-Dépendance" qui permet à ComptaFlow d'être actif 24h/24 dans le Cloud sans configuration manuelle.
+Ce document est la source suprême d'intelligence du projet. Il décrit l'architecture "Zéro-Dépendance" qui permet à Comptaflow d'être actif 24h/24 dans le Cloud sans configuration manuelle.
 
 ---
 
@@ -51,4 +51,4 @@ Le fichier `Dockerfile` à la racine automatise tout :
 - **Audit Logs** : Activés pour toute action critique.
 
 ---
-**ComptaFlow - Système Certifié Viable & Autonome.**
+**Comptaflow - Système Certifié Viable & Autonome.**

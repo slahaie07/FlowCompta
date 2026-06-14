@@ -1,6 +1,34 @@
 {
-  "users": [],
-  "profiles": [],
+  "users": [
+    {
+      "id": "admin_id",
+      "email": "admin@comptaflow.ca",
+      "password": "admin",
+      "role": "admin"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "admin_id",
+      "displayName": "Samuel L. (Admin)",
+      "companyName": "Cabinet ComptaFlow",
+      "email": "admin@comptaflow.ca",
+      "isAdmin": true,
+      "role": "admin",
+      "incomeBracket": "N/A",
+      "employeeCount": "N/A",
+      "needs": {
+        "bookkeeping": true,
+        "payroll": true,
+        "taxes": true,
+        "rentabilite": true,
+        "consultation": true
+      },
+      "activeMode": "business"
+    }
+  ],
   "transactions": [],
-  "invoices": []
+  "invoices": [],
+  "bot_logs": [],
+  "orders": []
 }

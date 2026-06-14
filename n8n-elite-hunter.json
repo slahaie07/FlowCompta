@@ -1,0 +1,116 @@
+{
+  "name": "ComptaFlow - Elite Hunter (Prospection LinkedIn IA)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.scrapingdog.com/linkedin/search",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "keywords",
+              "value": "Entrepreneur Quebec Fintech"
+            }
+          ]
+        }
+      },
+      "name": "LinkedIn Scraper",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [350, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "prompt": "=Génère un message d'approche ultra-personnalisé (approche 'Sniper' B2B) pour ce profil LinkedIn :\n\nNom: {{$json.name}}\nTitre: {{$json.title}}\nEntreprise: {{$json.company}}\nIndustrie: {{$json.industry}}\n\nDirectives OBLIGATOIRES :\n1. Ton : Conseiller de confiance, direct, très professionnel. Zéro jargon commercial agressif.\n2. Personnalisation : Mentionne spécifiquement son entreprise ({{$json.company}}) et un défi typique de son industrie ({{$json.industry}}).\n3. L'Offre : Propose une brève consultation sur l'optimisation de son 'runway' ou de ses flux financiers, pas une vente directe.\n4. Longueur : Maximum 4 phrases. Concis et percutant.\n\nExemple de ton attendu : 'Bonjour [Nom], j'analyse actuellement la croissance des acteurs tech à Montréal et [Entreprise] se démarque. En tant qu'Architecte Financier, j'aide les structures comme la vôtre à sécuriser leur conformité fiscale tout en allongeant leur runway. Seriez-vous ouvert à un échange de 10 min sur vos flux actuels ?'",
+        "options": {}
+      },
+      "name": "AI Sniper Script",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [600, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_ID",
+          "name": "OpenAI Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": "marketing_leads",
+        "data": {
+          "source": "LINKEDIN_IA",
+          "campaign_id": "ELITE_HUNTER_V1",
+          "revenue_estimate": 1200,
+          "metadata": {
+             "name": "={{$node[\"LinkedIn Scraper\"].json.name}}",
+             "script": "={{$json.text}}"
+          }
+        }
+      },
+      "name": "Insert Lead",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "YOUR_SUPABASE_ID",
+          "name": "Supabase Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn Scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Scraper": {
+      "main": [
+        [
+          {
+            "node": "AI Prospecting Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Prospecting Script": {
+      "main": [
+        [
+          {
+            "node": "Insert Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {}
+}

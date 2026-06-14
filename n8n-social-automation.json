@@ -1,0 +1,241 @@
+{
+  "name": "ComptaFlow - Social Media Multi-Posting AI",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "comptaflow-social-webhook",
+        "options": {}
+      },
+      "name": "Supabase Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300],
+      "webhookId": "comptaflow-social-trigger"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4",
+        "prompt": "=Génère 3 variations de posts pour ComptaFlow basées sur ce contenu :\n\nTitre : {{$json.body.record.title}}\nContenu : {{$json.body.record.raw_content}}\n\nDirectives :\n1. LinkedIn : Ton professionnel, expert, axé sur le ROI et la sérénité.\n2. Instagram : Ton inspirant, emojis, focus lifestyle d'entrepreneur.\n3. Twitter : Concis, impactant, hashtags stratégiques.\n\nRetourne un JSON avec les clés 'linkedin', 'instagram', 'twitter'.",
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "name": "AI Content Generator",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [350, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_ID",
+          "name": "OpenAI Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitBy": "={{$json.body.record.target_platforms}}",
+        "options": {}
+      },
+      "name": "Split Platforms",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [550, 300]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{$node[\"Split Platforms\"].json[\"batch\"][0]}}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "linkedin"
+            },
+            {
+              "value2": "instagram"
+            },
+            {
+              "value2": "twitter"
+            }
+          ]
+        }
+      },
+      "name": "Platform Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "text": "={{$node[\"AI Content Generator\"].json[\"linkedin\"]}}",
+        "additionalFields": {}
+      },
+      "name": "LinkedIn Post",
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [1000, 150],
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "YOUR_LINKEDIN_ID",
+          "name": "LinkedIn Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "caption": "={{$node[\"AI Content Generator\"].json[\"instagram\"]}}",
+        "mediaUrl": "={{$node[\"Supabase Webhook\"].json.body.record.image_url}}"
+      },
+      "name": "Instagram Post",
+      "type": "n8n-nodes-base.instagram",
+      "typeVersion": 1,
+      "position": [1000, 300],
+      "credentials": {
+        "instagramGraphApi": {
+          "id": "YOUR_INSTAGRAM_ID",
+          "name": "Instagram Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.twitter.com/2/tweets",
+        "authentication": "oAuth1",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{$node[\"AI Content Generator\"].json[\"twitter\"]}}"
+            }
+          ]
+        }
+      },
+      "name": "X (Twitter) Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1000, 450],
+      "credentials": {
+        "oAuth1Api": {
+          "id": "YOUR_X_ID",
+          "name": "X/Twitter Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": "social_content",
+        "updateKey": "id",
+        "data": {
+          "id": "={{$node[\"Supabase Webhook\"].json.body.record.id}}",
+          "status": "published"
+        }
+      },
+      "name": "Update Supabase Status",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1300, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "YOUR_SUPABASE_ID",
+          "name": "Supabase Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Supabase Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Content Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Content Generator": {
+      "main": [
+        [
+          {
+            "node": "Split Platforms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Platforms": {
+      "main": [
+        [
+          {
+            "node": "Platform Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Platform Switch": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn Post",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Instagram Post",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "X (Twitter) Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Post": {
+      "main": [
+        [
+          {
+            "node": "Update Supabase Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram Post": {
+      "main": [
+        [
+          {
+            "node": "Update Supabase Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "X (Twitter) Post": {
+      "main": [
+        [
+          {
+            "node": "Update Supabase Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {}
+}

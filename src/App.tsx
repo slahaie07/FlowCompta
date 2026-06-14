@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { UserData, Message } from './types';
-import { Auth } from './components/Auth';
-import { Onboarding } from './components/Onboarding';
+
+// Imports corriges suite a la restructuration architecturale
+import { Auth } from './components/common/Auth';
+import { Landing } from './components/common/Landing';
+import { Onboarding } from './components/auth/Onboarding';
 import { SuccessScreen } from './components/SuccessScreen';
-import { Dashboard } from './components/Dashboard';
+import { Dashboard } from './components/layout/Dashboard';
 
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
@@ -13,19 +16,26 @@ import { useAppMode } from './hooks/useAppMode';
 
 import { communicationService } from './lib/communication';
 import { toast } from 'sonner';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 
+/**
+ * AppContent - Architecture de Routage Standardisee
+ * Gere la logique d'acces, la redirection automatique et l'onboarding.
+ */
 function AppContent() {
-  const { user, userData, loading, logout, isAuthenticated, refreshProfile } = useAuth();
+  const { user, userData, loading, logout, isAuthenticated, refreshProfile, mockLogin } = useAuth();
   const { mode, toggleMode } = useAppMode();
   const [adminMessages, setAdminMessages] = useState<Message[]>([]);
   const navigate = useNavigate();
 
+  // Gestion centralisee de la fin d'onboarding
   const handleOnboardingComplete = async (data: UserData, quoteValue: number) => {
     if (!user) return;
 
     try {
       const confirmationId = `CF-${Date.now().toString().slice(-6)}-${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
 
+      // Synchronisation avec la base de donnees réelle
       const { error } = await supabase.from('profiles').upsert({
         id: user.id,
         display_name: data.displayName,
@@ -46,8 +56,8 @@ function AppContent() {
 
       navigate('/success');
     } catch(e) {
-      console.error("Erreur réelle de sauvegarde :", e);
-      toast.error("Erreur de sauvegarde réelle. Assurez-vous que les tables SQL existent dans Supabase.");
+      console.error("Erreur de sauvegarde :", e);
+      toast.error("Echec de synchronisation. Verifiez votre connexion Supabase.");
     }
   };
 
@@ -62,6 +72,7 @@ function AppContent() {
     setAdminMessages(prev => [...prev, newMsg]);
   };
 
+  // Ecran de chargement structurel
   if (loading) {
     return (
       <div className="min-h-screen bg-midnight text-silver flex items-center justify-center">
@@ -83,27 +94,29 @@ function AppContent() {
 
   return (
     <Routes>
-      {/* Public Routes */}
-      <Route path="/login" element={!isAuthenticated ? <Auth onAuthentication={() => navigate('/dashboard')} /> : <Navigate to="/" replace />} />
+      {/* Route Racine - Landing Page Gold Standard */}
+      <Route path="/" element={<Landing />} />
+
+      {/* Routes Publiques - Auth Centralisee */}
+      <Route path="/login" element={!isAuthenticated ? <Auth onAuthentication={() => navigate('/dashboard')} mockLogin={mockLogin} /> : <Navigate to="/dashboard" replace />} />
       
-      {/* Protected Routes */}
+      {/* Routes Protegees - Flux Onboarding */}
       <Route path="/onboarding" element={
         isAuthenticated ? (
-          isProfileComplete ? <Navigate to="/" replace /> : <Onboarding initialEmail={user?.email || ''} onComplete={handleOnboardingComplete} />
+          isProfileComplete ? <Navigate to="/dashboard" replace /> : <Onboarding initialEmail={user?.email || ''} onComplete={handleOnboardingComplete} />
         ) : <Navigate to="/login" replace />
       } />
 
       <Route path="/success" element={
-          isAuthenticated ? <SuccessScreen onContinue={() => navigate('/')} /> : <Navigate to="/login" replace />
+          isAuthenticated ? <SuccessScreen onContinue={() => navigate('/dashboard')} /> : <Navigate to="/login" replace />
       } />
 
+      {/* Tableau de Bord Principal */}
       <Route path="/dashboard/*" element={
         isAuthenticated ? (
           isProfileComplete ? (
             <Dashboard 
               userData={userData} 
-              adminMessages={adminMessages} 
-              onSendMessage={handleOnSendMessage}
               onLogout={logout}
               currentMode={mode}
               onToggleMode={toggleMode}
@@ -112,10 +125,7 @@ function AppContent() {
         ) : <Navigate to="/login" replace />
       } />
 
-      {/* Root Redirection */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      
-      {/* Fallback */}
+      {/* Redirection fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -124,9 +134,11 @@ function AppContent() {
 export default function App() {
   return (
     <div className="w-full min-h-screen font-sans text-silver selection:bg-sapphire/30 selection:text-white bg-midnight overflow-x-hidden">
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </ErrorBoundary>
     </div>
   );
 }

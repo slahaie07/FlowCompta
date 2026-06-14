@@ -39,11 +39,12 @@ export interface NewsUpdate {
 }
 
 export interface UserNeeds {
+  t1: boolean;
+  ta: boolean;
+  t2: boolean;
   bookkeeping: boolean;
-  payroll: boolean;
-  taxes: boolean;
-  rentabilite: boolean;
-  consultation: boolean;
+  stocks: boolean;
+  cfo: boolean;
 }
 
 export interface UserData {
@@ -81,11 +82,19 @@ export interface Document {
   fileName: string;
   fileSize: string;
   uploadDate: number;
-  status: 'secure' | 'processing';
+  status: 'secure' | 'processing' | 'error';
   url?: string;
   category: DocumentCategory;
   source: DocumentSource;
   userId: string;
+  metadata?: {
+    type?: string;
+    amount?: number;
+    date?: string;
+    emetteur?: string;
+    description?: string;
+    montant_total?: number;
+  };
 }
 
 export interface Message {

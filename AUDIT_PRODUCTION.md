@@ -1,4 +1,4 @@
-# Audit de Production - ComptaFlow
+# Audit de Production - Comptaflow
 
 Ce document résume l'architecture de production mise en place en fonction de votre cahier des charges.
 
@@ -37,7 +37,7 @@ Le flux n8n a été exporté sous format standard dans le fichier `n8n-workflow.
 
 ## 4. Ce Qu'il Manque Pour Être 100% "PRÊT" (Checklist)
 
-Pour que la plateforme ComptaFlow passe en production réelle, vous devez finaliser la configuration des éléments externes qui échappent à ce code source :
+Pour que la plateforme Comptaflow passe en production réelle, vous devez finaliser la configuration des éléments externes qui échappent à ce code source :
 
 ### Variables d'environnement requises (`.env`)
 1. **STRIPE_SECRET_KEY** : Votre clé secrète de production Stripe (ex: `sk_live_...`).

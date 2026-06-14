@@ -1,15 +1,32 @@
-# ComptaFlow 🚀
+# Comptaflow — La comptabilité qui coule de source 🚀
 
-Plateforme de comptabilité intelligente pour le marché canadien.
+![Comptaflow Banner](https://comptaflow-platform.vercel.app/og-image.png)
 
-## Fonctions
-- Switch Business / Personnel
-- OCR Intelligent (Gemini)
-- Gestion des Transactions
-- Registre des Factures
-- Coffre-fort sécurisé AES-256
-- Support Direct CPA
+Comptaflow est un cabinet comptable de nouvelle génération basé au Québec, fusionnant l'expertise fiscale traditionnelle avec une infrastructure technologique de pointe. 
 
-## Déploiement
-Hébergé sur Surge.sh
-URL : https://flowcompta.surge.sh
+## 🏛️ L'Écosystème Comptaflow
+Le projet est structuré autour de quatre piliers fondamentaux :
+- **🚀 Portail Client** : Interface haute couture pour l'onboarding, le dépôt de documents et le suivi en temps réel.
+- **🛡️ Console Admin** : Cockpit de pilotage pour le CPA (gestion des mandats, facturation, messagerie).
+- **🔐 Coffre-fort** : Stockage chiffré AES-256 conforme à la Loi 25.
+- **💬 Flux Direct** : Messagerie instantanée CPA-Client via Supabase Realtime.
+
+## 🛠️ Stack Technique (Elite)
+- **Frontend** : React 19, Vite, Tailwind CSS, Framer Motion.
+- **Backend** : Node.js (Express) on Vercel Functions.
+- **Base de données** : Supabase (PostgreSQL), Realtime engine.
+- **Email** : Resend API integration.
+- **Paiements** : Stripe & PayPal components + Interac Webhook scaffolding.
+
+## 🚀 Déploiement
+La plateforme est déployée en production sur **Vercel** :
+👉 [https://comptaflow-platform.vercel.app/](https://comptaflow-platform.vercel.app/)
+
+## 📚 Documentation pour l'Architecte
+- `PROJECT_BLUEPRINT.md` : Guide suprême de l'architecture.
+- `database.sql` : Schéma de base de données complet et sécurisé.
+- `Comptaflow_HUB.html` : Cockpit local reliant tous les services.
+
+---
+© 2026 Comptaflow — Québec, Canada.
+Propulsé par l'IA Architecte Suprême.

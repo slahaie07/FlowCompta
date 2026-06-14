@@ -1,65 +1,67 @@
-import { Transaction, Invoice } from '../types';
+import { Document } from '../types';
+import * as XLSX from 'xlsx';
 
 /**
- * Utilitaire d'exportation ComptaFlow
- * Permet de générer des fichiers CSV (Excel-compatible) à partir des données de l'application.
+ * 🏛️ COMPTAFLOW UNIVERSAL EXPORT ENGINE
+ * Transforme les données IA en formats compatibles avec les logiciels de production.
  */
-
-export const exportToCSV = (data: any[], fileName: string) => {
-  if (data.length === 0) return;
-
-  const headers = Object.keys(data[0]).join(',');
-  const rows = data.map(obj => 
-    Object.values(obj)
-      .map(val => {
-        const str = String(val).replace(/"/g, '""');
-        return `"${str}"`;
-      })
-      .join(',')
-  );
-
-  const csvContent = [headers, ...rows].join('\n');
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
+export const ExportService = {
   
-  const link = document.createElement('a');
-  link.setAttribute('href', url);
-  link.setAttribute('download', `${fileName}_${new Date().toISOString().split('T')[0]}.csv`);
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
+  /**
+   * Format EXCEL (Audit & Manuel)
+   */
+  exportToExcel(documents: Document[]) {
+    const data = documents.map(d => ({
+      Date: d.metadata?.date || new Date(d.uploadDate).toLocaleDateString(),
+      Émetteur: d.metadata?.emetteur || 'Inconnu',
+      Catégorie: d.metadata?.categorie_depense || 'Général',
+      'Montant HT': (d.metadata?.montant_total || 0) - (d.metadata?.tps || 0) - (d.metadata?.tvq || 0),
+      TPS: d.metadata?.tps || 0,
+      TVQ: d.metadata?.tvq || 0,
+      Total: d.metadata?.montant_total || 0,
+      Status: d.status,
+      Lien: d.url
+    }));
 
-/**
- * Formatage spécifique pour les transactions (Excel Pro)
- */
-export const exportTransactionsExcel = (transactions: Transaction[], clientName: string) => {
-  const formatted = transactions.map(t => ({
-    Date: new Date(t.date).toLocaleDateString('fr-CA'),
-    Description: t.description,
-    Type: t.type === 'sale' ? 'Vente' : 'Achat',
-    Montant: t.amount,
-    Statut: t.status,
-    Categorie: t.category,
-    Profil: t.context
-  }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Comptaflow_Export");
+    XLSX.writeFile(wb, `AGY_Export_Excel_${Date.now()}.xlsx`);
+  },
 
-  exportToCSV(formatted, `Rapport_Transactions_${clientName.replace(/\s+/g, '_')}`);
-};
+  /**
+   * Format QUICKBOOKS (IIF/CSV)
+   */
+  exportToQuickBooks(documents: Document[]) {
+    // Structure simplifiée pour import QuickBooks Online
+    const headers = "Date,Description,Amount,TaxAmount,TransactionType\n";
+    const rows = documents.map(d => {
+      const amount = d.metadata?.montant_total || 0;
+      const tax = (d.metadata?.tps || 0) + (d.metadata?.tvq || 0);
+      return `${d.metadata?.date || ''},${d.metadata?.emetteur || ''},${amount},${tax},Expense`;
+    }).join("\n");
 
-/**
- * Formatage spécifique pour les factures (Excel Pro)
- */
-export const exportInvoicesExcel = (invoices: Invoice[], clientName: string) => {
-  const formatted = invoices.map(i => ({
-    Numero: i.number,
-    Date: new Date(i.date).toLocaleDateString('fr-CA'),
-    Echeance: new Date(i.dueDate).toLocaleDateString('fr-CA'),
-    Client: i.clientName,
-    Montant: i.amount,
-    Statut: i.status
-  }));
+    this.downloadFile(headers + rows, "AGY_QuickBooks_Import.csv", "text/csv");
+  },
 
-  exportToCSV(formatted, `Registre_Factures_${clientName.replace(/\s+/g, '_')}`);
+  /**
+   * Format SAGE (CSV)
+   */
+  exportToSage(documents: Document[]) {
+    // Format spécifique Sage 50 / Business Cloud
+    const rows = documents.map(d => {
+      return `JOURNAL,${d.metadata?.date || ''},${d.metadata?.emetteur || ''},${d.metadata?.montant_total || 0},${d.metadata?.tps || 0},${d.metadata?.tvq || 0}`;
+    }).join("\n");
+
+    this.downloadFile(rows, "AGY_Sage_Import.csv", "text/csv");
+  },
+
+  downloadFile(content: string, filename: string, type: string) {
+    const blob = new Blob([content], { type });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+  }
 };

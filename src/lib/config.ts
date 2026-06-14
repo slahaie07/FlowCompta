@@ -1,12 +1,12 @@
 /**
- * Configuration Centrale ComptaFlow
+ * Configuration Centrale Comptaflow
  * Ce fichier est la source unique de vérité pour tous les paramètres de l'application.
  */
 
 export const CONFIG = {
   // Supabase
-  SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || 'https://unvyxfxlzhnutpugjxhe.supabase.co',
-  SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_xgTxHqKekbsaWqERcsPwXw_sTbWCR9x',
+  SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || 'https://hnxdlzdgiascuawgydir.supabase.co',
+  SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_BHVkYelBLz9x0HJn_EWDyQ_EyJxaAWF',
 
   // Automations (n8n)
   WEBHOOKS: {
@@ -21,16 +21,21 @@ export const CONFIG = {
   // Paramètres Métier
   FEES: {
     SETUP: 60.00,
-    MONTHLY_BUSINESS: 449.00,
-    PERSONAL_FILE: 120.00,
+    T1: 89.00,
+    TA: 199.00,
+    T2: 749.00,
+    BOOKKEEPING: 249.00,
+    STOCKS: 179.00,
+    CFO: 499.00
   },
 
   // Sécurité & App
   APP: {
-    NAME: 'ComptaFlow',
+    NAME: 'Comptaflow',
     VERSION: '1.0.0-PROD',
     ADMIN_EMAILS: ['admin@comptaflow.ca', 's.lahaie07@gmail.com'],
     SUPPORT_EMAIL: 'support@comptaflow.ca',
+    INTERAC_EMAIL: 's.lahaie07@gmail.com',
   }
 };
 

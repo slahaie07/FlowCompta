@@ -1,0 +1,79 @@
+{
+  "name": "ComptaFlow - Onboarding Automatisé",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "comptaflow-onboarding-webhook",
+        "options": {}
+      },
+      "name": "Stripe Payment Success",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 300],
+      "webhookId": "comptaflow-onboarding-trigger"
+    },
+    {
+      "parameters": {
+        "fromEmail": "Comptaflow <support@comptaflow.ca>",
+        "toEmail": "={{$json.body.customer_details.email}}",
+        "subject": "Bienvenue chez ComptaFlow - Votre Onboarding commence ici 🚀",
+        "html": "=<h1>Bienvenue {{$json.body.customer_details.name}} !</h1><p>Nous sommes ravis de vous accompagner dans la gestion de votre entreprise.</p><p>Votre compte est désormais actif. Vous pouvez accéder à votre dashboard ici : <a href='https://comptaflow-platform.vercel.app'>Dashboard ComptaFlow</a></p><p>Prochaine étape : Téléchargez vos premiers documents dans votre <strong>Vault</strong> sécurisé.</p><p>À très vite,<br>L'équipe Comptaflow</p>",
+        "options": {}
+      },
+      "name": "Send Welcome Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [400, 300],
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_RESEND_SMTP_ID",
+          "name": "Resend SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{$json.body.customer_details.name}} - Archives Fiscales",
+        "parentFolder": "YOUR_ROOT_FOLDER_ID"
+      },
+      "name": "Create Client Vault",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "credentials": {
+        "googleDriveApi": {
+          "id": "YOUR_GOOGLE_DRIVE_ID",
+          "name": "Google Drive Account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Stripe Payment Success": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Welcome Email": {
+      "main": [
+        [
+          {
+            "node": "Create Client Vault",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {}
+}

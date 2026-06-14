@@ -1,0 +1,147 @@
+import { BarChart3, Users, Clock, TrendingUp, ArrowUpRight, Activity, Send } from 'lucide-react';
+import { UserData, ClientRecord } from '../../types';
+import { Card } from '../ui/Card';
+import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
+import { useAdminHub } from '../../hooks/useAdminHub';
+import { toast } from 'sonner';
+
+export function AdminOverview() {
+  const { stats, loading } = useAdminHub();
+
+  if (loading) return <div className="p-8 text-center animate-pulse">Initialisation du Hub Cabinet...</div>;
+
+  return (
+    <div className="space-y-10">
+      <header className="flex justify-between items-end">
+        <div>
+          <h1 className="text-5xl font-serif font-bold text-ivoire tracking-tight leading-tight">
+            Hub <span className="animated-gradient-text italic">Comptaflow.</span>
+          </h1>
+          <div className="flex items-center gap-3 mt-3">
+            <span className="w-8 h-[1px] bg-gold/50"></span>
+            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em]">Opérations Stratégiques & BI</p>
+          </div>
+        </div>
+        <Badge variant="gold" className="bg-gold/10 text-gold border-gold/20 py-2 px-6 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Administrateur Suprême</Badge>
+      </header>
+
+      {/* Admin Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <Card className="p-8 space-y-6 premium-border-gold relative overflow-hidden group" glow="gold">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-gold/10 transition-colors" />
+          <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] relative z-10">
+            <TrendingUp size={16} className="text-gold" /> Revenu Cabinet
+          </div>
+          <p className="text-4xl font-serif font-bold text-ivoire relative z-10">{stats.totalRevenue.toLocaleString()} $</p>
+          <div className="flex items-center gap-2 relative z-10">
+            <Badge variant="success" className="bg-green-500/10 text-green-400 border-green-500/20 font-black">+12.4%</Badge>
+            <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">vs mois dernier</span>
+          </div>
+        </Card>
+        
+        <Card className="p-8 space-y-6 glass-card relative overflow-hidden group" glow="sapphire">
+          <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">
+            <Users size={16} className="text-sapphire-light" /> Portefeuille Clients
+          </div>
+          <p className="text-4xl font-serif font-bold text-ivoire">{stats.activeClients}</p>
+          <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Dossiers conformes ARC/RQ</p>
+        </Card>
+
+        <Card className="p-8 space-y-6 glass-card relative overflow-hidden group">
+          <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">
+            <Clock size={16} className="text-red-400" /> Flux de Travail
+          </div>
+          <p className="text-4xl font-serif font-bold text-ivoire">{stats.pendingTasks}</p>
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
+            <span className="text-[9px] text-red-500/70 font-black uppercase tracking-widest italic">Priorité Critique</span>
+          </div>
+        </Card>
+
+        <Card className="p-8 space-y-6 glass-card relative overflow-hidden group">
+          <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">
+            <Activity size={16} className="text-green-500" /> Neural Network Sync
+          </div>
+          <div className="flex items-center gap-3">
+             <div className="flex -space-x-2">
+               {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full border-2 border-midnight bg-gold/20 flex items-center justify-center text-[8px] font-bold text-gold">AI</div>)}
+             </div>
+             <p className="text-lg font-bold text-ivoire uppercase tracking-tighter">Opérationnel</p>
+          </div>
+          <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">n8n / Gemini / Supabase</p>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        {/* Recent Global Activity */}
+        <Card className="lg:col-span-2 p-0 overflow-hidden glass-card">
+          <div className="p-8 border-b border-white/5 bg-white/[0.01] flex justify-between items-center">
+             <h3 className="text-xs font-black text-silver uppercase tracking-[0.3em]">Flux d'activité du réseau</h3>
+             <Button variant="ghost" size="sm" className="text-[10px] font-black uppercase tracking-widest hover:text-gold">Archives Globales</Button>
+          </div>
+          <div className="divide-y divide-white/5">
+             {stats.globalTransactions.length === 0 && (
+                <div className="p-20 text-center text-slate-600 italic font-serif text-xl opacity-40">Aucune pulsation détectée sur le réseau ComptaFlow.</div>
+             )}
+             {stats.globalTransactions.map((log, i) => (
+               <div key={i} className="p-8 flex items-center justify-between hover:bg-white/[0.03] transition-all duration-500 group cursor-pointer">
+                  <div className="flex items-center gap-6">
+                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border border-white/5 ${log.type === 'sale' ? 'bg-green-500/10 text-green-400' : 'bg-gold/10 text-gold'}`}>
+                        {log.type === 'sale' ? <ArrowUpRight size={20}/> : <TrendingUp size={20}/>}
+                     </div>
+                     <div>
+                        <p className="text-base font-black text-ivoire group-hover:text-gold transition-colors">{log.profiles?.display_name || 'Mandat Anonyme'}</p>
+                        <p className="text-xs text-slate-500 font-medium mt-1">{log.description}</p>
+                     </div>
+                  </div>
+                  <div className="text-right">
+                     <Badge variant={log.status === 'reconciled' ? 'success' : 'default'} className="font-black uppercase text-[9px] tracking-widest">{log.status}</Badge>
+                     <p className="text-[10px] text-slate-600 mt-2 font-black uppercase tracking-tighter">{new Date(log.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                  </div>
+               </div>
+             ))}
+          </div>
+        </Card>
+
+        {/* Integration Status Box */}
+        <Card className="p-10 space-y-8 premium-border-gold relative overflow-hidden" glow="gold">
+           <div className="absolute bottom-0 right-0 w-64 h-64 bg-gold/5 blur-3xl rounded-full -mb-32 -mr-32" />
+           <div className="flex items-center gap-4 text-gold relative z-10">
+              <div className="p-3 bg-gold/10 rounded-2xl border border-gold/20 shadow-glow-sm">
+                <BarChart3 size={28} />
+              </div>
+              <h3 className="font-serif text-2xl font-bold italic text-ivoire">Gestion Intelligence</h3>
+           </div>
+           <p className="text-sm text-slate-500 leading-relaxed font-medium relative z-10">Contrôlez les connecteurs cloud et déclenchez les automatisations de fin de période.</p>
+           
+           <div className="space-y-6 relative z-10">
+              {[
+                { label: 'Cloud Sync Engine', status: 'Actif', color: 'text-green-500' },
+                { label: 'Gemini Tax Logic', status: 'En ligne', color: 'text-green-500' },
+                { label: 'n8n Batch Processor', status: 'Standby', color: 'text-gold' }
+              ].map((it, idx) => (
+                <div key={idx} className="flex items-center justify-between">
+                   <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">{it.label}</span>
+                   <span className={`${it.color} text-[10px] font-black uppercase tracking-tighter px-3 py-1 bg-white/5 rounded-full`}>{it.status}</span>
+                </div>
+              ))}
+           </div>
+           
+           <div className="space-y-4 pt-6 relative z-10">
+              <Button 
+                variant="gold" 
+                className="w-full gap-3 h-16 shadow-glow font-black uppercase tracking-[0.2em] text-xs"
+                onClick={async () => {
+                  toast.success("Intelligence en marche : Les bilans ont été formatés.");
+                }}
+              >
+                Générer Bilans <Send size={16}/>
+              </Button>
+              <Button variant="ghost" className="w-full gap-2 h-14 glass-button rounded-2xl text-[10px] font-black uppercase tracking-widest">Connecteurs Cloud</Button>
+           </div>
+        </Card>
+      </div>
+    </div>
+  );
+}

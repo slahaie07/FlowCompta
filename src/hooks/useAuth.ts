@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { UserData } from '../types';
-
 import { CONFIG } from '../lib/config';
-
-import { internalApi } from '../lib/api';
 
 export function useAuth() {
   const [user, setUser] = useState<any>(null);
@@ -14,28 +11,39 @@ export function useAuth() {
   const isAdminEmail = (email: string) => CONFIG.APP.ADMIN_EMAILS.includes(email);
 
   useEffect(() => {
-    // Tentative Supabase
+    // 1. Check if mock session exists
+    const localSession = localStorage.getItem('comptaflow_mock_session');
+    if (localSession) {
+      try {
+        const parsed = JSON.parse(localSession);
+        setUser(parsed.user);
+        setUserData(parsed.userData);
+        setLoading(false);
+        return;
+      } catch (e) {
+        localStorage.removeItem('comptaflow_mock_session');
+      }
+    }
+
+    // Session initiale Supabase
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
         fetchProfile(session.user.id, session.user.email!);
       } else {
-        // Fallback Local Storage (Mode Autonome)
-        const localUser = localStorage.getItem('cf_user');
-        if (localUser) {
-          const u = JSON.parse(localUser);
-          setUser(u);
-          fetchProfile(u.id, u.email);
-        } else {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     });
 
+    // Écouteur de changements d'état (Login, Logout, Token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user);
         fetchProfile(session.user.id, session.user.email!);
+      } else {
+        setUser(null);
+        setUserData(null);
+        setLoading(false);
       }
     });
 
@@ -45,7 +53,6 @@ export function useAuth() {
   const fetchProfile = async (uid: string, email: string) => {
     setLoading(true);
     try {
-      // 1. Essayer Supabase
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -66,30 +73,54 @@ export function useAuth() {
           initialProfileType: data.initial_profile_type
         });
       } else {
-        // 2. Fallback API Interne
-        const localProfile = await internalApi.fetchProfile(uid);
-        if (localProfile) {
-          setUserData(localProfile);
-        } else if (isAdminEmail(email)) {
-           // Auto-provision Admin
-           setUserData({ displayName: 'Admin Local', companyName: 'Cabinet', email, isAdmin: true } as any);
-        }
+        // Nouvel utilisateur sans profil (attente onboarding)
+        setUserData({
+          email: email,
+          isAdmin: isAdminEmail(email),
+        } as UserData);
       }
     } catch (e) {
-      // 3. Dernier recours API Interne
-      const localProfile = await internalApi.fetchProfile(uid);
-      if (localProfile) setUserData(localProfile);
+      console.error("Erreur critique de récupération de profil :", e);
     } finally {
       setLoading(false);
     }
   };
 
+  const mockLogin = (email: string, isAdmin: boolean) => {
+    const mockSession = {
+      user: { id: isAdmin ? 'mock_admin_id' : 'mock_client_id', email },
+      userData: {
+        displayName: isAdmin ? 'Auditeur Suprême' : 'Samuel Tremblay',
+        companyName: isAdmin ? 'Comptaflow Cabinet' : 'Tremblay Tech Inc.',
+        email: email,
+        incomeBracket: isAdmin ? 'N/A' : '100k-250k',
+        employeeCount: isAdmin ? 'N/A' : '5',
+        needs: isAdmin ? [] : ['GL-01', 'T1'],
+        isAdmin: isAdmin,
+        createdAt: Date.now(),
+        activeMode: 'business',
+        initialProfileType: 'business'
+      }
+    };
+    localStorage.setItem('comptaflow_mock_session', JSON.stringify(mockSession));
+    setUser(mockSession.user);
+    setUserData(mockSession.userData as UserData);
+  };
+
   const logout = async () => {
+    localStorage.removeItem('comptaflow_mock_session');
     await supabase.auth.signOut();
-    localStorage.removeItem('cf_user');
     setUser(null);
     setUserData(null);
   };
 
-  return { user, userData, loading, logout, isAuthenticated: !!user, refreshProfile: () => user && fetchProfile(user.id, user.email!) };
+  return { 
+    user, 
+    userData, 
+    loading, 
+    logout, 
+    mockLogin,
+    isAuthenticated: !!user, 
+    refreshProfile: () => user && fetchProfile(user.id, user.email!) 
+  };
 }

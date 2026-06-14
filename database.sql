@@ -1,4 +1,4 @@
--- 📂 SCHEMA "ELITE" COMPTAFLOW (SUPABASE FINAL)
+-- 📂 SCHEMA "ELITE" Comptaflow (SUPABASE FINAL)
 -- Conçu pour la scalabilité massive, la traçabilité et la protection anti-perte.
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -81,10 +81,26 @@ CREATE TABLE IF NOT EXISTS documents (
     status TEXT DEFAULT 'secure',
     category TEXT DEFAULT 'general',
     source TEXT DEFAULT 'client',
+    metadata JSONB DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 6. AUTOMATISATION : CRÉATION DE PROFIL (Trigger)
+-- 6. TABLE DES CONTENUS SOCIAUX (Pour l'automatisation n8n)
+CREATE TABLE IF NOT EXISTS social_content (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    author_id UUID REFERENCES profiles(id),
+    title TEXT NOT NULL,
+    raw_content TEXT NOT NULL,
+    image_url TEXT,
+    target_platforms TEXT[] DEFAULT ARRAY['linkedin', 'instagram', 'twitter'],
+    status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'scheduled', 'published', 'error')),
+    scheduled_at TIMESTAMP WITH TIME ZONE,
+    published_urls JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_social_status ON social_content(status);
+
+-- 7. AUTOMATISATION : CRÉATION DE PROFIL (Trigger)
 CREATE OR REPLACE FUNCTION public.handle_new_user() 
 RETURNS trigger AS $$
 BEGIN
@@ -98,7 +114,73 @@ CREATE OR REPLACE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 7. FONCTION DE SÉCURITÉ ADMIN
+-- 8. TABLE DES MESSAGES (Communication Temps Réel)
+CREATE TABLE IF NOT EXISTS messages (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES profiles(id) NOT NULL,
+    sender TEXT NOT NULL CHECK (sender IN ('client', 'cpa', 'system')),
+    text TEXT NOT NULL,
+    client_name TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Index pour accélérer la récupération des messages
+CREATE INDEX IF NOT EXISTS idx_messages_user_id ON messages(user_id);
+
+-- Politiques RLS Messages
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Messages access" ON messages FOR ALL USING (auth.uid() = user_id OR is_admin());
+
+-- 11. TABLE DES LOGS BOT (Comptaflow WARDEN)
+CREATE TABLE IF NOT EXISTS bot_logs (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    action_type TEXT NOT NULL,
+    target_id TEXT,
+    details TEXT,
+    status TEXT DEFAULT 'success',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 12. INTÉGRITÉ LÉGALE (HASHING SHA-256)
+CREATE TABLE IF NOT EXISTS document_hashes (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    document_id UUID REFERENCES documents(id) ON DELETE CASCADE,
+    file_hash TEXT NOT NULL, -- Empreinte numérique unique
+    algorithm TEXT DEFAULT 'sha256',
+    verified_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 13. ACCÈS COLLABORATEURS (CABINET STAFF)
+CREATE TABLE IF NOT EXISTS staff (
+    id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
+    display_name TEXT,
+    role TEXT CHECK (role IN ('CPA', 'CLERK', 'ADMIN')),
+    permissions JSONB DEFAULT '{}',
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+-- 14. TRACKING ACQUISITION (MARKETING LEADS)
+CREATE TABLE IF NOT EXISTS marketing_leads (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    source TEXT, -- 'GOOGLE', 'META', 'DIRECT'
+    campaign_id TEXT,
+    converted_at TIMESTAMP WITH TIME ZONE,
+    revenue_estimate NUMERIC,
+    metadata JSONB DEFAULT '{}'
+);
+
+-- ACTIVER LE REALTIME SUR TOUT L'ÉCOSYSTÈME
+ALTER PUBLICATION supabase_realtime ADD TABLE messages, documents, orders, profiles, bot_logs;
+
+-- Création du bucket 'vault' pour les documents confidentiels
+-- Note: Requires Supabase Storage schema privileges. Run these statements if applicable.
+INSERT INTO storage.buckets (id, name, public) VALUES ('vault', 'vault', false) ON CONFLICT DO NOTHING;
+
+-- Storage RLS: Les utilisateurs ne peuvent voir/uploader que dans leur propre dossier (id utilisateur)
+CREATE POLICY "Vault Client Access" ON storage.objects FOR ALL USING (
+    bucket_id = 'vault' AND (auth.uid()::text = (string_to_array(name, '/'))[1] OR public.is_admin())
+);
+
 CREATE OR REPLACE FUNCTION is_admin() 
 RETURNS BOOLEAN AS $$
 DECLARE

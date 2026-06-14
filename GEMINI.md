@@ -1,4 +1,4 @@
-# ComptaFlow - Portail Comptable Intelligent
+# Comptaflow - Portail Comptable Intelligent
 
 ## Configuration & Setup
 - **Environnement** : Copier `.env.example` vers `.env` et remplir les clés Supabase, Stripe et n8n.

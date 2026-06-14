@@ -4,7 +4,11 @@ import { Invoice } from '../types';
 import { communicationService } from '../lib/communication';
 import { toast } from 'sonner';
 
-import { internalApi } from '../lib/api';
+const MOCK_INVOICES: Invoice[] = [
+  { id: 'inv_1', userId: 'mock_client_id', date: '2026-06-01', dueDate: '2026-07-01', clientName: 'Tremblay Tech Inc.', number: 'INV-2026-001', amount: 4500.00, status: 'payé' },
+  { id: 'inv_2', userId: 'mock_client_id', date: '2026-06-08', dueDate: '2026-07-08', clientName: 'Tremblay Tech Inc.', number: 'INV-2026-002', amount: 249.00, status: 'en_attente' },
+  { id: 'inv_3', userId: 'mock_client_id', date: '2026-05-15', dueDate: '2026-06-15', clientName: 'Tremblay Tech Inc.', number: 'INV-2025-098', amount: 1250.00, status: 'en_retard' }
+];
 
 export function useInvoices(userId?: string) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -17,28 +21,22 @@ export function useInvoices(userId?: string) {
   const fetchInvoices = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      const targetId = userId || user?.id || (JSON.parse(localStorage.getItem('cf_user') || '{}').id);
+      const targetId = userId || user?.id;
+      const isMock = !targetId || targetId.startsWith('mock_');
 
-      if (!targetId) {
+      if (isMock) {
+        setInvoices(MOCK_INVOICES);
         setLoading(false);
         return;
       }
 
-      let data = [];
-      // 1. Supabase
-      try {
-        const { data: supabaseData, error } = await supabase
-          .from('invoices')
-          .select('*')
-          .eq('user_id', targetId)
-          .order('date', { ascending: false });
-        
-        if (supabaseData && !error) data = supabaseData;
-        else throw new Error("Supabase fail");
-      } catch (e) {
-        // 2. API Interne
-        data = await internalApi.fetchInvoices(targetId);
-      }
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('user_id', targetId)
+        .order('date', { ascending: false });
+      
+      if (error) throw error;
       
       setInvoices(data || []);
     } catch (e) {
@@ -52,25 +50,29 @@ export function useInvoices(userId?: string) {
   const addInvoice = async (data: Omit<Invoice, 'id' | 'userId'>) => {
     try {
       const { data: userData } = await supabase.auth.getUser();
-      const uid = userData.user?.id || (JSON.parse(localStorage.getItem('cf_user') || '{}').id);
-      
-      if (!uid) throw new Error("Non authentifié");
+      const uid = userData.user?.id || 'mock_client_id';
+      const isMock = uid.startsWith('mock_');
 
       const newInvoice = {
         ...data,
         user_id: uid
       };
 
-      // 1. Supabase
-      try {
-        const { error } = await supabase.from('invoices').insert(newInvoice);
-        if (error) throw error;
-      } catch (e) {
-        // 2. API Interne
-        await internalApi.addInvoice(newInvoice);
+      if (isMock) {
+        const localNew: Invoice = {
+          id: 'inv_' + Date.now(),
+          userId: uid,
+          ...data
+        };
+        setInvoices(prev => [localNew, ...prev]);
+        toast.success("Facture enregistrée en mode Démo.");
+        return;
       }
 
-      await communicationService.notifyAdminOfInvoice(newInvoice);
+      const { error } = await supabase.from('invoices').insert(newInvoice);
+      if (error) throw error;
+
+      await communicationService.notifyAdminOfInvoice(newInvoice as any);
       fetchInvoices();
     } catch (e) {
       console.error("Erreur réelle :", e);
@@ -80,6 +82,15 @@ export function useInvoices(userId?: string) {
 
   const updateInvoiceStatus = async (invoiceId: string, status: Invoice['status']) => {
     try {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id || 'mock_client_id';
+      const isMock = uid.startsWith('mock_');
+
+      if (isMock) {
+        setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, status } : inv));
+        return;
+      }
+
       const { error } = await supabase.from('invoices').update({ status }).eq('id', invoiceId);
       if (error) throw error;
       fetchInvoices();
