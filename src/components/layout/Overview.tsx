@@ -6,7 +6,7 @@ import { Button } from '../ui/Button';
 import { ChangelogBox } from './ChangelogBox';
 import { motion } from 'motion/react';
 
-export function Overview({ userData, isLoading, currentMode }: { userData: UserData, isLoading: boolean, currentMode: AppMode }) {
+export function Overview({ userData, isLoading, currentMode, onSignMandate }: { userData: UserData, isLoading: boolean, currentMode: AppMode, onSignMandate?: () => void }) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -128,7 +128,7 @@ export function Overview({ userData, isLoading, currentMode }: { userData: UserD
                     <Badge variant="error">Urgent</Badge>
                  </div>
                  <p className="text-sm text-slate-500 mt-2 font-light leading-relaxed max-w-2xl">Une signature électronique est requise avant le 15 juin pour valider votre dossier fiscal professionnel.</p>
-                 <Button variant="gold" className="mt-6 w-full md:w-auto gap-2 h-12">Signer via SignNow™ <ArrowUpRight size={16}/></Button>
+                 <Button variant="gold" className="mt-6 w-full md:w-auto gap-2 h-12" onClick={onSignMandate}>Signer via SignNow™ <ArrowUpRight size={16}/></Button>
               </div>
            </div>
            {[

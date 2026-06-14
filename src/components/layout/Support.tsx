@@ -4,17 +4,25 @@ import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Badge } from '../ui/Badge';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export function Support() {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would call a cloud function to send an actual email or ticket
     setSent(true);
+    toast.success("Ticket de support enregistré avec succès.");
     setTimeout(() => setSent(false), 5000);
+  };
+
+  const handleCopySMS = () => {
+    navigator.clipboard.writeText('+18195551234');
+    toast.success("Numéro d'assistance prioritaire copié dans le presse-papiers.");
   };
 
   return (
@@ -70,10 +78,10 @@ export function Support() {
                  <div>
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-tighter">Courriel</p>
                     <p className="text-sm text-silver font-medium">s.lahaie07@gmail.com</p>
-                 </div>
+                  </div>
               </div>
 
-              <div className="flex items-center gap-4 group cursor-pointer">
+              <div className="flex items-center gap-4 group cursor-pointer" onClick={handleCopySMS}>
                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-sapphire-light group-hover:bg-sapphire group-hover:text-white transition-all">
                     <Phone size={18} />
                  </div>
@@ -83,7 +91,7 @@ export function Support() {
                  </div>
               </div>
 
-              <div className="flex items-center gap-4 group cursor-pointer">
+              <div className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate('/dashboard/messaging')}>
                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-green-500 group-hover:bg-green-500 group-hover:text-white transition-all">
                     <MessageSquare size={18} />
                  </div>

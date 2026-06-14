@@ -7,7 +7,7 @@ def bundle():
     output_path = r"C:\Users\user\Desktop\Comptaflow.html"
 
     if not os.path.exists(html_path):
-        print("❌ Dossier de build 'dist' introuvable. Veuillez d'abord compiler le projet.")
+        print("[ERROR] Dossier de build 'dist' introuvable. Veuillez d'abord compiler le projet.")
         return
 
     with open(html_path, "r", encoding="utf-8") as f:

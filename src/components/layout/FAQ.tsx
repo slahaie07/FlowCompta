@@ -3,9 +3,11 @@ import { useState } from 'react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { motion, AnimatePresence } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
 
 export function FAQ() {
   const [openIndex, setSetOpenIndex] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   const faqs = [
     {
@@ -76,7 +78,7 @@ export function FAQ() {
       <Card className="p-10 border-sapphire/20 bg-sapphire/[0.02] text-center space-y-6">
          <h3 className="text-xl font-serif text-silver italic">Encore des questions ?</h3>
          <p className="text-sm text-slate-500 max-w-lg mx-auto">Notre équipe de support technique et nos experts CPA sont disponibles pour vous répondre sous 24 heures.</p>
-         <Button variant="secondary" className="px-10 h-12 uppercase tracking-widest text-[10px] font-bold">Ouvrir un ticket de support</Button>
+         <Button variant="secondary" className="px-10 h-12 uppercase tracking-widest text-[10px] font-bold" onClick={() => navigate('/dashboard/support')}>Ouvrir un ticket de support</Button>
       </Card>
     </div>
   );

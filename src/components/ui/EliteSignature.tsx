@@ -1,5 +1,5 @@
 import { PenTool, CheckCircle2, ShieldCheck, Lock, Download, FileText } from 'lucide-react';
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -10,6 +10,7 @@ export function EliteSignature({ contract, onComplete }: { contract: { title: st
   const [step, setStatus] = useState<'review' | 'signing' | 'certified'>('review');
   const [signatureData, setSignatureData] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
 
   const startSigning = () => setStatus('signing');
 
@@ -30,6 +31,60 @@ export function EliteSignature({ contract, onComplete }: { contract: { title: st
       toast.success("Mandat certifié numériquement.");
       setTimeout(onComplete, 3000);
     }
+  };
+
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    let x, y;
+    if ('touches' in e) {
+      if (e.touches.length === 0) return;
+      x = e.touches[0].clientX - rect.left;
+      y = e.touches[0].clientY - rect.top;
+    } else {
+      x = e.nativeEvent.offsetX;
+      y = e.nativeEvent.offsetY;
+    }
+
+    ctx.strokeStyle = '#D4AF37';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setIsDrawing(true);
+    setSignatureData('signing');
+  };
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    let x, y;
+    if ('touches' in e) {
+      if (e.touches.length === 0) return;
+      x = e.touches[0].clientX - rect.left;
+      y = e.touches[0].clientY - rect.top;
+    } else {
+      x = e.nativeEvent.offsetX;
+      y = e.nativeEvent.offsetY;
+    }
+
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    setSignatureData('signed');
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
   };
 
   return (
@@ -67,22 +122,19 @@ export function EliteSignature({ contract, onComplete }: { contract: { title: st
                           ref={canvasRef}
                           width={800}
                           height={256}
-                          className="w-full h-full"
-                          onMouseDown={(e) => {
-                            const ctx = canvasRef.current?.getContext('2d');
-                            if (ctx) {
-                              ctx.strokeStyle = '#D4AF37';
-                              ctx.lineWidth = 3;
-                              ctx.beginPath();
-                              ctx.moveTo(e.nativeEvent.offsetX, e.target.offsetTop); // Simple path for demo
-                              setSignatureData('signed');
-                            }
-                          }}
+                          className="w-full h-full block bg-transparent"
+                          onMouseDown={startDrawing}
+                          onMouseMove={draw}
+                          onMouseUp={stopDrawing}
+                          onMouseLeave={stopDrawing}
+                          onTouchStart={startDrawing}
+                          onTouchMove={draw}
+                          onTouchEnd={stopDrawing}
                         />
                      </div>
                      <div className="flex gap-6 w-full">
                         <Button variant="ghost" className="flex-1 h-14 uppercase font-black text-[10px]" onClick={clearCanvas}>Effacer</Button>
-                        <Button variant="gold" className="flex-[2] h-14 shadow-glow uppercase font-black text-[10px]" onClick={finalize}>Certifier le Mandat</Button>
+                        <Button variant="gold" className="flex-[2] h-14 shadow-glow uppercase font-black text-[10px]" onClick={finalize} disabled={!signatureData || signatureData === 'signing'}>Certifier le Mandat</Button>
                      </div>
                   </motion.div>
                 )}

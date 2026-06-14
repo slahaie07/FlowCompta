@@ -21,6 +21,7 @@ import { NewsTicker } from './NewsTicker';
 import { MarketingAnalytics } from './MarketingAnalytics';
 import { BiometricVerification } from '../ui/BiometricVerification';
 import { EliteSignature } from '../ui/EliteSignature';
+import { SaasMetricsDashboard } from './SaasMetricsDashboard';
 import { useAdminClients } from '../../hooks/useAdminClients';
 import { useTransactions } from '../../hooks/useTransactions';
 import { Button } from '../ui/Button';
@@ -65,12 +66,14 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
     { id: 'transactions', label: 'Flux Global', icon: Receipt },
     { id: 'invoices', label: 'Registre Factures', icon: FileText },
     { id: 'marketing', label: 'Marketing Guerilla', icon: TrendingUp },
+    { id: 'saas', label: 'Valorisation Clients', icon: BarChart3 },
     { id: 'partners', label: 'Elite Partners', icon: Handshake },
     { id: 'messaging', label: 'Canal Direct', icon: MessageSquare },
     { id: 'vault', label: 'Archives Globales', icon: VaultIcon },
   ] : [
     { id: 'overview', label: 'Ma Situation', icon: LayoutDashboard },
     { id: 'intelligence', label: 'Elite AI Hub', icon: Sparkles },
+    { id: 'saas', label: 'Valorisation SaaS', icon: BarChart3 },
     { id: 'partners', label: 'Elite Partners', icon: Handshake },
     { id: 'transactions', label: 'Journal des flux', icon: Receipt },
     { id: 'invoices', label: 'Mes Factures', icon: FileText },
@@ -195,7 +198,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
             >
               <Routes>
                 <Route index element={userData.isAdmin ? <Navigate to="admin_overview" replace /> : <Navigate to="overview" replace />} />
-                <Route path="overview" element={<Overview userData={userData} isLoading={false} currentMode={currentMode} />} />
+                <Route path="overview" element={<Overview userData={userData} isLoading={false} currentMode={currentMode} onSignMandate={() => setShowMandateSigning(true)} />} />
                 <Route path="admin_overview" element={<AdminOverview />} />
                 <Route path="intelligence" element={<EliteIntelligence transactions={transactions} userData={userData} />} />
                 <Route path="core" element={<AGY_Elite_Core />} />
@@ -207,6 +210,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
                 } />
                 <Route path="transactions" element={<Transactions currentMode={currentMode} isAdmin={userData.isAdmin} />} />
                 <Route path="invoices" element={<Invoices />} />
+                <Route path="saas" element={<SaasMetricsDashboard />} />
                 <Route path="pricing" element={<Pricing />} />
                 <Route path="faq" element={<FAQ />} />
                 <Route path="support" element={<Support />} />
