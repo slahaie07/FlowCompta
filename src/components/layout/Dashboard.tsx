@@ -18,6 +18,7 @@ import { EliteIntelligence } from './EliteIntelligence';
 import { AGY_Elite_Core } from './AGY_Elite_Core';
 import { ElitePartnerHub } from './ElitePartnerHub';
 import { NewsTicker } from './NewsTicker';
+import { MarketingAnalytics } from './MarketingAnalytics';
 import { BiometricVerification } from '../ui/BiometricVerification';
 import { EliteSignature } from '../ui/EliteSignature';
 import { useAdminClients } from '../../hooks/useAdminClients';
@@ -63,6 +64,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
     { id: 'admin_clients', label: 'Gestion Clients', icon: Shield },
     { id: 'transactions', label: 'Flux Global', icon: Receipt },
     { id: 'invoices', label: 'Registre Factures', icon: FileText },
+    { id: 'marketing', label: 'Marketing Guerilla', icon: TrendingUp },
     { id: 'partners', label: 'Elite Partners', icon: Handshake },
     { id: 'messaging', label: 'Canal Direct', icon: MessageSquare },
     { id: 'vault', label: 'Archives Globales', icon: VaultIcon },
@@ -146,7 +148,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
           </Button>
           <div className="flex items-center gap-4 p-3 glass-card rounded-2xl border border-white/5 hover:border-gold/20 transition-colors group">
             <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-gold/20 to-white/5 flex items-center justify-center text-gold font-serif font-bold shrink-0 shadow-lg border border-gold/10 group-hover:scale-105 transition-transform">
-              {userData.displayName.charAt(0)}
+              {userData.displayName?.charAt(0) || 'U'}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-black text-silver truncate group-hover:text-ivoire transition-colors">{userData.displayName}</p>
@@ -170,7 +172,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
              </div>
           </div>
           <div className="flex items-center gap-3 md:gap-4">
-            <button className="flex items-center gap-1 px-3 py-1.5 bg-white/5 border border-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-gold/30 transition-all text-slate-400 hover:text-gold">FR / EN / AR</button>
+             <button className="flex items-center gap-1 px-3 py-1.5 bg-white/5 border border-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-gold/30 transition-all text-slate-400 hover:text-gold">FR / EN / AR</button>
             <button className="p-2.5 bg-white/5 border border-white/5 hover:border-gold/30 rounded-xl transition-all relative group">
               <Bell size={18} className="text-slate-400 group-hover:text-gold transition-colors" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-gold rounded-full border-2 border-midnight shadow-glow animate-bounce"></span>
@@ -209,6 +211,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
                 <Route path="faq" element={<FAQ />} />
                 <Route path="support" element={<Support />} />
                 <Route path="integrations" element={<Integrations />} />
+                <Route path="marketing" element={<MarketingAnalytics />} />
                 <Route path="*" element={<Navigate to={userData.isAdmin ? "admin_overview" : "overview"} replace />} />
               </Routes>
             </motion.div>
