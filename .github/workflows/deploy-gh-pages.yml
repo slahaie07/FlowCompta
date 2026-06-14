@@ -1,0 +1,53 @@
+# 🏛️ Cabinet Comptaflow — Workflow GitHub Pages
+# Déploie automatiquement l'application sur GitHub Pages sans avoir besoin de clés API externes.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+# Définir les permissions minimales requises pour le déploiement sécurisé sur GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Récupérer le code source
+        uses: actions/checkout@v4
+
+      - name: 🟢 Configurer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Installer les dépendances
+        run: npm ci
+
+      - name: ⚡ Compiler le client React + HTML Pré-rendu
+        run: npm run build
+
+      - name: ⚙️ Configurer GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: 📦 Téléverser l'artefact de build
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: 🚀 Déployer sur GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
