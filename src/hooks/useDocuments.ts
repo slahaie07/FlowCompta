@@ -17,11 +17,31 @@ export function useDocuments(clientId?: string) {
   const fetchDocuments = async () => {
     setLoading(true);
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      const targetId = clientId || userData.user?.id;
-      const isMock = !targetId || targetId.startsWith('mock_');
+      let uid = 'mock_client_id';
+      let isMock = true;
+
+      const localSession = localStorage.getItem('comptaflow_mock_session');
+      if (localSession) {
+        try {
+          const parsed = JSON.parse(localSession);
+          uid = parsed.user?.id || 'mock_client_id';
+        } catch (e) {}
+      } else {
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data?.session?.user) {
+            uid = data.session.user.id;
+            isMock = uid.startsWith('mock_');
+          }
+        } catch (e) {
+          // Offline fallback
+        }
+      }
+
+      const targetId = clientId || uid;
+      const effectiveIsMock = isMock || targetId.startsWith('mock_');
       
-      if (isMock) {
+      if (effectiveIsMock) {
         setDocuments(MOCK_DOCUMENTS);
         return;
       }
@@ -84,14 +104,32 @@ export function useDocuments(clientId?: string) {
    */
   const uploadDocument = async (file: File, category: DocumentCategory = 'general', targetUserId?: string) => {
     try {
-      const { data: authData } = await supabase.auth.getUser();
-      if (!authData.user) throw new Error("Authentification requise");
+      let uid = 'mock_client_id';
+      let isMock = true;
 
-      const finalTargetId = targetUserId || authData.user.id;
+      const localSession = localStorage.getItem('comptaflow_mock_session');
+      if (localSession) {
+        try {
+          const parsed = JSON.parse(localSession);
+          uid = parsed.user?.id || 'mock_client_id';
+        } catch (e) {}
+      } else {
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data?.session?.user) {
+            uid = data.session.user.id;
+            isMock = uid.startsWith('mock_');
+          }
+        } catch (e) {
+          // Offline fallback
+        }
+      }
+
+      const finalTargetId = targetUserId || uid;
       const isAdminUpload = !!targetUserId;
-      const isMock = finalTargetId.startsWith('mock_');
+      const effectiveIsMock = isMock || finalTargetId.startsWith('mock_');
 
-      if (isMock) {
+      if (effectiveIsMock) {
         const newDoc: DocumentType = {
           id: 'doc_' + Date.now(),
           fileName: file.name,

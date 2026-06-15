@@ -19,8 +19,18 @@ export function useAdminClients(isAdmin: boolean) {
     if (!isAdmin) return;
     setLoading(true);
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      const isMock = !userData.user || userData.user.id.startsWith('mock_');
+      let isMock = false;
+      const localSession = localStorage.getItem('comptaflow_mock_session');
+      if (localSession) {
+        isMock = true;
+      } else {
+        try {
+          const { data } = await supabase.auth.getSession();
+          isMock = !data.session?.user || data.session.user.id.startsWith('mock_');
+        } catch (err) {
+          isMock = true;
+        }
+      }
 
       if (isMock) {
         const storedMockClientsStr = localStorage.getItem('comptaflow_mock_clients');
@@ -81,8 +91,18 @@ export function useAdminClients(isAdmin: boolean) {
     };
 
     // Check if mock
-    const { data: userData } = await supabase.auth.getUser();
-    const isMock = !userData.user || userData.user.id.startsWith('mock_');
+    let isMock = false;
+    const localSession = localStorage.getItem('comptaflow_mock_session');
+    if (localSession) {
+      isMock = true;
+    } else {
+      try {
+        const { data } = await supabase.auth.getSession();
+        isMock = !data.session?.user || data.session.user.id.startsWith('mock_');
+      } catch (err) {
+        isMock = true;
+      }
+    }
 
     if (isMock) {
       const storedMockClientsStr = localStorage.getItem('comptaflow_mock_clients');

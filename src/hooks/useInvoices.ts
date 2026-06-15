@@ -20,11 +20,31 @@ export function useInvoices(userId?: string) {
 
   const fetchInvoices = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const targetId = userId || user?.id;
-      const isMock = !targetId || targetId.startsWith('mock_');
+      let uid = 'mock_client_id';
+      let isMock = true;
 
-      if (isMock) {
+      const localSession = localStorage.getItem('comptaflow_mock_session');
+      if (localSession) {
+        try {
+          const parsed = JSON.parse(localSession);
+          uid = parsed.user?.id || 'mock_client_id';
+        } catch (e) {}
+      } else {
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data?.session?.user) {
+            uid = data.session.user.id;
+            isMock = uid.startsWith('mock_');
+          }
+        } catch (e) {
+          // System offline
+        }
+      }
+
+      const targetId = userId || uid;
+      const effectiveIsMock = isMock || targetId.startsWith('mock_');
+
+      if (effectiveIsMock) {
         setInvoices(MOCK_INVOICES);
         setLoading(false);
         return;
@@ -49,9 +69,26 @@ export function useInvoices(userId?: string) {
 
   const addInvoice = async (data: Omit<Invoice, 'id' | 'userId'>) => {
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      const uid = userData.user?.id || 'mock_client_id';
-      const isMock = uid.startsWith('mock_');
+      let uid = 'mock_client_id';
+      let isMock = true;
+
+      const localSession = localStorage.getItem('comptaflow_mock_session');
+      if (localSession) {
+        try {
+          const parsed = JSON.parse(localSession);
+          uid = parsed.user?.id || 'mock_client_id';
+        } catch (e) {}
+      } else {
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data?.session?.user) {
+            uid = data.session.user.id;
+            isMock = uid.startsWith('mock_');
+          }
+        } catch (e) {
+          // System offline
+        }
+      }
 
       const newInvoice = {
         ...data,
@@ -82,9 +119,26 @@ export function useInvoices(userId?: string) {
 
   const updateInvoiceStatus = async (invoiceId: string, status: Invoice['status']) => {
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      const uid = userData.user?.id || 'mock_client_id';
-      const isMock = uid.startsWith('mock_');
+      let uid = 'mock_client_id';
+      let isMock = true;
+
+      const localSession = localStorage.getItem('comptaflow_mock_session');
+      if (localSession) {
+        try {
+          const parsed = JSON.parse(localSession);
+          uid = parsed.user?.id || 'mock_client_id';
+        } catch (e) {}
+      } else {
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data?.session?.user) {
+            uid = data.session.user.id;
+            isMock = uid.startsWith('mock_');
+          }
+        } catch (e) {
+          // System offline
+        }
+      }
 
       if (isMock) {
         setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, status } : inv));

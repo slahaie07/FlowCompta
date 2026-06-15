@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { Mail, Key, UserPlus, LogIn, ShieldAlert, ArrowLeft, Building2, ArrowRight, Lock, X } from 'lucide-react';
-import React, { useState } from 'react';
+import { Mail, Key, UserPlus, LogIn, ShieldAlert, ArrowLeft, ArrowRight, Lock, X, ShieldCheck, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // Imports recalibrés pour la nouvelle architecture
 import { supabase } from '../../lib/supabase';
@@ -8,123 +8,235 @@ import { CONFIG } from '../../lib/config';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { toast } from 'sonner';
 
 interface AuthProps {
   onAuthentication: (email: string) => void;
   mockLogin?: (email: string, isAdmin: boolean) => void;
 }
 
-type AuthView = 'choice' | 'login' | 'register';
+type AuthView = 'choice' | 'login' | 'register' | 'otp_verify';
 
-/**
- * Composant Auth - Architecture Standardisee
- * Gere le choix du mode (Login/Register) et l'authentification (Supabase ou Interne).
- */
 export function Auth({ onAuthentication, mockLogin }: AuthProps) {
   const [view, setView] = useState<AuthView>('choice');
   const [emailInput, setEmailInput] = useState('');
   const [password, setPassword] = useState('');
-  const [emailSent, setEmailSent] = useState(false);
+  const [useOtp, setUseOtp] = useState(false);
+  const [otpCode, setOtpCode] = useState<string[]>(Array(6).fill(''));
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showGoogleModal, setShowGoogleModal] = useState(false);
-  const [customGoogleEmail, setCustomGoogleEmail] = useState('');
-  const [showCustomGoogleInput, setShowCustomGoogleInput] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const [showDemoTip, setShowDemoTip] = useState(false);
+  
+  const otpInputsRef = useRef<HTMLInputElement[]>([]);
 
-  const handleGoogleAuth = () => {
-    setError('');
-    setShowGoogleModal(true);
+  // Gestion du compte à rebours pour le renvoi de l'OTP
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const timer = setTimeout(() => setCountdown(prev => prev - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [countdown]);
+
+  // Autofocus premier input OTP
+  useEffect(() => {
+    if (view === 'otp_verify' && otpInputsRef.current[0]) {
+      setTimeout(() => otpInputsRef.current[0]?.focus(), 100);
+    }
+  }, [view]);
+
+  // Mode de détection hors-ligne ou session fictive
+  const checkIsMock = (email: string) => {
+    const localSession = localStorage.getItem('comptaflow_mock_session');
+    if (localSession) return true;
+    return email.toLowerCase().includes('comptaflow.ca') || email.toLowerCase().includes('mock') || !window.navigator.onLine;
   };
 
-  const handleGoogleAccountSelect = async (selectedEmail: string) => {
+  // Envoi de l'OTP
+  const handleSendOtp = async (email: string) => {
     setIsLoading(true);
     setError('');
-    setShowGoogleModal(false);
-    
-    const cleanEmail = selectedEmail.toLowerCase().trim();
-    // Mot de passe déterminé et sécurisé basé sur le courriel Google pour un accès direct transparent
-    const derivedPassword = 'Google_' + btoa(cleanEmail).replace(/[^a-zA-Z0-9]/g, '').slice(0, 15) + '_EliteSecret2026!';
-    
+    const cleanEmail = email.toLowerCase().trim();
+    const isMock = checkIsMock(cleanEmail);
+
+    if (isMock) {
+      setTimeout(() => {
+        setIsLoading(false);
+        setView('otp_verify');
+        setCountdown(60);
+        setShowDemoTip(true);
+        toast.info("🔐 Mode Démo : Saisissez le code '123456' pour vous connecter.");
+      }, 1000);
+      return;
+    }
+
     try {
-      // 1. Essayer de se connecter
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      const { error: otpError } = await supabase.auth.signInWithOtp({
         email: cleanEmail,
-        password: derivedPassword,
-      });
-      
-      if (signInError) {
-        // 2. Si le compte n'existe pas ou demande validation, l'inscrire
-        if (signInError.message.includes("Invalid login credentials") || signInError.message.includes("Email not confirmed")) {
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email: cleanEmail,
-            password: derivedPassword,
-            options: {
-              emailRedirectTo: window.location.origin + '/dashboard',
-              data: { display_name: cleanEmail.split('@')[0] }
-            }
-          });
-          
-          if (signUpError) throw signUpError;
-          
-          if (signUpData.user) {
-            onAuthentication(cleanEmail);
-          }
-        } else {
-          throw signInError;
+        options: {
+          shouldCreateUser: view === 'register',
+          emailRedirectTo: window.location.origin + '/dashboard',
         }
-      } else if (signInData.user) {
-        onAuthentication(cleanEmail);
-      }
+      });
+
+      if (otpError) throw otpError;
+
+      setView('otp_verify');
+      setCountdown(60);
+      toast.success("Code d'accès envoyé avec succès !");
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Erreur d'authentification Google.");
+      setError(err.message || "Impossible d'envoyer le code d'accès.");
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Validation de l'OTP
+  const handleVerifyOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    const token = otpCode.join('');
+    if (token.length < 6) {
+      setError("Veuillez saisir le code complet de 6 chiffres.");
+      setIsLoading(false);
+      return;
+    }
+
+    const cleanEmail = emailInput.toLowerCase().trim();
+    const isMock = checkIsMock(cleanEmail);
+
+    if (isMock) {
+      setTimeout(() => {
+        setIsLoading(false);
+        if (token === '123456') {
+          const isAdmin = cleanEmail.includes('admin');
+          if (mockLogin) {
+            mockLogin(cleanEmail, isAdmin);
+          }
+          onAuthentication(cleanEmail);
+          toast.success("Authentification démo réussie.");
+        } else {
+          setError("Code incorrect. (Indice de démo : 123456)");
+        }
+      }, 1000);
+      return;
+    }
+
+    try {
+      const { data, error: verifyError } = await supabase.auth.verifyOtp({
+        email: cleanEmail,
+        token,
+        type: 'email'
+      });
+
+      if (verifyError) throw verifyError;
+
+      if (data.user) {
+        onAuthentication(data.user.email!);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Code de validation incorrect ou expiré.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Connexion Classique par Mot de Passe
   const handlePasswordAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
-    const finalEmail = emailInput.toLowerCase() === 'admin' ? CONFIG.APP.ADMIN_EMAILS[0] : emailInput;
+    const cleanEmail = emailInput.toLowerCase().trim();
+    const finalEmail = cleanEmail === 'admin' ? CONFIG.APP.ADMIN_EMAILS[0] : cleanEmail;
+    const isMock = checkIsMock(finalEmail);
+
+    if (isMock) {
+      setTimeout(() => {
+        setIsLoading(false);
+        const isAdmin = finalEmail.includes('admin') || CONFIG.APP.ADMIN_EMAILS.includes(finalEmail);
+        if (mockLogin) {
+          mockLogin(finalEmail, isAdmin);
+        }
+        onAuthentication(finalEmail);
+      }, 1500);
+      return;
+    }
 
     try {
       if (view === 'register') {
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email: finalEmail,
           password,
-          options: { 
+          options: {
             emailRedirectTo: window.location.origin + '/dashboard',
             data: { display_name: 'Nouvel Entrepreneur' }
           }
         });
 
-        if (error) throw error;
-        if (data.user) setEmailSent(true);
+        if (signUpError) throw signUpError;
+        if (data.user) {
+          toast.success("Veuillez confirmer votre compte par courriel.");
+          setView('choice');
+        }
       } else {
-        const { data, error } = await supabase.auth.signInWithPassword({ email: finalEmail, password });        
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
+          email: finalEmail,
+          password
+        });
 
-        if (error) throw error;
+        if (signInError) throw signInError;
 
         if (data.user) {
-           if (!data.user.email_confirmed_at && data.user.app_metadata?.provider === 'email') {
-              setError("Veuillez confirmer votre courriel avant de vous connecter. Alternativement, utilisez l'accès Démo instantané ci-dessous.");
-              await supabase.auth.signOut();
-              return;
-           }
-           onAuthentication(data.user.email!);
+          if (!data.user.email_confirmed_at && data.user.app_metadata?.provider === 'email') {
+            setError("Veuillez confirmer votre courriel avant de vous connecter.");
+            await supabase.auth.signOut();
+            return;
+          }
+          onAuthentication(data.user.email!);
         }
       }
     } catch (err: any) {
-      let friendlyMessage = err.message || "Identifiants invalides ou problème de connexion.";
-      if (err.message?.includes("provider is not enabled") || err.message?.includes("Unsupported provider")) {
-        friendlyMessage = "L'authentification par courriel/mot de passe n'est pas activée dans votre console Supabase. Activez le fournisseur 'Email' dans Authentication > Providers ou utilisez l'accès Démo instantané ci-dessous.";
+      let friendlyMessage = err.message || "Identifiants invalides.";
+      if (err.message?.includes("provider is not enabled")) {
+        friendlyMessage = "Le mot de passe n'est pas activé. Connectez-vous avec l'accès direct sans mot de passe (OTP).";
       }
       setError(friendlyMessage);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Gestion de la saisie OTP dans les cases
+  const handleOtpChange = (index: number, value: string) => {
+    if (isNaN(Number(value))) return; // N'accepter que les chiffres
+    
+    const newOtp = [...otpCode];
+    newOtp[index] = value.substring(value.length - 1);
+    setOtpCode(newOtp);
+
+    // Auto-focus vers l'input suivant
+    if (value && index < 5) {
+      otpInputsRef.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
+      otpInputsRef.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').trim();
+    if (pastedData.length === 6 && !isNaN(Number(pastedData))) {
+      const newOtp = pastedData.split('');
+      setOtpCode(newOtp);
+      otpInputsRef.current[5]?.focus();
     }
   };
 
@@ -138,37 +250,16 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
 
       <div className="absolute top-8 right-8 z-20">
          <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-gold/20 rounded-full text-[10px] font-bold text-silver uppercase tracking-[0.2em]">
-            <Lock size={12} className="text-gold" /> Chiffrement Actif
+            <Lock size={12} className="text-gold" /> Chiffrement Souverain
          </div>
       </div>
-
-      {showGoogleModal && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-noir/80 backdrop-blur-sm p-6">
-          <Card className="w-full max-w-sm p-8 bg-surface border-gold/30">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-serif text-ivoire">Choisir un compte</h3>
-              <button onClick={() => setShowGoogleModal(false)} className="text-slate-500 hover:text-ivoire"><X size={20}/></button>
-            </div>
-            <div className="space-y-3">
-              <button onClick={() => handleGoogleAccountSelect('client@comptaflow.ca')} className="w-full p-4 rounded-xl bg-white/5 hover:bg-gold/10 border border-white/5 text-left text-xs text-ivoire">client@comptaflow.ca</button>
-              <button onClick={() => setShowCustomGoogleInput(true)} className="w-full p-4 rounded-xl border border-dashed border-gold/30 text-gold text-xs text-center">+ Utiliser un autre compte</button>
-              {showCustomGoogleInput && (
-                <div className="mt-4 flex gap-2">
-                  <Input placeholder="email@exemple.com" value={customGoogleEmail} onChange={e => setCustomGoogleEmail(e.target.value)} className="bg-noir" />
-                  <Button onClick={() => handleGoogleAccountSelect(customGoogleEmail)} variant="gold">OK</Button>
-                </div>
-              )}
-            </div>
-          </Card>
-        </div>
-      )}
 
       <AnimatePresence mode="wait">
         {view === 'choice' ? (
           <motion.div key="choice" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.1 }} className="relative z-10 w-full max-w-4xl">
              <div className="text-center mb-16 space-y-4">
                 <div className="w-20 h-20 border-2 border-gold rounded-2xl flex items-center justify-center mx-auto shadow-2xl shadow-gold/20 mb-8 transition-transform hover:rotate-3 duration-500">
-                   <span className="font-serif font-bold text-4xl text-gold">A</span>
+                   <span className="font-serif font-bold text-4xl text-gold">C</span>
                 </div>
                 <h1 className="text-5xl md:text-7xl font-serif text-ivoire tracking-tighter">Comptaflow<span className="text-gold italic">.</span></h1>
                 <p className="text-slate-500 uppercase tracking-[0.4em] text-[10px] font-bold italic">La comptabilité qui coule de source</p>
@@ -178,8 +269,8 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                 {/* Bouton Login */}
                 <button
                   type="button"
-                  onClick={() => setView('login')}
-                  className="group relative p-8 md:p-12 rounded-[2.5rem] bg-surface border border-white/10 hover:border-gold/50 transition-all duration-500 text-center space-y-6 z-30 cursor-pointer overflow-hidden"
+                  onClick={() => { setView('login'); setUseOtp(true); }}
+                  className="group relative p-8 md:p-12 rounded-[2.5rem] bg-surface border border-white/10 hover:border-gold/50 transition-all duration-500 text-center space-y-6 z-30 cursor-pointer overflow-hidden shadow-2xl"
                 >
                    <div className="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                    <div className="w-16 h-16 rounded-2xl bg-gold/5 border border-gold/20 flex items-center justify-center text-gold mx-auto group-hover:bg-gold group-hover:text-noir transition-all duration-500 relative z-10">
@@ -187,15 +278,15 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                    </div>
                    <div className="space-y-2 relative z-10">
                       <h3 className="text-2xl font-serif text-ivoire">Espace Client</h3>
-                      <p className="text-sm text-slate-500 font-light italic">Reprenez là où vous en étiez</p>
+                      <p className="text-sm text-slate-500 font-light italic">Authentification d'élite par clé d'accès unique</p>
                    </div>
                 </button>
 
                 {/* Bouton Register */}
                 <button
                   type="button"
-                  onClick={() => setView('register')}
-                  className="group relative p-8 md:p-12 rounded-[2.5rem] bg-surface border border-white/10 hover:border-gold/50 transition-all duration-500 text-center space-y-6 z-30 cursor-pointer overflow-hidden"
+                  onClick={() => { setView('register'); setUseOtp(true); }}
+                  className="group relative p-8 md:p-12 rounded-[2.5rem] bg-surface border border-white/10 hover:border-gold/50 transition-all duration-500 text-center space-y-6 z-30 cursor-pointer overflow-hidden shadow-2xl"
                 >
                    <div className="absolute inset-0 bg-gold/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                    <div className="w-16 h-16 rounded-2xl bg-gold/5 border border-gold/20 flex items-center justify-center text-gold mx-auto group-hover:bg-gold group-hover:text-noir transition-all duration-500 relative z-10">
@@ -203,7 +294,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                    </div>
                    <div className="space-y-2 relative z-10">
                       <h3 className="text-2xl font-serif text-ivoire">Nouveau Dossier</h3>
-                      <p className="text-sm text-slate-500 font-light italic">Devenir client en 3 minutes</p>
+                      <p className="text-sm text-slate-500 font-light italic">Créer un profil professionnel en 3 minutes</p>
                    </div>
                 </button>
              </div>
@@ -242,12 +333,89 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                 </div>
              </div>
           </motion.div>
+        ) : view === 'otp_verify' ? (
+          <motion.div key="otp_verify" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }} className="relative z-10 w-full max-w-md">
+            <Card className="p-10 relative bg-surface border-gold/30" glow="gold">
+              <button
+                type="button"
+                onClick={() => { setView('login'); setError(''); setShowDemoTip(false); }}
+                className="absolute left-6 top-6 text-slate-500 hover:text-ivoire flex items-center gap-2 text-xs uppercase font-bold tracking-widest transition-colors z-20 cursor-pointer"
+              >
+                 <ArrowLeft size={14} /> Retour
+              </button>
+
+              <div className="flex flex-col items-center text-center space-y-8 pt-8">
+                <div className="w-16 h-16 rounded-2xl bg-gold/10 border border-gold text-gold flex items-center justify-center shadow-lg shadow-gold/10">
+                  <ShieldCheck size={32} />
+                </div>
+
+                <div className="space-y-2">
+                  <h2 className="text-3xl font-serif text-ivoire tracking-tight italic">Clé d'Accès.</h2>
+                  <p className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-bold">
+                    Saisissez le code de validation reçu
+                  </p>
+                </div>
+
+                {showDemoTip && (
+                  <div className="w-full p-4 bg-gold/5 border border-gold/20 text-gold text-xs rounded-xl font-light italic">
+                    🔐 Compte démo actif : Veuillez utiliser le code <span className="font-bold font-mono text-sm underline decoration-wavy">123456</span> pour valider votre entrée.
+                  </div>
+                )}
+
+                {error && (
+                  <div className="w-full p-4 text-xs text-danger bg-danger/10 border border-danger/20 rounded-xl flex items-center gap-3 text-left">
+                    <ShieldAlert size={18} className="shrink-0" /> <span>{error}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleVerifyOtp} className="w-full space-y-8">
+                  {/* PIN Input de Haute Sécurité */}
+                  <div className="flex justify-between gap-2">
+                    {otpCode.map((digit, idx) => (
+                      <input
+                        key={idx}
+                        ref={el => { if (el) otpInputsRef.current[idx] = el; }}
+                        type="text"
+                        maxLength={1}
+                        value={digit}
+                        onChange={e => handleOtpChange(idx, e.target.value)}
+                        onKeyDown={e => handleOtpKeyDown(idx, e)}
+                        onPaste={handleOtpPaste}
+                        className="w-12 h-14 bg-noir border border-white/10 rounded-xl text-center text-xl font-serif font-bold text-gold focus:border-gold focus:ring-1 focus:ring-gold/30 outline-none transition-all shadow-inner"
+                      />
+                    ))}
+                  </div>
+
+                  <Button type="submit" variant="gold" className="w-full h-16 gap-3 font-bold uppercase tracking-[0.2em] shadow-gold/20" isLoading={isLoading}>
+                    Valider le code d'accès <ArrowRight size={20}/>
+                  </Button>
+                </form>
+
+                <div className="pt-2 text-center">
+                  {countdown > 0 ? (
+                    <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black">
+                      Renvoyer un code dans {countdown}s
+                    </p>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleSendOtp(emailInput)}
+                      className="text-[10px] text-gold hover:text-ivoire font-black uppercase tracking-widest flex items-center gap-2 mx-auto cursor-pointer transition-colors"
+                      disabled={isLoading}
+                    >
+                      <RefreshCw size={12} /> Renvoyer un code d'accès
+                    </button>
+                  )}
+                </div>
+              </div>
+            </Card>
+          </motion.div>
         ) : (
           <motion.div key="form" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }} className="relative z-10 w-full max-w-md">
             <Card className="p-10 relative bg-surface border-gold/30" glow="gold">
               <button
                 type="button"
-                onClick={() => { setView('choice'); setError(''); setEmailSent(false); }}
+                onClick={() => { setView('choice'); setError(''); }}
                 className="absolute left-6 top-6 text-slate-500 hover:text-ivoire flex items-center gap-2 text-xs uppercase font-bold tracking-widest transition-colors z-20 cursor-pointer"
               >
                  <ArrowLeft size={14} /> Retour
@@ -258,62 +426,34 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                   {view === 'login' ? <LogIn size={32} /> : <UserPlus size={32} />}
                 </div>
 
-                {!emailSent ? (
-                  <div className="w-full space-y-8">
-                    <div className="space-y-2">
-                      <h2 className="text-3xl font-serif text-ivoire tracking-tight italic leading-tight">
-                        {view === 'login' ? "Content de vous revoir." : "Bienvenue chez Comptaflow."}
-                      </h2>
-                      <p className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-bold">
-                        {view === 'login' ? "Identification Sécurisée" : "Création de Dossier Fiscal"}       
-                      </p>
+                <div className="w-full space-y-8">
+                  <div className="space-y-2">
+                    <h2 className="text-3xl font-serif text-ivoire tracking-tight italic leading-tight">
+                      {view === 'login' ? "Identité Cabinet." : "Nouveau Dossier."}
+                    </h2>
+                    <p className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-bold">
+                      {useOtp ? "Connexion haute sécurité sans mot de passe" : "Identification classique"}
+                    </p>
+                  </div>
+
+                  {error && (
+                    <div className="p-4 text-xs text-danger bg-danger/10 border border-danger/20 rounded-xl flex items-center gap-3 text-left animate-shake">
+                      <ShieldAlert size={18} className="shrink-0" /> <span>{error}</span>
                     </div>
+                  )}
 
-                    {view === 'login' && (
-                      <div className="p-4 bg-gold/5 border border-gold/10 rounded-xl text-[10px] text-gold/60 uppercase font-bold tracking-widest italic text-center">
-                        Accès prioritaire à votre portail
-                      </div>
-                    )}
+                  <div className="space-y-5">
+                    <Input
+                      type="email" 
+                      placeholder="Votre adresse courriel"
+                      icon={<Mail size={18} className="text-gold/40" />}
+                      value={emailInput}
+                      onChange={e => setEmailInput(e.target.value)}
+                      required
+                      className="bg-noir border-white/10 focus:border-gold/50"
+                    />
 
-                    <div className="space-y-4">
-                      <Button 
-                        type="button" 
-                        variant="secondary" 
-                        className="w-full h-14 gap-3 glass-button rounded-2xl font-bold uppercase text-[10px] tracking-widest border-white/5 hover:border-gold/20" 
-                        onClick={handleGoogleAuth}
-                        isLoading={isLoading}
-                      >
-                        <svg className="w-4 h-4" viewBox="0 0 24 24">
-                          <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-3.27 3.28-8.11 3.28-11.09z"/>
-                          <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-1 .67-2.28 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                          <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-                          <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                        Continuer avec Google
-                      </Button>
-
-                      <div className="relative py-2">
-                        <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-white/5"></span></div>
-                        <div className="relative flex justify-center text-[8px] uppercase tracking-[0.3em] font-black"><span className="bg-surface px-4 text-slate-600">Ou via identifiant scellé</span></div>
-                      </div>
-                    </div>
-
-                    {error && (
-                      <div className="p-4 text-xs text-danger bg-danger/10 border border-danger/20 rounded-xl flex items-center gap-3 text-left animate-shake">
-                        <ShieldAlert size={18} className="shrink-0" /> <span>{error}</span>
-                      </div>
-                    )}
-
-                    <form onSubmit={handlePasswordAuth} className="space-y-5">
-                      <Input
-                        type="text" 
-                        placeholder={view === 'login' ? "Courriel" : "Votre courriel"}
-                        icon={<Mail size={18} className="text-gold/40" />}
-                        value={emailInput}
-                        onChange={e => setEmailInput(e.target.value)}
-                        required
-                        className="bg-noir border-white/10 focus:border-gold/50"
-                      />
+                    {!useOtp && (
                       <Input
                         type="password"
                         placeholder="Mot de passe"
@@ -324,24 +464,42 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                         minLength={6}
                         className="bg-noir border-white/10 focus:border-gold/50"
                       />
+                    )}
 
-                      <Button type="submit" variant="gold" className="w-full h-16 gap-3 font-bold uppercase tracking-[0.2em] shadow-gold/20 mt-4" isLoading={isLoading}>
-                        {view === 'login' ? "Se connecter" : "S'inscrire"} <ArrowRight size={20}/>
+                    {useOtp ? (
+                      <Button 
+                        onClick={() => handleSendOtp(emailInput)} 
+                        variant="gold" 
+                        className="w-full h-16 gap-3 font-bold uppercase tracking-[0.2em] shadow-gold/20 mt-4 animate-in fade-in duration-300"
+                        isLoading={isLoading}
+                        disabled={!emailInput}
+                      >
+                        Recevoir mon code d'accès <ArrowRight size={20}/>
                       </Button>
-                    </form>
-                  </div>
-                ) : (
-                  <div className="space-y-8 py-4 animate-in fade-in zoom-in-95 duration-500">
-                    <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto border border-gold/30">
-                      <Mail size={32} className="text-gold animate-pulse" />
+                    ) : (
+                      <form onSubmit={handlePasswordAuth} className="space-y-5">
+                        <Button 
+                          type="submit" 
+                          variant="gold" 
+                          className="w-full h-16 gap-3 font-bold uppercase tracking-[0.2em] shadow-gold/20 mt-4" 
+                          isLoading={isLoading}
+                        >
+                          Se connecter <ArrowRight size={20}/>
+                        </Button>
+                      </form>
+                    )}
+
+                    <div className="pt-4 text-center">
+                      <button
+                        type="button"
+                        onClick={() => { setUseOtp(!useOtp); setError(''); }}
+                        className="text-[10px] text-slate-500 hover:text-gold uppercase tracking-widest font-black transition-colors cursor-pointer"
+                      >
+                        {useOtp ? "👉 Se connecter avec mot de passe" : "👉 Connexion sans mot de passe (Code OTP)"}
+                      </button>
                     </div>
-                    <div className="space-y-4">
-                      <h3 className="text-2xl font-serif text-ivoire italic">Validation requise.</h3>
-                      <p className="text-sm text-slate-400 font-light leading-relaxed">Vérifiez vos courriels. Un lien de confirmation a été envoyé à <br/><span className="text-ivoire font-medium underline decoration-gold/50 underline-offset-4">{emailInput}</span>.</p>
-                    </div>
-                    <Button variant="ghost" className="mt-4" onClick={() => setEmailSent(false)}>Retour à l'accueil</Button>       
                   </div>
-                )}
+                </div>
               </div>
             </Card>
           </motion.div>
