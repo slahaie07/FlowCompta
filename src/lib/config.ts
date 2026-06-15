@@ -3,20 +3,25 @@
  * Ce fichier est la source unique de vérité pour tous les paramètres de l'application.
  */
 
+const sanitizeVar = (val: string | undefined): string => {
+  if (!val) return '';
+  return val.replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
+};
+
 export const CONFIG = {
   // Supabase
-  SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || 'https://hnxdlzdgiascuawgydir.supabase.co',
-  SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_BHVkYelBLz9x0HJn_EWDyQ_EyJxaAWF',
+  SUPABASE_URL: sanitizeVar(import.meta.env.VITE_SUPABASE_URL || 'https://hnxdlzdgiascuawgydir.supabase.co'),
+  SUPABASE_ANON_KEY: sanitizeVar(import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_BHVkYelBLz9x0HJn_EWDyQ_EyJxaAWF'),
 
   // Automations (n8n)
   WEBHOOKS: {
-    INVOICE: import.meta.env.VITE_N8N_INVOICE_WEBHOOK_URL,
-    SUBSCRIPTION: import.meta.env.VITE_N8N_SUBSCRIPTION_WEBHOOK_URL,
+    INVOICE: sanitizeVar(import.meta.env.VITE_N8N_INVOICE_WEBHOOK_URL),
+    SUBSCRIPTION: sanitizeVar(import.meta.env.VITE_N8N_SUBSCRIPTION_WEBHOOK_URL),
   },
 
   // Paiements
-  STRIPE_PUBLIC_KEY: import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_...',
-  PAYPAL_CLIENT_ID: import.meta.env.VITE_PAYPAL_CLIENT_ID || 'test',
+  STRIPE_PUBLIC_KEY: sanitizeVar(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_...'),
+  PAYPAL_CLIENT_ID: sanitizeVar(import.meta.env.VITE_PAYPAL_CLIENT_ID || 'test'),
 
   // Paramètres Métier
   FEES: {
