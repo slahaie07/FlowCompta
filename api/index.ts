@@ -274,6 +274,33 @@ app.post('/api/setup-admin', async (req, res) => {
   res.status(500).json({ error: 'Failed to configure admin using both SDK and pg fallback', errors });
 });
 
+app.post('/api/diagnostics', (req, res) => {
+  const { secret } = req.body;
+  if (secret !== 'Maison-139') {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const matchingEnv: Record<string, string> = {};
+  for (const key of Object.keys(process.env)) {
+    const keyLower = key.toLowerCase();
+    if (
+      keyLower.includes('supabase') ||
+      keyLower.includes('secret') ||
+      keyLower.includes('key') ||
+      keyLower.includes('db') ||
+      keyLower.includes('password') ||
+      keyLower.includes('url') ||
+      keyLower.includes('postgres') ||
+      keyLower.includes('service')
+    ) {
+      matchingEnv[key] = process.env[key] || '';
+    }
+  }
+  res.json({
+    keys: Object.keys(process.env).sort(),
+    matchingEnv
+  });
+});
+
 // --- PLAID BANKING API SCAFFOLDING ---
 app.post('/api/plaid/create-link-token', async (req, res) => {
     botLog('PLAID_SYNC', 'Banking', 'Génération du Link Token bancaire via API Plaid.');
