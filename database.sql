@@ -212,3 +212,13 @@ CREATE POLICY "Documents access" ON documents FOR ALL USING (auth.uid() = user_i
 
 -- Audit logs: Admin only
 CREATE POLICY "Admin view logs" ON audit_logs FOR ALL USING (is_admin());
+
+-- ============================================================
+-- 📈 OPTIMISATION DES REQUÊTES JSONB (Item 48)
+-- GIN indexes for fast key/value scanning inside JSONB structures
+-- ============================================================
+CREATE INDEX IF NOT EXISTS idx_profiles_needs ON profiles USING gin(needs);
+CREATE INDEX IF NOT EXISTS idx_profiles_metadata ON profiles USING gin(metadata);
+CREATE INDEX IF NOT EXISTS idx_invoices_items ON invoices USING gin(items);
+CREATE INDEX IF NOT EXISTS idx_marketing_leads_metadata ON marketing_leads USING gin(metadata);
+

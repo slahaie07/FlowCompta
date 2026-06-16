@@ -48,6 +48,46 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
+// --- MIDDLEWARE DE SÉCURITÉ (HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy - Items 10, 11, 12, 27, 28, 32) ---
+app.use((req, res, next) => {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.paypal.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.supabase.co https://images.unsplash.com; connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com; frame-src 'self' https://js.stripe.com https://www.paypal.com; font-src 'self' https://fonts.gstatic.com;");
+    next();
+});
+
+// --- EN-MÉMOIRE RATE LIMITER BASIQUE (PREVENT BRUTE FORCE - Items 6 & 7) ---
+const rateLimitStore: Record<string, { count: number; resetTime: number }> = {};
+const rateLimiter = (limit: number, windowMs: number) => {
+  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+    const key = `${ip.toString()}:${req.path}`;
+    const now = Date.now();
+    
+    if (!rateLimitStore[key] || rateLimitStore[key].resetTime < now) {
+      rateLimitStore[key] = {
+        count: 1,
+        resetTime: now + windowMs
+      };
+      return next();
+    }
+    
+    rateLimitStore[key].count++;
+    
+    if (rateLimitStore[key].count > limit) {
+      botLog('RATE_LIMIT_EXCEEDED', ip.toString(), `Trop de requêtes sur ${req.path}`);
+      return res.status(429).json({
+        error: "Too many requests",
+        message: "Trop de requêtes. Veuillez réessayer plus tard."
+      });
+    }
+    
+    next();
+  };
+};
+
 // ============================================================
 // 🛡️ DEEP GUARD : PREDICTIVE TELEMETRY & AUTO-HEALING
 // ============================================================
@@ -873,7 +913,181 @@ app.post('/api/profile/delete', async (req, res) => {
   });
 });
 
+// --- LOI 25 : DROIT À LA PORTABILITÉ DES DONNÉES ("Right to Portability" / Item 109) ---
+app.post('/api/profile/export', rateLimiter(5, 60000), async (req, res) => {
+  const { userId, email } = req.body;
 
+  if (!userId && !email) {
+    botLog('EXPORT_PROFILE_BAD_REQUEST', 'System', "Tentative d'exportation de données sans identifiants.");
+    return res.status(400).json({ error: "userId ou email requis pour l'exportation." });
+  }
+
+  let targetUserId = userId;
+  let targetEmail = email;
+
+  // 1. Resolve from local_db.json if available
+  const db = getDb();
+  let foundInLocalDb = false;
+  let localData: any = {};
+  if (db.profiles) {
+    const localProfile = db.profiles.find((p: any) => 
+      (targetUserId && p.id === targetUserId) || 
+      (targetEmail && p.email?.toLowerCase() === targetEmail.toLowerCase())
+    );
+    if (localProfile) {
+      targetUserId = localProfile.id || targetUserId;
+      targetEmail = localProfile.email || targetEmail;
+      foundInLocalDb = true;
+      
+      localData.profile = localProfile;
+      localData.transactions = db.transactions ? db.transactions.filter((t: any) => t.userId === targetUserId || t.user_id === targetUserId) : [];
+      localData.invoices = db.invoices ? db.invoices.filter((i: any) => i.userId === targetUserId || i.user_id === targetUserId) : [];
+      localData.orders = db.orders ? db.orders.filter((o: any) => o.userId === targetUserId || o.user_id === targetUserId) : [];
+      localData.messages = db.messages ? db.messages.filter((m: any) => m.userId === targetUserId || m.user_id === targetUserId) : [];
+    }
+  }
+
+  // 2. Resolve from Supabase / Postgres if needed
+  const projectRef = 'hnxdlzdgiascuawgydir';
+  const supabaseUrl = sanitizeEnvVar(process.env.VITE_SUPABASE_URL) || `https://${projectRef}.supabase.co`;
+  const serviceRoleKey = sanitizeEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY);
+  
+  let dbData: any = {};
+  let foundInDb = false;
+
+  if (serviceRoleKey && !targetUserId?.startsWith('mock_')) {
+    try {
+      const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+        auth: { autoRefreshToken: false, persistSession: false }
+      });
+      
+      // Resolve details if needed
+      if (!targetUserId || !targetEmail) {
+        let query = supabaseAdmin.from('profiles').select('*');
+        if (targetUserId) {
+          query = query.eq('id', targetUserId);
+        } else {
+          query = query.eq('email', targetEmail);
+        }
+        const { data: p } = await query.maybeSingle();
+        if (p) {
+          targetUserId = p.id;
+          targetEmail = p.email;
+        }
+      }
+
+      if (targetUserId) {
+        foundInDb = true;
+        // Fetch everything concurrently (Item 48 optimization)
+        const [
+          { data: profile },
+          { data: transactions },
+          { data: invoices },
+          { data: documents },
+          { data: messages },
+          { data: socialContent }
+        ] = await Promise.all([
+          supabaseAdmin.from('profiles').select('*').eq('id', targetUserId).maybeSingle(),
+          supabaseAdmin.from('transactions').select('*').eq('user_id', targetUserId),
+          supabaseAdmin.from('invoices').select('*').eq('user_id', targetUserId),
+          supabaseAdmin.from('documents').select('*').eq('user_id', targetUserId),
+          supabaseAdmin.from('messages').select('*').eq('user_id', targetUserId),
+          supabaseAdmin.from('social_content').select('*').eq('author_id', targetUserId)
+        ]);
+
+        dbData = {
+          profile,
+          transactions,
+          invoices,
+          documents,
+          messages,
+          socialContent
+        };
+      }
+    } catch (e: any) {
+      console.error("[export-profile] Supabase error:", e.message);
+    }
+  }
+
+  // Fallback to PG direct client if needed
+  if (!foundInDb && !targetUserId?.startsWith('mock_')) {
+    const configs = [
+      { host: `db.${projectRef}.supabase.co`, port: 5432, user: 'postgres' },
+      { host: `aws-1-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` },
+      { host: `aws-0-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` }
+    ];
+    
+    for (const conf of configs) {
+      const client = new Client({
+        host: conf.host,
+        port: conf.port,
+        user: conf.user,
+        password: 'Maison-139',
+        database: 'postgres',
+        ssl: { rejectUnauthorized: false },
+        connectionTimeoutMillis: 5000
+      });
+      try {
+        await client.connect();
+        foundInDb = true;
+
+        if (!targetUserId || !targetEmail) {
+          const resUser = await client.query('SELECT id, email FROM public.profiles WHERE id = $1 OR email = $2', [targetUserId, targetEmail]);
+          if (resUser.rows.length > 0) {
+            targetUserId = resUser.rows[0].id;
+            targetEmail = resUser.rows[0].email;
+          }
+        }
+
+        if (targetUserId) {
+          const profile = (await client.query('SELECT * FROM public.profiles WHERE id = $1', [targetUserId])).rows[0];
+          const transactions = (await client.query('SELECT * FROM public.transactions WHERE user_id = $1', [targetUserId])).rows;
+          const invoices = (await client.query('SELECT * FROM public.invoices WHERE user_id = $1', [targetUserId])).rows;
+          const documents = (await client.query('SELECT * FROM public.documents WHERE user_id = $1', [targetUserId])).rows;
+          const messages = (await client.query('SELECT * FROM public.messages WHERE user_id = $1', [targetUserId])).rows;
+          const socialContent = (await client.query('SELECT * FROM public.social_content WHERE author_id = $1', [targetUserId])).rows;
+
+          dbData = {
+            profile,
+            transactions,
+            invoices,
+            documents,
+            messages,
+            socialContent
+          };
+        }
+
+        await client.end();
+        break;
+      } catch (e) {
+        try { await client.end(); } catch (err) {}
+      }
+    }
+  }
+
+  // Merge mock and DB data if both found, or select appropriate
+  const exportPayload = foundInLocalDb ? { ...localData, source: "mock_local_db" } : { ...dbData, source: "production_db" };
+
+  if (!exportPayload.profile && !foundInLocalDb) {
+    botLog('EXPORT_PROFILE_NOT_FOUND', 'System', `Tentative d'export pour un utilisateur inexistant: ID=${userId}, Email=${email}`);
+    return res.status(404).json({ error: "Profil utilisateur introuvable pour l'exportation." });
+  }
+
+  botLog('EXPORT_PROFILE_SUCCESS', targetUserId || 'unknown', `Données exportées pour ${targetEmail}`);
+
+  // Force download as JSON file attachment
+  res.setHeader('Content-disposition', `attachment; filename=comptaflow_export_${targetUserId || 'data'}.json`);
+  res.setHeader('Content-type', 'application/json');
+  return res.send(JSON.stringify({
+    schema_version: "CF-Loi25-V1.0",
+    exported_at: new Date().toISOString(),
+    user_identity: {
+      userId: targetUserId,
+      email: targetEmail
+    },
+    data: exportPayload
+  }, null, 2));
+});
 
 // ============================================================
 // 🏛 ...

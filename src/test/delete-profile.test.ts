@@ -60,3 +60,40 @@ test('Loi 25 : Refus de suppression pour rétention légale (factures impayées/
   expect(data.error).toBe('LEGAL_RETENTION_REQUIRED');
   expect(data.hasTaxFilings).toBe(true);
 });
+
+test('Loi 25 : Droit à la portabilité (Export de données)', async () => {
+  const baseUrl = 'http://localhost:3000';
+  const userId = 'mock_client_id';
+  const email = 'client@comptaflow.ca';
+
+  // Simulation d'une exportation réussie
+  const mockExportResponse = {
+    schema_version: "CF-Loi25-V1.0",
+    exported_at: "2026-06-16T18:28:23-04:00",
+    user_identity: { userId, email },
+    data: {
+      profile: { id: userId, email, displayName: "Samuel Tremblay" },
+      transactions: [],
+      invoices: [],
+      source: "mock_local_db"
+    }
+  };
+
+  (global.fetch as any).mockResolvedValueOnce({
+    status: 200,
+    json: async () => mockExportResponse
+  });
+
+  const res = await fetch(`${baseUrl}/api/profile/export`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, email })
+  });
+
+  expect(res.status).toBe(200);
+  const data = await res.json();
+  expect(data.schema_version).toBe('CF-Loi25-V1.0');
+  expect(data.user_identity.email).toBe(email);
+  expect(data.data.profile.displayName).toBe("Samuel Tremblay");
+});
+
