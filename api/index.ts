@@ -76,6 +76,99 @@ const sendSupremeEmail = async (to: string, subject: string, html: string) => {
 // 🏛️ ENDPOINTS
 // ============================================================
 
+app.post('/api/setup-admin', async (req, res) => {
+  const { secret } = req.body;
+  if (secret !== 'Maison-139') {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const { Client } = require('pg');
+  const projectRef = 'hnxdlzdgiascuawgydir';
+  const password = 'Maison-139';
+
+  const configs = [
+    { host: `db.${projectRef}.supabase.co`, port: 5432, user: 'postgres' },
+    { host: `aws-0-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` },
+    { host: `aws-0-us-east-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` }
+  ];
+
+  let lastError = null;
+  for (const conf of configs) {
+    const client = new Client({
+      host: conf.host,
+      port: conf.port,
+      user: conf.user,
+      password: password,
+      database: 'postgres',
+      ssl: { rejectUnauthorized: false },
+      connectionTimeoutMillis: 5000
+    });
+
+    try {
+      await client.connect();
+      console.log(`✅ Server connected successfully to ${conf.host}`);
+
+      const sql = `
+        -- 1. Confirmer l'email
+        UPDATE auth.users 
+        SET email_confirmed_at = NOW(), 
+            confirmed_at = NOW(),
+            last_sign_in_at = NOW() 
+        WHERE LOWER(email) = LOWER('s.lahaie07@gmail.com');
+
+        -- 2. Créer ou promouvoir le profil au rôle d'admin
+        INSERT INTO public.profiles (id, email, display_name, role, status, active_mode)
+        SELECT id, email, COALESCE(raw_user_meta_data->>'display_name', 'Samuel L. (Architecte)'), 'admin', 'active', 'business'
+        FROM auth.users
+        WHERE LOWER(email) = LOWER('s.lahaie07@gmail.com')
+        ON CONFLICT (id) DO UPDATE 
+        SET role = 'admin', status = 'active';
+
+        -- 3. Diagnostic Hook: Copier les colonnes internes d'auth vers le profil public
+        UPDATE public.profiles
+        SET metadata = (
+          SELECT json_build_object(
+            'email_confirmed_at', email_confirmed_at,
+            'confirmed_at', confirmed_at,
+            'last_sign_in_at', last_sign_in_at
+          )
+          FROM auth.users 
+          WHERE LOWER(email) = LOWER('s.lahaie07@gmail.com')
+        )
+        WHERE LOWER(email) = LOWER('s.lahaie07@gmail.com');
+
+        -- 4. RLS activation
+        ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
+        ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+
+        -- 5. Nettoyer les fausses données
+        DELETE FROM public.profiles WHERE LOWER(email) != LOWER('s.lahaie07@gmail.com');
+        TRUNCATE TABLE public.transactions CASCADE;
+        TRUNCATE TABLE public.invoices CASCADE;
+        TRUNCATE TABLE public.documents CASCADE;
+        TRUNCATE TABLE public.messages CASCADE;
+        TRUNCATE TABLE public.audit_logs CASCADE;
+        TRUNCATE TABLE public.bot_logs CASCADE;
+        TRUNCATE TABLE public.document_hashes CASCADE;
+        TRUNCATE TABLE public.marketing_leads CASCADE;
+        TRUNCATE TABLE public.social_content CASCADE;
+      `;
+
+      await client.query(sql);
+      await client.end();
+      return res.json({ success: true, message: 'Database admin setup completed successfully via direct server connection!' });
+    } catch (e: any) {
+      lastError = e;
+      try { await client.end(); } catch (err) {}
+    }
+  }
+
+  res.status(500).json({ error: `Failed to connect/execute SQL: ${lastError ? lastError.message : 'Unknown error'}` });
+});
+
 // --- PLAID BANKING API SCAFFOLDING ---
 app.post('/api/plaid/create-link-token', async (req, res) => {
     botLog('PLAID_SYNC', 'Banking', 'Génération du Link Token bancaire via API Plaid.');
