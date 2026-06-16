@@ -150,7 +150,7 @@ app.post('/api/setup-admin', async (req, res) => {
       const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
       if (listError) throw new Error(`List users error: ${listError.message}`);
 
-      let user = users.find(u => u.email?.toLowerCase() === targetEmail.toLowerCase());
+      let user = users.find((u: any) => u.email?.toLowerCase() === targetEmail.toLowerCase());
       let userId = '';
 
       if (!user) {
