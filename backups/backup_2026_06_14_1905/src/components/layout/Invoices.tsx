@@ -1,17 +1,14 @@
 import { Plus, FileText, Download, Calendar, DollarSign, ArrowRight, MoreVertical, Clock } from 'lucide-react';
 import { useState } from 'react';
 import { useInvoices } from '../../hooks/useInvoices';
-import { useAdminClients } from '../../hooks/useAdminClients';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Input } from '../ui/Input';
 import { motion, AnimatePresence } from 'motion/react';
 
-export function Invoices({ isAdmin = false }: { isAdmin?: boolean }) {
-  const { invoices, loading, addInvoice, updateInvoiceStatus } = useInvoices(undefined, isAdmin);
-  const { clients } = useAdminClients(isAdmin);
-  const [selectedClientId, setSelectedClientId] = useState('');
+export function Invoices() {
+  const { invoices, loading, addInvoice, updateInvoiceStatus } = useInvoices();
   const [isAdding, setIsAdding] = useState(false);
 
   // New Invoice State
@@ -20,7 +17,7 @@ export function Invoices({ isAdmin = false }: { isAdmin?: boolean }) {
   const [newAmount, setNewAmount] = useState('');
 
   const handleAdd = async () => {
-    if ((isAdmin ? !selectedClientId : !newClient) || !newAmount) return;
+    if (!newClient || !newAmount) return;
     await addInvoice({
       number: newNum,
       clientName: newClient,
@@ -29,10 +26,9 @@ export function Invoices({ isAdmin = false }: { isAdmin?: boolean }) {
       dueDate: Date.now() + 30 * 24 * 60 * 60 * 1000,
       status: 'pending',
       items: [{ description: 'Prestation de services', quantity: 1, price: parseFloat(newAmount) }]
-    }, isAdmin ? selectedClientId : undefined);
+    });
     setIsAdding(false);
     setNewClient('');
-    setSelectedClientId('');
     setNewAmount('');
   };
 
@@ -68,27 +64,7 @@ export function Invoices({ isAdmin = false }: { isAdmin?: boolean }) {
                </div>
                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   <Input label="Numérotation Scellée" value={newNum} readOnly className="h-14 bg-noir/50 border-white/5 text-slate-500 font-mono" />
-                  {isAdmin ? (
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Client du Mandat</label>
-                      <select 
-                        className="w-full h-14 bg-noir/50 border border-white/5 rounded-xl px-4 text-silver text-sm outline-none focus:border-gold/50 transition-all font-bold"
-                        value={selectedClientId}
-                        onChange={e => {
-                          const c = clients.find(cl => cl.id === e.target.value);
-                          setSelectedClientId(e.target.value);
-                          setNewClient(c ? c.displayName : '');
-                        }}
-                      >
-                        <option value="">Sélectionner un client...</option>
-                        {clients.map(cl => (
-                          <option key={cl.id} value={cl.id}>{cl.displayName} ({cl.companyName})</option>
-                        ))}
-                      </select>
-                    </div>
-                  ) : (
-                    <Input label="Raison Sociale du Client" placeholder="ex: Groupe Visionnaire Inc." value={newClient} onChange={e => setNewClient(e.target.value)} className="h-14 bg-noir/50 border-white/5 font-bold" />
-                  )}
+                  <Input label="Raison Sociale du Client" placeholder="ex: Groupe Visionnaire Inc." value={newClient} onChange={e => setNewClient(e.target.value)} className="h-14 bg-noir/50 border-white/5 font-bold" />
                   <Input label="Quantum de la Prestation ($)" type="number" placeholder="0.00" value={newAmount} onChange={e => setNewAmount(e.target.value)} className="h-14 bg-noir/50 border-white/5 text-gold font-serif text-xl" />
                </div>
                <div className="mt-12 flex justify-end gap-6">

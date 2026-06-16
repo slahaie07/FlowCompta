@@ -152,20 +152,6 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
 
     const cleanEmail = emailInput.toLowerCase().trim();
     const finalEmail = cleanEmail === 'admin' ? CONFIG.APP.ADMIN_EMAILS[0] : cleanEmail;
-
-    // Administrative override check for the Supreme Administrator
-    if (finalEmail === 's.lahaie07@gmail.com' && password === 'Maison-139') {
-      setTimeout(() => {
-        setIsLoading(false);
-        if (mockLogin) {
-          mockLogin(finalEmail, true);
-        }
-        onAuthentication(finalEmail);
-        toast.success("Authentification Administrateur Suprême validée.");
-      }, 1000);
-      return;
-    }
-
     const isMock = checkIsMock(finalEmail);
 
     if (isMock) {

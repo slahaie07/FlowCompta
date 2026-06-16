@@ -61,12 +61,22 @@ export function useAdminClients(isAdmin: boolean) {
 
       if (error) throw error;
 
+      // Fetch actual document counts for each client
+      const { data: docsData } = await supabase
+        .from('documents')
+        .select('id, user_id');
+
+      const docCounts = (docsData || []).reduce((acc: Record<string, number>, doc: any) => {
+        acc[doc.user_id] = (acc[doc.user_id] || 0) + 1;
+        return acc;
+      }, {});
+
       const mapped = (data || []).map((p: any) => ({
         id: p.id,
         displayName: p.display_name || p.displayName || 'Inconnu',
         companyName: p.company_name || p.companyName || 'Particulier',
         status: p.status || 'Actif',
-        documents: p.id === 'mock_client_id' ? 4 : Math.floor(Math.random() * 10) + 1,
+        documents: p.id === 'mock_client_id' ? 4 : (docCounts[p.id] || 0),
         lastActive: 'Récemment',
         email: p.email,
         needs: p.needs || []

@@ -1,7 +1,6 @@
 import { Plus, Search, ArrowUpCircle, ArrowDownCircle, Filter, MoreHorizontal, Receipt, FileText, AlertCircle, CheckCircle2, ShieldAlert, Clock } from 'lucide-react';
 import { useState } from 'react';
 import { useTransactions } from '../../hooks/useTransactions';
-import { useAdminClients } from '../../hooks/useAdminClients';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -11,8 +10,6 @@ import { motion, AnimatePresence } from 'motion/react';
 
 export function Transactions({ currentMode, isAdmin }: { currentMode: AppMode, isAdmin?: boolean }) {
   const { transactions, loading, addTransaction } = useTransactions(undefined, isAdmin);
-  const { clients } = useAdminClients(!!isAdmin);
-  const [selectedClientId, setSelectedClientId] = useState('');
   const [filter, setFilter] = useState<'all' | 'sale' | 'purchase'>('all');
   const [isAdding, setIsAdding] = useState(false);
   
@@ -22,7 +19,7 @@ export function Transactions({ currentMode, isAdmin }: { currentMode: AppMode, i
   const [newDesc, setNewDesc] = useState('');
 
   const handleAdd = async () => {
-    if (!newAmount || !newDesc || (isAdmin && !selectedClientId)) return;
+    if (!newAmount || !newDesc) return;
     await addTransaction({
       type: newType,
       amount: parseFloat(newAmount),
@@ -31,11 +28,10 @@ export function Transactions({ currentMode, isAdmin }: { currentMode: AppMode, i
       status: 'pending',
       category: 'Général',
       context: currentMode
-    }, isAdmin ? selectedClientId : undefined);
+    });
     setIsAdding(false);
     setNewAmount('');
     setNewDesc('');
-    setSelectedClientId('');
   };
 
   const filtered = transactions.filter(t => 
@@ -121,36 +117,21 @@ export function Transactions({ currentMode, isAdmin }: { currentMode: AppMode, i
                     <Plus size={28} className="rotate-45" />
                   </button>
                </div>
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-end">
-                   <div className="md:col-span-3 space-y-3">
-                     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 ml-2">Nature Juridique</label>
-                     <select className="w-full h-14 bg-noir/50 border border-white/5 rounded-2xl px-5 text-ivoire font-bold outline-none focus:border-gold/50 transition-all appearance-none cursor-pointer" value={newType} onChange={e => setNewType(e.target.value as any)}>
-                         <option value="purchase">↗ Dépense Stratégique</option>
-                         <option value="sale">↙ Revenu Opérationnel</option>
-                     </select>
-                   </div>
-                   {isAdmin && (
-                     <div className="md:col-span-3 space-y-3">
-                       <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 ml-2">Client du Mandat</label>
-                       <select 
-                         className="w-full h-14 bg-noir/50 border border-white/5 rounded-2xl px-5 text-ivoire font-bold outline-none focus:border-gold/50 transition-all appearance-none cursor-pointer"
-                         value={selectedClientId}
-                         onChange={e => setSelectedClientId(e.target.value)}
-                       >
-                         <option value="">Sélectionner...</option>
-                         {clients.map(cl => (
-                           <option key={cl.id} value={cl.id}>{cl.displayName}</option>
-                         ))}
-                       </select>
-                     </div>
-                   )}
-                   <div className={isAdmin ? "md:col-span-4" : "md:col-span-6"}>
-                     <Input label="Description du Mandat" placeholder="ex: Honoraires, Acquisition Assets, SaaS..." value={newDesc} onChange={e => setNewDesc(e.target.value)} className="h-14 bg-noir/50 border-white/5" />
-                   </div>
-                   <div className={isAdmin ? "md:col-span-2" : "md:col-span-3"}>
-                     <Input label="Quantum ($)" type="number" placeholder="0.00" value={newAmount} onChange={e => setNewAmount(e.target.value)} className="h-14 bg-noir/50 border-white/5 text-gold font-serif text-xl" />
-                   </div>
-                </div>
+               <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-end">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 ml-2">Nature Juridique</label>
+                    <select className="w-full h-14 bg-noir/50 border border-white/5 rounded-2xl px-5 text-ivoire font-bold outline-none focus:border-gold/50 transition-all appearance-none cursor-pointer" value={newType} onChange={e => setNewType(e.target.value as any)}>
+                        <option value="purchase">↗ Dépense Stratégique</option>
+                        <option value="sale">↙ Revenu Opérationnel</option>
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <Input label="Description du Mandat" placeholder="ex: Honoraires, Acquisition Assets, SaaS..." value={newDesc} onChange={e => setNewDesc(e.target.value)} className="h-14 bg-noir/50 border-white/5" />
+                  </div>
+                  <div>
+                    <Input label="Quantum ($)" type="number" placeholder="0.00" value={newAmount} onChange={e => setNewAmount(e.target.value)} className="h-14 bg-noir/50 border-white/5 text-gold font-serif text-xl" />
+                  </div>
+               </div>
                <div className="mt-12 flex flex-col md:flex-row justify-end gap-6">
                   <Button variant="ghost" onClick={() => setIsAdding(false)} className="h-14 px-10 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-ivoire order-2 md:order-1">Abandonner</Button>
                   <Button variant="gold" onClick={handleAdd} className="h-14 px-16 shadow-glow font-black uppercase tracking-[0.2em] text-xs rounded-2xl order-1 md:order-2">Certifier & Enregistrer</Button>

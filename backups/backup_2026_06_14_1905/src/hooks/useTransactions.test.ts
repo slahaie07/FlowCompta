@@ -10,7 +10,7 @@ describe('useTransactions', () => {
 
   it('fetches transactions for current user by default', async () => {
     const mockUser = { id: 'user123' };
-    (supabase.auth.getSession as any).mockResolvedValue({ data: { session: { user: mockUser } }, error: null });
+    (supabase.auth.getUser as any).mockResolvedValue({ data: { user: mockUser }, error: null });
     
     const mockData = [{ id: '1', amount: 100, user_id: 'user123' }];
     const selectMock = vi.fn().mockReturnThis();
@@ -33,9 +33,6 @@ describe('useTransactions', () => {
   });
 
   it('fetches all transactions when isAdmin is true', async () => {
-    const mockUser = { id: 'admin123' };
-    (supabase.auth.getSession as any).mockResolvedValue({ data: { session: { user: mockUser } }, error: null });
-
     const mockData = [{ id: '1', amount: 100 }, { id: '2', amount: 200 }];
     const selectMock = vi.fn().mockReturnThis();
     const orderMock = vi.fn().mockResolvedValue({ data: mockData, error: null });

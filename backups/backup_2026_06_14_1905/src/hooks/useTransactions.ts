@@ -35,31 +35,11 @@ export function useTransactions(userId?: string, isAdmin: boolean = false) {
 
   const fetchTransactions = async () => {
     try {
-      let uid = 'mock_client_id';
-      let isMock = true;
+      const { data: { user } } = await supabase.auth.getUser();
+      const targetId = userId || user?.id;
+      const isMock = !targetId || targetId.startsWith('mock_');
 
-      const localSession = localStorage.getItem('comptaflow_mock_session');
-      if (localSession) {
-        try {
-          const parsed = JSON.parse(localSession);
-          uid = parsed.user?.id || 'mock_client_id';
-        } catch (e) {}
-      } else {
-        try {
-          const { data } = await supabase.auth.getSession();
-          if (data?.session?.user) {
-            uid = data.session.user.id;
-            isMock = uid.startsWith('mock_');
-          }
-        } catch (e) {
-          // System offline
-        }
-      }
-
-      const targetId = userId || uid;
-      const effectiveIsMock = isMock || targetId.startsWith('mock_');
-
-      if (effectiveIsMock) {
+      if (isMock) {
         setTransactions(MOCK_TRANSACTIONS);
         setLoading(false);
         return;
@@ -84,28 +64,11 @@ export function useTransactions(userId?: string, isAdmin: boolean = false) {
     }
   };
 
-  const addTransaction = async (data: Omit<Transaction, 'id' | 'userId'>, targetUserId?: string) => {
+  const addTransaction = async (data: Omit<Transaction, 'id' | 'userId'>) => {
     try {
-      let uid = targetUserId || 'mock_client_id';
-      let isMock = true;
-
-      const localSession = localStorage.getItem('comptaflow_mock_session');
-      if (localSession) {
-        try {
-          const parsed = JSON.parse(localSession);
-          uid = targetUserId || parsed.user?.id || 'mock_client_id';
-        } catch (e) {}
-      } else {
-        try {
-          const { data } = await supabase.auth.getSession();
-          if (data?.session?.user) {
-            uid = targetUserId || data.session.user.id;
-            isMock = uid.startsWith('mock_') || (targetUserId ? targetUserId.startsWith('mock_') : false);
-          }
-        } catch (e) {
-          // System offline
-        }
-      }
+      const { data: user } = await supabase.auth.getUser();
+      const uid = user.user?.id || 'mock_client_id';
+      const isMock = uid.startsWith('mock_');
       
       const newTx = { ...data, user_id: uid };
 

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0A0A0A" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- SEO & Branding -->
+    <title>Comptaflow — La comptabilité qui coule de source | Québec</title>
+    <meta name="description" content="Solution comptable d'élite au Québec : impôts, tenue de livres et direction financière. Un portail unique, des prix fermes, zéro paperasse. Profitez du flux Comptaflow." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%230A0A0A' stroke='%23D4AF37' stroke-width='3'/%3E%3Ctext x='32' y='42' font-size='30' font-family='Georgia' fill='%23D4AF37' text-anchor='middle'%3EC%3C/text%3E%3C/svg%3E" />
+    
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://comptaflow-platform.vercel.app/" />
+    <meta property="og:title" content="Comptaflow — Cabinet comptable nouvelle génération" />
+    <meta property="og:description" content="Vos finances, traitées avec la rigueur d'un grand livre et l'élégance d'un grand cabinet. Découvrez le futur de la comptabilité." />
+    <meta property="og:image" content="https://comptaflow-platform.vercel.app/og-image.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://comptaflow-platform.vercel.app/" />
+    <meta property="twitter:title" content="Comptaflow — La comptabilité qui coule de source" />
+    <meta property="twitter:description" content="Onboarding instantané, coffre-fort chiffré et messagerie directe avec votre CPA." />
+
+    <!-- Tracking Pixel (GA4 / GTM Server-Side Ready) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX', {
+        'anonymize_ip': true // Loi 25 Compliance
+      });
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  </head>
+  <body>
+    <div id="root">
+      <!-- Pré-rendu statique pour l'optimisation SEO & vitesse d'affichage -->
+      <div class="pre-rendered-landing" style="background-color: #0A0A0A; color: #F5F1E8; font-family: 'Outfit', sans-serif; min-height: 100vh;">
+        <nav style="display: flex; justify-content: space-between; align-items: center; padding: 24px; max-width: 1200px; margin: 0 auto;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border: 2px solid #D4AF37; border-radius: 50%; display: grid; place-items: center; color: #D4AF37; font-weight: bold; font-family: 'Cormorant Garamond', serif; font-size: 20px;">C</div>
+            <span style="font-size: 24px; font-weight: bold; font-family: 'Cormorant Garamond', serif;">Compta<span style="color: #D4AF37;">flow</span></span>
+          </div>
+          <div style="display: flex; gap: 24px; align-items: center;">
+            <a href="#services" style="color: #A39E92; text-decoration: none; font-size: 14px;">Services</a>
+            <a href="/login" style="color: #D4AF37; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid rgba(212, 175, 55, 0.3); padding: 8px 20px; border-radius: 99px; text-transform: uppercase; letter-spacing: 1px;">Espace Client</a>
+          </div>
+        </nav>
+        
+        <header style="text-align: center; padding: 100px 24px 80px; max-width: 900px; margin: 0 auto;">
+          <span style="border: 1px solid #D4AF37; color: #D4AF37; font-size: 9px; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; padding: 4px 12px; border-radius: 99px; display: inline-block;">Cabinet Comptable Élite • MMXXVI</span>
+          <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 56px; margin-top: 32px; margin-bottom: 24px; font-weight: 500; line-height: 1.1; letter-spacing: -1px;">
+            La comptabilité qui <em style="color: #D4AF37; font-style: italic;">coule de source</em>.
+          </h1>
+          <p style="color: #A39E92; font-size: 18px; font-weight: 300; margin-bottom: 48px; max-width: 650px; margin-left: auto; margin-right: auto; line-height: 1.6;">
+            Vos finances, traitées avec la rigueur d'un grand livre et l'élégance d'un grand cabinet. Découvrez le portail client intelligent, le coffre-fort sécurisé et le suivi en temps réel.
+          </p>
+          <a href="/login" style="background-color: #D4AF37; color: #0A0A0A; font-weight: bold; text-decoration: none; padding: 18px 40px; border-radius: 99px; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; display: inline-block; box-shadow: 0 10px 30px rgba(212, 175, 55, 0.15);">Ouvrir mon dossier</a>
+        </header>
+
+        <section id="services" style="max-width: 1200px; margin: 0 auto; padding: 40px 24px 100px;">
+          <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 36px; text-align: center; margin-bottom: 12px; font-weight: 500;">Nos Services & Tarifs</h2>
+          <p style="text-align: center; color: #A39E92; font-size: 11px; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 60px; font-weight: 600;">Des honoraires fixes et transparents</p>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px;">
+            <div style="background-color: #121110; border: 1px solid rgba(212, 175, 55, 0.15); padding: 40px; border-radius: 20px; transition: border-color 0.3s;">
+              <span style="color: #D4AF37; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">T1 / TP-1</span>
+              <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 26px; margin: 16px 0; font-weight: 600;">Impôts — Particulier</h3>
+              <p style="color: #A39E92; font-size: 14px; line-height: 1.6; font-weight: 300;">Déclaration complète, optimisation de tous vos crédits d'impôts et transmission électronique sécurisée.</p>
+              <div style="color: #D4AF37; font-size: 32px; font-weight: bold; margin-top: 32px; font-family: 'Cormorant Garamond', serif;">89 $</div>
+            </div>
+            
+            <div style="background-color: #121110; border: 1px solid rgba(212, 175, 55, 0.15); padding: 40px; border-radius: 20px;">
+              <span style="color: #D4AF37; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">T2125</span>
+              <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 26px; margin: 16px 0; font-weight: 600;">Impôts — Travailleur autonome</h3>
+              <p style="color: #A39E92; font-size: 14px; line-height: 1.6; font-weight: 300;">Revenus d'entreprise, calcul des dépenses d'affaires déductibles et rapports de TPS/TVQ.</p>
+              <div style="color: #D4AF37; font-size: 32px; font-weight: bold; margin-top: 32px; font-family: 'Cormorant Garamond', serif;">199 $</div>
+            </div>
+            
+            <div style="background-color: #121110; border: 1px solid rgba(212, 175, 55, 0.15); padding: 40px; border-radius: 20px;">
+              <span style="color: #D4AF37; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">T2 / CO-17</span>
+              <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 26px; margin: 16px 0; font-weight: 600;">Impôts — Société</h3>
+              <p style="color: #A39E92; font-size: 14px; line-height: 1.6; font-weight: 300;">Déclarations de revenus corporatives d'actionnaires, états financiers annuels complets et stratégies.</p>
+              <div style="color: #D4AF37; font-size: 32px; font-weight: bold; margin-top: 32px; font-family: 'Cormorant Garamond', serif;">749 $</div>
+            </div>
+          </div>
+        </section>
+
+        <footer style="text-align: center; padding: 48px; border-top: 1px solid rgba(212, 175, 55, 0.1); color: #A39E92; font-size: 11px; letter-spacing: 1px;">
+          © MMXXVI Comptaflow. Cabinet Comptable Élite • Tous Droits Réservés.
+        </footer>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
