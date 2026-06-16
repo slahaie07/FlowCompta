@@ -94,7 +94,7 @@ app.post('/api/setup-admin', async (req, res) => {
     { host: `aws-0-us-east-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` }
   ];
 
-  let lastError = null;
+  let errors = [];
   for (const conf of configs) {
     const client = new Client({
       host: conf.host,
@@ -163,12 +163,12 @@ app.post('/api/setup-admin', async (req, res) => {
       await client.end();
       return res.json({ success: true, message: 'Database admin setup completed successfully via direct server connection!' });
     } catch (e: any) {
-      lastError = e;
+      errors.push({ host: conf.host, port: conf.port, user: conf.user, error: e.message, code: e.code });
       try { await client.end(); } catch (err) {}
     }
   }
 
-  res.status(500).json({ error: `Failed to connect/execute SQL: ${lastError ? lastError.message : 'Unknown error'}` });
+  res.status(500).json({ error: 'Failed to connect/execute SQL with all configs', errors });
 });
 
 // --- PLAID BANKING API SCAFFOLDING ---
