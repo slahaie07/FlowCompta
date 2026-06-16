@@ -9,7 +9,7 @@ Ce rapport récapitule l'avancement suite à l'analyse et à la mise à jour des
 | Checklist / Document | Total d'Éléments | Validés & Prêts | En Attente (User/Clés) | Statut Global |
 | :--- | :---: | :---: | :---: | :---: |
 | **[FINAL_PRODUCTION_CHECKLIST.md](file:///C:/Users/user/CODE_WORKSPACE/Projects/flowcompta/docs/FINAL_PRODUCTION_CHECKLIST.md)** | 10 | 4 | 6 | 🟡 Config Externe Requise |
-| **[PERFECT_BUILD_AUDIT.md](file:///C:/Users/user/CODE_WORKSPACE/Projects/flowcompta/PERFECT_BUILD_AUDIT.md)** | 200 | 56 | 144 | 🟢 Cœur Technique Certifié |
+| **[PERFECT_BUILD_AUDIT.md](file:///C:/Users/user/CODE_WORKSPACE/Projects/flowcompta/PERFECT_BUILD_AUDIT.md)** | 200 | 57 | 143 | 🟢 Cœur Technique Certifié |
 
 ---
 
@@ -32,14 +32,15 @@ Ce rapport récapitule l'avancement suite à l'analyse et à la mise à jour des
 ## 🛡️ 2. Statut de l'Audit d'Intégrité (200 points)
 *Fichier source : [PERFECT_BUILD_AUDIT.md](file:///C:/Users/user/CODE_WORKSPACE/Projects/flowcompta/PERFECT_BUILD_AUDIT.md)*
 
-Nous avons analysé la conformité de notre implémentation et **coché 56 critères cruciaux** comme étant officiellement **validés** :
+Nous avons analysé la conformité de notre implémentation et **coché 57 critères cruciaux** comme étant officiellement **validés** :
 
-### 🔒 Sécurité (14/34 critères validés)
+### 🔒 Sécurité (15/34 critères validés)
 *   **RLS (Row Level Security)** : Activé et vérifié sur toutes les tables de la base de données Supabase.
 *   **Règles d'isolation** : Les politiques SQL garantissent la stricte étanchéité (`auth.uid() = user_id OR is_admin()`).
 *   **Traçabilité** : Table `audit_logs` opérationnelle pour enregistrer toutes les actions critiques.
 *   **Anti-Injection SQL & XSS** : Intégrés grâce à l'utilisation systématique de requêtes paramétrées (API) et à la validation des formulaires.
 *   **Détecteur d'Inactivité (Nouveau)** : Déconnexion automatique après 15 minutes d'inactivité (Loi 25) avec avertissement `sonner`.
+*   **Droit à l'Oubli / Dépouillement (Nouveau)** : Suppression de compte automatisée et sécurisée (`/api/profile/delete`) avec contrôle de rétention fiscale légale de 7 ans.
 
 ### 🚀 Scalabilité & Performance (12/34 critères validés)
 *   **Indexation DB** : Index créés sur les colonnes fréquemment requises pour éviter les ralentissements.
