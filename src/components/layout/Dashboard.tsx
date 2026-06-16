@@ -27,6 +27,7 @@ import { useTransactions } from '../../hooks/useTransactions';
 import { Button } from '../ui/Button';
 import { ModeSwitcher } from '../ui/ModeSwitcher';
 import { generateContract } from '../../lib/contractEngine';
+import { useLanguage } from '../../hooks/useLanguage';
 
 interface DashboardProps {
   userData: UserData;
@@ -43,6 +44,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const { clients: adminClients, addClient } = useAdminClients(!!userData.isAdmin);
   const { transactions } = useTransactions(undefined, userData.isAdmin);
+  const { lang, toggleLanguage } = useLanguage();
   
   const [isVaultUnlocked, setIsVaultUnlocked] = useState(false);
   const [showMandateSigning, setShowMandateSigning] = useState(false);
@@ -175,7 +177,13 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
              </div>
           </div>
           <div className="flex items-center gap-3 md:gap-4">
-             <button className="flex items-center gap-1 px-3 py-1.5 bg-white/5 border border-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-gold/30 transition-all text-slate-400 hover:text-gold">FR / EN / AR</button>
+             <button 
+               onClick={toggleLanguage}
+               className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-gold/30 transition-all text-slate-400 hover:text-gold cursor-pointer"
+             >
+               <Globe size={12} className="text-gold" />
+               <span>{lang === 'fr' ? 'FR' : 'EN'}</span>
+             </button>
             <button className="p-2.5 bg-white/5 border border-white/5 hover:border-gold/30 rounded-xl transition-all relative group">
               <Bell size={18} className="text-slate-400 group-hover:text-gold transition-colors" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-gold rounded-full border-2 border-midnight shadow-glow animate-bounce"></span>

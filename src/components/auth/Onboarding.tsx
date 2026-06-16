@@ -13,6 +13,7 @@ import { calculateCanadianTaxes, formatCAD, ProvinceCode } from '../../lib/finan
 import { t, LanguageCode } from '../../lib/i18n';
 import { communicationService } from '../../lib/communication';
 import { CONFIG } from '../../lib/config';
+import { useLanguage } from '../../hooks/useLanguage';
 
 interface OnboardingProps {
   initialEmail: string;
@@ -24,7 +25,9 @@ export function Onboarding({ initialEmail, onComplete }: OnboardingProps) {
   const [step, setStep] = useState(0); 
   const [isProcessing, setIsProcessing] = useState(false);
   const [profileType, setProfileType] = useState<'personal' | 'business' | null>(null);
-  const [selectedLang, setSelectedLang] = useState<LanguageCode>('fr');
+  
+  const { lang: globalLang, changeLanguage } = useLanguage();
+  const [selectedLang, setSelectedLang] = useState<LanguageCode>(globalLang);
   
   const [data, setData] = useState<UserData>({
     displayName: '',
@@ -284,13 +287,13 @@ export function Onboarding({ initialEmail, onComplete }: OnboardingProps) {
                           {[
                             { id: 'fr', label: 'Français' },
                             { id: 'en', label: 'English' }
-                          ].map(lang => (
+                          ].map(langItem => (
                             <button 
-                              key={lang.id} 
-                              onClick={() => setSelectedLang(lang.id as any)}
-                              className={`px-8 py-3 rounded-full border font-bold text-xs uppercase tracking-widest transition-all ${selectedLang === lang.id ? 'bg-gold text-noir border-gold shadow-gold/20' : 'bg-white/5 border-white/10 text-slate-500 hover:border-gold/30'}`}
+                              key={langItem.id} 
+                              onClick={() => { setSelectedLang(langItem.id as any); changeLanguage(langItem.id as any); }}
+                              className={`px-8 py-3 rounded-full border font-bold text-xs uppercase tracking-widest transition-all ${selectedLang === langItem.id ? 'bg-gold text-noir border-gold shadow-gold/20' : 'bg-white/5 border-white/10 text-slate-500 hover:border-gold/30'}`}
                             >
-                               {lang.label}
+                               {langItem.label}
                             </button>
                           ))}
                        </div>
