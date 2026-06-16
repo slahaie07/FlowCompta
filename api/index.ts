@@ -10,6 +10,7 @@ import crypto from 'crypto';
 import dotenv from 'dotenv';
 import twilio from 'twilio';
 import pg from 'pg';
+import { createClient } from '@supabase/supabase-js';
 const { Client } = pg;
 
 dotenv.config();
@@ -86,21 +87,126 @@ app.post('/api/setup-admin', async (req, res) => {
   }
 
   const projectRef = 'hnxdlzdgiascuawgydir';
-  const password = 'Maison-139';
-
-  const configs = [
-    { host: `db.${projectRef}.supabase.co`, port: 5432, user: 'postgres' },
-    { host: `aws-0-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` },
-    { host: `aws-0-us-east-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` }
-  ];
+  const targetEmail = 's.lahaie07@gmail.com';
+  const targetPassword = 'Maison-139';
 
   let errors = [];
+
+  // 1. First, attempt to use the Supabase Service Role SDK (HTTP REST)
+  const supabaseUrl = sanitizeEnvVar(process.env.VITE_SUPABASE_URL) || `https://${projectRef}.supabase.co`;
+  const serviceRoleKey = sanitizeEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+  if (serviceRoleKey) {
+    console.log("[setup-admin] Service role key detected. Running HTTP Admin SDK flow...");
+    try {
+      const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      });
+
+      // A. Check if the auth user exists
+      const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+      if (listError) throw new Error(`List users error: ${listError.message}`);
+
+      let user = users.find(u => u.email?.toLowerCase() === targetEmail.toLowerCase());
+      let userId = '';
+
+      if (!user) {
+        console.log(`[setup-admin] Creating new admin auth user...`);
+        const { data: authUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+          email: targetEmail,
+          password: targetPassword,
+          email_confirm: true,
+          user_metadata: { display_name: 'Samuel L. (Architecte)' }
+        });
+        if (createError) throw new Error(`Create user error: ${createError.message}`);
+        userId = authUser.user.id;
+      } else {
+        userId = user.id;
+        console.log(`[setup-admin] Admin auth user exists. Confirming email...`);
+        const { error: confirmError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+          email_confirm: true
+        });
+        if (confirmError) throw new Error(`Confirm email error: ${confirmError.message}`);
+      }
+
+      // B. Upsert admin profile
+      console.log(`[setup-admin] Upserting admin profile...`);
+      const { error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .upsert({
+          id: userId,
+          email: targetEmail,
+          display_name: 'Samuel L. (Architecte)',
+          role: 'admin',
+          status: 'active',
+          active_mode: 'business'
+        });
+      if (profileError) throw new Error(`Profile upsert error: ${profileError.message}`);
+
+      // C. Clean mock data
+      console.log(`[setup-admin] Cleaning mock data tables...`);
+      const tablesToClean = [
+        'document_hashes',
+        'documents',
+        'transactions',
+        'invoices',
+        'social_content',
+        'messages',
+        'audit_logs',
+        'bot_logs',
+        'marketing_leads'
+      ];
+      for (const table of tablesToClean) {
+        try {
+          const { error: delError } = await supabaseAdmin
+            .from(table)
+            .delete()
+            .neq('id', '00000000-0000-0000-0000-000000000000');
+          if (delError) console.error(`[setup-admin] Error cleaning table ${table}:`, delError.message);
+        } catch (tblErr: any) {
+          console.error(`[setup-admin] Table deletion crash on ${table}:`, tblErr.message);
+        }
+      }
+
+      // Clean other profiles (except admin)
+      console.log(`[setup-admin] Cleaning other profiles...`);
+      const { error: cleanProfilesErr } = await supabaseAdmin
+        .from('profiles')
+        .delete()
+        .neq('id', userId);
+      if (cleanProfilesErr) console.error(`[setup-admin] Error cleaning profiles:`, cleanProfilesErr.message);
+
+      return res.json({
+        success: true,
+        method: 'Supabase JS Admin SDK',
+        message: 'Admin account confirmed, promoted, and simulation data successfully cleared!'
+      });
+    } catch (sdkErr: any) {
+      console.error("[setup-admin] SDK Admin flow failed:", sdkErr.message);
+      errors.push({ method: 'Supabase JS Admin SDK', error: sdkErr.message });
+    }
+  } else {
+    console.log("[setup-admin] No service role key found. Skipping HTTP Admin SDK flow.");
+    errors.push({ method: 'Supabase JS Admin SDK', error: 'No SUPABASE_SERVICE_ROLE_KEY found in process.env' });
+  }
+
+  // 2. Fallback to SQL direct connection if password or PG works
+  console.log("[setup-admin] Attempting SQL direct connection fallback...");
+  const configs = [
+    { host: `db.${projectRef}.supabase.co`, port: 5432, user: 'postgres' },
+    { host: `aws-1-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` },
+    { host: `aws-0-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` }
+  ];
+
   for (const conf of configs) {
     const client = new Client({
       host: conf.host,
       port: conf.port,
       user: conf.user,
-      password: password,
+      password: targetPassword,
       database: 'postgres',
       ssl: { rejectUnauthorized: false },
       connectionTimeoutMillis: 5000
@@ -108,7 +214,7 @@ app.post('/api/setup-admin', async (req, res) => {
 
     try {
       await client.connect();
-      console.log(`✅ Server connected successfully to ${conf.host}`);
+      console.log(`[setup-admin] Successfully connected to direct host ${conf.host}`);
 
       const sql = `
         -- 1. Confirmer l'email
@@ -126,7 +232,7 @@ app.post('/api/setup-admin', async (req, res) => {
         ON CONFLICT (id) DO UPDATE 
         SET role = 'admin', status = 'active';
 
-        -- 3. Diagnostic Hook: Copier les colonnes internes d'auth vers le profil public
+        -- 3. Diagnostic Hook
         UPDATE public.profiles
         SET metadata = (
           SELECT json_build_object(
@@ -139,14 +245,7 @@ app.post('/api/setup-admin', async (req, res) => {
         )
         WHERE LOWER(email) = LOWER('s.lahaie07@gmail.com');
 
-        -- 4. RLS activation
-        ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-        ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
-        ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
-        ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
-        ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
-
-        -- 5. Nettoyer les fausses données
+        -- 4. Nettoyer les fausses données
         DELETE FROM public.profiles WHERE LOWER(email) != LOWER('s.lahaie07@gmail.com');
         TRUNCATE TABLE public.transactions CASCADE;
         TRUNCATE TABLE public.invoices CASCADE;
@@ -161,14 +260,18 @@ app.post('/api/setup-admin', async (req, res) => {
 
       await client.query(sql);
       await client.end();
-      return res.json({ success: true, message: 'Database admin setup completed successfully via direct server connection!' });
+      return res.json({
+        success: true,
+        method: 'Direct PG Client',
+        message: 'Admin account confirmed, promoted, and simulation data successfully cleared via PG Client!'
+      });
     } catch (e: any) {
-      errors.push({ host: conf.host, port: conf.port, user: conf.user, error: e.message, code: e.code });
+      errors.push({ method: 'Direct PG Client fallback', host: conf.host, error: e.message, code: e.code });
       try { await client.end(); } catch (err) {}
     }
   }
 
-  res.status(500).json({ error: 'Failed to connect/execute SQL with all configs', errors });
+  res.status(500).json({ error: 'Failed to configure admin using both SDK and pg fallback', errors });
 });
 
 // --- PLAID BANKING API SCAFFOLDING ---
@@ -345,8 +448,7 @@ app.get('/api/cron/elite-hunter', async (req, res) => {
     const result = await agenticModel.generateContent(prompt);
     const sniperMessage = await result.response.text();
 
-    const { createClient } = require('@supabase/supabase-js');
-    const sAdmin = createClient(sanitizeEnvVar(process.env.VITE_SUPABASE_URL), sanitizeEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY) || sanitizeEnvVar(process.env.VITE_SUPABASE_ANON_KEY));
+    const sAdmin = createClient(sanitizeEnvVar(process.env.VITE_SUPABASE_URL || ''), sanitizeEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY) || sanitizeEnvVar(process.env.VITE_SUPABASE_ANON_KEY || ''));
     
     const { error } = await sAdmin.from('marketing_leads').insert([{
       source: 'NATIVE_CRON_HUNTER',
