@@ -9,6 +9,9 @@ import { GoogleGenerativeAI, Schema, SchemaType } from '@google/generative-ai';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 import twilio from 'twilio';
+import pg from 'pg';
+const { Client } = pg;
+
 dotenv.config();
 
 // ============================================================
@@ -82,7 +85,6 @@ app.post('/api/setup-admin', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const { Client } = require('pg');
   const projectRef = 'hnxdlzdgiascuawgydir';
   const password = 'Maison-139';
 
