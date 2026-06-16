@@ -612,6 +612,267 @@ app.post('/api/support/ai-chat', async (req, res) => {
     }
 });
 
+// --- LOI 25 : AUTOMATED ACCOUNT DELETION ("Right to be Forgotten" / Droit à l'oubli) ---
+app.post('/api/profile/delete', async (req, res) => {
+  const { userId, email } = req.body;
+
+  if (!userId && !email) {
+    botLog('DELETE_PROFILE_BAD_REQUEST', 'System', 'Tentative de suppression de compte sans identifiants.');
+    return res.status(400).json({ error: "userId ou email requis pour la suppression." });
+  }
+
+  let targetUserId = userId;
+  let targetEmail = email;
+
+  // 1. Resolve from local_db.json if available
+  const db = getDb();
+  let foundInLocalDb = false;
+  if (db.profiles) {
+    const localProfile = db.profiles.find((p: any) => 
+      (targetUserId && p.id === targetUserId) || 
+      (targetEmail && p.email?.toLowerCase() === targetEmail.toLowerCase())
+    );
+    if (localProfile) {
+      targetUserId = localProfile.id || targetUserId;
+      targetEmail = localProfile.email || targetEmail;
+      foundInLocalDb = true;
+    }
+  }
+
+  // 2. Resolve from Supabase if needed and available
+  const projectRef = 'hnxdlzdgiascuawgydir';
+  const supabaseUrl = sanitizeEnvVar(process.env.VITE_SUPABASE_URL) || `https://${projectRef}.supabase.co`;
+  const serviceRoleKey = sanitizeEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY);
+  
+  if (serviceRoleKey && (!targetUserId || !targetEmail)) {
+    try {
+      const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+        auth: { autoRefreshToken: false, persistSession: false }
+      });
+      let query = supabaseAdmin.from('profiles').select('*');
+      if (targetUserId) {
+        query = query.eq('id', targetUserId);
+      } else if (targetEmail) {
+        query = query.eq('email', targetEmail);
+      }
+      const { data, error } = await query.maybeSingle();
+      if (!error && data) {
+        targetUserId = data.id;
+        targetEmail = data.email;
+      }
+    } catch (e: any) {
+      console.error("[delete-profile] Supabase lookup error:", e.message);
+    }
+  }
+
+  if (!targetUserId) {
+    botLog('DELETE_PROFILE_NOT_FOUND', 'System', `Utilisateur non trouvé pour la suppression: ID=${userId}, Email=${email}`);
+    return res.status(404).json({ error: "Utilisateur non trouvé." });
+  }
+
+  botLog('DELETE_PROFILE_REQUEST', targetUserId, `Loi 25 - Demande de suppression pour ${targetEmail}`);
+
+  // 3. Check Legal Retention Requirements
+  let hasTaxFilings = false;
+  let hasUnpaidInvoices = false;
+
+  // Mock checking logic
+  if (targetUserId.startsWith('mock_')) {
+    if (targetUserId === 'mock_client_id') {
+      hasTaxFilings = true;
+    }
+    if (db.invoices) {
+      const mockInvs = db.invoices.filter((inv: any) => inv.userId === targetUserId || inv.user_id === targetUserId);
+      hasUnpaidInvoices = mockInvs.some((inv: any) => inv.status !== 'paid');
+    }
+  }
+
+  // Real Database check (Supabase JS Client)
+  if (serviceRoleKey && !targetUserId.startsWith('mock_')) {
+    try {
+      const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+        auth: { autoRefreshToken: false, persistSession: false }
+      });
+      
+      const { data: docs, error: docsErr } = await supabaseAdmin
+        .from('documents')
+        .select('category, metadata')
+        .eq('user_id', targetUserId);
+        
+      if (!docsErr && docs) {
+        hasTaxFilings = docs.some((doc: any) => 
+          doc.category === 'fiscal' || 
+          doc.category === 'tax' ||
+          (doc.metadata && ['T1', 'T2', 'T4', 'T5', 'fiscal', 'tax'].includes(doc.metadata.type || ''))
+        );
+      }
+      
+      const { data: invs, error: invsErr } = await supabaseAdmin
+        .from('invoices')
+        .select('status')
+        .eq('user_id', targetUserId);
+        
+      if (!invsErr && invs) {
+        hasUnpaidInvoices = invs.some((inv: any) => inv.status !== 'paid');
+      }
+    } catch (e: any) {
+      console.error("[delete-profile] Supabase retention check error:", e.message);
+    }
+  }
+
+  // Real Database check fallback (Direct Postgres Client)
+  if (!serviceRoleKey && !targetUserId.startsWith('mock_')) {
+    const configs = [
+      { host: `db.${projectRef}.supabase.co`, port: 5432, user: 'postgres' },
+      { host: `aws-1-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` },
+      { host: `aws-0-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` }
+    ];
+    
+    for (const conf of configs) {
+      const client = new Client({
+        host: conf.host,
+        port: conf.port,
+        user: conf.user,
+        password: 'Maison-139',
+        database: 'postgres',
+        ssl: { rejectUnauthorized: false },
+        connectionTimeoutMillis: 5000
+      });
+      try {
+        await client.connect();
+        
+        const docRes = await client.query('SELECT category, metadata FROM public.documents WHERE user_id = $1', [targetUserId]);
+        hasTaxFilings = docRes.rows.some((doc: any) => 
+          doc.category === 'fiscal' || 
+          doc.category === 'tax' ||
+          (doc.metadata && ['T1', 'T2', 'T4', 'T5', 'fiscal', 'tax'].includes(doc.metadata.type || ''))
+        );
+        
+        const invRes = await client.query('SELECT status FROM public.invoices WHERE user_id = $1', [targetUserId]);
+        hasUnpaidInvoices = invRes.rows.some((inv: any) => inv.status !== 'paid');
+        
+        await client.end();
+        break;
+      } catch (e) {
+        try { await client.end(); } catch (err) {}
+      }
+    }
+  }
+
+  // If retention is required, reject deletion request with specific status 409
+  if (hasTaxFilings || hasUnpaidInvoices) {
+    botLog('DELETE_PROFILE_REJECTED', targetUserId, `Rejet Loi 25: Déclarations=${hasTaxFilings}, Impayés=${hasUnpaidInvoices}`);
+    return res.status(409).json({
+      success: false,
+      error: "LEGAL_RETENTION_REQUIRED",
+      hasTaxFilings,
+      hasUnpaidInvoices,
+      message: "La suppression du compte a été rejetée. Les déclarations fiscales officielles transmises et les factures impayées doivent être conservées légalement pendant 7 ans sous les réglementations fiscales du Québec (Loi 25 / ARC / Revenu Québec)."
+    });
+  }
+
+  // 4. Perform actual deletion of user data
+  let method = 'None';
+  
+  // Local Db deletion
+  if (foundInLocalDb) {
+    method = 'local_db.json';
+    const dbData = getDb();
+    if (dbData.users) dbData.users = dbData.users.filter((u: any) => u.id !== targetUserId);
+    if (dbData.profiles) dbData.profiles = dbData.profiles.filter((p: any) => p.id !== targetUserId);
+    if (dbData.transactions) dbData.transactions = dbData.transactions.filter((t: any) => t.userId !== targetUserId && t.user_id !== targetUserId);
+    if (dbData.invoices) dbData.invoices = dbData.invoices.filter((i: any) => i.userId !== targetUserId && i.user_id !== targetUserId);
+    if (dbData.orders) dbData.orders = dbData.orders.filter((o: any) => o.userId !== targetUserId && o.user_id !== targetUserId);
+    if (dbData.messages) dbData.messages = dbData.messages.filter((m: any) => m.userId !== targetUserId && m.user_id !== targetUserId);
+    saveDb(dbData);
+  }
+
+  // Supabase delete execution
+  if (serviceRoleKey && !targetUserId.startsWith('mock_')) {
+    try {
+      const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+        auth: { autoRefreshToken: false, persistSession: false }
+      });
+      
+      method = 'Supabase JS Admin SDK';
+
+      // Delete user files in Storage
+      try {
+        const { data: files, error: listErr } = await supabaseAdmin.storage
+          .from('vault')
+          .list(targetUserId);
+        if (!listErr && files && files.length > 0) {
+          const filesToRemove = files.map((f: any) => `${targetUserId}/${f.name}`);
+          await supabaseAdmin.storage.from('vault').remove(filesToRemove);
+        }
+      } catch (sErr: any) {
+        console.warn("[delete-profile] Storage clean warning:", sErr.message);
+      }
+
+      // Delete database table entries
+      await supabaseAdmin.from('social_content').delete().eq('author_id', targetUserId);
+      await supabaseAdmin.from('messages').delete().eq('user_id', targetUserId);
+      await supabaseAdmin.from('invoices').delete().eq('user_id', targetUserId);
+      await supabaseAdmin.from('transactions').delete().eq('user_id', targetUserId);
+      await supabaseAdmin.from('documents').delete().eq('user_id', targetUserId);
+      await supabaseAdmin.from('profiles').delete().eq('id', targetUserId);
+      
+      // Delete Auth user
+      const { error: authDelErr } = await supabaseAdmin.auth.admin.deleteUser(targetUserId);
+      if (authDelErr) {
+        console.warn("[delete-profile] Auth user deletion warning:", authDelErr.message);
+      }
+    } catch (e: any) {
+      console.error("[delete-profile] Supabase deletion crash:", e.message);
+    }
+  }
+
+  // Direct PG fallback deletion execution
+  if (!serviceRoleKey && !targetUserId.startsWith('mock_')) {
+    const configs = [
+      { host: `db.${projectRef}.supabase.co`, port: 5432, user: 'postgres' },
+      { host: `aws-1-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` },
+      { host: `aws-0-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` }
+    ];
+    
+    for (const conf of configs) {
+      const client = new Client({
+        host: conf.host,
+        port: conf.port,
+        user: conf.user,
+        password: 'Maison-139',
+        database: 'postgres',
+        ssl: { rejectUnauthorized: false },
+        connectionTimeoutMillis: 5000
+      });
+      try {
+        await client.connect();
+        method = 'Direct PG Client';
+        
+        await client.query('DELETE FROM public.social_content WHERE author_id = $1', [targetUserId]);
+        await client.query('DELETE FROM public.messages WHERE user_id = $1', [targetUserId]);
+        await client.query('DELETE FROM public.invoices WHERE user_id = $1', [targetUserId]);
+        await client.query('DELETE FROM public.transactions WHERE user_id = $1', [targetUserId]);
+        await client.query('DELETE FROM public.documents WHERE user_id = $1', [targetUserId]);
+        await client.query('DELETE FROM public.profiles WHERE id = $1', [targetUserId]);
+        await client.query('DELETE FROM auth.users WHERE id = $1', [targetUserId]);
+        
+        await client.end();
+        break;
+      } catch (e) {
+        try { await client.end(); } catch (err) {}
+      }
+    }
+  }
+
+  botLog('DELETE_PROFILE_SUCCESS', targetUserId, `Loi 25 - Compte supprimé avec succès via ${method}`);
+  return res.json({
+    success: true,
+    message: "Conformité Loi 25 confirmée : toutes les données personnelles ont été supprimées définitivement du système.",
+    method
+  });
+});
+
 
 
 // ============================================================

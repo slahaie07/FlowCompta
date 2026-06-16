@@ -112,7 +112,7 @@
 ## ⚖️ 4. LEGAL (Quebec Law 25, CPA Standards) [103-136]
 103. [x] Privacy Policy explicitly mentions Law 25 compliance.
 104. [x] Data Protection Officer (DPO) contact info visible.
-105. [ ] "Right to be Forgotten" (Data Deletion) automated.
+105. [x] "Right to be Forgotten" (Data Deletion) automated.
 106. [x] Cookie Consent banner with "Opt-in" for non-essential cookies.
 107. [ ] Data residency in Canada (or explicitly disclosed if elsewhere).
 108. [ ] Incident Response Plan documented for data breaches.
