@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter, HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { UserData, Message } from './types';
@@ -9,6 +9,7 @@ import { Landing } from './components/common/Landing';
 import { Onboarding } from './components/auth/Onboarding';
 import { SuccessScreen } from './components/SuccessScreen';
 import { Dashboard } from './components/layout/Dashboard';
+import { Privacy } from './components/common/Privacy';
 
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
@@ -27,6 +28,41 @@ function AppContent() {
   const { mode, toggleMode } = useAppMode();
   const [adminMessages, setAdminMessages] = useState<Message[]>([]);
   const navigate = useNavigate();
+
+  // Détecteur d'inactivité pour sécurité Loi 25 (15 minutes)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    let timeoutId: number;
+
+    const resetTimer = () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+      // 15 minutes = 900 000 ms
+      timeoutId = window.setTimeout(() => {
+        logout();
+        toast.warning("Votre session a expiré pour cause d'inactivité (Sécurité Loi 25).");
+        navigate('/login');
+      }, 900000);
+    };
+
+    // Événements d'activité utilisateur
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+    const eventHandler = () => resetTimer();
+    
+    events.forEach(event => {
+      window.addEventListener(event, eventHandler);
+    });
+
+    // Initialisation du timer
+    resetTimer();
+
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+      events.forEach(event => {
+        window.removeEventListener(event, eventHandler);
+      });
+    };
+  }, [isAuthenticated, logout, navigate]);
 
   // Gestion centralisee de la fin d'onboarding
   const handleOnboardingComplete = async (data: UserData, quoteValue: number) => {
@@ -151,6 +187,7 @@ function AppContent() {
     <Routes>
       {/* Route Racine - Landing Page Gold Standard */}
       <Route path="/" element={<Landing />} />
+      <Route path="/privacy" element={<Privacy />} />
 
       {/* Routes Publiques - Auth Centralisee */}
       <Route path="/login" element={!isAuthenticated ? <Auth onAuthentication={() => navigate('/dashboard')} mockLogin={mockLogin} /> : <Navigate to="/dashboard" replace />} />

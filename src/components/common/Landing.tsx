@@ -21,10 +21,18 @@ export function Landing() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showCookieBanner, setShowCookieBanner] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', handleScroll);
+    
+    // Check cookie consent for Law 25
+    const accepted = localStorage.getItem('comptaflow_cookies_accepted');
+    if (!accepted) {
+      setShowCookieBanner(true);
+    }
+    
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -307,6 +315,7 @@ export function Landing() {
           <div className="flex flex-col md:flex-row items-center gap-8 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
             <span>© 2026 Comptaflow — Québec, Canada</span>
             <span>Les prix affichés sont hors taxes (TPS 5 % et TVQ 9,975 % en sus).</span>
+            <button onClick={() => navigate('/privacy')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">Confidentialité (Loi 25)</button>
             <a href="/admin" className="hover:text-gold transition-colors">Administration</a>
           </div>
         </div>
@@ -324,6 +333,44 @@ export function Landing() {
           display: none;
         }
       `}</style>
+
+      {showCookieBanner && (
+        <motion.div 
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed bottom-6 inset-x-6 z-[200] max-w-4xl mx-auto p-6 bg-noir/95 border border-gold/30 rounded-2xl shadow-2xl backdrop-blur-lg flex flex-col md:flex-row items-center justify-between gap-6"
+        >
+          <div className="space-y-1 text-left">
+            <h4 className="text-gold font-serif text-lg font-bold flex items-center gap-2">
+              🍪 Consentement aux témoins (Cookies)
+            </h4>
+            <p className="text-silver text-xs font-light max-w-2xl leading-relaxed">
+              Nous utilisons des témoins essentiels et analytiques pour optimiser votre expérience, conformément à la Loi 25. Vous pouvez accepter ou refuser les témoins non essentiels. 
+              Consultez notre <button onClick={() => { setShowCookieBanner(false); navigate('/privacy'); }} className="text-gold hover:underline">Politique de Confidentialité</button> pour en savoir plus.
+            </p>
+          </div>
+          <div className="flex gap-3 shrink-0">
+            <button 
+              onClick={() => {
+                localStorage.setItem('comptaflow_cookies_accepted', 'false');
+                setShowCookieBanner(false);
+              }}
+              className="px-5 py-2 text-xs font-bold uppercase tracking-widest text-silver hover:text-ivoire border border-white/10 rounded-lg hover:bg-white/5 transition-all"
+            >
+              Refuser
+            </button>
+            <button 
+              onClick={() => {
+                localStorage.setItem('comptaflow_cookies_accepted', 'true');
+                setShowCookieBanner(false);
+              }}
+              className="px-5 py-2 text-xs font-bold uppercase tracking-widest text-noir bg-gold hover:bg-gold-light rounded-lg transition-all shadow-md shadow-gold/20"
+            >
+              Accepter
+            </button>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }

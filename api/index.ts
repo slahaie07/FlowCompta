@@ -359,10 +359,16 @@ app.post('/api/webhook/transaction-alert', async (req, res) => {
 
 app.post('/api/ai/analyze-document', async (req, res) => {
   const { fileData, fileName, mimeType } = req.body;
-  const hash = crypto.createHash('sha256').update(fileData).digest('hex');
-  botLog('LEGAL_HASHING', fileName, `SHA-256 généré: ${hash.slice(0, 8)}...`);
+  
+  if (!fileData || !fileName || !mimeType) {
+    botLog('IA_ANALYZE_ERROR', fileName || 'unknown', 'Paramètres requis manquants.');
+    return res.status(400).json({ error: "Champs obligatoires manquants: fileData, fileName ou mimeType." });
+  }
 
   try {
+    const hash = crypto.createHash('sha256').update(fileData).digest('hex');
+    botLog('LEGAL_HASHING', fileName, `SHA-256 généré: ${hash.slice(0, 8)}...`);
+
     const prompt = `Extraire JSON Québec : type (FACTURE, T4, etc.), emetteur, date, montant_total, tps, tvq, categorie.`;
     const result = await visionModel.generateContent([prompt, { inlineData: { data: fileData, mimeType } }]);
     const analysis = JSON.parse((await result.response).text().replace(/```json|```/g, "").trim());
@@ -370,6 +376,7 @@ app.post('/api/ai/analyze-document', async (req, res) => {
     botLog('IA_ANALYZE', fileName, `Classification: ${analysis.type} | Confiance: Élite`);
     res.json({ success: true, analysis, hash });
   } catch (error: any) {
+    botLog('IA_ANALYZE_CRASH', fileName, error.message);
     res.status(500).json({ error: "IA error" });
   }
 });
@@ -377,6 +384,10 @@ app.post('/api/ai/analyze-document', async (req, res) => {
 app.post('/api/payment/create-checkout', async (req, res) => {
     const { items, method, customerEmail, reference } = req.body;
     
+    if (!items || !method || !customerEmail || !reference) {
+      return res.status(400).json({ error: "Paramètres de facturation manquants." });
+    }
+
     if (method === 'interac') {
         botLog('PAYMENT_PENDING', reference, `Instructions Interac envoyées à ${customerEmail}`);
         await sendSupremeEmail(customerEmail, `Action : Virement Comptaflow ${reference}`, `
@@ -386,6 +397,53 @@ app.post('/api/payment/create-checkout', async (req, res) => {
         `);
         return res.json({ success: true, manual: true, reference });
     }
+
+    if (method === 'card') {
+        try {
+            const lineItems = items.map((item: any) => ({
+                price_data: {
+                    currency: 'cad',
+                    product_data: {
+                        name: item.name || item.code,
+                        description: item.desc || item.code,
+                    },
+                    unit_amount: Math.round(Number(item.price) * 100),
+                },
+                quantity: 1,
+            }));
+
+            // Ajout automatique du frais d'ouverture de 60$
+            lineItems.push({
+                price_data: {
+                    currency: 'cad',
+                    product_data: {
+                        name: "Frais d'ouverture de dossier (Comptaflow)",
+                        description: "Frais administratifs et configuration initiale du coffre-fort sécurisé",
+                    },
+                    unit_amount: 6000,
+                },
+                quantity: 1,
+            });
+
+            const session = await stripe.checkout.sessions.create({
+                payment_method_types: ['card'],
+                line_items: lineItems,
+                mode: 'payment',
+                customer_email: customerEmail,
+                client_reference_id: reference,
+                success_url: `${req.headers.origin || 'https://comptaflow-immen-v5.vercel.app'}/success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${req.headers.origin || 'https://comptaflow-immen-v5.vercel.app'}/dashboard/pricing`,
+            });
+
+            botLog('PAYMENT_CHECKOUT_CREATED', reference, `Session Stripe créée: ${session.id}`);
+            return res.json({ success: true, url: session.url });
+        } catch (error: any) {
+            botLog('PAYMENT_CHECKOUT_ERROR', reference, error.message);
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    return res.status(400).json({ error: `Mode de paiement non supporté : ${method}` });
 });
 
 // --- STRIPE DIRECT DEBIT (PAD / Automated Billing) ---

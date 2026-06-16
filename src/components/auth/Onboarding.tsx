@@ -67,6 +67,57 @@ export function Onboarding({ initialEmail, onComplete }: OnboardingProps) {
   const [showInterac, setShowInterac] = useState(false);
   const [interacRef, setInteracRef] = useState('');
 
+  const handleStripePayment = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    
+    try {
+      const services = Object.entries(data.needs)
+        .filter(([_, v]) => v)
+        .map(([k, _]) => {
+          const s = [
+            {id: 't1', label: "Impôts — Particulier", p: 89},
+            {id: 'ta', label: "Impôts — Travailleur autonome", p: 199},
+            {id: 't2', label: "Impôts — Société", p: 749},
+            {id: 'bookkeeping', label: "Tenue de livres", p: 249},
+            {id: 'stocks', label: "Gestion des stocks", p: 179},
+            {id: 'cfo', label: "Finances d'entreprise", p: 499}
+          ].find(x => x.id === k);
+          return { name: s?.label, price: s?.p || 0 };
+        });
+
+      const ref = `Comptaflow-${Date.now().toString().slice(-6)}`;
+      
+      const res = await fetch('/api/payment/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: services,
+          customerEmail: data.email,
+          customerName: data.displayName,
+          method: 'card',
+          reference: ref,
+          metadata: {
+             companyName: data.companyName,
+             needs: JSON.stringify(data.needs)
+          }
+        })
+      });
+
+      const result = await res.json();
+      
+      if (result.url) {
+        window.location.href = result.url;
+      } else {
+        throw new Error(result.error || "Impossible de créer la session de paiement.");
+      }
+    } catch (err: any) {
+      toast.error("Erreur de paiement Stripe : " + err.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleComplete = async () => {
     if (isProcessing) return;
     setIsProcessing(true);
@@ -425,6 +476,24 @@ export function Onboarding({ initialEmail, onComplete }: OnboardingProps) {
                     </div>
 
                     <div className="space-y-4">
+                      {/* Stripe Credit Card Integration */}
+                      <button 
+                        onClick={handleStripePayment}
+                        disabled={isProcessing}
+                        className="w-full p-6 rounded-2xl bg-gradient-to-r from-gold/15 to-noir border border-gold/30 hover:border-gold/60 hover:scale-[1.01] transition-all text-left group shadow-lg shadow-gold/5"
+                      >
+                         <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-5">
+                               <div className="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-noir transition-all duration-500"><CreditCard size={24}/></div>
+                               <div>
+                                  <p className="text-sm font-serif text-ivoire font-bold">Carte de crédit (Visa, Mastercard, Amex)</p>
+                                  <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest font-bold italic">Règlement instantané sécurisé par Stripe</p>
+                               </div>
+                            </div>
+                            <ChevronRight size={20} className="text-gold/60 group-hover:text-gold transition-colors" />
+                         </div>
+                      </button>
+
                       {/* PayPal Integration */}
                       <div className="relative group">
                          <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
