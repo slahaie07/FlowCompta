@@ -49,9 +49,15 @@ export interface UserNeeds {
 
 export interface UserData {
   id?: string;
+  fullName?: string;
   displayName?: string;
   companyName?: string;
   email: string;
+  role?: 'super_admin' | 'sub_admin' | 'client';
+  subAdminId?: string;
+  interacEmail?: string;
+  interacQuestion?: string;
+  interacAutodepot?: boolean;
   neq?: string;
   nas?: string;
   incomeBracket?: string;

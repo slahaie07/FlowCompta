@@ -6,9 +6,7 @@ import { toast } from 'sonner';
 const MOCK_CLIENTS: ClientRecord[] = [
   { id: 'mock_client_1', displayName: 'Samuel Tremblay', companyName: 'Tremblay Tech Inc.', status: 'Actif', documents: 8, lastActive: 'Il y a 5 min', email: 'samuel@tremblaytech.ca', needs: ['T2', 'Tenue de livres'] },
   { id: 'mock_client_2', displayName: 'Valérie Roy', companyName: 'Boutique Écolo Québec', status: 'Actif', documents: 15, lastActive: 'Il y a 2 heures', email: 'valerie@boutiqueecolo.ca', needs: ['TPS/TVQ', 'Tenue de livres'] },
-  { id: 'mock_client_3', displayName: 'Marc-André Gagnon', companyName: 'Constructions Gagnon Ltée', status: 'En attente', documents: 3, lastActive: 'Hier', email: 'contact@constructionsgagnon.ca', needs: ['T2', 'Salaires'] },
-  { id: 'mock_client_4', displayName: 'Sophie Lavoie', companyName: 'Clinique Physio Santé', status: 'Actif', documents: 12, lastActive: 'Il y a 3 jours', email: 'sophie.lavoie@physiosante.ca', needs: ['T2', 'TPS/TVQ'] },
-  { id: 'mock_client_5', displayName: 'Jean-Pierre Fortin', companyName: 'Fortin & Associés Consulting', status: 'Archivé', documents: 22, lastActive: 'Il y a 1 mois', email: 'jp@fortinconsulting.ca', needs: ['T2'] }
+  { id: 'mock_client_3', displayName: 'Marc-André Gagnon', companyName: 'Constructions Gagnon Ltée', status: 'En attente', documents: 3, lastActive: 'Hier', email: 'contact@constructionsgagnon.ca', needs: ['T2', 'Salaires'] }
 ];
 
 export function useAdminClients(isAdmin: boolean) {
@@ -20,13 +18,19 @@ export function useAdminClients(isAdmin: boolean) {
     setLoading(true);
     try {
       let isMock = false;
+      let currentUserId = '';
       const localSession = localStorage.getItem('comptaflow_mock_session');
       if (localSession) {
         isMock = true;
       } else {
         try {
           const { data } = await supabase.auth.getSession();
-          isMock = !data.session?.user || data.session.user.id.startsWith('mock_');
+          if (data.session?.user) {
+            currentUserId = data.session.user.id;
+            isMock = currentUserId.startsWith('mock_');
+          } else {
+            isMock = true;
+          }
         } catch (err) {
           isMock = true;
         }
@@ -43,7 +47,7 @@ export function useAdminClients(isAdmin: boolean) {
               if (idx >= 0) {
                 combined[idx] = newC;
               } else {
-                combined.unshift(newC); // New clients at top
+                combined.unshift(newC);
               }
             });
           } catch(e) {
@@ -54,37 +58,72 @@ export function useAdminClients(isAdmin: boolean) {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'client');
+      // Lire les profils de type client assignés à ce sub_admin (ou tous si super_admin)
+      let profileQuery = supabase.from('profiles').select('*').eq('role', 'client');
+      
+      // Lire aussi la table clients (flat records)
+      let clientsQuery = supabase.from('clients').select('*');
 
-      if (error) throw error;
+      // Vérifier le rôle de l'utilisateur pour appliquer l'isolation
+      const { data: profileData } = await supabase.from('profiles').select('role').eq('id', currentUserId).single();
+      const userRole = profileData?.role || 'client';
 
-      // Fetch actual document counts for each client
-      const { data: docsData } = await supabase
-        .from('documents')
-        .select('id, user_id');
+      if (userRole === 'sub_admin') {
+        profileQuery = profileQuery.eq('sub_admin_id', currentUserId);
+        clientsQuery = clientsQuery.eq('sub_admin_id', currentUserId);
+      }
 
-      const docCounts = (docsData || []).reduce((acc: Record<string, number>, doc: any) => {
-        acc[doc.user_id] = (acc[doc.user_id] || 0) + 1;
-        return acc;
-      }, {});
+      const [profilesRes, clientsRes] = await Promise.all([profileQuery, clientsQuery]);
 
-      const mapped = (data || []).map((p: any) => ({
-        id: p.id,
-        displayName: p.display_name || p.displayName || 'Inconnu',
-        companyName: p.company_name || p.companyName || 'Particulier',
-        status: p.status || 'Actif',
-        documents: p.id === 'mock_client_id' ? 4 : (docCounts[p.id] || 0),
-        lastActive: 'Récemment',
-        email: p.email,
-        needs: p.needs || []
-      })) as ClientRecord[];
+      if (profilesRes.error) throw profilesRes.error;
+      if (clientsRes.error) throw clientsRes.error;
 
-      setClients(mapped);
-    } catch (e) {
-      console.error(e);
+      // Fusionner les dossiers enregistrés dans la table `clients` et les profils utilisateurs
+      const combinedList: ClientRecord[] = [];
+      const seenEmails = new Set<string>();
+
+      // 1. Ajouter les profils enregistrés
+      (profilesRes.data || []).forEach((p: any) => {
+        if (p.email) seenEmails.add(p.email.toLowerCase());
+        combinedList.push({
+          id: p.id,
+          displayName: p.full_name || p.display_name || 'Sans Nom',
+          companyName: p.company_name || 'Particulier (Utilisateur)',
+          status: p.status || 'Actif',
+          documents: 0,
+          lastActive: 'Récemment',
+          email: p.email,
+          needs: p.needs || []
+        });
+      });
+
+      // 2. Ajouter les fiches de la table `clients` (pour lesquelles le client n'a pas encore créé de profil, ou fiches CPA)
+      (clientsRes.data || []).forEach((c: any) => {
+        if (c.courriel && seenEmails.has(c.courriel.toLowerCase())) {
+          // Déjà inclus via son profil utilisateur, on peut éventuellement enrichir l'entrée
+          const existing = combinedList.find(item => item.email?.toLowerCase() === c.courriel.toLowerCase());
+          if (existing) {
+            existing.companyName = c.nom; // Préférer le nom de l'entreprise de la fiche
+            existing.needs = [c.no_tps ? 'TPS' : '', c.no_tvq ? 'TVQ' : ''].filter(Boolean);
+          }
+          return;
+        }
+        
+        combinedList.push({
+          id: c.id,
+          displayName: c.nom,
+          companyName: c.nom,
+          status: 'Fiche active',
+          documents: 0,
+          lastActive: 'Non connecté',
+          email: c.courriel,
+          needs: [c.no_tps ? 'TPS' : '', c.no_tvq ? 'TVQ' : ''].filter(Boolean)
+        });
+      });
+
+      setClients(combinedList);
+    } catch (e: any) {
+      console.error("Erreur de récupération des clients :", e);
       setClients([]);
     } finally {
       setLoading(false);
@@ -92,61 +131,65 @@ export function useAdminClients(isAdmin: boolean) {
   };
 
   const addClient = async (newClient: Omit<ClientRecord, 'id' | 'documents' | 'lastActive'>) => {
-    const clientId = `client_${Date.now()}`;
-    const clientRecord: ClientRecord = {
-      ...newClient,
-      id: clientId,
-      documents: 0,
-      lastActive: 'À l\'instant'
-    };
-
-    // Check if mock
-    let isMock = false;
-    const localSession = localStorage.getItem('comptaflow_mock_session');
-    if (localSession) {
-      isMock = true;
-    } else {
-      try {
-        const { data } = await supabase.auth.getSession();
-        isMock = !data.session?.user || data.session.user.id.startsWith('mock_');
-      } catch (err) {
+    try {
+      let isMock = false;
+      let currentUserId = '';
+      const localSession = localStorage.getItem('comptaflow_mock_session');
+      if (localSession) {
         isMock = true;
-      }
-    }
-
-    if (isMock) {
-      const storedMockClientsStr = localStorage.getItem('comptaflow_mock_clients');
-      let list = [];
-      if (storedMockClientsStr) {
+      } else {
         try {
-          list = JSON.parse(storedMockClientsStr);
-        } catch(e) {
-          console.error(e);
+          const { data } = await supabase.auth.getSession();
+          if (data.session?.user) {
+            currentUserId = data.session.user.id;
+            isMock = currentUserId.startsWith('mock_');
+          } else {
+            isMock = true;
+          }
+        } catch (err) {
+          isMock = true;
         }
       }
-      list.push(clientRecord);
-      localStorage.setItem('comptaflow_mock_clients', JSON.stringify(list));
-      await fetchClients();
-      toast.success("Nouveau client enregistré localement (Mémoire active).");
-      return true;
-    } else {
-      const { error } = await supabase.from('profiles').insert({
-        id: clientId,
-        display_name: newClient.displayName,
-        company_name: newClient.companyName,
-        email: newClient.email,
-        role: 'client',
-        needs: newClient.needs,
-        status: newClient.status
+
+      if (isMock) {
+        const clientRecord: ClientRecord = {
+          ...newClient,
+          id: `client_${Date.now()}`,
+          documents: 0,
+          lastActive: "À l'instant"
+        };
+        const storedMockClientsStr = localStorage.getItem('comptaflow_mock_clients');
+        let list = [];
+        if (storedMockClientsStr) {
+          try {
+            list = JSON.parse(storedMockClientsStr);
+          } catch(e) {}
+        }
+        list.push(clientRecord);
+        localStorage.setItem('comptaflow_mock_clients', JSON.stringify(list));
+        await fetchClients();
+        toast.success("Nouveau client enregistré localement.");
+        return true;
+      }
+
+      // Enregistrer dans la table `clients`
+      const { error } = await supabase.from('clients').insert({
+        sub_admin_id: currentUserId,
+        nom: newClient.displayName,
+        courriel: newClient.email,
+        telephone: '',
+        notes: newClient.companyName // utilise companyName comme notes ou descriptif
       });
 
-      if (error) {
-        toast.error("Erreur de création du client.");
-        return false;
-      }
-      toast.success("Nouveau client créé dans Supabase.");
+      if (error) throw error;
+
+      toast.success("Nouveau client créé dans la base du cabinet.");
       await fetchClients();
       return true;
+    } catch (e: any) {
+      console.error("Erreur lors de la création du client :", e);
+      toast.error(e.message || "Erreur de création du client.");
+      return false;
     }
   };
 

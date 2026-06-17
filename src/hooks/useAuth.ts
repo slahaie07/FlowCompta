@@ -62,22 +62,23 @@ export function useAuth() {
       if (data) {
         setUserData({
           id: data.id || uid,
-          displayName: data.display_name,
-          companyName: data.company_name,
+          fullName: data.full_name,
+          displayName: data.full_name, // fallback for components
           email: email,
-          incomeBracket: data.income_bracket,
-          employeeCount: data.employee_count,
-          needs: data.needs,
-          isAdmin: data.role === 'admin' || isAdminEmail(email),
-          createdAt: new Date(data.created_at).getTime(),
-          activeMode: data.active_mode,
-          initialProfileType: data.initial_profile_type
+          role: data.role || 'client',
+          subAdminId: data.sub_admin_id,
+          interacEmail: data.interac_email,
+          interacQuestion: data.interac_question,
+          interacAutodepot: data.interac_autodepot,
+          isAdmin: data.role === 'super_admin' || data.role === 'sub_admin' || isAdminEmail(email),
+          createdAt: new Date(data.created_at).getTime()
         });
       } else {
-        // Nouvel utilisateur sans profil (attente onboarding)
+        // Nouvel utilisateur sans profil (attente onboarding/création automatique par trigger)
         setUserData({
           id: uid,
           email: email,
+          role: 'client',
           isAdmin: isAdminEmail(email),
         } as UserData);
       }
@@ -88,18 +89,22 @@ export function useAuth() {
     }
   };
 
-  const mockLogin = (email: string, isAdmin: boolean) => {
+  const mockLogin = (email: string, role: 'super_admin' | 'sub_admin' | 'client') => {
+    const id = `mock_${role}_id`;
     const mockSession = {
-      user: { id: isAdmin ? 'mock_admin_id' : 'mock_client_id', email },
+      user: { id, email },
       userData: {
-        id: isAdmin ? 'mock_admin_id' : 'mock_client_id',
-        displayName: isAdmin ? 'Auditeur Suprême' : 'Samuel Tremblay',
-        companyName: isAdmin ? 'Comptaflow Cabinet' : 'Tremblay Tech Inc.',
+        id,
+        fullName: role === 'super_admin' ? 'Super Admin Compta' : role === 'sub_admin' ? 'Partenaire CPA' : 'Client Tremblay',
+        displayName: role === 'super_admin' ? 'Super Admin Compta' : role === 'sub_admin' ? 'Partenaire CPA' : 'Client Tremblay',
+        companyName: role === 'super_admin' ? 'Comptaflow Cabinet' : role === 'sub_admin' ? 'Cabinet Associé CPA' : 'Tremblay Tech Inc.',
         email: email,
-        incomeBracket: isAdmin ? 'N/A' : '100k-250k',
-        employeeCount: isAdmin ? 'N/A' : '5',
-        needs: isAdmin ? [] : ['GL-01', 'T1'],
-        isAdmin: isAdmin,
+        role: role,
+        isAdmin: role === 'super_admin' || role === 'sub_admin',
+        subAdminId: role === 'client' ? 'mock_sub_admin_id' : undefined,
+        interacEmail: role === 'sub_admin' ? 'interac@cpa.ca' : undefined,
+        interacQuestion: role === 'sub_admin' ? 'Mot de passe' : undefined,
+        interacAutodepot: role === 'sub_admin' ? false : undefined,
         createdAt: Date.now(),
         activeMode: 'business',
         initialProfileType: 'business'

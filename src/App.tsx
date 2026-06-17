@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { AnimatePresence, motion } from 'motion/react';
 import { UserData, Message } from './types';
 
-// Imports corriges suite a la restructuration architecturale
+// Imports corrigés pour la nouvelle architecture
 import { Auth } from './components/common/Auth';
 import { Landing } from './components/common/Landing';
 import { Onboarding } from './components/auth/Onboarding';
@@ -13,18 +12,25 @@ import { Privacy } from './components/common/Privacy';
 import { Showcase } from './components/common/Showcase';
 import { OrganicLoader } from './components/ui/OrganicLoader';
 
-import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
 import { useAppMode } from './hooks/useAppMode';
-
-import { communicationService } from './lib/communication';
 import { toast } from 'sonner';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 
-/**
- * AppContent - Architecture de Routage Standardisee
- * Gere la logique d'acces, la redirection automatique et l'onboarding.
- */
+function RoleRedirect({ userData }: { userData: UserData | null }) {
+  if (!userData) {
+    return (
+      <div className="min-h-screen bg-midnight text-silver flex flex-col items-center justify-center gap-8">
+        <OrganicLoader label="LOAD" size="md" />
+        <p className="text-slate-500 font-serif italic text-lg animate-pulse">Chargement de votre profil sécurisé...</p>
+      </div>
+    );
+  }
+  if (userData.role === 'super_admin') return <Navigate to="/super-admin" replace />;
+  if (userData.role === 'sub_admin') return <Navigate to="/sub-admin" replace />;
+  return <Navigate to="/client" replace />;
+}
+
 function AppContent() {
   const { user, userData, loading, logout, isAuthenticated, refreshProfile, mockLogin } = useAuth();
   const { mode, toggleMode } = useAppMode();
@@ -49,123 +55,41 @@ function AppContent() {
 
     // Événements d'activité utilisateur
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
-    const eventHandler = () => resetTimer();
-    
-    events.forEach(event => {
-      window.addEventListener(event, eventHandler);
-    });
-
-    // Initialisation du timer
+    events.forEach(evt => document.addEventListener(evt, resetTimer));
     resetTimer();
 
     return () => {
+      events.forEach(evt => document.removeEventListener(evt, resetTimer));
       if (timeoutId) window.clearTimeout(timeoutId);
-      events.forEach(event => {
-        window.removeEventListener(event, eventHandler);
-      });
     };
   }, [isAuthenticated, logout, navigate]);
 
-  // Gestion centralisee de la fin d'onboarding
-  const handleOnboardingComplete = async (data: UserData, quoteValue: number) => {
-    if (!user) return;
-
-    const confirmationId = `CF-${Date.now().toString().slice(-6)}-${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
-    const isMock = user.id.startsWith('mock_');
-
-    if (isMock) {
-      const localSession = localStorage.getItem('comptaflow_mock_session');
-      if (localSession) {
-        try {
-          const parsed = JSON.parse(localSession);
-          parsed.userData = {
-            ...parsed.userData,
-            displayName: data.displayName,
-            companyName: data.companyName,
-            incomeBracket: data.incomeBracket,
-            employeeCount: data.employeeCount,
-            needs: data.needs,
-            createdAt: Date.now()
-          };
-          localStorage.setItem('comptaflow_mock_session', JSON.stringify(parsed));
-        } catch (e) {
-          console.error("Erreur de sauvegarde mock session :", e);
-        }
-      }
-
-      const localClients = localStorage.getItem('comptaflow_mock_clients');
-      let clientList = [];
-      if (localClients) {
-        try {
-          clientList = JSON.parse(localClients);
-        } catch (e) {
-          console.error(e);
-        }
-      }
-
-      const newClientRecord = {
-        id: user.id,
-        displayName: data.displayName,
-        companyName: data.companyName,
-        status: 'En attente',
-        documents: 0,
-        lastActive: 'À l\'instant',
-        email: user.email,
-        needs: data.needs || ['Tenue de livres']
-      };
-
-      const existingIdx = clientList.findIndex((c: any) => c.email === user.email);
-      if (existingIdx >= 0) {
-        clientList[existingIdx] = newClientRecord;
-      } else {
-        clientList.unshift(newClientRecord);
-      }
-      localStorage.setItem('comptaflow_mock_clients', JSON.stringify(clientList));
-
-      await refreshProfile();
-      navigate('/success');
-      return;
+  // Redirection automatique après authentification
+  useEffect(() => {
+    if (isAuthenticated && userData && window.location.pathname === '/login') {
+      if (userData.role === 'super_admin') navigate('/super-admin');
+      else if (userData.role === 'sub_admin') navigate('/sub-admin');
+      else navigate('/client');
     }
+  }, [isAuthenticated, userData, navigate]);
 
-    try {
-      // Synchronisation avec la base de donnees réelle
-      const { error } = await supabase.from('profiles').upsert({
-        id: user.id,
-        display_name: data.displayName,
-        company_name: data.companyName,
-        email: user.email,
-        income_bracket: data.incomeBracket,
-        employee_count: data.employeeCount,
-        needs: data.needs,
-        role: 'client',
-        active_mode: data.activeMode || 'business',
-        initial_profile_type: data.initialProfileType || 'business'
-      });
-
-      if (error) throw error;
-
-      await refreshProfile();
-      await communicationService.notifyAdminOfSubscription(data, quoteValue, confirmationId);
-
-      navigate('/success');
-    } catch(e) {
-      console.error("Erreur de sauvegarde :", e);
-      toast.error("Echec de synchronisation. Verifiez votre connexion Supabase.");
-    }
+  const handleOnboardingComplete = () => {
+    refreshProfile();
+    navigate('/success');
   };
 
   const handleOnSendMessage = (text: string) => {
     const newMsg: Message = {
       id: Date.now().toString(),
-      sender: userData?.isAdmin ? 'cpa' : 'client',
+      sender: userData?.role === 'client' ? 'client' : 'cpa',
       text,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      clientName: userData?.displayName || 'Inconnu'
+      clientName: userData?.fullName || 'Utilisateur'
     };
     setAdminMessages(prev => [...prev, newMsg]);
   };
 
-  // Ecran de chargement structurel
+  // Écran de chargement structurel
   if (loading) {
     return (
       <div className="min-h-screen bg-midnight text-silver flex flex-col items-center justify-center gap-8">
@@ -175,22 +99,28 @@ function AppContent() {
     );
   }
 
-  const isProfileComplete = userData && userData.incomeBracket;
+  const isProfileComplete = userData && (userData.role !== 'client' || userData.fullName);
 
   return (
     <Routes>
-      {/* Route Racine - Landing Page Gold Standard */}
+      {/* Route Racine */}
       <Route path="/" element={<Landing />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/showcase" element={<Showcase />} />
 
-      {/* Routes Publiques - Auth Centralisee */}
-      <Route path="/login" element={!isAuthenticated ? <Auth onAuthentication={() => navigate('/dashboard')} mockLogin={mockLogin} /> : <Navigate to="/dashboard" replace />} />
+      {/* Routes Publiques */}
+      <Route path="/login" element={
+        !isAuthenticated ? (
+          <Auth onAuthentication={() => {}} mockLogin={mockLogin} />
+        ) : (
+          <RoleRedirect userData={userData} />
+        )
+      } />
       
-      {/* Routes Protegees - Flux Onboarding */}
+      {/* Routes Protégées - Flux Onboarding */}
       <Route path="/onboarding" element={
         isAuthenticated ? (
-          isProfileComplete ? <Navigate to="/dashboard" replace /> : <Onboarding initialEmail={user?.email || ''} onComplete={handleOnboardingComplete} />
+          isProfileComplete ? <RoleRedirect userData={userData} /> : <Onboarding initialEmail={user?.email || ''} onComplete={handleOnboardingComplete} />
         ) : <Navigate to="/login" replace />
       } />
 
@@ -198,10 +128,10 @@ function AppContent() {
           isAuthenticated ? <SuccessScreen onContinue={() => navigate('/dashboard')} /> : <Navigate to="/login" replace />
       } />
 
-      {/* Tableau de Bord Principal */}
-      <Route path="/dashboard/*" element={
+      {/* Portail Super Admin */}
+      <Route path="/super-admin/*" element={
         isAuthenticated ? (
-          isProfileComplete ? (
+          userData && userData.role === 'super_admin' ? (
             <Dashboard 
               userData={userData} 
               adminMessages={adminMessages}
@@ -210,11 +140,44 @@ function AppContent() {
               currentMode={mode}
               onToggleMode={toggleMode}
             />
-          ) : <Navigate to="/onboarding" replace />
+          ) : <RoleRedirect userData={userData} />
         ) : <Navigate to="/login" replace />
       } />
 
-      {/* Redirection fallback */}
+      {/* Portail Sub Admin */}
+      <Route path="/sub-admin/*" element={
+        isAuthenticated ? (
+          userData && userData.role === 'sub_admin' ? (
+            <Dashboard 
+              userData={userData} 
+              adminMessages={adminMessages}
+              onSendMessage={handleOnSendMessage}
+              onLogout={logout}
+              currentMode={mode}
+              onToggleMode={toggleMode}
+            />
+          ) : <RoleRedirect userData={userData} />
+        ) : <Navigate to="/login" replace />
+      } />
+
+      {/* Portail Client */}
+      <Route path="/client/*" element={
+        isAuthenticated ? (
+          userData && userData.role === 'client' ? (
+            <Dashboard 
+              userData={userData} 
+              adminMessages={adminMessages}
+              onSendMessage={handleOnSendMessage}
+              onLogout={logout}
+              currentMode={mode}
+              onToggleMode={toggleMode}
+            />
+          ) : <RoleRedirect userData={userData} />
+        ) : <Navigate to="/login" replace />
+      } />
+
+      {/* Redirection générique */}
+      <Route path="/dashboard" element={<RoleRedirect userData={userData} />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
