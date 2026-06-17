@@ -74,7 +74,7 @@ export function Vault({ isLoading: dashboardLoading }: { isLoading: boolean }) {
         </div>
       </header>
 
-      {/* CPA Deliverables (High Priority) */}
+      {/* Livrables Comptables (Priorité Haute) */}
       <section className="space-y-8">
          <h3 className="text-xs font-black text-gold uppercase tracking-[0.3em] flex items-center gap-3">
             <CheckCircle2 size={18} /> Rapports Certifiés du Cabinet

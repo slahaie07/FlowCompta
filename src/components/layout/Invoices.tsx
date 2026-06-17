@@ -414,8 +414,8 @@ export function Invoices({ isAdmin = false }: { isAdmin?: boolean }) {
                     <DollarSign size={18} className="text-gold" /> Virement Interac requis
                   </h4>
                   <div className="space-y-2 text-xs">
-                    <p><span className="text-slate-500">Destinataire :</span> <span className="font-bold text-ivoire">{subAdminInterac?.full_name || 'Votre CPA'}</span></p>
-                    <p><span className="text-slate-500">Envoyer le virement à :</span> <span className="font-bold text-gold font-mono">{subAdminInterac?.interac_email || 'virement@cpa.ca'}</span></p>
+                    <p><span className="text-slate-500">Destinataire :</span> <span className="font-bold text-ivoire">{subAdminInterac?.full_name || 'Votre commis comptable'}</span></p>
+                    <p><span className="text-slate-500">Envoyer le virement à :</span> <span className="font-bold text-gold font-mono">{subAdminInterac?.interac_email || 'virement@compta-flow.net'}</span></p>
                     <p><span className="text-slate-500">Montant exact :</span> <span className="font-bold text-gold font-mono">{selectedInvoice.amount.toFixed(2)} $ CAD</span></p>
                     <p><span className="text-slate-500">Dépôt automatique :</span> <span className="font-bold text-ivoire">{subAdminInterac?.interac_autodepot ? 'Oui (Aucune question requise)' : 'Non'}</span></p>
                     {!subAdminInterac?.interac_autodepot && (
@@ -426,7 +426,7 @@ export function Invoices({ isAdmin = false }: { isAdmin?: boolean }) {
 
                 {selectedInvoice.clientADeclarePaye ? (
                   <div className="p-4 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl text-center text-xs font-bold">
-                    ⏳ Vous avez déclaré avoir envoyé le virement. En attente de validation par votre CPA.
+                    ⏳ Vous avez déclaré avoir envoyé le virement. En attente de validation par votre commis comptable.
                   </div>
                 ) : (
                   <Button 

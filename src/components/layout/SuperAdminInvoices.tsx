@@ -167,7 +167,7 @@ export function SuperAdminInvoices() {
               <tr>
                 <th className="px-8 py-6">Numéro</th>
                 <th className="px-8 py-6">Client</th>
-                <th className="px-8 py-6">Cabinet CPA</th>
+                <th className="px-8 py-6">Cabinet Comptable</th>
                 <th className="px-8 py-6 text-right">Sous-Total HT</th>
                 <th className="px-8 py-6 text-right">TPS</th>
                 <th className="px-8 py-6 text-right">TVQ</th>

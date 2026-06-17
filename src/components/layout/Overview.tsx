@@ -150,7 +150,7 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
                 <span>📁</span> Dépôt de Document Instantané
               </h3>
               <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                Glissez-déposez vos reçus, relevés ou avis de cotisation pour votre CPA. Notre intelligence artificielle classe et analyse vos pièces automatiquement.
+                Glissez-déposez vos reçus, relevés ou avis de cotisation pour votre commis comptable. Notre intelligence artificielle classe et analyse vos pièces automatiquement.
               </p>
             </div>
 
@@ -229,7 +229,7 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
 
                     {inv.clientADeclarePaye ? (
                       <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-center text-[10px] text-amber-500 uppercase font-black tracking-wider">
-                        ⏳ Paiement en cours de validation par votre CPA
+                        ⏳ Paiement en cours de validation par votre commis comptable
                       </div>
                     ) : (
                       <div className="space-y-3 bg-white/[0.02] border border-white/5 p-4 rounded-xl">

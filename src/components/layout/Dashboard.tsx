@@ -79,12 +79,12 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
     { id: 'transactions', label: 'Journal des flux', icon: Receipt },
     { id: 'invoices', label: 'Mes Factures', icon: FileText },
     { id: 'vault', label: 'Coffre-fort', icon: VaultIcon },
-    { id: 'messaging', label: 'Contacter mon CPA', icon: MessageSquare },
+    { id: 'messaging', label: 'Contacter mon commis comptable', icon: MessageSquare },
     { id: 'faq', label: 'Sécurité & FAQ', icon: ShieldCheck },
     { id: 'support', label: 'Centre d\'Aide', icon: HelpCircle },
   ];
 
-  const currentContract = generateContract('fr', 'Expertise Comptable ComptaFlow', 249, 'CAD');
+  const currentContract = generateContract('fr', 'Gestion Comptable ComptaFlow', 249, 'CAD');
 
   return (
     <div className="min-h-screen flex bg-midnight relative overflow-hidden w-full">
@@ -160,7 +160,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
             <div className="flex-1 min-w-0">
               <p className="text-sm font-black text-silver truncate group-hover:text-ivoire transition-colors">{userData.fullName || userData.displayName}</p>
               <p className="text-[10px] text-slate-500 uppercase font-black truncate tracking-tighter">
-                {userData.role === 'super_admin' ? 'Propriétaire Suprême' : userData.role === 'sub_admin' ? 'Cabinet CPA' : 'Espace Client'}
+                {userData.role === 'super_admin' ? 'Propriétaire Suprême' : userData.role === 'sub_admin' ? 'Cabinet Comptable' : 'Espace Client'}
               </p>
             </div>
           </div>

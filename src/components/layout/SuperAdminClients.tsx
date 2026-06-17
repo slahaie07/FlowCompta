@@ -93,7 +93,7 @@ export function SuperAdminClients() {
                         </div>
                       ) : (
                         <span className="text-amber-500 text-xs italic flex items-center gap-1">
-                          <ShieldAlert size={12} /> Orphelin (Aucun CPA)
+                          <ShieldAlert size={12} /> Orphelin (Aucun commis comptable)
                         </span>
                       )}
                     </td>

@@ -13,7 +13,7 @@ export function ElitePartnerHub() {
       benefit: "6 mois de frais offerts + 100$ de bonus",
       desc: "L'ouverture de compte la plus rapide du Canada, intégration directe avec ComptaFlow.",
       offerUrl: "https://neobank.ca/comptaflow",
-      commission: "CPA Certified",
+      commission: "Comptable Certifié",
       icon: DollarSign
     },
     {

@@ -62,7 +62,7 @@ export function Privacy() {
               <li>Traiter et télétransmettre vos déclarations d'impôts à l'ARC (Agence du revenu du Canada) et à Revenu Québec.</li>
               <li>Effectuer vos rapprochements bancaires et livrer vos rapports de tenue de livres mensuels.</li>
               <li>Gérer votre abonnement client et traiter vos facturations chiffrées.</li>
-              <li>Assurer un support client rapide et sécurisé avec un CPA accrédité.</li>
+              <li>Assurer un support client rapide et sécurisé avec votre commis comptable attitré.</li>
             </ul>
           </section>
 
@@ -93,7 +93,7 @@ export function Privacy() {
             </p>
             <ul className="list-disc pl-6 text-silver text-sm font-light space-y-2">
               <li><strong>Rétractation du Consentement</strong> : Vous pouvez fermer votre espace client et exiger le retrait de vos renseignements personnels à tout moment.</li>
-              <li><strong>Réglementation CPA / Fiscale</strong> : Veuillez noter que les documents comptables et déclarations fiscales transmis officiellement doivent être conservés pendant une période légale obligatoire de <strong>sept (7) ans</strong> suivant la fin de l'année d'imposition concernée, conformément aux normes de l'ARC, de Revenu Québec et de l'Ordre des CPA.</li>
+              <li><strong>Réglementation Fiscale</strong> : Veuillez noter que les documents comptables et déclarations fiscales transmis officiellement doivent être conservés pendant une période légale obligatoire de <strong>sept (7) ans</strong> suivant la fin de l'année d'imposition concernée, conformément aux normes de l'ARC, de Revenu Québec et des lois fiscales en vigueur.</li>
             </ul>
           </section>
 

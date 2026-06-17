@@ -45,7 +45,7 @@ export function Integrations() {
   const connectors = [
     { name: 'Plaid Bank Sync', description: 'Synchronisation bancaire en temps réel (Auto-Auth)', icon: Database, color: 'text-emerald-400' },
     { name: 'Gmail', description: 'Envoi automatisé de bilans et factures', icon: Mail, color: 'text-red-500' },
-    { name: 'Google Calendar', description: 'Planification des consultations CPA', icon: Calendar, color: 'text-blue-500' },
+    { name: 'Google Calendar', description: 'Planification des consultations comptables', icon: Calendar, color: 'text-blue-500' },
     { name: 'Google Docs / Sheets', description: 'Génération de lettres et tableaux de bord', icon: FileText, color: 'text-green-500' },
     { name: 'Google Tasks', description: 'Synchronisation des tâches administratives', icon: CheckSquare, color: 'text-blue-400' },
     { name: 'Google Chat & Meet', description: 'Communication et réunions équipes/clients', icon: MessageSquare, color: 'text-emerald-500' },

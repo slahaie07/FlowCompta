@@ -13,7 +13,7 @@ export function SuccessScreen({ onContinue }: SuccessScreenProps) {
     { icon: UserCheck, label: 'Identité Vérifiée', delay: 0.5 },
     { icon: Server, label: 'Coffre-fort chiffré initialisé', delay: 1.2 },
     { icon: Search, label: 'Analyse fiscale démarrée', delay: 2.0 },
-    { icon: Shield, label: 'Liaison CPA active', delay: 2.8 },
+    { icon: Shield, label: 'Liaison comptable active', delay: 2.8 },
   ];
 
   return (
