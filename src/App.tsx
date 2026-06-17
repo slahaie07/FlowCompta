@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { UserData, Message } from './types';
 
-// Imports corrigés pour la nouvelle architecture
+// Imports pour les composants
 import { Auth } from './components/common/Auth';
 import { Landing } from './components/common/Landing';
 import { Onboarding } from './components/auth/Onboarding';
@@ -16,20 +16,6 @@ import { useAuth } from './hooks/useAuth';
 import { useAppMode } from './hooks/useAppMode';
 import { toast } from 'sonner';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
-
-function RoleRedirect({ userData }: { userData: UserData | null }) {
-  if (!userData) {
-    return (
-      <div className="min-h-screen bg-midnight text-silver flex flex-col items-center justify-center gap-8">
-        <OrganicLoader label="LOAD" size="md" />
-        <p className="text-slate-500 font-serif italic text-lg animate-pulse">Chargement de votre profil sécurisé...</p>
-      </div>
-    );
-  }
-  if (userData.role === 'super_admin') return <Navigate to="/super-admin" replace />;
-  if (userData.role === 'sub_admin') return <Navigate to="/sub-admin" replace />;
-  return <Navigate to="/client" replace />;
-}
 
 function AppContent() {
   const { user, userData, loading, logout, isAuthenticated, refreshProfile, mockLogin } = useAuth();
@@ -67,9 +53,7 @@ function AppContent() {
   // Redirection automatique après authentification
   useEffect(() => {
     if (isAuthenticated && userData && window.location.pathname === '/login') {
-      if (userData.role === 'super_admin') navigate('/super-admin');
-      else if (userData.role === 'sub_admin') navigate('/sub-admin');
-      else navigate('/client');
+      navigate('/dashboard');
     }
   }, [isAuthenticated, userData, navigate]);
 
@@ -111,16 +95,16 @@ function AppContent() {
       {/* Routes Publiques */}
       <Route path="/login" element={
         !isAuthenticated ? (
-          <Auth onAuthentication={() => {}} mockLogin={mockLogin} />
+          <Auth onAuthentication={() => navigate('/dashboard')} mockLogin={mockLogin} />
         ) : (
-          <RoleRedirect userData={userData} />
+          <Navigate to="/dashboard" replace />
         )
       } />
       
       {/* Routes Protégées - Flux Onboarding */}
       <Route path="/onboarding" element={
         isAuthenticated ? (
-          isProfileComplete ? <RoleRedirect userData={userData} /> : <Onboarding initialEmail={user?.email || ''} onComplete={handleOnboardingComplete} />
+          isProfileComplete ? <Navigate to="/dashboard" replace /> : <Onboarding initialEmail={user?.email || ''} onComplete={handleOnboardingComplete} />
         ) : <Navigate to="/login" replace />
       } />
 
@@ -128,10 +112,10 @@ function AppContent() {
           isAuthenticated ? <SuccessScreen onContinue={() => navigate('/dashboard')} /> : <Navigate to="/login" replace />
       } />
 
-      {/* Portail Super Admin */}
-      <Route path="/super-admin/*" element={
+      {/* Tableau de bord unifié /dashboard/* avec garde de route par rôle intégrée */}
+      <Route path="/dashboard/*" element={
         isAuthenticated ? (
-          userData && userData.role === 'super_admin' ? (
+          isProfileComplete ? (
             <Dashboard 
               userData={userData} 
               adminMessages={adminMessages}
@@ -140,44 +124,11 @@ function AppContent() {
               currentMode={mode}
               onToggleMode={toggleMode}
             />
-          ) : <RoleRedirect userData={userData} />
-        ) : <Navigate to="/login" replace />
-      } />
-
-      {/* Portail Sub Admin */}
-      <Route path="/sub-admin/*" element={
-        isAuthenticated ? (
-          userData && userData.role === 'sub_admin' ? (
-            <Dashboard 
-              userData={userData} 
-              adminMessages={adminMessages}
-              onSendMessage={handleOnSendMessage}
-              onLogout={logout}
-              currentMode={mode}
-              onToggleMode={toggleMode}
-            />
-          ) : <RoleRedirect userData={userData} />
-        ) : <Navigate to="/login" replace />
-      } />
-
-      {/* Portail Client */}
-      <Route path="/client/*" element={
-        isAuthenticated ? (
-          userData && userData.role === 'client' ? (
-            <Dashboard 
-              userData={userData} 
-              adminMessages={adminMessages}
-              onSendMessage={handleOnSendMessage}
-              onLogout={logout}
-              currentMode={mode}
-              onToggleMode={toggleMode}
-            />
-          ) : <RoleRedirect userData={userData} />
+          ) : <Navigate to="/onboarding" replace />
         ) : <Navigate to="/login" replace />
       } />
 
       {/* Redirection générique */}
-      <Route path="/dashboard" element={<RoleRedirect userData={userData} />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -48,8 +48,8 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
   const [isVaultUnlocked, setIsVaultUnlocked] = useState(false);
   const [showMandateSigning, setShowMandateSigning] = useState(false);
 
-  // Déterminer l'onglet actif et le préfixe de route en fonction du rôle
-  const portalPrefix = userData.role === 'super_admin' ? '/super-admin' : userData.role === 'sub_admin' ? '/sub-admin' : '/client';
+  // Préfixe de portail unifié
+  const portalPrefix = '/dashboard';
   const pathSegments = location.pathname.split('/');
   const activeTab = pathSegments[pathSegments.length - 1] || (userData.role === 'super_admin' ? 'super_overview' : userData.role === 'sub_admin' ? 'admin_overview' : 'overview');
 
@@ -215,18 +215,34 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
                 } />
 
                 {/* 1. Vues Super Admin */}
-                <Route path="super_overview" element={<SuperAdminOverview />} />
-                <Route path="super_subadmins" element={<SuperAdminSubAdmins />} />
-                <Route path="super_clients" element={<SuperAdminClients />} />
-                <Route path="super_invoices" element={<SuperAdminInvoices />} />
+                <Route path="super_overview" element={
+                  userData.role === 'super_admin' ? <SuperAdminOverview /> : <Navigate to="/dashboard" replace />
+                } />
+                <Route path="super_subadmins" element={
+                  userData.role === 'super_admin' ? <SuperAdminSubAdmins /> : <Navigate to="/dashboard" replace />
+                } />
+                <Route path="super_clients" element={
+                  userData.role === 'super_admin' ? <SuperAdminClients /> : <Navigate to="/dashboard" replace />
+                } />
+                <Route path="super_invoices" element={
+                  userData.role === 'super_admin' ? <SuperAdminInvoices /> : <Navigate to="/dashboard" replace />
+                } />
 
                 {/* 2. Vues Sub Admin */}
-                <Route path="admin_overview" element={<AdminOverview />} />
-                <Route path="admin_clients" element={<AdminClients clients={adminClients} isAdmin={true} onAddClient={addClient} />} />
-                <Route path="interac_settings" element={<InteracSettings userData={userData} />} />
+                <Route path="admin_overview" element={
+                  userData.role === 'sub_admin' ? <AdminOverview /> : <Navigate to="/dashboard" replace />
+                } />
+                <Route path="admin_clients" element={
+                  userData.role === 'sub_admin' ? <AdminClients clients={adminClients} isAdmin={true} onAddClient={addClient} /> : <Navigate to="/dashboard" replace />
+                } />
+                <Route path="interac_settings" element={
+                  userData.role === 'sub_admin' ? <InteracSettings userData={userData} /> : <Navigate to="/dashboard" replace />
+                } />
 
                 {/* 3. Vues Client */}
-                <Route path="overview" element={<Overview userData={userData} isLoading={false} currentMode={currentMode} onSignMandate={() => setShowMandateSigning(true)} />} />
+                <Route path="overview" element={
+                  userData.role === 'client' ? <Overview userData={userData} isLoading={false} currentMode={currentMode} onSignMandate={() => setShowMandateSigning(true)} /> : <Navigate to="/dashboard" replace />
+                } />
 
                 {/* Vues Communes mais isolées par RLS */}
                 <Route path="transactions" element={<Transactions currentMode={currentMode} isAdmin={userData.role === 'sub_admin' || userData.role === 'super_admin'} />} />
