@@ -182,7 +182,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-gold/30 transition-all text-slate-400 hover:text-gold cursor-pointer"
              >
                <Globe size={12} className="text-gold" />
-               <span>{lang === 'fr' ? 'FR' : 'EN'}</span>
+               <span>{lang.toUpperCase()}</span>
              </button>
             <button className="p-2.5 bg-white/5 border border-white/5 hover:border-gold/30 rounded-xl transition-all relative group">
               <Bell size={18} className="text-slate-400 group-hover:text-gold transition-colors" />

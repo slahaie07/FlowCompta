@@ -8,8 +8,16 @@ export function useLanguage() {
     
     // Auto-detect based on navigator language or default to 'fr'
     const browserLang = navigator.language.slice(0, 2);
-    return (browserLang === 'en' || browserLang === 'fr') ? (browserLang as LanguageCode) : 'fr';
+    if (browserLang === 'en' || browserLang === 'fr' || browserLang === 'ar') {
+      return browserLang as LanguageCode;
+    }
+    return 'fr';
   });
+
+  useEffect(() => {
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   const changeLanguage = (newLang: LanguageCode) => {
     setLang(newLang);
@@ -17,7 +25,14 @@ export function useLanguage() {
   };
 
   const toggleLanguage = () => {
-    const nextLang: LanguageCode = lang === 'fr' ? 'en' : 'fr';
+    let nextLang: LanguageCode;
+    if (lang === 'fr') {
+      nextLang = 'en';
+    } else if (lang === 'en') {
+      nextLang = 'ar';
+    } else {
+      nextLang = 'fr';
+    }
     changeLanguage(nextLang);
   };
 

@@ -62,13 +62,12 @@ export function Landing() {
             <a href="#faq" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.faq')}</a>
             <button onClick={() => navigate('/login')} className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.clientSpace')}</button>
             
-            {/* Language Switcher Button */}
             <button 
               onClick={toggleLanguage} 
               className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gold/20 bg-white/5 text-[10px] font-bold text-silver uppercase hover:border-gold hover:text-gold transition-all duration-300 cursor-pointer"
             >
               <Globe size={12} className="text-gold" />
-              <span>{lang === 'fr' ? 'EN' : 'FR'}</span>
+              <span>{lang.toUpperCase()}</span>
             </button>
 
             <Button variant="gold" size="sm" onClick={() => navigate('/onboarding')} className="shadow-gold/20">{t('nav.becomeClient')}</Button>
@@ -81,7 +80,7 @@ export function Landing() {
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-gold/20 bg-white/5 text-[10px] font-bold text-silver uppercase"
             >
               <Globe size={10} className="text-gold" />
-              <span>{lang === 'fr' ? 'EN' : 'FR'}</span>
+              <span>{lang.toUpperCase()}</span>
             </button>
 
             <button className="text-gold" onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -108,11 +107,10 @@ export function Landing() {
 
       {/* Hero Section */}
       <header className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
-        {/* Architectural Pillars Decorations */}
         <div className="absolute left-6 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-2 items-center opacity-30">
           <div className="w-[1px] h-32 bg-gradient-to-b from-transparent to-gold" />
           <span className="rotate-180 [writing-mode:vertical-lr] text-[10px] tracking-[0.6em] uppercase font-bold text-slate-500">
-            {lang === 'fr' ? 'Précision · Fluidité · Excellence' : 'Precision · Fluidity · Excellence'}
+            {lang === 'fr' ? 'Précision · Fluidité · Excellence' : lang === 'en' ? 'Precision · Fluidity · Excellence' : 'دقة · انسيابية · تميز'}
           </span>
           <div className="w-[1px] h-32 bg-gradient-to-t from-transparent to-gold" />
         </div>
@@ -239,7 +237,7 @@ export function Landing() {
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-20">
           <div className="lg:sticky lg:top-32 h-fit space-y-8">
             <span className="text-gold text-xs font-bold tracking-[0.4em] uppercase">
-              {lang === 'fr' ? 'Article I — Le registre' : 'Article I — The Registry'}
+              {lang === 'fr' ? 'Article I — Le registre' : lang === 'en' ? 'Article I — The Registry' : 'المادة الأولى — السجل'}
             </span>
             <h2 className="text-5xl font-serif font-bold tracking-tight leading-tight">{t('services.title')}</h2>
             <p className="text-silver font-light leading-relaxed">{t('services.subtitle')}</p>
