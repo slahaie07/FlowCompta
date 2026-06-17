@@ -93,7 +93,7 @@ export function SuperAdminOverview() {
       </header>
 
       {/* Grid de Stats Globales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
         <Card className="p-8 space-y-4 premium-border-gold relative overflow-hidden group" glow="gold">
           <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">
             <Shield size={16} className="text-gold" /> Comptables (SubAdmins)
@@ -121,12 +121,21 @@ export function SuperAdminOverview() {
           </div>
         </Card>
 
+        <Card className="p-8 space-y-4 glass-card relative overflow-hidden group">
+          <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">
+            <DollarSign size={16} className="text-gold" /> Volume Réseau Payé
+          </div>
+          <div className="text-4xl font-serif font-bold text-ivoire">
+            {stats.totalRevenue.toLocaleString('fr-CA', { style: 'currency', currency: 'CAD' })}
+          </div>
+        </Card>
+
         <Card className="p-8 space-y-4 premium-border-gold relative overflow-hidden group" glow="gold">
           <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">
-            <DollarSign size={16} className="text-gold" /> Chiffre d'Affaires Payé
+            <DollarSign size={16} className="text-amber-500" /> Commissions Réseau (5%)
           </div>
           <div className="text-4xl font-serif font-bold text-gold">
-            {stats.totalRevenue.toLocaleString('fr-CA', { style: 'currency', currency: 'CAD' })}
+            {(stats.totalRevenue * 0.05).toLocaleString('fr-CA', { style: 'currency', currency: 'CAD' })}
           </div>
         </Card>
       </div>
@@ -144,6 +153,7 @@ export function SuperAdminOverview() {
                 <th className="px-8 py-6">Adresse Courriel</th>
                 <th className="px-8 py-6 text-center">Nombre Clients</th>
                 <th className="px-8 py-6 text-right">Chiffre d'Affaires Encaissé</th>
+                <th className="px-8 py-6 text-right">Redevance (5%)</th>
                 <th className="px-8 py-6 text-right">Date d'Enregistrement</th>
               </tr>
             </thead>
@@ -157,6 +167,9 @@ export function SuperAdminOverview() {
                     <td className="px-8 py-6 text-right font-serif font-bold text-gold">
                       {sa.revenue.toLocaleString('fr-CA', { style: 'currency', currency: 'CAD' })}
                     </td>
+                    <td className="px-8 py-6 text-right font-serif font-bold text-amber-500">
+                      {(sa.revenue * 0.05).toLocaleString('fr-CA', { style: 'currency', currency: 'CAD' })}
+                    </td>
                     <td className="px-8 py-6 text-right text-slate-500 text-xs">
                       {new Date(sa.created_at).toLocaleDateString('fr-CA')}
                     </td>
@@ -164,7 +177,7 @@ export function SuperAdminOverview() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-8 py-12 text-center text-slate-500 italic">
+                  <td colSpan={6} className="px-8 py-12 text-center text-slate-500 italic">
                     Aucun comptable partenaire enregistré pour le moment.
                   </td>
                 </tr>

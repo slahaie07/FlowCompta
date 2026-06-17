@@ -33,22 +33,44 @@ export function AdminOverview() {
       </header>
 
       {/* Admin Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
         <Card className="p-8 space-y-6 premium-border-gold relative overflow-hidden group" glow="gold">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-gold/10 transition-colors" />
           <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] relative z-10">
-            <TrendingUp size={16} className="text-gold" /> Revenu Cabinet
+            <TrendingUp size={16} className="text-gold" /> Chiffre d'Affaires Brut
           </div>
-          <p className="text-4xl font-serif font-bold text-ivoire relative z-10">{stats.totalRevenue.toLocaleString()} $</p>
+          <p className="text-4xl font-serif font-bold text-ivoire relative z-10">{(stats.totalRevenue || 0).toLocaleString()} $</p>
           <div className="flex items-center gap-2 relative z-10">
             <Badge variant="success" className="bg-green-500/10 text-green-400 border-green-500/20 font-black">+12.4%</Badge>
             <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">vs mois dernier</span>
           </div>
         </Card>
-        
+
+        <Card className="p-8 space-y-6 glass-card relative overflow-hidden group" glow="gold">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-gold/10 transition-colors" />
+          <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] relative z-10">
+            <TrendingUp size={16} className="text-amber-500" /> Frais de Réseau (5%)
+          </div>
+          <p className="text-4xl font-serif font-bold text-amber-500 relative z-10">{((stats.totalRevenue || 0) * 0.05).toLocaleString()} $</p>
+          <div className="flex items-center gap-2 relative z-10">
+            <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Redevance ComptaFlow</span>
+          </div>
+        </Card>
+
         <Card className="p-8 space-y-6 glass-card relative overflow-hidden group" glow="sapphire">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-sapphire/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-sapphire/10 transition-colors" />
+          <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] relative z-10">
+            <TrendingUp size={16} className="text-sapphire-light" /> Revenu Net Cabinet (95%)
+          </div>
+          <p className="text-4xl font-serif font-bold text-gold relative z-10">{((stats.totalRevenue || 0) * 0.95).toLocaleString()} $</p>
+          <div className="flex items-center gap-2 relative z-10">
+            <Badge variant="info" className="bg-sapphire/10 text-sapphire-light border-sapphire/20 font-black">Net Encaissé</Badge>
+          </div>
+        </Card>
+        
+        <Card className="p-8 space-y-6 glass-card relative overflow-hidden group">
           <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">
-            <Users size={16} className="text-sapphire-light" /> Portefeuille Clients
+            <Users size={16} className="text-slate-400" /> Portefeuille Clients
           </div>
           <p className="text-4xl font-serif font-bold text-ivoire">{stats.activeClients}</p>
           <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Dossiers conformes ARC/RQ</p>
@@ -63,19 +85,6 @@ export function AdminOverview() {
             <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
             <span className="text-[9px] text-red-500/70 font-black uppercase tracking-widest italic">Priorité Critique</span>
           </div>
-        </Card>
-
-        <Card className="p-8 space-y-6 glass-card relative overflow-hidden group">
-          <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">
-            <Activity size={16} className="text-green-500" /> Neural Network Sync
-          </div>
-          <div className="flex items-center gap-3">
-             <div className="flex -space-x-2">
-               {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full border-2 border-midnight bg-gold/20 flex items-center justify-center text-[8px] font-bold text-gold">AI</div>)}
-             </div>
-             <p className="text-lg font-bold text-ivoire uppercase tracking-tighter">Opérationnel</p>
-          </div>
-          <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">n8n / Gemini / Supabase</p>
         </Card>
       </div>
 
