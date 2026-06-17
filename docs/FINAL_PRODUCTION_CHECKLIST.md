@@ -21,9 +21,9 @@ Pour encaisser de l'argent réel, vous devez passer Stripe en mode production.
 ---
 
 ### 🌐 2. Connexion du Nom de Domaine
-- [x] **Déploiement Vercel initialisé** : Le site est actuellement déployé sur [https://comptaflow-immen-v5.vercel.app](https://comptaflow-immen-v5.vercel.app)
-- [ ] **Liaison Domaine Personnel** : Dans le dashboard Vercel, aller dans *Settings -> Domains* et ajouter votre domaine final (ex: `comptaflow.ca`).
-- [ ] **DNS Registrar** : Configurer les enregistrements A (vers `76.76.21.21`) et CNAME (vers `cname.vercel-dns.com`) chez votre registraire (GoDaddy, Namecheap, etc.).
+- [x] **Déploiement Vercel initialisé** : Le site est actuellement déployé sur [https://compta-flow.net](https://compta-flow.net)
+- [x] **Liaison Domaine Personnel** : `compta-flow.net` et `www.compta-flow.net` associés avec succès au projet Vercel.
+- [ ] **DNS Registrar** : Configurer les enregistrements A (vers `76.76.21.21` pour `compta-flow.net`) et CNAME (vers `cname.vercel-dns.com` pour `www.compta-flow.net`) chez votre registraire (WHC).
 
 ---
 

@@ -471,8 +471,8 @@ app.post('/api/payment/create-checkout', async (req, res) => {
                 mode: 'payment',
                 customer_email: customerEmail,
                 client_reference_id: reference,
-                success_url: `${req.headers.origin || 'https://comptaflow-immen-v5.vercel.app'}/success?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `${req.headers.origin || 'https://comptaflow-immen-v5.vercel.app'}/dashboard/pricing`,
+                success_url: `${req.headers.origin || 'https://compta-flow.net'}/success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${req.headers.origin || 'https://compta-flow.net'}/dashboard/pricing`,
             });
 
             botLog('PAYMENT_CHECKOUT_CREATED', reference, `Session Stripe créée: ${session.id}`);

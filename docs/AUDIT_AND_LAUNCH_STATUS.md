@@ -17,7 +17,7 @@ Ce rapport récapitule l'avancement suite à l'analyse et à la mise à jour des
 *Fichier source : [FINAL_PRODUCTION_CHECKLIST.md](file:///C:/Users/user/CODE_WORKSPACE/Projects/flowcompta/docs/FINAL_PRODUCTION_CHECKLIST.md)*
 
 ### ✅ Éléments complétés et validés
-*   **Déploiement Vercel initialisé** : L'instance est hébergée sur [https://comptaflow-immen-v5.vercel.app](https://comptaflow-immen-v5.vercel.app).
+*   **Déploiement Vercel initialisé** : L'instance est hébergée sur [https://compta-flow.net](https://compta-flow.net).
 *   **Automatisation d'Onboarding prête** : Le fichier d'importation [n8n-onboarding-automation.json](file:///C:/Users/user/CODE_WORKSPACE/Projects/flowcompta/n8n-onboarding-automation.json) a été généré et validé.
 *   **Moteur Réseau Social prêt** : Le script [n8n-social-automation.json](file:///C:/Users/user/CODE_WORKSPACE/Projects/flowcompta/n8n-social-automation.json) et la table `social_content` de Supabase sont configurés pour la publication automatique.
 
