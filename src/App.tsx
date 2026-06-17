@@ -10,6 +10,7 @@ import { Onboarding } from './components/auth/Onboarding';
 import { SuccessScreen } from './components/SuccessScreen';
 import { Dashboard } from './components/layout/Dashboard';
 import { Privacy } from './components/common/Privacy';
+import { Showcase } from './components/common/Showcase';
 
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
@@ -188,6 +189,7 @@ function AppContent() {
       {/* Route Racine - Landing Page Gold Standard */}
       <Route path="/" element={<Landing />} />
       <Route path="/privacy" element={<Privacy />} />
+      <Route path="/showcase" element={<Showcase />} />
 
       {/* Routes Publiques - Auth Centralisee */}
       <Route path="/login" element={!isAuthenticated ? <Auth onAuthentication={() => navigate('/dashboard')} mockLogin={mockLogin} /> : <Navigate to="/dashboard" replace />} />
