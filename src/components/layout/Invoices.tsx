@@ -7,6 +7,7 @@ import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Input } from '../ui/Input';
 import { motion, AnimatePresence } from 'motion/react';
+import { OrganicLoader } from '../ui/OrganicLoader';
 
 export function Invoices({ isAdmin = false }: { isAdmin?: boolean }) {
   const { invoices, loading, addInvoice, updateInvoiceStatus } = useInvoices(undefined, isAdmin);
@@ -36,7 +37,12 @@ export function Invoices({ isAdmin = false }: { isAdmin?: boolean }) {
     setNewAmount('');
   };
 
-  if (loading) return <div className="p-8 text-center animate-pulse font-serif text-xl text-slate-500 italic">Chargement du registre de facturation...</div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center py-20 gap-8">
+      <OrganicLoader label="FAC" size="sm" />
+      <p className="text-slate-500 font-serif italic text-lg animate-pulse">Chargement du registre de facturation...</p>
+    </div>
+  );
 
   return (
     <div className="space-y-10 pb-20 md:pb-10">

@@ -1,29 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Hanken+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Cormorant Garamond", ui-serif, Georgia, serif;
+  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Bodoni Moda", ui-serif, Georgia, serif;
+  --font-mono: "IBM Plex Mono", monospace;
   
-  --color-noir: #0A0A0A;
-  --color-surface: #121110;
-  --color-surface-light: #181613;
+  --color-noir: #0B0B0C;
+  --color-surface: #0D0D0E;
+  --color-surface-light: #121214;
   
-  --color-gold: #D4AF37;
-  --color-gold-light: #F0CE6B;
-  --color-gold-pale: rgba(212, 175, 55, 0.25);
+  --color-gold: #C6A15B;
+  --color-gold-light: #E2C58F;
+  --color-gold-pale: rgba(198, 161, 91, 0.25);
   
-  --color-ivoire: #F5F1E8;
-  --color-silver: #A39E92;
-  --color-slate-400: #A39E92;
-  --color-slate-500: #5E594F;
+  --color-ivoire: #F3EEE3;
+  --color-silver: rgba(243, 238, 227, 0.6);
+  --color-slate-400: rgba(243, 238, 227, 0.65);
+  --color-slate-500: rgba(243, 238, 227, 0.45);
 
   --color-success: #4CAF7D;
   --color-danger: #D96B5B;
   --color-info: #6BA3D9;
   
-  --color-midnight: #0A0A0A;
-  --color-obsidian: #121110;
+  --color-midnight: #0B0B0C;
+  --color-obsidian: #0D0D0E;
 }
 
 @layer base {
@@ -177,3 +178,40 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--color-gold);
 }
+
+/* Organic Morphing Loader */
+@keyframes organic-morph {
+  0% {
+    border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+  }
+  33% {
+    border-radius: 70% 30% 52% 48% / 60% 40% 60% 40%;
+  }
+  66% {
+    border-radius: 45% 55% 35% 65% / 40% 60% 40% 60%;
+  }
+  100% {
+    border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+  }
+}
+
+@keyframes organic-rotate {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.05);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+.animate-organic {
+  animation: organic-morph 6s ease-in-out infinite, organic-rotate 10s linear infinite;
+}
+
+.animate-organic-reverse {
+  animation: organic-morph 8s ease-in-out infinite alternate-reverse, organic-rotate 12s linear infinite reverse;
+}
+

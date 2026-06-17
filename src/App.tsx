@@ -11,6 +11,7 @@ import { SuccessScreen } from './components/SuccessScreen';
 import { Dashboard } from './components/layout/Dashboard';
 import { Privacy } from './components/common/Privacy';
 import { Showcase } from './components/common/Showcase';
+import { OrganicLoader } from './components/ui/OrganicLoader';
 
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
@@ -167,17 +168,9 @@ function AppContent() {
   // Ecran de chargement structurel
   if (loading) {
     return (
-      <div className="min-h-screen bg-midnight text-silver flex items-center justify-center">
-        <div className="relative">
-          <div className="w-24 h-24 border-4 border-gold/10 border-t-gold rounded-full animate-spin" />
-          <motion.div 
-            animate={{ opacity: [0.3, 1, 0.3] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="absolute inset-0 flex items-center justify-center text-gold font-serif text-xs tracking-widest font-bold"
-          >
-            FLOW
-          </motion.div>
-        </div>
+      <div className="min-h-screen bg-midnight text-silver flex flex-col items-center justify-center gap-8">
+        <OrganicLoader label="FLOW" size="md" />
+        <p className="text-slate-500 font-serif italic text-lg animate-pulse">Initialisation de votre espace sécurisé...</p>
       </div>
     );
   }

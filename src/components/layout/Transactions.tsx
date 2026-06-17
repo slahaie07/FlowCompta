@@ -8,6 +8,7 @@ import { Badge } from '../ui/Badge';
 import { Input } from '../ui/Input';
 import { Transaction, AppMode } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
+import { OrganicLoader } from '../ui/OrganicLoader';
 
 export function Transactions({ currentMode, isAdmin }: { currentMode: AppMode, isAdmin?: boolean }) {
   const { transactions, loading, addTransaction } = useTransactions(undefined, isAdmin);
@@ -46,8 +47,8 @@ export function Transactions({ currentMode, isAdmin }: { currentMode: AppMode, i
   const totalPurchases = filtered.filter(t => t.type === 'purchase').reduce((acc, t) => acc + t.amount, 0);
 
   if (loading) return (
-    <div className="flex flex-col items-center justify-center h-96 space-y-4">
-      <div className="w-12 h-12 border-4 border-gold/20 border-t-gold rounded-full animate-spin" />
+    <div className="flex flex-col items-center justify-center py-20 gap-8">
+      <OrganicLoader label="F" size="sm" />
       <p className="text-slate-500 font-serif italic text-lg animate-pulse">Synchronisation de vos flux {currentMode === 'business' ? 'professionnels' : 'personnels'}...</p>
     </div>
   );

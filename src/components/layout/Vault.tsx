@@ -8,6 +8,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { DocumentCategory } from '../../types';
 import { motion } from 'motion/react';
+import { OrganicLoader } from '../ui/OrganicLoader';
 
 export function Vault({ isLoading: dashboardLoading }: { isLoading: boolean }) {
   const { documents, loading: docsLoading, uploadDocument, getSecureDownloadUrl } = useDocuments();
@@ -105,7 +106,7 @@ export function Vault({ isLoading: dashboardLoading }: { isLoading: boolean }) {
       <Card className="relative p-20 flex flex-col items-center justify-center border-dashed border-white/10 hover:border-gold/40 hover:bg-white/[0.02] transition-all duration-700 group cursor-pointer overflow-hidden premium-border-gold" glow="gold">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold/30 to-transparent animate-pulse" />
         <div className="w-24 h-24 bg-noir/50 rounded-[2.5rem] flex items-center justify-center text-gold mb-8 border border-gold/10 shadow-[0_0_50px_rgba(212,175,55,0.1)] group-hover:scale-110 group-hover:shadow-[0_0_70px_rgba(212,175,55,0.2)] transition-all duration-700">
-          {isUploading ? <div className="w-10 h-10 border-2 border-gold border-t-transparent animate-spin rounded-full" /> : <UploadCloud size={40} />}
+          {isUploading ? <OrganicLoader label="DEP" size="sm" /> : <UploadCloud size={40} />}
         </div>
         <h3 className="text-3xl font-serif text-ivoire mb-3 italic font-bold">Portail de Dépôt Sécurisé</h3>
         <p className="text-sm text-slate-500 mb-10 text-center max-w-md font-medium leading-relaxed">

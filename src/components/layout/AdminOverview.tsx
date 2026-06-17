@@ -5,11 +5,17 @@ import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { useAdminHub } from '../../hooks/useAdminHub';
 import { toast } from 'sonner';
+import { OrganicLoader } from '../ui/OrganicLoader';
 
 export function AdminOverview() {
   const { stats, loading } = useAdminHub();
 
-  if (loading) return <div className="p-8 text-center animate-pulse">Initialisation du Hub Cabinet...</div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center py-20 gap-8">
+      <OrganicLoader label="HUB" size="sm" />
+      <p className="text-slate-500 font-serif italic text-lg animate-pulse">Initialisation du Hub Cabinet...</p>
+    </div>
+  );
 
   return (
     <div className="space-y-10">
