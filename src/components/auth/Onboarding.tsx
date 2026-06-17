@@ -370,11 +370,9 @@ export function Onboarding({ initialEmail, onComplete }: OnboardingProps) {
                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
                    <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                       {profileType === 'business' ? [
-                        { id: 't2', label: "Impôts — Société", price: 749, icon: Building },
                         { id: 'ta', label: "Impôts — Travailleur autonome", price: 199, icon: Users },
                         { id: 'bookkeeping', label: "Tenue de livres", price: 249, icon: Calculator },
-                        { id: 'stocks', label: "Gestion des stocks", price: 179, icon: Package },
-                        { id: 'cfo', label: "Finances d'entreprise", price: 499, icon: PieChart }
+                        { id: 'stocks', label: "Gestion des stocks", price: 179, icon: Package }
                       ].map((s) => (
                         <button 
                           key={s.id} 

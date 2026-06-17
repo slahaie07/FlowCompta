@@ -7,7 +7,7 @@ import { calculateCanadianTaxes, formatCAD } from '../../lib/financeUtils';
 import { CONFIG } from '../../lib/config';
 
 export function Pricing() {
-  const businessLevel = CONFIG.FEES.T2;
+  const businessLevel = CONFIG.FEES.BOOKKEEPING;
   const personalLevel = CONFIG.FEES.T1;
   
   const bizTaxes = calculateCanadianTaxes(businessLevel, 'QC');
@@ -27,8 +27,8 @@ export function Pricing() {
               <div className="flex items-center gap-4">
                  <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center text-gold shadow-lg"><Building size={24} /></div>
                  <div>
-                    <h3 className="text-xl font-serif text-silver">PME & Gestion</h3>
-                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">T2 / Tenue / Paie</p>
+                    <h3 className="text-xl font-serif text-silver">Tenue de livres</h3>
+                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Tenue & Rapports de taxes</p>
                  </div>
               </div>
               <Badge variant="gold">Populaire</Badge>
@@ -46,9 +46,9 @@ export function Pricing() {
               <ul className="space-y-3">
                  {[
                    'Tenue de livres mensuelle',
-                   'Production T2 / CO-17 incluse',
-                   'Liaison bancaire automatisée',
-                   'Accès Admin Prioritaire'
+                   'Rapports de taxes (TPS/TVQ)',
+                   'Liaison bancaire et Plaid',
+                   'Accès Support Prioritaire'
                  ].map(f => (
                    <li key={f} className="flex items-center gap-3 text-sm text-slate-400 font-light">
                       <CheckCircle size={14} className="text-green-500" /> {f}

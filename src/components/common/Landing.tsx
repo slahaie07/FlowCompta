@@ -42,10 +42,8 @@ export function Landing() {
   const services = [
     { code: "T1 / TP-1", name: t('services.t1_name'), price: t('services.t1_price'), desc: t('services.t1_desc') },
     { code: "T2125", name: t('services.ta_name'), price: t('services.ta_price'), desc: t('services.ta_desc') },
-    { code: "T2 / CO-17", name: t('services.t2_name'), price: t('services.t2_price'), desc: t('services.t2_desc') },
     { code: "GL-01", name: t('services.gl_name'), price: t('services.gl_price'), desc: t('services.gl_desc') },
     { code: "INV-02", name: t('services.inv_name'), price: t('services.inv_price'), desc: t('services.inv_desc') },
-    { code: "CFO-03", name: t('services.cfo_name'), price: t('services.cfo_price'), desc: t('services.cfo_desc') },
   ];
 
   return (
@@ -222,11 +220,9 @@ export function Landing() {
               {[
                 "T1 / TP-1 Particuliers",
                 "T2125 Travailleurs autonomes",
-                "T2 / CO-17 Sociétés",
                 "TPS / TVQ Conformité",
                 "Tenue de livres",
                 "Gestion des stocks",
-                "Direction financière",
                 "Coffre-fort chiffré"
               ].map((text) => (
                 <span key={text} className="mx-10 text-sm font-serif tracking-[0.2em] text-silver uppercase flex items-center gap-4">
