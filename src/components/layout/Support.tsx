@@ -42,7 +42,7 @@ export function Support() {
                       <Send size={24} />
                    </div>
                    <p className="text-silver font-medium">Message acheminé avec succès !</p>
-                   <p className="text-xs text-slate-500">Votre commis comptable vous répondra sous 24h ouvrables.</p>
+                   <p className="text-xs text-slate-500">Votre comptable vous répondra sous 24h ouvrables.</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">

@@ -50,12 +50,15 @@
     box-shadow: 
       0 25px 50px -12px rgba(0, 0, 0, 0.8),
       inset 0 1px 1px rgba(255, 255, 255, 0.03);
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.4s ease;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
   }
 
   .glass-card:hover {
-    border-color: rgba(212, 175, 55, 0.2);
-    transform: translateY(-4px) scale(1.01);
+    border-color: rgba(212, 175, 55, 0.3);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+      0 40px 80px -15px rgba(0, 0, 0, 0.9),
+      0 0 30px rgba(198, 161, 91, 0.1);
   }
 
   .glass-panel {
@@ -69,7 +72,7 @@
   .premium-gradient-gold {
     background: linear-gradient(135deg, #D4AF37 0%, #F0CE6B 50%, #D4AF37 100%);
     background-size: 200% auto;
-    animation: shine 6s linear infinite;
+    animation: shine 4s linear infinite;
   }
 
   .premium-border-gold {
@@ -119,12 +122,13 @@
   }
 
   .animated-gradient-text {
-    background: linear-gradient(to right, #D4AF37 0%, #F5F1E8 25%, #D4AF37 50%, #F5F1E8 75%, #D4AF37 100%);
+    background: linear-gradient(to right, #D4AF37 0%, #F5F1E8 20%, #D4AF37 40%, #F5F1E8 60%, #D4AF37 80%, #F5F1E8 100%);
     background-size: 400% auto;
     color: transparent;
     -webkit-background-clip: text;
     background-clip: text;
-    animation: shine 8s linear infinite;
+    animation: shine 6s linear infinite;
+    filter: drop-shadow(0 0 5px rgba(198, 161, 91, 0.2));
   }
 }
 
@@ -214,4 +218,3 @@
 .animate-organic-reverse {
   animation: organic-morph 8s ease-in-out infinite alternate-reverse, organic-rotate 12s linear infinite reverse;
 }
-

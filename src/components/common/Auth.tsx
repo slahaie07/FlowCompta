@@ -209,46 +209,6 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                    </div>
                 </button>
              </div>
-
-             {/* Accès Démo Rapide */}
-             <div className="mt-8 text-center space-y-4 relative z-30">
-                <div className="relative py-2 max-w-xs mx-auto">
-                   <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-white/5"></span></div>
-                   <div className="relative flex justify-center text-[9px] uppercase tracking-[0.3em] font-black text-slate-500"><span className="bg-noir px-4">Accès rapide</span></div>
-                </div>
-                <div className="flex flex-wrap justify-center gap-3">
-                   <button
-                     type="button"
-                     onClick={() => {
-                       if (mockLogin) mockLogin('super@comptaflow.ca', 'super_admin');
-                       onAuthentication('super@comptaflow.ca');
-                     }}
-                     className="px-6 py-3 rounded-xl bg-white/5 border border-white/5 hover:border-gold/30 text-gold text-[10px] uppercase font-black tracking-widest cursor-pointer hover:bg-gold/5 transition-all duration-300"
-                   >
-                     👑 Super Admin
-                   </button>
-                   <button
-                     type="button"
-                     onClick={() => {
-                       if (mockLogin) mockLogin('comptable@comptaflow.ca', 'sub_admin');
-                       onAuthentication('comptable@comptaflow.ca');
-                     }}
-                     className="px-6 py-3 rounded-xl bg-white/5 border border-white/5 hover:border-gold/30 text-gold text-[10px] uppercase font-black tracking-widest cursor-pointer hover:bg-gold/5 transition-all duration-300"
-                   >
-                     💼 Sub Admin
-                   </button>
-                   <button
-                     type="button"
-                     onClick={() => {
-                       if (mockLogin) mockLogin('client@comptaflow.ca', 'client');
-                       onAuthentication('client@comptaflow.ca');
-                     }}
-                     className="px-6 py-3 rounded-xl bg-white/5 border border-white/5 hover:border-gold/30 text-gold text-[10px] uppercase font-black tracking-widest cursor-pointer hover:bg-gold/5 transition-all duration-300"
-                   >
-                     👤 Client
-                   </button>
-                </div>
-             </div>
           </motion.div>
         ) : (
           <motion.div

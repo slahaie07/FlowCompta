@@ -38,7 +38,8 @@ export const CONFIG = {
   APP: {
     NAME: 'Comptaflow',
     VERSION: '1.0.0-PROD',
-    ADMIN_EMAILS: ['admin@comptaflow.ca', 's.lahaie07@gmail.com'],
+    SUPER_ADMIN_EMAILS: ['admin@comptaflow.ca', 's.lahaie07@gmail.com'],
+    SUB_ADMIN_EMAILS: ['comptable@comptaflow.ca', 'partenaire@comptaflow.ca'],
     SUPPORT_EMAIL: 'support@comptaflow.ca',
     INTERAC_EMAIL: 's.lahaie07@gmail.com',
   }

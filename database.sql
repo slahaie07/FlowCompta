@@ -169,8 +169,37 @@ CREATE TABLE IF NOT EXISTS marketing_leads (
     metadata JSONB DEFAULT '{}'
 );
 
+-- 15. GESTION DES DEMANDES DE SERVICE (Interne & IA-Assisted)
+CREATE TABLE IF NOT EXISTS service_requests (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    client_id UUID REFERENCES profiles(id) NOT NULL,
+    type TEXT NOT NULL, -- ex: 'BILAN', 'TAX_RECONCILIATION', 'SALAIRE'
+    description TEXT,
+    payload JSONB DEFAULT '{}', -- Données brutes de la demande
+    ai_validation_report JSONB DEFAULT '{}', -- Analyse automatique des erreurs potentielles
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'review', 'completed', 'rejected')),
+    assigned_to UUID REFERENCES staff(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 16. DÉPLOIEMENT DES RÉSULTATS (Livraisons concrètes)
+CREATE TABLE IF NOT EXISTS service_results (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    request_id UUID REFERENCES service_requests(id) ON DELETE CASCADE,
+    client_id UUID REFERENCES profiles(id) NOT NULL,
+    title TEXT NOT NULL,
+    summary TEXT,
+    result_data JSONB DEFAULT '{}', -- Les chiffres finaux validés
+    document_url TEXT, -- Lien vers le PDF généré
+    is_published BOOLEAN DEFAULT FALSE, -- Tant que c'est FALSE, seul l'admin voit
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_requests_client ON service_requests(client_id);
+CREATE INDEX IF NOT EXISTS idx_results_client ON service_results(client_id);
+
 -- ACTIVER LE REALTIME SUR TOUT L'ÉCOSYSTÈME
-ALTER PUBLICATION supabase_realtime ADD TABLE messages, documents, orders, profiles, bot_logs;
+ALTER PUBLICATION supabase_realtime ADD TABLE messages, documents, orders, profiles, bot_logs, service_requests, service_results;
 
 -- Création du bucket 'vault' pour les documents confidentiels
 -- Note: Requires Supabase Storage schema privileges. Run these statements if applicable.
@@ -184,34 +213,51 @@ CREATE POLICY "Vault Client Access" ON storage.objects FOR ALL USING (
 CREATE OR REPLACE FUNCTION is_admin() 
 RETURNS BOOLEAN AS $$
 DECLARE
-  is_admin_user BOOLEAN;
+  u_role TEXT;
 BEGIN
-  SELECT (role = 'admin') INTO is_admin_user FROM profiles WHERE id = auth.uid();
-  RETURN COALESCE(is_admin_user, false);
+  SELECT role INTO u_role FROM profiles WHERE id = auth.uid();
+  RETURN (u_role IN ('admin', 'super_admin', 'sub_admin'));
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 7. POLITIQUES DE SÉCURITÉ (RLS) - RIGOUREUX
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
-ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
-ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
+-- Table system_errors pour le logging technique (Tech 20/20)
+CREATE TABLE IF NOT EXISTS system_errors (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES profiles(id),
+    error_message TEXT NOT NULL,
+    stack_trace TEXT,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_errors_created ON system_errors(created_at);
 
 -- Profiles: Own + Admin can see all
 CREATE POLICY "Profiles access" ON profiles FOR ALL USING (auth.uid() = id OR is_admin());
 
--- Transactions: Own + Admin
-CREATE POLICY "Transactions access" ON transactions FOR ALL USING (auth.uid() = user_id OR is_admin());
+-- Transactions: Own + Sub-Admin (assigned) + Super-Admin
+CREATE POLICY "Transactions access" ON transactions FOR ALL USING (
+    auth.uid() = user_id OR 
+    (SELECT role FROM profiles WHERE id = auth.uid()) = 'super_admin' OR
+    (SELECT sub_admin_id FROM profiles WHERE id = user_id) = auth.uid()
+);
 
--- Invoices: Own + Admin
-CREATE POLICY "Invoices access" ON invoices FOR ALL USING (auth.uid() = user_id OR is_admin());
+-- Invoices: Own + Sub-Admin (assigned) + Super-Admin
+CREATE POLICY "Invoices access" ON invoices FOR ALL USING (
+    auth.uid() = user_id OR 
+    (SELECT role FROM profiles WHERE id = auth.uid()) = 'super_admin' OR
+    (SELECT sub_admin_id FROM profiles WHERE id = user_id) = auth.uid()
+);
 
--- Documents: Own + Admin
-CREATE POLICY "Documents access" ON documents FOR ALL USING (auth.uid() = user_id OR is_admin());
+-- Documents: Own + Sub-Admin (assigned) + Super-Admin
+CREATE POLICY "Documents access" ON documents FOR ALL USING (
+    auth.uid() = user_id OR 
+    (SELECT role FROM profiles WHERE id = auth.uid()) = 'super_admin' OR
+    (SELECT sub_admin_id FROM profiles WHERE id = user_id) = auth.uid()
+);
 
 -- Audit logs: Admin only
 CREATE POLICY "Admin view logs" ON audit_logs FOR ALL USING (is_admin());
+
 
 -- ============================================================
 -- 📈 OPTIMISATION DES REQUÊTES JSONB (Item 48)

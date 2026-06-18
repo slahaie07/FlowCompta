@@ -2,7 +2,7 @@ import React from 'react';
 
 interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'default' | 'success' | 'warning' | 'error' | 'info' | 'gold';
+  variant?: 'default' | 'success' | 'warning' | 'error' | 'info' | 'gold' | 'secondary';
   className?: string;
   key?: React.Key;
 }
@@ -15,6 +15,7 @@ export const Badge = ({ children, variant = 'default', className = '' }: BadgePr
     error: "bg-red-500/10 text-red-400 border-red-500/20",
     info: "bg-sapphire/10 text-sapphire-light border-sapphire/20",
     gold: "bg-gold/10 text-gold border-gold/20",
+    secondary: "bg-slate-500/10 text-slate-400 border-slate-500/20",
   };
 
   return (

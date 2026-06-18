@@ -3,11 +3,6 @@ import { supabase } from '../lib/supabase';
 import { Invoice } from '../types';
 import { toast } from 'sonner';
 
-const MOCK_INVOICES: Invoice[] = [
-  { id: 'inv_1', userId: 'mock_client_id', date: new Date('2026-06-01').getTime(), dueDate: new Date('2026-07-01').getTime(), clientName: 'Tremblay Tech Inc.', number: 'INV-2026-001', amount: 4500.00, status: 'paid', items: [] },
-  { id: 'inv_2', userId: 'mock_client_id', date: new Date('2026-06-08').getTime(), dueDate: new Date('2026-07-08').getTime(), clientName: 'Tremblay Tech Inc.', number: 'INV-2026-002', amount: 249.00, status: 'pending', items: [] }
-];
-
 export function useInvoices(userId?: string, isAdmin: boolean = false) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,34 +14,20 @@ export function useInvoices(userId?: string, isAdmin: boolean = false) {
   const fetchInvoices = async () => {
     setLoading(true);
     try {
-      let uid = 'mock_client_id';
-      let isMock = true;
+      let uid = '';
       let userRole = 'client';
 
-      const localSession = localStorage.getItem('comptaflow_mock_session');
-      if (localSession) {
-        try {
-          const parsed = JSON.parse(localSession);
-          uid = parsed.userData?.id || parsed.user?.id || 'mock_client_id';
-          userRole = parsed.userData?.role || 'client';
-          isMock = true;
-        } catch (e) {}
-      } else {
-        try {
-          const { data } = await supabase.auth.getSession();
-          if (data?.session?.user) {
-            uid = data.session.user.id;
-            isMock = uid.startsWith('mock_');
-            
-            // Get user role
-            const { data: prof } = await supabase.from('profiles').select('role').eq('id', uid).single();
-            userRole = prof?.role || 'client';
-          }
-        } catch (e) {}
+      const { data: sessData } = await supabase.auth.getSession();
+      if (sessData?.session?.user) {
+        uid = sessData.session.user.id;
+        
+        // Get user role
+        const { data: prof } = await supabase.from('profiles').select('role').eq('id', uid).single();
+        userRole = prof?.role || 'client';
       }
 
-      if (isMock) {
-        setInvoices(MOCK_INVOICES);
+      if (!uid) {
+        setInvoices([]);
         return;
       }
 
@@ -114,30 +95,13 @@ export function useInvoices(userId?: string, isAdmin: boolean = false) {
     try {
       if (!targetUserId) throw new Error("ID Client manquant.");
 
-      let isMock = false;
       let currentUserId = '';
-
-      const localSession = localStorage.getItem('comptaflow_mock_session');
-      if (localSession) {
-        isMock = true;
-      } else {
-        const { data: sess } = await supabase.auth.getSession();
-        if (sess?.session?.user) {
-          currentUserId = sess.session.user.id;
-          isMock = currentUserId.startsWith('mock_');
-        }
+      const { data: sess } = await supabase.auth.getSession();
+      if (sess?.session?.user) {
+        currentUserId = sess.session.user.id;
       }
 
-      if (isMock) {
-        const localNew: Invoice = {
-          id: 'inv_' + Date.now(),
-          userId: targetUserId,
-          ...data
-        };
-        setInvoices(prev => [localNew, ...prev]);
-        toast.success("Facture enregistrée en mode Démo.");
-        return;
-      }
+      if (!currentUserId) throw new Error("Non authentifié.");
 
       const newInvoice = {
         sub_admin_id: currentUserId,
@@ -162,16 +126,6 @@ export function useInvoices(userId?: string, isAdmin: boolean = false) {
 
   const updateInvoiceStatus = async (invoiceId: string, status: string, interacRef?: string) => {
     try {
-      let isMock = false;
-      const localSession = localStorage.getItem('comptaflow_mock_session');
-      if (localSession) isMock = true;
-
-      if (isMock) {
-        setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, status: status as any, interacReference: interacRef } : inv));
-        toast.success("Statut mis à jour localement.");
-        return;
-      }
-
       const updatePayload: any = { statut: status };
       if (status === 'payee') {
         updatePayload.date_paiement = new Date().toISOString();
@@ -191,16 +145,6 @@ export function useInvoices(userId?: string, isAdmin: boolean = false) {
 
   const declarePaidByClient = async (invoiceId: string) => {
     try {
-      let isMock = false;
-      const localSession = localStorage.getItem('comptaflow_mock_session');
-      if (localSession) isMock = true;
-
-      if (isMock) {
-        setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, clientADeclarePaye: true } : inv));
-        toast.success("Déclaration enregistrée localement.");
-        return;
-      }
-
       const { error } = await supabase
         .from('invoices')
         .update({ client_a_declare_paye: true })

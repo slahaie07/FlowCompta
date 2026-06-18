@@ -163,7 +163,7 @@ export function Messaging({ userData, targetClientId }: MessagingProps) {
           </div>
           <div>
             <h3 className="font-serif font-medium text-silver text-lg tracking-tight italic">
-              Commis Comptable Dédié
+              Comptable Professionnel Dédié
             </h3>
             <div className="flex items-center gap-2 mt-0.5">
                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_5px_rgba(34,197,94,0.5)]"></span>

@@ -62,7 +62,7 @@ export function Privacy() {
               <li>Traiter et télétransmettre vos déclarations d'impôts à l'ARC (Agence du revenu du Canada) et à Revenu Québec.</li>
               <li>Effectuer vos rapprochements bancaires et livrer vos rapports de tenue de livres mensuels.</li>
               <li>Gérer votre abonnement client et traiter vos facturations chiffrées.</li>
-              <li>Assurer un support client rapide et sécurisé avec votre commis comptable attitré.</li>
+              <li>Assurer un support client rapide et sécurisé avec votre comptable professionnel attitré.</li>
             </ul>
           </section>
 

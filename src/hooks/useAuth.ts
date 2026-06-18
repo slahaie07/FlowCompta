@@ -8,23 +8,14 @@ export function useAuth() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const isAdminEmail = (email: string) => CONFIG.APP.ADMIN_EMAILS.includes(email);
+  const getRoleFromEmail = (email: string): 'super_admin' | 'sub_admin' | 'client' => {
+    const lowEmail = email.toLowerCase();
+    if (CONFIG.APP.SUPER_ADMIN_EMAILS.some(e => e.toLowerCase() === lowEmail)) return 'super_admin';
+    if (CONFIG.APP.SUB_ADMIN_EMAILS.some(e => e.toLowerCase() === lowEmail)) return 'sub_admin';
+    return 'client';
+  };
 
   useEffect(() => {
-    // 1. Check if mock session exists
-    const localSession = localStorage.getItem('comptaflow_mock_session');
-    if (localSession) {
-      try {
-        const parsed = JSON.parse(localSession);
-        setUser(parsed.user);
-        setUserData(parsed.userData);
-        setLoading(false);
-        return;
-      } catch (e) {
-        localStorage.removeItem('comptaflow_mock_session');
-      }
-    }
-
     // Session initiale Supabase
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -52,6 +43,8 @@ export function useAuth() {
 
   const fetchProfile = async (uid: string, email: string) => {
     setLoading(true);
+    const forcedRole = getRoleFromEmail(email);
+
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -60,26 +53,27 @@ export function useAuth() {
         .single();
 
       if (data) {
+        const finalRole = forcedRole !== 'client' ? forcedRole : (data.role || 'client');
         setUserData({
           id: data.id || uid,
           fullName: data.full_name,
           displayName: data.full_name, // fallback for components
           email: email,
-          role: data.role || 'client',
+          role: finalRole as any,
           subAdminId: data.sub_admin_id,
           interacEmail: data.interac_email,
           interacQuestion: data.interac_question,
           interacAutodepot: data.interac_autodepot,
-          isAdmin: data.role === 'super_admin' || data.role === 'sub_admin' || isAdminEmail(email),
+          isAdmin: finalRole === 'super_admin' || finalRole === 'sub_admin',
           createdAt: new Date(data.created_at).getTime()
         });
       } else {
-        // Nouvel utilisateur sans profil (attente onboarding/création automatique par trigger)
+        // Nouvel utilisateur sans profil
         setUserData({
           id: uid,
           email: email,
-          role: 'client',
-          isAdmin: isAdminEmail(email),
+          role: forcedRole,
+          isAdmin: forcedRole === 'super_admin' || forcedRole === 'sub_admin',
         } as UserData);
       }
     } catch (e) {
@@ -89,34 +83,7 @@ export function useAuth() {
     }
   };
 
-  const mockLogin = (email: string, role: 'super_admin' | 'sub_admin' | 'client') => {
-    const id = `mock_${role}_id`;
-    const mockSession = {
-      user: { id, email },
-      userData: {
-        id,
-        fullName: role === 'super_admin' ? 'Super Admin Compta' : role === 'sub_admin' ? 'Partenaire CPA' : 'Client Tremblay',
-        displayName: role === 'super_admin' ? 'Super Admin Compta' : role === 'sub_admin' ? 'Partenaire CPA' : 'Client Tremblay',
-        companyName: role === 'super_admin' ? 'Comptaflow Cabinet' : role === 'sub_admin' ? 'Cabinet Associé CPA' : 'Tremblay Tech Inc.',
-        email: email,
-        role: role,
-        isAdmin: role === 'super_admin' || role === 'sub_admin',
-        subAdminId: role === 'client' ? 'mock_sub_admin_id' : undefined,
-        interacEmail: role === 'sub_admin' ? 'interac@cpa.ca' : undefined,
-        interacQuestion: role === 'sub_admin' ? 'Mot de passe' : undefined,
-        interacAutodepot: role === 'sub_admin' ? false : undefined,
-        createdAt: Date.now(),
-        activeMode: 'business',
-        initialProfileType: 'business'
-      }
-    };
-    localStorage.setItem('comptaflow_mock_session', JSON.stringify(mockSession));
-    setUser(mockSession.user);
-    setUserData(mockSession.userData as UserData);
-  };
-
   const logout = async () => {
-    localStorage.removeItem('comptaflow_mock_session');
     await supabase.auth.signOut();
     setUser(null);
     setUserData(null);
@@ -127,7 +94,6 @@ export function useAuth() {
     userData, 
     loading, 
     logout, 
-    mockLogin,
     isAuthenticated: !!user, 
     refreshProfile: () => user && fetchProfile(user.id, user.email!) 
   };

@@ -79,7 +79,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
     { id: 'transactions', label: 'Journal des flux', icon: Receipt },
     { id: 'invoices', label: 'Mes Factures', icon: FileText },
     { id: 'vault', label: 'Coffre-fort', icon: VaultIcon },
-    { id: 'messaging', label: 'Contacter mon commis comptable', icon: MessageSquare },
+    { id: 'messaging', label: 'Contacter mon comptable', icon: MessageSquare },
     { id: 'faq', label: 'Sécurité & FAQ', icon: ShieldCheck },
     { id: 'support', label: 'Centre d\'Aide', icon: HelpCircle },
   ];

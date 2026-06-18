@@ -773,7 +773,7 @@ app.post('/api/profile/delete', async (req, res) => {
         host: conf.host,
         port: conf.port,
         user: conf.user,
-        password: 'Maison-139',
+        password: ADMIN_SECRET,
         database: 'postgres',
         ssl: { rejectUnauthorized: false },
         connectionTimeoutMillis: 5000
@@ -880,7 +880,7 @@ app.post('/api/profile/delete', async (req, res) => {
         host: conf.host,
         port: conf.port,
         user: conf.user,
-        password: 'Maison-139',
+        password: ADMIN_SECRET,
         database: 'postgres',
         ssl: { rejectUnauthorized: false },
         connectionTimeoutMillis: 5000
@@ -1022,7 +1022,7 @@ app.post('/api/profile/export', rateLimiter(5, 60000), async (req, res) => {
         host: conf.host,
         port: conf.port,
         user: conf.user,
-        password: 'Maison-139',
+        password: ADMIN_SECRET,
         database: 'postgres',
         ssl: { rejectUnauthorized: false },
         connectionTimeoutMillis: 5000

@@ -7,7 +7,7 @@ import { ChangelogBox } from './ChangelogBox';
 import { motion } from 'motion/react';
 import { useInvoices } from '../../hooks/useInvoices';
 import { useDocuments } from '../../hooks/useDocuments';
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { toast } from 'sonner';
 
@@ -143,6 +143,9 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Colonne Gauche: Dépôt et Mandat */}
         <div className="lg:col-span-7 space-y-8">
+          {/* Radar Fiscal Prédictif (AI/Tax Integration) */}
+          <TaxPredictor userId={userData.id} />
+
           {/* Dépôt Direct */}
           <Card className="p-8 space-y-6 premium-border-gold" glow="gold">
             <div>
@@ -150,7 +153,7 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
                 <span>📁</span> Dépôt de Document Instantané
               </h3>
               <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                Glissez-déposez vos reçus, relevés ou avis de cotisation pour votre commis comptable. Notre intelligence artificielle classe et analyse vos pièces automatiquement.
+                Glissez-déposez vos reçus, relevés ou avis de cotisation pour votre comptable. Notre intelligence artificielle classe et analyse vos pièces automatiquement.
               </p>
             </div>
 
@@ -229,7 +232,7 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
 
                     {inv.clientADeclarePaye ? (
                       <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-center text-[10px] text-amber-500 uppercase font-black tracking-wider">
-                        ⏳ Paiement en cours de validation par votre commis comptable
+                        ⏳ Paiement en cours de validation par votre comptable
                       </div>
                     ) : (
                       <div className="space-y-3 bg-white/[0.02] border border-white/5 p-4 rounded-xl">

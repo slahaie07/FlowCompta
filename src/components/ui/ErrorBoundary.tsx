@@ -1,4 +1,5 @@
 import React, { ErrorInfo, ReactNode } from 'react';
+import { supabase } from '../../lib/supabase';
 
 interface Props {
   children?: ReactNode;
@@ -17,8 +18,25 @@ export class ErrorBoundary extends React.Component<Props, State> {
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  async componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Uncaught error:", error, errorInfo);
+    
+    // Logging technique 20/20
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      await supabase.from('system_errors').insert({
+        user_id: session?.user?.id || null,
+        error_message: error.message,
+        stack_trace: error.stack,
+        metadata: { 
+          componentStack: errorInfo.componentStack,
+          url: window.location.href,
+          userAgent: navigator.userAgent
+        }
+      });
+    } catch (e) {
+      console.warn("Échec du logging d'erreur distant.");
+    }
   }
 
   render() {

@@ -3,16 +3,6 @@ import { supabase } from '../lib/supabase';
 import { Transaction } from '../types';
 import { toast } from 'sonner';
 
-const MOCK_TRANSACTIONS: Transaction[] = [
-  { id: 'tx_1', userId: 'mock_client_id', date: new Date('2026-06-12').getTime(), description: 'Facture Client #1024 - Tremblay Tech', amount: 4500.00, type: 'sale', category: 'Revenus d\'entreprise', status: 'reconciled', context: 'business' },
-  { id: 'tx_2', userId: 'mock_client_id', date: new Date('2026-06-11').getTime(), description: 'Abonnement AWS Cloud Services', amount: 342.50, type: 'purchase', category: 'Hébergement & Cloud', status: 'reconciled', context: 'business' },
-  { id: 'tx_3', userId: 'mock_client_id', date: new Date('2026-06-10').getTime(), description: 'Stripe Payout - Tremblay Tech Inc.', amount: 8200.00, type: 'sale', category: 'Revenus d\'entreprise', status: 'reconciled', context: 'business' },
-  { id: 'tx_4', userId: 'mock_client_id', date: new Date('2026-06-08').getTime(), description: 'Frais de Cabinet - ComptaFlow Elite', amount: 249.00, type: 'purchase', category: 'Honoraires professionnels', status: 'reconciled', context: 'business' },
-  { id: 'tx_5', userId: 'mock_client_id', date: new Date('2026-06-05').getTime(), description: 'Déplacement Client - Uber Québec', amount: 42.80, type: 'purchase', category: 'Transport & Déplacements', status: 'reconciled', context: 'business' },
-  { id: 'tx_6', userId: 'mock_client_id', date: new Date('2026-06-02').getTime(), description: 'Abonnement GitHub Enterprise', amount: 99.00, type: 'purchase', category: 'Logiciels & SaaS', status: 'reconciled', context: 'business' },
-  { id: 'tx_7', userId: 'mock_client_id', date: new Date('2026-05-30').getTime(), description: 'Restauration Affaires - Le Saint-Amour', amount: 185.40, type: 'purchase', category: 'Repas & Représentation', status: 'reconciled', context: 'business' }
-];
-
 export function useTransactions(userId?: string, isAdmin: boolean = false) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,32 +25,15 @@ export function useTransactions(userId?: string, isAdmin: boolean = false) {
 
   const fetchTransactions = async () => {
     try {
-      let uid = 'mock_client_id';
-      let isMock = true;
-
-      const localSession = localStorage.getItem('comptaflow_mock_session');
-      if (localSession) {
-        try {
-          const parsed = JSON.parse(localSession);
-          uid = parsed.user?.id || 'mock_client_id';
-        } catch (e) {}
-      } else {
-        try {
-          const { data } = await supabase.auth.getSession();
-          if (data?.session?.user) {
-            uid = data.session.user.id;
-            isMock = uid.startsWith('mock_');
-          }
-        } catch (e) {
-          // System offline
-        }
+      let uid = '';
+      const { data } = await supabase.auth.getSession();
+      if (data?.session?.user) {
+        uid = data.session.user.id;
       }
 
       const targetId = userId || uid;
-      const effectiveIsMock = isMock || targetId.startsWith('mock_');
-
-      if (effectiveIsMock) {
-        setTransactions(MOCK_TRANSACTIONS);
+      if (!targetId) {
+        setTransactions([]);
         setLoading(false);
         return;
       }
@@ -72,10 +45,10 @@ export function useTransactions(userId?: string, isAdmin: boolean = false) {
 
       if (!isAdmin) query = query.eq('user_id', targetId);
       
-      const { data, error } = await query;
+      const { data: dbData, error } = await query;
       if (error) throw error;
       
-      setTransactions(data || []);
+      setTransactions(dbData || []);
     } catch (e) {
       console.error("Transactions error:", e);
       setTransactions([]);
@@ -86,39 +59,15 @@ export function useTransactions(userId?: string, isAdmin: boolean = false) {
 
   const addTransaction = async (data: Omit<Transaction, 'id' | 'userId'>, targetUserId?: string) => {
     try {
-      let uid = targetUserId || 'mock_client_id';
-      let isMock = true;
-
-      const localSession = localStorage.getItem('comptaflow_mock_session');
-      if (localSession) {
-        try {
-          const parsed = JSON.parse(localSession);
-          uid = targetUserId || parsed.user?.id || 'mock_client_id';
-        } catch (e) {}
-      } else {
-        try {
-          const { data } = await supabase.auth.getSession();
-          if (data?.session?.user) {
-            uid = targetUserId || data.session.user.id;
-            isMock = uid.startsWith('mock_') || (targetUserId ? targetUserId.startsWith('mock_') : false);
-          }
-        } catch (e) {
-          // System offline
-        }
+      let uid = targetUserId;
+      if (!uid) {
+        const { data: sess } = await supabase.auth.getSession();
+        uid = sess?.session?.user?.id;
       }
+
+      if (!uid) throw new Error("Utilisateur non identifié.");
       
       const newTx = { ...data, user_id: uid };
-
-      if (isMock) {
-        const localNew: Transaction = {
-          id: 'tx_' + Date.now(),
-          userId: uid,
-          ...data
-        };
-        setTransactions(prev => [localNew, ...prev]);
-        toast.success("Transaction enregistrée en mode Démo.");
-        return;
-      }
 
       const { data: dbData, error } = await supabase.from('transactions').insert(newTx).select();
       if (error) throw error;

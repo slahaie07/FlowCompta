@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 
 function AppContent() {
-  const { user, userData, loading, logout, isAuthenticated, refreshProfile, mockLogin } = useAuth();
+  const { user, userData, loading, logout, isAuthenticated, refreshProfile } = useAuth();
   const { mode, toggleMode } = useAppMode();
   const [adminMessages, setAdminMessages] = useState<Message[]>([]);
   const navigate = useNavigate();
@@ -95,7 +95,7 @@ function AppContent() {
       {/* Routes Publiques */}
       <Route path="/login" element={
         !isAuthenticated ? (
-          <Auth onAuthentication={() => navigate('/dashboard')} mockLogin={mockLogin} />
+          <Auth onAuthentication={() => navigate('/dashboard')} />
         ) : (
           <Navigate to="/dashboard" replace />
         )

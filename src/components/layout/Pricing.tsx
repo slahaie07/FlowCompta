@@ -1,118 +1,98 @@
-import { Building, User, CheckCircle, ArrowRight, Calculator } from 'lucide-react';
+import { Building, User, CheckCircle, ArrowRight, Calculator, Sparkles, ShieldCheck, Zap } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
-import { calculateCanadianTaxes, formatCAD } from '../../lib/financeUtils';
-
+import { formatCAD } from '../../lib/financeUtils';
 import { CONFIG } from '../../lib/config';
 
 export function Pricing() {
-  const businessLevel = CONFIG.FEES.BOOKKEEPING;
-  const personalLevel = CONFIG.FEES.T1;
-  
-  const bizTaxes = calculateCanadianTaxes(businessLevel, 'QC');
-  const persTaxes = calculateCanadianTaxes(personalLevel, 'QC');
+  const plans = [
+    {
+      name: "Dossier Particulier",
+      subtitle: "Fiscalité Personnelle",
+      description: "Idéal pour les employés et retraités cherchant une optimisation maximale de leurs crédits.",
+      features: ["Déclaration T1 / TP-1", "Crédits d'impôt optimisés", "Transmission électronique", "Support via messagerie"],
+      cta: "Obtenir mon prix"
+    },
+    {
+      name: "Elite Travailleur Autonome",
+      subtitle: "Gestion de Croissance",
+      description: "Conçu pour les entrepreneurs solos qui veulent se concentrer sur leur talent, pas sur les taxes.",
+      features: ["Tenue de livres mensuelle", "Rapports TPS / TVQ", "Calcul des déductions d'affaires", "Bilan de fin d'année"],
+      cta: "Demander une soumission",
+      highlight: true
+    },
+    {
+      name: "Structure Corporate",
+      subtitle: "Solution Entreprise",
+      description: "Gestion complète pour les sociétés incorporées exigeant une rigueur absolue.",
+      features: ["États financiers annuels", "Déclarations T2 / CO-17", "Stratégie dividendes/salaires", "Expert dédié attitré"],
+      cta: "Évaluer mes besoins"
+    }
+  ];
 
   return (
-    <div className="space-y-12 pb-10">
-      <header className="text-center space-y-4">
-        <h1 className="text-4xl font-serif font-medium text-silver tracking-tight italic">Architecture de <span className="text-gold">Valeur.</span></h1>
-        <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-[10px]">Grille tarifaire officielle Comptaflow</p>
-      </header>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Business */}
-        <Card className="p-8 space-y-8" glow="gold">
-           <div className="flex items-center justify-between border-b border-white/5 pb-6">
-              <div className="flex items-center gap-4">
-                 <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center text-gold shadow-lg"><Building size={24} /></div>
-                 <div>
-                    <h3 className="text-xl font-serif text-silver">Tenue de livres</h3>
-                    <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Tenue & Rapports de taxes</p>
-                 </div>
-              </div>
-              <Badge variant="gold">Populaire</Badge>
-           </div>
-           
-           <div className="space-y-6">
-              <div className="flex justify-between items-end">
-                 <div>
-                    <p className="text-xs text-slate-500 uppercase font-bold">À partir de</p>
-                    <p className="text-4xl font-serif text-gold">{formatCAD(businessLevel)}</p>
-                 </div>
-                 <p className="text-[10px] text-slate-600 font-bold uppercase pb-1">/ Mois</p>
-              </div>
-              
-              <ul className="space-y-3">
-                 {[
-                   'Tenue de livres mensuelle',
-                   'Rapports de taxes (TPS/TVQ)',
-                   'Liaison bancaire et Plaid',
-                   'Accès Support Prioritaire'
-                 ].map(f => (
-                   <li key={f} className="flex items-center gap-3 text-sm text-slate-400 font-light">
-                      <CheckCircle size={14} className="text-green-500" /> {f}
-                   </li>
-                 ))}
-              </ul>
-           </div>
-           
-           <div className="pt-6 border-t border-white/5 space-y-2">
-              <div className="flex justify-between text-[10px] text-slate-600 font-bold uppercase"><span>TPS (5%)</span><span>{formatCAD(bizTaxes.tps)}</span></div>
-              <div className="flex justify-between text-[10px] text-slate-600 font-bold uppercase"><span>TVQ (9.975%)</span><span>{formatCAD(bizTaxes.tvq)}</span></div>
-              <div className="flex justify-between text-xs text-silver font-bold pt-2"><span>Total Mensuel</span><span>{formatCAD(bizTaxes.total)}</span></div>
-           </div>
-        </Card>
-
-        {/* Personal */}
-        <Card className="p-8 space-y-8" glow="sapphire">
-           <div className="flex items-center gap-4 border-b border-white/5 pb-6">
-              <div className="w-12 h-12 rounded-2xl bg-sapphire/10 flex items-center justify-center text-sapphire-light shadow-lg"><User size={24} /></div>
-              <div>
-                 <h3 className="text-xl font-serif text-silver">Particuliers</h3>
-                 <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">T1 / TP1 / Conseil</p>
-              </div>
-           </div>
-
-           <div className="space-y-6">
-              <div className="flex justify-between items-end">
-                 <div>
-                    <p className="text-xs text-slate-500 uppercase font-bold">Standard</p>
-                    <p className="text-4xl font-serif text-sapphire-light">{formatCAD(personalLevel)}</p>
-                 </div>
-                 <p className="text-[10px] text-slate-600 font-bold uppercase pb-1">/ Dossier</p>
-              </div>
-              
-              <ul className="space-y-3">
-                 {[
-                   'Optimisation T1 / TP1',
-                   'Analyse REER / CELI',
-                   'Coffre-fort documents à vie',
-                   'Support email inclus'
-                 ].map(f => (
-                   <li key={f} className="flex items-center gap-3 text-sm text-slate-400 font-light">
-                      <CheckCircle size={14} className="text-sapphire-light" /> {f}
-                   </li>
-                 ))}
-              </ul>
-           </div>
-
-           <div className="pt-6 border-t border-white/5 space-y-2">
-              <div className="flex justify-between text-[10px] text-slate-600 font-bold uppercase"><span>TPS (5%)</span><span>{formatCAD(persTaxes.tps)}</span></div>
-              <div className="flex justify-between text-[10px] text-slate-600 font-bold uppercase"><span>TVQ (9.975%)</span><span>{formatCAD(persTaxes.tvq)}</span></div>
-              <div className="flex justify-between text-xs text-silver font-bold pt-2"><span>Total Final</span><span>{formatCAD(persTaxes.total)}</span></div>
-           </div>
-        </Card>
+    <div className="space-y-16 py-10">
+      <div className="text-center space-y-4">
+        <Badge variant="gold" className="px-4 py-1 text-[10px] uppercase tracking-[0.3em]">Tarification Personnalisée</Badge>
+        <h2 className="text-5xl font-serif font-bold text-ivoire">Une structure de prix <span className="animated-gradient-text italic">sur mesure.</span></h2>
+        <p className="text-slate-500 max-w-2xl mx-auto font-medium">Parce que chaque entrepreneur est unique, nous calculons vos honoraires en fonction de la complexité réelle de votre dossier. Zéro frais d'ouverture.</p>
       </div>
 
-      {/* Setup Fee Highlight */}
-      <Card className="p-6 bg-gold/[0.02] border-gold/10 flex items-center justify-between gap-6">
-         <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold"><Calculator size={20}/></div>
-            <p className="text-sm font-medium text-slate-400 italic">Des frais d'ouverture de dossier de <span className="text-gold font-bold">{formatCAD(CONFIG.FEES.SETUP)}</span> s'appliquent à toute nouvelle inscription.</p>
-         </div>
-         <Button variant="ghost" size="sm" className="gap-2 text-[10px] uppercase font-bold">Détails légaux <ArrowRight size={14}/></Button>
-      </Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {plans.map((plan, i) => (
+          <Card key={i} className={`p-10 flex flex-col h-full relative overflow-hidden transition-all duration-500 ${plan.highlight ? 'premium-border-gold ring-1 ring-gold/20' : 'glass-card'}`} glow={plan.highlight ? 'gold' : undefined}>
+            {plan.highlight && (
+              <div className="absolute top-6 right-6">
+                <Sparkles size={20} className="text-gold animate-pulse" />
+              </div>
+            )}
+            
+            <div className="space-y-2 mb-8">
+              <p className="text-[10px] font-black text-gold uppercase tracking-[0.2em]">{plan.subtitle}</p>
+              <h3 className="text-2xl font-serif font-bold text-ivoire">{plan.name}</h3>
+            </div>
+
+            <p className="text-sm text-slate-400 font-light leading-relaxed mb-10 flex-1">{plan.description}</p>
+
+            <div className="space-y-4 mb-10">
+              {plan.features.map((feat, idx) => (
+                <div key={idx} className="flex items-center gap-3 text-xs text-silver">
+                  <div className="w-5 h-5 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center shrink-0">
+                    <CheckCircle size={14} className="text-gold" />
+                  </div>
+                  {feat}
+                </div>
+              ))}
+            </div>
+
+            <Button variant={plan.highlight ? 'gold' : 'secondary'} className="w-full h-14 uppercase font-black text-[10px] tracking-widest gap-2">
+              {plan.cta} <ArrowRight size={14} />
+            </Button>
+          </Card>
+        ))}
+      </div>
+
+      {/* Fact & Safety Box */}
+      <div className="max-w-4xl mx-auto p-12 glass-card rounded-[2.5rem] border-white/5 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gold/[0.01]" />
+        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="space-y-4">
+             <div className="flex items-center gap-3 text-gold">
+                <ShieldCheck size={24} />
+                <h4 className="font-serif text-xl font-bold italic text-ivoire">Sérénité Garantie</h4>
+             </div>
+             <p className="text-sm text-slate-500 leading-relaxed">Chaque soumission est sans engagement. Nous analysons votre volume de transactions pour vous offrir le prix le plus juste.</p>
+          </div>
+          <div className="space-y-4 text-right md:text-left">
+             <div className="flex items-center gap-3 text-gold md:justify-start justify-end">
+                <Zap size={24} />
+                <h4 className="font-serif text-xl font-bold italic text-ivoire">Zéro Frais d'Ouverture</h4>
+             </div>
+             <p className="text-sm text-slate-500 leading-relaxed">L'accès au portail et la création de votre dossier sont totalement gratuits. Vous ne payez que pour les travaux effectués.</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
