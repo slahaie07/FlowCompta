@@ -8,20 +8,30 @@ const sanitizeVar = (val: string | undefined): string => {
   return val.replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
 };
 
+const getEnvVar = (key: string): string | undefined => {
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return import.meta.env[key];
+  }
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[key];
+  }
+  return undefined;
+};
+
 export const CONFIG = {
   // Supabase
-  SUPABASE_URL: sanitizeVar(import.meta.env.VITE_SUPABASE_URL || 'https://hnxdlzdgiascuawgydir.supabase.co'),
-  SUPABASE_ANON_KEY: sanitizeVar(import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_BHVkYelBLz9x0HJn_EWDyQ_EyJxaAWF'),
+  SUPABASE_URL: sanitizeVar(getEnvVar('VITE_SUPABASE_URL') || 'https://hnxdlzdgiascuawgydir.supabase.co'),
+  SUPABASE_ANON_KEY: sanitizeVar(getEnvVar('VITE_SUPABASE_ANON_KEY') || 'sb_publishable_BHVkYelBLz9x0HJn_EWDyQ_EyJxaAWF'),
 
   // Automations (n8n)
   WEBHOOKS: {
-    INVOICE: sanitizeVar(import.meta.env.VITE_N8N_INVOICE_WEBHOOK_URL),
-    SUBSCRIPTION: sanitizeVar(import.meta.env.VITE_N8N_SUBSCRIPTION_WEBHOOK_URL),
+    INVOICE: sanitizeVar(getEnvVar('VITE_N8N_INVOICE_WEBHOOK_URL')),
+    SUBSCRIPTION: sanitizeVar(getEnvVar('VITE_N8N_SUBSCRIPTION_WEBHOOK_URL')),
   },
 
   // Paiements
-  STRIPE_PUBLIC_KEY: sanitizeVar(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_...'),
-  PAYPAL_CLIENT_ID: sanitizeVar(import.meta.env.VITE_PAYPAL_CLIENT_ID || 'test'),
+  STRIPE_PUBLIC_KEY: sanitizeVar(getEnvVar('VITE_STRIPE_PUBLIC_KEY') || 'pk_test_...'),
+  PAYPAL_CLIENT_ID: sanitizeVar(getEnvVar('VITE_PAYPAL_CLIENT_ID') || 'test'),
 
   // Paramètres Métier
   FEES: {
