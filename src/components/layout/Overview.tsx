@@ -18,7 +18,7 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Charger les coordonnées Interac du CPA attitré
+  // Charger les coordonnées Interac du comptable attitré
   useEffect(() => {
     async function loadCpaInfo() {
       if (userData?.subAdminId) {
@@ -32,7 +32,7 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
             setCpaInfo(data);
           }
         } catch (e) {
-          console.warn("Impossible de charger les coordonnées du CPA attitré :", e);
+          console.warn("Impossible de charger les coordonnées du comptable attitré :", e);
         }
       }
     }
@@ -99,7 +99,7 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
         <div className="flex gap-4 w-full md:w-auto relative z-10">
            <Button variant="secondary" size="lg" className="flex-1 md:flex-none gap-3 h-14 md:h-12 px-8 glass-button rounded-2xl group" onClick={() => window.location.href=`mailto:${cpaInfo?.email || 's.lahaie07@gmail.com'}`}>
              <MailIcon size={16} className="text-gold group-hover:scale-110 transition-transform"/> 
-             <span className="text-xs font-bold uppercase tracking-widest">Contacter mon CPA</span>
+             <span className="text-xs font-bold uppercase tracking-widest">Contacter mon comptable</span>
            </Button>
            <Button variant="ghost" size="icon" className="h-14 w-14 md:h-12 md:w-12 glass-card rounded-2xl border-white/5 hover:border-gold/20 transition-all">
              <HelpCircle size={20} className="text-slate-400"/>

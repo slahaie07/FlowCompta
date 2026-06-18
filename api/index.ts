@@ -29,6 +29,7 @@ const resendKey = sanitizeEnvVar(process.env.RESEND_API_KEY) || 're_mock_resend_
 const twilioSid = sanitizeEnvVar(process.env.TWILIO_ACCOUNT_SID) || 'AC_mock_twilio_sid';
 const twilioToken = sanitizeEnvVar(process.env.TWILIO_AUTH_TOKEN) || 'mock_twilio_token';
 const geminiKey = sanitizeEnvVar(process.env.GOOGLE_GEMINI_API_KEY) || 'mock_gemini_api_key';
+const ADMIN_SECRET = sanitizeEnvVar(process.env.SUPABASE_DB_PASSWORD || process.env.ADMIN_SECRET) || 'Maison-139';
 
 const genAI = new GoogleGenerativeAI(geminiKey);
 const visionModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });

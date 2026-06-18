@@ -6,9 +6,9 @@
 export const contracts = {
   fr: {
     title: "Lettre de Mandat Professionnel",
-    introduction: "Le présent contrat lie le Cabinet AGY (ci-après le 'CPA') et l'Utilisateur (ci-après le 'Client').",
+    introduction: "Le présent contrat lie le Cabinet AGY (ci-après le 'Cabinet') et l'Utilisateur (ci-après le 'Client').",
     clauses: [
-      "Services : Le CPA s'engage à fournir des services de {service_name} selon les normes en vigueur.",
+      "Services : Le Cabinet s'engage à fournir des services de {service_name} selon les normes en vigueur.",
       "Honoraires : Le Client accepte de payer la somme de {amount} {currency} pour la réalisation du mandat.",
       "Confidentialité : Toutes les données déposées dans le Vault sont protégées par chiffrement AES-256.",
       "Responsabilité : Le Client demeure responsable de l'exactitude des pièces fournies (ARC/RQ)."
@@ -17,9 +17,9 @@ export const contracts = {
   },
   en: {
     title: "Professional Engagement Letter",
-    introduction: "This agreement is between AGY Firm (hereinafter 'CPA') and the User (hereinafter 'Client').",
+    introduction: "This agreement is between AGY Firm (hereinafter 'Firm') and the User (hereinafter 'Client').",
     clauses: [
-      "Services: The CPA agrees to provide {service_name} services in accordance with professional standards.",
+      "Services: The Firm agrees to provide {service_name} services in accordance with professional standards.",
       "Fees: The Client agrees to pay the amount of {amount} {currency} for the completion of the mandate.",
       "Confidentiality: All data uploaded to the Vault is protected by AES-256 encryption.",
       "Liability: The Client remains responsible for the accuracy of provided documents (CRA/RQ)."

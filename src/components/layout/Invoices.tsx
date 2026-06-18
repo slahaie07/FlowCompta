@@ -49,7 +49,7 @@ export function Invoices({ isAdmin = false }: { isAdmin?: boolean }) {
             setSubAdminInterac(data);
           }
         } catch (err) {
-          console.warn("Impossible de charger les infos Interac du CPA :", err);
+          console.warn("Impossible de charger les infos Interac du comptable :", err);
         }
       }
     }
