@@ -274,15 +274,14 @@ export function Landing() {
             <h2 className="text-5xl font-serif font-bold tracking-tight italic">{t('process.title')}</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 text-left relative">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-left relative">
             {/* Connecting line */}
-            <div className="absolute top-10 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-gold to-transparent hidden lg:block opacity-30" />
+            <div className="absolute top-10 left-[15%] right-[15%] h-[1px] bg-gradient-to-r from-transparent via-gold to-transparent hidden lg:block opacity-30" />
             
             {[
               { n: 1, t: t('process.step1Title'), d: t('process.step1Desc') },
               { n: 2, t: t('process.step2Title'), d: t('process.step2Desc') },
               { n: 3, t: t('process.step3Title'), d: t('process.step3Desc') },
-              { n: 4, t: t('process.step4Title'), d: t('process.step4Desc') },
             ].map((step, i) => (
               <div key={i} className="space-y-6 relative group">
                 <div className="w-20 h-20 rounded-full border border-gold flex items-center justify-center bg-noir text-gold font-serif text-3xl font-bold relative z-10 group-hover:bg-gold group-hover:text-noir transition-all duration-500 shadow-[0_0_0_8px_var(--color-noir)]">
@@ -326,14 +325,16 @@ export function Landing() {
       {/* Footer */}
       <footer className="py-20 border-t border-gold/20 bg-noir">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-10">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 border border-gold rounded-full flex items-center justify-center text-gold font-serif font-bold text-sm">A</div>
-            <span className="text-xl font-serif font-bold tracking-tight">A<em className="text-gold not-italic">GY</em></span>
+          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
+            <div className="w-8 h-8 border border-gold rounded-full flex items-center justify-center text-gold font-serif font-bold text-sm">C</div>
+            <span className="text-xl font-serif font-bold tracking-tight">Compta<em className="text-gold not-italic">flow</em></span>
           </div>
           <div className="flex flex-col md:flex-row items-center gap-8 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
             <span>{t('footer.copyright')}</span>
             <span>{t('footer.taxDisclaimer')}</span>
             <button onClick={() => navigate('/privacy')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">{t('footer.privacy')}</button>
+            <button onClick={() => navigate('/terms')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">{t('footer.terms')}</button>
+            <button onClick={() => navigate('/legal')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">{t('footer.legal')}</button>
             <a href="/admin" className="hover:text-gold transition-colors">{t('footer.admin')}</a>
           </div>
         </div>

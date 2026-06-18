@@ -10,6 +10,8 @@ import { SuccessScreen } from './components/SuccessScreen';
 import { Dashboard } from './components/layout/Dashboard';
 import { Privacy } from './components/common/Privacy';
 import { Showcase } from './components/common/Showcase';
+import { Terms } from './components/common/Terms';
+import { Legal } from './components/common/Legal';
 import { OrganicLoader } from './components/ui/OrganicLoader';
 
 import { useAuth } from './hooks/useAuth';
@@ -90,6 +92,8 @@ function AppContent() {
       {/* Route Racine */}
       <Route path="/" element={<Landing />} />
       <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/legal" element={<Legal />} />
       <Route path="/showcase" element={<Showcase />} />
 
       {/* Routes Publiques */}

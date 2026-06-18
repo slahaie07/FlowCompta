@@ -29,7 +29,7 @@ export const i18n = {
       payroll: "Gestion des paies",
       taxes_biz: "Impôts Société",
       taxes_perso: "Impôts Particulier",
-      consulting: "Expertise Comptable",
+      consulting: "Aide Comptable & Conseil",
       stocks: "Gestion des stocks",
       title: "Quatre services, quatre prix nets.",
       subtitle: "Chaque mandat est inscrit au registre avec son tarif ferme. Sélectionnez, payez, suivez — tout part d'ici.",
@@ -76,10 +76,10 @@ export const i18n = {
 
     // Hero
     hero: {
-      tagline: "Cabinet comptable · Québec · Canada",
-      title1: "La comptabilité qui",
-      title2: "coule de source.",
-      subtitle: "Comptaflow réunit vos impôts, votre tenue de livres et vos finances d'entreprise dans un seul flux : un portail, des prix fermes, zéro paperasse.",
+      tagline: "Services de tenue de livres & d'aide comptable · Québec",
+      title1: "Votre tenue de livres,",
+      title2: "claire et sans paperasse.",
+      subtitle: "Comptaflow réunit votre tenue de livres, vos déclarations de revenus et d'impôts dans un seul flux d'aide comptable : un portail, des prix fermes, zéro tracas.",
       cta: "Ouvrir mon dossier — 60 $",
       googleLogin: "Espace Client",
       preview: "Aperçu client",
@@ -107,15 +107,13 @@ export const i18n = {
     // Process
     process: {
       tagline: "Article II — Le flux",
-      title: "Quatre étapes. Un seul flux.",
-      step1Title: "Composez",
-      step1Desc: "Sélectionnez vos mandats en ligne. Le frais d'ouverture de 60 $ crée votre espace sécurisé.",
-      step2Title: "Payez",
-      step2Desc: "Paiement par carte ou Interac. Compte créé instantanément, reçu officiel à l'appui.",
-      step3Title: "Déposez",
-      step3Desc: "T4, relevés, factures : glissez-déposez le tout dans votre coffre-fort numérique chiffré.",
-      step4Title: "Recevez",
-      step4Desc: "Suivez l'avancement en temps réel et récupérez vos livrables directement dans le portail."
+      title: "Trois étapes. Un seul flux.",
+      step1Title: "Configurez & Réglez",
+      step1Desc: "Sélectionnez vos besoins à tarifs fixes. Les frais d'ouverture de 60 $ activent votre compte sécurisé.",
+      step2Title: "Déposez vos pièces",
+      step2Desc: "Glissez-déposez vos reçus, T4, factures dans votre coffre-fort chiffré et hébergé au Canada.",
+      step3Title: "Suivez & Récupérez",
+      step3Desc: "Suivez l'avancement de vos déclarations et récupérez vos livrables validés en direct."
     },
 
     // FAQ
@@ -125,7 +123,7 @@ export const i18n = {
       q1: "À quoi sert le frais d'ouverture de dossier de 60 $ ?",
       a1: "Il couvre la création de votre espace client sécurisé, la vérification initiale de votre dossier fiscal et la configuration de votre coffre-fort de documents. Il n'est facturé qu'une seule fois.",
       q2: "Mes documents sont-ils en sécurité ?",
-      a2: "Oui. Vos fichiers sont transmis chiffrés (TLS) et stockés dans une base de données hébergée au Canada, accessible uniquement par vous et votre comptable. Aucun document ne transite par courriel.",
+      a2: "Oui. Vos fichiers sont transmis chiffrés (TLS) et stockés dans une base de données hébergée au Canada, accessible uniquement par vous et votre préparateur comptable. Aucun document ne transite par courriel.",
       q3: "Quels formats de documents puis-je déposer ?",
       a3: "PDF, images (photos de reçus), fichiers Excel et CSV — jusqu'à 4 Mo par fichier. Une photo nette de votre T4 prise au téléphone fait parfaitement l'affaire.",
       q4: "Comment suivre l'avancement de mon dossier ?",
@@ -144,6 +142,8 @@ export const i18n = {
     footer: {
       taxDisclaimer: "Les prix affichés sont hors taxes (TPS 5 % et TVQ 9,975 % en sus).",
       privacy: "Confidentialité (Loi 25)",
+      terms: "Conditions de service",
+      legal: "Mentions légales",
       admin: "Administration",
       copyright: "© 2026 Comptaflow — Québec, Canada"
     }
@@ -173,7 +173,7 @@ export const i18n = {
       payroll: "Payroll",
       taxes_biz: "Corporate Tax",
       taxes_perso: "Personal Tax",
-      consulting: "Accounting Advice",
+      consulting: "Bookkeeping & Tax Support",
       stocks: "Inventory Management",
       title: "Four services, four flat rates.",
       subtitle: "Each mandate is logged with its fixed price. Select, pay, track — everything flows from here.",
@@ -220,10 +220,10 @@ export const i18n = {
 
     // Hero
     hero: {
-      tagline: "Accounting Firm · Quebec · Canada",
-      title1: "Accounting that",
-      title2: "flows naturally.",
-      subtitle: "Comptaflow brings together your taxes, bookkeeping, and corporate finance into a single flow: one portal, fixed rates, zero paperwork.",
+      tagline: "Bookkeeping & Tax Support Services · Quebec",
+      title1: "Your bookkeeping,",
+      title2: "clear and paperless.",
+      subtitle: "Comptaflow brings together your tax declarations, bookkeeping, and daily finances into a single bookkeeping assistance flow: one portal, fixed rates, zero paperwork.",
       cta: "Start My File — $60",
       googleLogin: "Client Area",
       preview: "Client Preview",
@@ -251,15 +251,13 @@ export const i18n = {
     // Process
     process: {
       tagline: "Article II — The Flow",
-      title: "Four Steps. One Flow.",
-      step1Title: "Configure",
-      step1Desc: "Select your mandates online. The $60 setup fee configures your secure client account.",
-      step2Title: "Pay",
-      step2Desc: "Secure payment via card or Interac. Instant account creation and official receipt issued.",
-      step3Title: "Upload",
-      step3Desc: "T4s, receipts, bank statements: drag and drop everything into your encrypted digital vault.",
-      step4Title: "Receive",
-      step4Desc: "Track progress in real time and retrieve your tax and financial deliverables directly in the portal."
+      title: "Three Steps. One Flow.",
+      step1Title: "Configure & Pay",
+      step1Desc: "Select your flat-rate mandates. The $60 setup fee activates your secure bookkeeping account.",
+      step2Title: "Upload Documents",
+      step2Desc: "Drag and drop bank statements, T4s, and receipts into your encrypted Canadian-hosted vault.",
+      step3Title: "Track & Retrieve",
+      step3Desc: "Monitor execution in real time and download your completed declarations and ledgers."
     },
 
     // FAQ
@@ -288,6 +286,8 @@ export const i18n = {
     footer: {
       taxDisclaimer: "Displayed prices exclude taxes (5% GST and 9.975% QST will be added).",
       privacy: "Privacy Policy (Law 25)",
+      terms: "Terms of Service",
+      legal: "Legal Notice",
       admin: "Administration",
       copyright: "© 2026 Comptaflow — Quebec, Canada"
     }
@@ -308,14 +308,14 @@ export const i18n = {
     setup_fee: "رسوم تأسيس لمرة واحدة",
     total: "المبلغ الإجمالي",
     secure_storage: "خزنة مشفرة",
-    audit_active: "تدقيق معتمد",
+    audit_active: "مساعدة محاسبية",
     msg_validate: "يرجى تأكيد بريدك الإلكتروني قبل المتابعة",
     services: {
       bookkeeping: "مسك الدفاتر",
       payroll: "إدارة الرواتب",
       taxes_biz: "ضريبة الشركات",
       taxes_perso: "الضريبة الشخصية",
-      consulting: "خبرة محاسب قانوني",
+      consulting: "استشارات مسك الدفاتر والمساعدة",
       stocks: "إدارة المخزون",
       title: "أربعة خدمات، أربعة أسعار ثابتة",
       subtitle: "يتم تسجيل كل تفويض بسعره الثابت.",
@@ -352,10 +352,10 @@ export const i18n = {
       mobileOpen: "بدء ملفي"
     },
     hero: {
-      tagline: "مكتب محاسبة · كيبك · كندا",
-      title1: "المحاسبة التي",
-      title2: "تتدفق بشكل طبيعي.",
-      subtitle: "يجمع كومبتا فلو ضرائبك وإمساك الدفاتر والتمويل في تدفق واحد.",
+      tagline: "خدمات مسك الدفاتر والمساعدة المحاسبية · كيبك",
+      title1: "مسك الدفاتر الخاص بك،",
+      title2: "واضح وخالي من الأوراق.",
+      subtitle: "يجمع كومبتا فلو مسك الدفاتر وإقرارات ضريبة الدخل والضرائب في تدفق واحد مساعدة محاسبية.",
       cta: "بدء ملفي — 60 $",
       googleLogin: "بوابة العميل",
       preview: "معاينة العميل",
@@ -380,15 +380,13 @@ export const i18n = {
     },
     process: {
       tagline: "المادة الثانية — التدفق",
-      title: "أربع خطوات. تدفق واحد.",
-      step1Title: "تكوين",
-      step1Desc: "اختر خدماتك عبر الإنترنت. رسوم 60 $ تؤسس حسابك الآمن.",
-      step2Title: "دفع",
-      step2Desc: "دفع آمن بالبطاقة أو إنترأك. إنشاء الحساب فوراً.",
-      step3Title: "رفع",
-      step3Desc: "ملفات ووصولات: اسحب وأفلت كل شيء في خزنتك الآمنة.",
-      step4Title: "تلقي",
-      step4Desc: "تابع التقدم بالوقت الحقيقي واستلم مخرجاتك مباشرة."
+      title: "ثلاث خطوات. تدفق واحد.",
+      step1Title: "التكوين والدفع",
+      step1Desc: "اختر خدماتك بأسعار ثابتة. رسوم 60 $ تنشط حسابك الآمن.",
+      step2Title: "تحميل المستندات",
+      step2Desc: "اسحب وأفلت الوصولات وملفات T4 في خزنتك المشفرة والمستضافة في كندا.",
+      step3Title: "المتابعة والاستلام",
+      step3Desc: "تتبع التقدم واسترد ملفاتك وجداولك الجاهزة مباشرة."
     },
     faq: {
       tagline: "المادة الخامسة — الأسئلة الشائعة",
@@ -411,6 +409,8 @@ export const i18n = {
     footer: {
       taxDisclaimer: "الأسعار المعروضة لا تشمل الضرائب (تضاف ضريبة المبيعات الفيدرالية والمحلية).",
       privacy: "سياسة الخصوصية (قانون 25)",
+      terms: "شروط الخدمة",
+      legal: "الإشعارات القانونية",
       admin: "الإدارة",
       copyright: "© 2026 كومبتا فلو — كيبك، كندا"
     }

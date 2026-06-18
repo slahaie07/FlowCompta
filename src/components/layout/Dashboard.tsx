@@ -160,7 +160,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
             <div className="flex-1 min-w-0">
               <p className="text-sm font-black text-silver truncate group-hover:text-ivoire transition-colors">{userData.fullName || userData.displayName}</p>
               <p className="text-[10px] text-slate-500 uppercase font-black truncate tracking-tighter">
-                {userData.role === 'super_admin' ? 'Propriétaire Suprême' : userData.role === 'sub_admin' ? 'Cabinet Comptable' : 'Espace Client'}
+                {userData.role === 'super_admin' ? 'Propriétaire Suprême' : userData.role === 'sub_admin' ? 'Préparateur Partenaire' : 'Espace Client'}
               </p>
             </div>
           </div>

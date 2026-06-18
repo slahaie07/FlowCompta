@@ -62,7 +62,7 @@ export function Privacy() {
               <li>Traiter et télétransmettre vos déclarations d'impôts à l'ARC (Agence du revenu du Canada) et à Revenu Québec.</li>
               <li>Effectuer vos rapprochements bancaires et livrer vos rapports de tenue de livres mensuels.</li>
               <li>Gérer votre abonnement client et traiter vos facturations chiffrées.</li>
-              <li>Assurer un support client rapide et sécurisé avec votre comptable professionnel attitré.</li>
+              <li>Assurer un support client rapide et sécurisé avec votre préparateur attitré.</li>
             </ul>
           </section>
 
@@ -123,7 +123,7 @@ export function Privacy() {
         </main>
 
         <footer className="mt-12 text-center text-xs text-slate-500 font-light">
-          Comptaflow est une plateforme technologique dédiée aux services de comptabilité accrédités au Québec.
+          Comptaflow est une plateforme technologique dédiée aux services de tenue de livres et d'aide comptable au Québec.
         </footer>
       </div>
     </div>

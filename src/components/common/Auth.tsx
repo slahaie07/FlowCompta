@@ -169,7 +169,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
             className="w-full max-w-2xl text-center space-y-12 relative z-10"
           >
              <div className="space-y-4">
-                <span className="text-xs uppercase tracking-[0.4em] font-black text-gold">Québec • Conformité & Cabinet Privé</span>
+                <span className="text-xs uppercase tracking-[0.4em] font-black text-gold">Québec • Aide Comptable & Tenue de Livres</span>
                 <h1 className="text-6xl md:text-7xl font-serif font-bold text-ivoire tracking-tight italic leading-tight">
                   Portail <span className="animated-gradient-text">ComptaFlow.</span>
                 </h1>
@@ -284,7 +284,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                             className="w-full h-14 bg-noir border border-white/10 rounded-xl px-5 text-sm font-semibold text-ivoire outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all cursor-pointer"
                           >
                             <option value="client">Client final (Entreprise/Individu)</option>
-                            <option value="sub_admin">Comptable Partenaire (Cabinet)</option>
+                            <option value="sub_admin">Préparateur Partenaire (Tenue de livres)</option>
                           </select>
                         </div>
 

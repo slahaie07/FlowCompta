@@ -29,9 +29,9 @@ export function Support() {
     <div className="space-y-8 max-w-5xl mx-auto">
       <header>
         <h1 className="text-3xl font-serif font-medium text-silver tracking-tight italic">Centre d'Assistance <span className="text-gold">Prioritaire</span></h1>
-        <p className="text-slate-400 mt-1.5 text-sm font-light uppercase tracking-widest">Votre cabinet à portée de clic</p>
+        <p className="text-slate-400 mt-1.5 text-sm font-light uppercase tracking-widest">Votre préparateur à portée de clic</p>
       </header>
-
+ 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-6">
            <Card className="p-8" glow="sapphire">
@@ -42,7 +42,7 @@ export function Support() {
                       <Send size={24} />
                    </div>
                    <p className="text-silver font-medium">Message acheminé avec succès !</p>
-                   <p className="text-xs text-slate-500">Votre comptable vous répondra sous 24h ouvrables.</p>
+                   <p className="text-xs text-slate-500">Votre préparateur vous répondra sous 24h ouvrables.</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -59,7 +59,7 @@ export function Support() {
                    </div>
                    <div className="pt-4">
                       <Button variant="gold" className="w-full h-14 gap-2" type="submit">
-                         Envoyer au cabinet <Send size={18}/>
+                         Envoyer au préparateur <Send size={18}/>
                       </Button>
                    </div>
                 </form>

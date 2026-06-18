@@ -12,7 +12,7 @@ export function FAQ() {
   const faqs = [
     {
       question: "Mes données financières sont-elles en sécurité ?",
-      answer: "Absolument. ComptaFlow utilise le chiffrement AES-256 (niveau bancaire) pour tous vos documents. Vos données sont isolées via des politiques RLS (Row Level Security) garantissant que seul vous et votre comptable professionnel assigné pouvez y accéder.",
+      answer: "Absolument. ComptaFlow utilise le chiffrement AES-256 (niveau bancaire) pour tous vos documents. Vos données sont isolées via des politiques RLS (Row Level Security) garantissant que seul vous et votre préparateur comptable assigné pouvez y accéder.",
       icon: Lock
     },
     {
@@ -21,8 +21,8 @@ export function FAQ() {
       icon: Globe
     },
     {
-      question: "Comment fonctionne la liaison avec mon comptable ?",
-      answer: "Dès que vous téléversez un document ou saisissez une transaction, votre comptable professionnel est notifié. Les échanges se font via notre canal direct chiffré, éliminant les risques liés aux courriels non sécurisés.",
+      question: "Comment fonctionne la liaison avec mon préparateur ?",
+      answer: "Dès que vous téléversez un document ou saisissez une transaction, votre préparateur de déclarations est notifié. Les échanges se font via notre canal direct chiffré, éliminant les risques liés aux courriels non sécurisés.",
       icon: ShieldCheck
     },
     {
@@ -77,7 +77,7 @@ export function FAQ() {
 
       <Card className="p-10 border-sapphire/20 bg-sapphire/[0.02] text-center space-y-6">
          <h3 className="text-xl font-serif text-silver italic">Encore des questions ?</h3>
-         <p className="text-sm text-slate-500 max-w-lg mx-auto">Notre équipe de support technique et nos comptables professionnels sont disponibles pour vous répondre sous 24 heures.</p>
+         <p className="text-sm text-slate-500 max-w-lg mx-auto">Notre équipe de support technique et nos préparateurs de déclarations sont disponibles pour vous répondre sous 24 heures.</p>
          <Button variant="secondary" className="px-10 h-12 uppercase tracking-widest text-[10px] font-bold" onClick={() => navigate('/dashboard/support')}>Ouvrir un ticket de support</Button>
       </Card>
     </div>

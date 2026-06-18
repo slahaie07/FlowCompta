@@ -192,7 +192,7 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
                   <Badge variant="gold">Actif</Badge>
                </div>
                <p className="text-xs text-slate-500 mt-2 font-light leading-relaxed">
-                 Votre mandat de représentation et de gestion avec le cabinet comptable est signé et conforme aux exigences de Revenu Québec.
+                 Votre mandat de tenue de livres et d'aide comptable est signé et conforme aux exigences de Revenu Québec.
                </p>
                <Button variant="ghost" className="mt-4 text-[10px] font-bold uppercase tracking-widest gap-2 h-10 border-white/15 text-slate-400 hover:text-gold" onClick={onSignMandate}>
                  Voir le Mandat Signé <ArrowUpRight size={14}/>
