@@ -653,6 +653,115 @@ app.post('/api/support/ai-chat', async (req, res) => {
     }
 });
 
+// --- AUTOMATED INTERAC E-TRANSFER RECONCILIATION VIA n8n ---
+app.post('/api/invoices/reconcile', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (!token || token !== ADMIN_SECRET) {
+    return res.status(401).json({ error: "Non autorisé. Jeton secret invalide." });
+  }
+
+  const { invoiceNumber, amount, interacRef } = req.body;
+
+  if (!invoiceNumber || !interacRef) {
+    return res.status(400).json({ error: "invoiceNumber et interacRef sont requis." });
+  }
+
+  try {
+    // 1. Check in local DB mock handler first if running locally
+    if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+      const db = getDb();
+      const invoice = db.invoices.find((i: any) => i.number === invoiceNumber);
+      if (invoice) {
+        if (invoice.status === 'paid') {
+          return res.status(400).json({ error: "La facture est déjà payée." });
+        }
+        invoice.status = 'paid';
+        invoice.clientADeclarePaye = true;
+        invoice.interacReference = interacRef;
+        invoice.datePaiement = new Date().toISOString();
+        saveDb(db);
+        return res.json({ success: true, message: "Facture réconciliée avec succès (Mock DB).", invoice });
+      }
+    }
+
+    // 2. Query Supabase
+    const { data: invoice, error: fetchError } = await supabase
+      .from('invoices')
+      .select('*, profiles!client_id(full_name, email)')
+      .eq('numero', invoiceNumber)
+      .single();
+
+    if (fetchError || !invoice) {
+      return res.status(404).json({ error: `Facture ${invoiceNumber} introuvable.` });
+    }
+
+    if (invoice.statut === 'payee') {
+      return res.status(400).json({ error: "La facture est déjà réglée." });
+    }
+
+    // Optionnel: valider le montant (avec une marge de 0.05 $ pour les arrondis de centimes)
+    if (amount && Math.abs(parseFloat(invoice.montant_total) - parseFloat(amount)) > 0.05) {
+      return res.status(400).json({ 
+        error: `Montant non concordant. Attendu: ${invoice.montant_total}, Reçu: ${amount}` 
+      });
+    }
+
+    // Mettre à jour dans Supabase
+    const { error: updateError } = await supabase
+      .from('invoices')
+      .update({
+        statut: 'payee',
+        date_paiement: new Date().toISOString(),
+        interac_reference: interacRef,
+        client_a_declare_paye: true
+      })
+      .eq('id', invoice.id);
+
+    if (updateError) throw updateError;
+
+    // Envoi du courriel de confirmation via Resend
+    if (resendKey && invoice.profiles?.email) {
+      try {
+        const resend = new Resend(resendKey);
+        await resend.emails.send({
+          from: 'Facturation ComptaFlow <noreply@appiapro.ca>',
+          to: invoice.profiles.email,
+          subject: `Confirmation de réception de votre virement Interac - Facture ${invoiceNumber}`,
+          text: `Bonjour ${invoice.profiles.full_name || 'Client'},\n\nNous confirmons la bonne réception de votre virement Interac d'un montant de ${invoice.montant_total} $ (Réf Interac: ${interacRef}).\n\nVotre facture ${invoiceNumber} est maintenant marquée comme payée.\n\nCordialement,\nL'équipe ComptaFlow`
+        });
+      } catch (emailErr: any) {
+        console.warn("Échec d'envoi du courriel de confirmation :", emailErr.message);
+      }
+    }
+
+    // Logger dans la table d'audit
+    try {
+      await supabase.from('audit_logs').insert({
+        user_id: invoice.client_id,
+        action: 'AUTO_RECONCILE',
+        table_name: 'invoices',
+        record_id: invoice.id,
+        new_data: { interac_reference: interacRef, amount: invoice.montant_total }
+      });
+    } catch (auditErr) {
+      console.warn("Échec d'écriture dans les logs d'audit :", auditErr);
+    }
+
+    return res.json({ 
+      success: true, 
+      message: "Facture réconciliée avec succès et notifiée par courriel.",
+      invoiceId: invoice.id,
+      clientEmail: invoice.profiles?.email
+    });
+
+  } catch (err: any) {
+    botLog('RECONCILE_ERROR', 'System', err.message);
+    return res.status(500).json({ error: "Erreur interne lors de la réconciliation : " + err.message });
+  }
+});
+
 // --- LOI 25 : AUTOMATED ACCOUNT DELETION ("Right to be Forgotten" / Droit à l'oubli) ---
 app.post('/api/profile/delete', async (req, res) => {
   const { userId, email } = req.body;
