@@ -6,12 +6,23 @@ export interface Invoice {
   id: string;
   number: string;
   clientName: string;
+  clientEmail?: string;
   amount: number;
   date: number;
   dueDate: number;
-  status: 'paid' | 'pending' | 'overdue' | 'draft';
+  status: 'paid' | 'pending' | 'overdue' | 'draft' | 'cancelled';
   userId: string;
+  subAdminId?: string;
   items: { description: string; quantity: number; price: number }[];
+  // Champs Québec
+  montantHt?: number;
+  tps?: number;
+  tvq?: number;
+  montantTotal?: number;
+  // Flux Interac
+  clientADeclarePaye?: boolean;
+  interacReference?: string;
+  datePaiement?: string | null;
 }
 
 export interface Transaction {

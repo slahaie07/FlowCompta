@@ -1,4 +1,5 @@
 import { FileText, Clock, AlertCircle, TrendingUp, CheckCircle2, ArrowUpRight, HelpCircle, Mail as MailIcon, UploadCloud, ShieldCheck, Check, DollarSign } from 'lucide-react';
+import { TaxPredictor } from './TaxPredictor';
 import { UserData, AppMode } from '../../types';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';

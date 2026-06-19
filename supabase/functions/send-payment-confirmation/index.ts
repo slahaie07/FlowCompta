@@ -19,73 +19,83 @@ serve(async (req) => {
 
     const { invoiceId } = await req.json()
 
-    // Charger les infos de la facture, du client et du sous-admin
     const { data: invoice, error: invError } = await supabaseClient
       .from('invoices')
       .select('*, client:profiles!client_id(full_name, email), sub_admin:profiles!sub_admin_id(full_name, email)')
       .eq('id', invoiceId)
       .single()
 
-    if (invError || !invoice) {
-      throw invError || new Error('Invoice not found')
-    }
+    if (invError || !invoice) throw invError || new Error('Facture introuvable')
 
     const clientEmail = invoice.client?.email
     const clientName = invoice.client?.full_name || 'Client'
     const subAdminName = invoice.sub_admin?.full_name || 'Votre CPA'
-    const amount = parseFloat(invoice.montant_total).toFixed(2)
+    const total = parseFloat(invoice.montant_total).toFixed(2)
     const number = invoice.numero
     const ref = invoice.interac_reference || 'Dépôt direct'
-    
-    const emailBody = `
-      <h2>Paiement Interac Confirmé - ComptaFlow</h2>
-      <p>Bonjour ${clientName},</p>
-      <p>Votre comptable partenaire, <strong>${subAdminName}</strong>, a confirmé la réception du virement Interac pour la facture <strong>${number}</strong>.</p>
-      <p>Le statut de la facture a été mis à jour à <strong>Payée (Acquittée)</strong>.</p>
-      
-      <ul>
-        <li><strong>Numéro de facture :</strong> ${number}</li>
-        <li><strong>Montant reçu :</strong> ${amount} $ CAD</li>
-        <li><strong>Référence de transaction :</strong> ${ref}</li>
-        <li><strong>Date de paiement :</strong> ${invoice.date_paiement ? new Date(invoice.date_paiement).toLocaleString('fr-CA') : new Date().toLocaleString('fr-CA')}</li>
-      </ul>
-      
-      <p>Merci pour votre ponctualité,<br/>L'équipe ComptaFlow</p>
-    `
+    const datePaiement = invoice.date_paiement
+      ? new Date(invoice.date_paiement).toLocaleDateString('fr-CA')
+      : new Date().toLocaleDateString('fr-CA')
 
-    // Envoi via Resend API
+    const emailHtml = `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"/></head>
+<body style="margin:0;padding:0;background:#f4f1ea;font-family:Arial,sans-serif;">
+  <div style="max-width:600px;margin:40px auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 32px rgba(0,0,0,0.08);">
+    <div style="background:#0a0a0a;padding:32px 40px;text-align:center;">
+      <div style="font-family:Georgia,serif;font-size:28px;color:#C6A15B;letter-spacing:4px;">ComptaFlow</div>
+      <div style="font-size:9px;letter-spacing:4px;color:#666;margin-top:4px;text-transform:uppercase;">Plateforme Comptable Certifiée Québec</div>
+    </div>
+    <div style="padding:40px;">
+      <div style="background:#d1fae5;border:1px solid #6ee7b7;border-radius:12px;padding:20px;text-align:center;margin-bottom:32px;">
+        <div style="font-size:32px;margin-bottom:8px;">✅</div>
+        <div style="color:#065f46;font-size:18px;font-weight:bold;font-family:Georgia,serif;">Paiement Interac Confirmé</div>
+      </div>
+
+      <p style="color:#444;font-size:14px;margin:0 0 24px;">Bonjour <strong>${clientName}</strong>, votre comptable <strong>${subAdminName}</strong> a confirmé la réception de votre virement Interac.</p>
+
+      <div style="background:#faf7f0;border:1px solid #C6A15B33;border-radius:12px;padding:24px;margin-bottom:32px;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr><td style="padding:6px 0;color:#888;font-size:12px;">Numéro de facture</td><td style="padding:6px 0;color:#C6A15B;font-family:monospace;font-weight:bold;text-align:right;">${number}</td></tr>
+          <tr><td style="padding:6px 0;color:#888;font-size:12px;">Montant reçu</td><td style="padding:6px 0;color:#C6A15B;font-size:18px;font-weight:bold;font-family:Georgia,serif;text-align:right;">${total} $ CAD</td></tr>
+          <tr><td style="padding:6px 0;color:#888;font-size:12px;">Référence Interac</td><td style="padding:6px 0;color:#065f46;font-family:monospace;font-size:13px;font-weight:bold;text-align:right;">${ref}</td></tr>
+          <tr><td style="padding:6px 0;color:#888;font-size:12px;">Date de paiement</td><td style="padding:6px 0;color:#111;font-size:12px;text-align:right;">${datePaiement}</td></tr>
+          <tr><td style="padding:6px 0;color:#888;font-size:12px;">Statut</td><td style="padding:6px 0;text-align:right;"><span style="background:#d1fae5;color:#065f46;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:bold;">ACQUITTÉE</span></td></tr>
+        </table>
+      </div>
+
+      <p style="color:#666;font-size:12px;line-height:1.6;">Conservez ce courriel à titre de reçu. Vous pouvez également télécharger votre facture acquittée depuis votre portail ComptaFlow.</p>
+    </div>
+    <div style="padding:24px 40px;background:#faf7f0;text-align:center;">
+      <p style="color:#aaa;font-size:11px;margin:0;">ComptaFlow · compta-flow.net · TPS/TVQ conformes Revenu Québec</p>
+    </div>
+  </div>
+</body>
+</html>`
+
     const resendApiKey = Deno.env.get('RESEND_API_KEY')
-    if (resendApiKey) {
+    if (resendApiKey && clientEmail) {
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${resendApiKey}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${resendApiKey}` },
         body: JSON.stringify({
           from: 'ComptaFlow <noreply@compta-flow.net>',
           to: [clientEmail],
-          subject: `Paiement Interac Confirmé - Facture ${number}`,
-          html: emailBody
+          subject: `✅ Paiement confirmé — Facture ${number} acquittée`,
+          html: emailHtml
         })
       })
-      
-      if (!res.ok) {
-        throw new Error(await res.text())
-      }
+      if (!res.ok) throw new Error(await res.text())
     } else {
-      console.warn("RESEND_API_KEY non configurée, log de l'email :");
-      console.log(emailBody);
+      console.warn("RESEND_API_KEY non configurée — confirmation non envoyée.")
     }
 
     return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200,
     })
   } catch (err: any) {
     return new Response(JSON.stringify({ error: err.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400,
     })
   }
 })
