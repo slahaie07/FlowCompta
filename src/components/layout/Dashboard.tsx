@@ -29,7 +29,8 @@ import { SuperAdminClients } from './SuperAdminClients';
 import { SuperAdminInvoices } from './SuperAdminInvoices';
 import { InteracSettings } from './InteracSettings';
 import { SalesLedger } from './SalesLedger';
-import { BookOpen } from 'lucide-react';
+import { ServiceReports } from './ServiceReports';
+import { BookOpen, Briefcase } from 'lucide-react';
 
 interface DashboardProps {
   userData: UserData;
@@ -78,6 +79,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
     { id: 'invoices', label: 'Factures Clients', icon: FileText },
     { id: 'vault', label: 'Documents Clients', icon: VaultIcon },
     { id: 'sales_ledger', label: 'Grand Livre Ventes', icon: BookOpen },
+    { id: 'service_reports', label: 'Services Professionnels', icon: Briefcase },
     { id: 'interac_settings', label: 'Paramètres Interac', icon: Settings },
     { id: 'messaging', label: 'Canal Messagerie', icon: MessageSquare },
   ] : [
@@ -282,6 +284,9 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
                 } />
                 <Route path="sales_ledger" element={
                   (userData.role === 'sub_admin' || userData.role === 'super_admin') ? <SalesLedger /> : <Navigate to="/dashboard" replace />
+                } />
+                <Route path="service_reports" element={
+                  (userData.role === 'sub_admin' || userData.role === 'super_admin') ? <ServiceReports /> : <Navigate to="/dashboard" replace />
                 } />
                 <Route path="interac_settings" element={
                   userData.role === 'sub_admin' ? <InteracSettings userData={userData} /> : <Navigate to="/dashboard" replace />
