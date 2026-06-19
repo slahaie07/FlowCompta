@@ -1,15 +1,11 @@
-# 🏛️ Cabinet Comptaflow — Workflow de Déploiement Continu (CI/CD)
-# Ce workflow compile l'application et déploie le client statique HTML sur Cloudflare Pages.
+# Workflow Cloudflare Pages désactivé — déploiement géré par Vercel.
+# Pour réactiver, remplacer 'workflow_dispatch' par 'push' et 'pull_request',
+# et configurer CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID dans les secrets GitHub.
 
 name: Cloudflare Pages Deployment
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
