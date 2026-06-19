@@ -168,8 +168,8 @@ export function AdminClients({
         </Card>
       </div>
 
-      {/* Clients Table */}
-      <Card className="p-0 overflow-hidden">
+      {/* Clients Table — desktop */}
+      <Card className="p-0 overflow-hidden hidden md:block">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -190,9 +190,7 @@ export function AdminClients({
                     </div>
                   </td>
                   <td className="px-8 py-6">
-                    <div className="flex flex-wrap gap-2">
-                       {renderNeeds(client)}
-                    </div>
+                    <div className="flex flex-wrap gap-2">{renderNeeds(client)}</div>
                   </td>
                   <td className="px-8 py-6">
                     <Badge variant={client.status === 'En règle' || client.status === 'Actif' ? 'success' : (client.status === 'À réviser' ? 'error' : 'warning')}>
@@ -201,13 +199,11 @@ export function AdminClients({
                   </td>
                   <td className="px-8 py-6">
                     <div className="flex justify-end gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
-                       {/* HUB EXPORT UNIVERSEL */}
                        <div className="flex gap-1 bg-noir/50 p-1 rounded-xl border border-white/5">
-                          <button onClick={() => handleUniversalExport(client, 'excel')} className="p-2 hover:text-gold transition-colors" title="Export Excel Audit"><FileSpreadsheet size={16}/></button>
-                          <button onClick={() => handleUniversalExport(client, 'qb')} className="p-2 hover:text-gold transition-colors" title="Export QuickBooks Import"><Calculator size={16}/></button>
-                          <button onClick={() => handleUniversalExport(client, 'sage')} className="p-2 hover:text-gold transition-colors" title="Export Sage Import"><Database size={16}/></button>
+                          <button onClick={() => handleUniversalExport(client, 'excel')} className="p-2 hover:text-gold transition-colors" title="Export Excel"><FileSpreadsheet size={16}/></button>
+                          <button onClick={() => handleUniversalExport(client, 'qb')} className="p-2 hover:text-gold transition-colors" title="Export QuickBooks"><Calculator size={16}/></button>
+                          <button onClick={() => handleUniversalExport(client, 'sage')} className="p-2 hover:text-gold transition-colors" title="Export Sage"><Database size={16}/></button>
                        </div>
-
                        <Button variant="ghost" size="sm" className="gap-2 text-[10px] uppercase font-bold" onClick={() => handleAdminExport(client)}>
                           <Download size={14}/> Rapport
                        </Button>
@@ -225,6 +221,40 @@ export function AdminClients({
           </table>
         </div>
       </Card>
+
+      {/* Clients Cards — mobile */}
+      <div className="md:hidden space-y-4">
+        {clients.map((client) => (
+          <Card key={client.id} className="p-5 space-y-4 glass-card">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="font-bold text-silver">{client.displayName}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{client.companyName || 'Individuel'}</p>
+              </div>
+              <Badge variant={client.status === 'En règle' || client.status === 'Actif' ? 'success' : (client.status === 'À réviser' ? 'error' : 'warning')}>
+                {client.status}
+              </Badge>
+            </div>
+            <div className="flex flex-wrap gap-2">{renderNeeds(client)}</div>
+            <div className="flex items-center gap-2 pt-2 border-t border-white/5 flex-wrap">
+              <div className="flex gap-1 bg-noir/50 p-1 rounded-xl border border-white/5">
+                <button onClick={() => handleUniversalExport(client, 'excel')} className="p-2 hover:text-gold transition-colors text-slate-500" title="Excel"><FileSpreadsheet size={15}/></button>
+                <button onClick={() => handleUniversalExport(client, 'qb')} className="p-2 hover:text-gold transition-colors text-slate-500" title="QuickBooks"><Calculator size={15}/></button>
+                <button onClick={() => handleUniversalExport(client, 'sage')} className="p-2 hover:text-gold transition-colors text-slate-500" title="Sage"><Database size={15}/></button>
+              </div>
+              <Button variant="ghost" size="sm" className="gap-1.5 text-[10px] uppercase font-bold h-9 px-3 flex-1" onClick={() => handleAdminExport(client)}>
+                <Download size={13}/> Rapport
+              </Button>
+              <label className="cursor-pointer flex-1">
+                <div className="h-9 px-3 rounded-xl bg-gold/10 text-gold text-[10px] font-bold uppercase flex items-center justify-center gap-1.5 hover:bg-gold hover:text-noir transition-all">
+                  <UploadCloud size={13}/> Livrer
+                </div>
+                <input type="file" className="hidden" onChange={(e) => handleAdminUpload(e, client.id)} />
+              </label>
+            </div>
+          </Card>
+        ))}
+      </div>
 
       {/* Add Client Modal */}
       {showAddModal && (

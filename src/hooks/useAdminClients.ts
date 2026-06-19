@@ -3,191 +3,118 @@ import { supabase } from '../lib/supabase';
 import { ClientRecord } from '../types';
 import { toast } from 'sonner';
 
-const MOCK_CLIENTS: ClientRecord[] = [
-  { id: 'mock_client_1', displayName: 'Samuel Tremblay', companyName: 'Tremblay Tech Inc.', status: 'Actif', documents: 8, lastActive: 'Il y a 5 min', email: 'samuel@tremblaytech.ca', needs: ['T2', 'Tenue de livres'] },
-  { id: 'mock_client_2', displayName: 'Valérie Roy', companyName: 'Boutique Écolo Québec', status: 'Actif', documents: 15, lastActive: 'Il y a 2 heures', email: 'valerie@boutiqueecolo.ca', needs: ['TPS/TVQ', 'Tenue de livres'] },
-  { id: 'mock_client_3', displayName: 'Marc-André Gagnon', companyName: 'Constructions Gagnon Ltée', status: 'En attente', documents: 3, lastActive: 'Hier', email: 'contact@constructionsgagnon.ca', needs: ['T2', 'Salaires'] }
-];
-
 export function useAdminClients(isAdmin: boolean) {
   const [clients, setClients] = useState<ClientRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchClients = async () => {
-    if (!isAdmin) return;
+    if (!isAdmin) { setLoading(false); return; }
     setLoading(true);
     try {
-      let isMock = false;
-      let currentUserId = '';
-      const localSession = localStorage.getItem('comptaflow_mock_session');
-      if (localSession) {
-        isMock = true;
-      } else {
-        try {
-          const { data } = await supabase.auth.getSession();
-          if (data.session?.user) {
-            currentUserId = data.session.user.id;
-            isMock = currentUserId.startsWith('mock_');
-          } else {
-            isMock = true;
-          }
-        } catch (err) {
-          isMock = true;
-        }
-      }
+      const { data: sessionData } = await supabase.auth.getSession();
+      const uid = sessionData?.session?.user?.id;
 
-      if (isMock) {
-        const storedMockClientsStr = localStorage.getItem('comptaflow_mock_clients');
-        let combined = [...MOCK_CLIENTS];
-        if (storedMockClientsStr) {
-          try {
-            const storedMockClients = JSON.parse(storedMockClientsStr);
-            storedMockClients.forEach((newC: ClientRecord) => {
-              const idx = combined.findIndex(c => c.email === newC.email);
-              if (idx >= 0) {
-                combined[idx] = newC;
-              } else {
-                combined.unshift(newC);
-              }
-            });
-          } catch(e) {
-            console.error(e);
-          }
-        }
-        setClients(combined);
-        return;
-      }
+      if (!uid) { setClients([]); return; }
 
-      // Lire les profils de type client assignés à ce sub_admin (ou tous si super_admin)
-      let profileQuery = supabase.from('profiles').select('*').eq('role', 'client');
-      
-      // Lire aussi la table clients (flat records)
-      let clientsQuery = supabase.from('clients').select('*');
+      const { data: profData } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', uid)
+        .single();
+      const userRole = profData?.role || 'sub_admin';
 
-      // Vérifier le rôle de l'utilisateur pour appliquer l'isolation
-      const { data: profileData } = await supabase.from('profiles').select('role').eq('id', currentUserId).single();
-      const userRole = profileData?.role || 'client';
+      const combinedList: ClientRecord[] = [];
+      const seenIds = new Set<string>();
+
+      // 1. Load client PROFILES (auth users with role='client' assigned to this CPA)
+      let profileQuery = supabase
+        .from('profiles')
+        .select('id, full_name, display_name, company_name, company, email, status, needs, role')
+        .eq('role', 'client');
 
       if (userRole === 'sub_admin') {
-        profileQuery = profileQuery.eq('sub_admin_id', currentUserId);
-        clientsQuery = clientsQuery.eq('sub_admin_id', currentUserId);
+        profileQuery = profileQuery.eq('sub_admin_id', uid);
       }
 
-      const [profilesRes, clientsRes] = await Promise.all([profileQuery, clientsQuery]);
+      const { data: profiles, error: pErr } = await profileQuery;
+      if (pErr) console.warn("Profiles query:", pErr.message);
 
-      if (profilesRes.error) throw profilesRes.error;
-      if (clientsRes.error) throw clientsRes.error;
-
-      // Fusionner les dossiers enregistrés dans la table `clients` et les profils utilisateurs
-      const combinedList: ClientRecord[] = [];
-      const seenEmails = new Set<string>();
-
-      // 1. Ajouter les profils enregistrés
-      (profilesRes.data || []).forEach((p: any) => {
-        if (p.email) seenEmails.add(p.email.toLowerCase());
+      (profiles || []).forEach((p: any) => {
+        seenIds.add(p.id);
         combinedList.push({
           id: p.id,
           displayName: p.full_name || p.display_name || 'Sans Nom',
-          companyName: p.company_name || 'Particulier (Utilisateur)',
+          companyName: p.company_name || p.company || 'Particulier',
           status: p.status || 'Actif',
           documents: 0,
           lastActive: 'Récemment',
           email: p.email,
-          needs: p.needs || []
+          needs: Array.isArray(p.needs) ? p.needs : [],
         });
       });
 
-      // 2. Ajouter les fiches de la table `clients` (pour lesquelles le client n'a pas encore créé de profil, ou fiches CPA)
-      (clientsRes.data || []).forEach((c: any) => {
-        if (c.courriel && seenEmails.has(c.courriel.toLowerCase())) {
-          // Déjà inclus via son profil utilisateur, on peut éventuellement enrichir l'entrée
-          const existing = combinedList.find(item => item.email?.toLowerCase() === c.courriel.toLowerCase());
-          if (existing) {
-            existing.companyName = c.nom; // Préférer le nom de l'entreprise de la fiche
-            existing.needs = [c.no_tps ? 'TPS' : '', c.no_tvq ? 'TVQ' : ''].filter(Boolean);
-          }
-          return;
-        }
-        
+      // 2. Load client RECORDS from `clients` table (CPA's own client directory)
+      let clientsQuery = supabase
+        .from('clients')
+        .select('id, name, email, notes, status, needs, user_id, sub_admin_id');
+
+      if (userRole === 'sub_admin') {
+        // clients where this CPA is the owner
+        clientsQuery = clientsQuery.or(`user_id.eq.${uid},sub_admin_id.eq.${uid}`);
+      }
+
+      const { data: clientRecords, error: cErr } = await clientsQuery;
+      if (cErr) console.warn("Clients query:", cErr.message);
+
+      (clientRecords || []).forEach((c: any) => {
+        if (seenIds.has(c.id)) return; // already included via profiles
+        seenIds.add(c.id);
         combinedList.push({
           id: c.id,
-          displayName: c.nom,
-          companyName: c.nom,
-          status: 'Fiche active',
+          displayName: c.name || 'Sans Nom',
+          companyName: c.name || 'Particulier',
+          status: c.status || 'Actif',
           documents: 0,
           lastActive: 'Non connecté',
-          email: c.courriel,
-          needs: [c.no_tps ? 'TPS' : '', c.no_tvq ? 'TVQ' : ''].filter(Boolean)
+          email: c.email,
+          needs: Array.isArray(c.needs) ? c.needs : [],
         });
       });
 
       setClients(combinedList);
     } catch (e: any) {
-      console.error("Erreur de récupération des clients :", e);
+      console.error("Erreur récupération clients:", e);
       setClients([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const addClient = async (newClient: Omit<ClientRecord, 'id' | 'documents' | 'lastActive'>) => {
+  const addClient = async (newClient: Omit<ClientRecord, 'id' | 'documents' | 'lastActive'>): Promise<boolean> => {
     try {
-      let isMock = false;
-      let currentUserId = '';
-      const localSession = localStorage.getItem('comptaflow_mock_session');
-      if (localSession) {
-        isMock = true;
-      } else {
-        try {
-          const { data } = await supabase.auth.getSession();
-          if (data.session?.user) {
-            currentUserId = data.session.user.id;
-            isMock = currentUserId.startsWith('mock_');
-          } else {
-            isMock = true;
-          }
-        } catch (err) {
-          isMock = true;
-        }
-      }
+      const { data: sessionData } = await supabase.auth.getSession();
+      const uid = sessionData?.session?.user?.id;
+      if (!uid) throw new Error("Non authentifié.");
 
-      if (isMock) {
-        const clientRecord: ClientRecord = {
-          ...newClient,
-          id: `client_${Date.now()}`,
-          documents: 0,
-          lastActive: "À l'instant"
-        };
-        const storedMockClientsStr = localStorage.getItem('comptaflow_mock_clients');
-        let list = [];
-        if (storedMockClientsStr) {
-          try {
-            list = JSON.parse(storedMockClientsStr);
-          } catch(e) {}
-        }
-        list.push(clientRecord);
-        localStorage.setItem('comptaflow_mock_clients', JSON.stringify(list));
-        await fetchClients();
-        toast.success("Nouveau client enregistré localement.");
-        return true;
-      }
+      const needsArray = Array.isArray(newClient.needs) ? newClient.needs : [];
 
-      // Enregistrer dans la table `clients`
       const { error } = await supabase.from('clients').insert({
-        sub_admin_id: currentUserId,
-        nom: newClient.displayName,
-        courriel: newClient.email,
-        telephone: '',
-        notes: newClient.companyName // utilise companyName comme notes ou descriptif
+        user_id: uid,
+        sub_admin_id: uid,
+        name: newClient.displayName,
+        email: newClient.email || null,
+        notes: newClient.companyName,
+        status: newClient.status || 'En attente',
+        needs: needsArray,
       });
 
       if (error) throw error;
 
-      toast.success("Nouveau client créé dans la base du cabinet.");
+      toast.success("Nouveau client enregistré dans le cabinet.");
       await fetchClients();
       return true;
     } catch (e: any) {
-      console.error("Erreur lors de la création du client :", e);
+      console.error("Erreur création client:", e);
       toast.error(e.message || "Erreur de création du client.");
       return false;
     }
@@ -195,6 +122,18 @@ export function useAdminClients(isAdmin: boolean) {
 
   useEffect(() => {
     fetchClients();
+
+    const channel = supabase
+      .channel('clients_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'clients' }, () => {
+        fetchClients();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        fetchClients();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [isAdmin]);
 
   return { clients, loading, refreshClients: fetchClients, addClient };

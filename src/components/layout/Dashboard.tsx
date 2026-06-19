@@ -40,11 +40,11 @@ interface DashboardProps {
 export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, currentMode, onToggleMode }: DashboardProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { clients: adminClients, addClient } = useAdminClients(userData.role === 'sub_admin' || userData.role === 'super_admin');
   const { transactions } = useTransactions(undefined, userData.role === 'sub_admin' || userData.role === 'super_admin');
   const { lang, toggleLanguage } = useLanguage();
-  
+
   const [isVaultUnlocked, setIsVaultUnlocked] = useState(false);
   const [showMandateSigning, setShowMandateSigning] = useState(false);
 
@@ -86,6 +86,14 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
 
   const currentContract = generateContract('fr', 'Gestion Comptable ComptaFlow', 249, 'CAD');
 
+  const navigateTo = (id: string) => {
+    navigate(`${portalPrefix}/${id}`);
+    setIsSidebarOpen(false);
+  };
+
+  // Bottom nav: max 5 items for mobile
+  const bottomNavItems = navItems.slice(0, 5);
+
   return (
     <div className="min-h-screen flex bg-midnight relative overflow-hidden w-full">
       {/* Background Decor */}
@@ -94,16 +102,27 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
         <div className={`absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-gold/5 rounded-full blur-[120px] transition-colors duration-1000 ${currentMode === 'personal' ? 'bg-sapphire/5' : ''}`} />
       </div>
 
-      {/* Sidebar */}
-      <motion.nav 
+      {/* Mobile overlay backdrop */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsSidebarOpen(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 md:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar — desktop always visible, mobile as drawer */}
+      <motion.nav
         initial={false}
-        animate={{ 
-          width: isSidebarOpen ? (window.innerWidth < 768 ? '100%' : 300) : 0,
-          x: isSidebarOpen ? 0 : -300
-        }}
-        className="fixed md:relative h-screen bg-[#050505]/90 backdrop-blur-3xl border-r border-white/5 flex flex-col z-30 overflow-hidden shrink-0"
+        animate={{ x: isSidebarOpen ? 0 : -320 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="fixed md:sticky top-0 h-screen w-[280px] md:w-[300px] bg-[#050505]/95 backdrop-blur-3xl border-r border-white/5 flex flex-col z-30 shrink-0"
       >
-        <div className="p-8 flex items-center justify-between">
+        <div className="p-6 md:p-8 flex items-center justify-between">
           <div className="flex items-center gap-4" onClick={() => navigate(portalPrefix)} style={{ cursor: 'pointer' }}>
              <div className="w-10 h-10 rounded-xl premium-gradient-gold flex items-center justify-center shadow-[0_0_20px_rgba(198,161,91,0.3)]">
                <Shield size={20} className="text-midnight" />
@@ -113,27 +132,27 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
                <span className="text-[8px] uppercase tracking-[0.3em] text-slate-500 font-black mt-1 block">ComptaFlow Elite</span>
              </div>
           </div>
-          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden p-2 text-slate-500 hover:text-gold transition-colors"><X size={24}/></button>
+          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden p-2 text-slate-500 hover:text-gold transition-colors"><X size={22}/></button>
         </div>
 
         {userData.role === 'client' && (
-          <div className="px-8 mb-6">
+          <div className="px-6 md:px-8 mb-6">
              <ModeSwitcher mode={currentMode} onToggle={onToggleMode} />
           </div>
         )}
 
-        <div className="flex-1 px-4 py-4 space-y-2 overflow-y-auto custom-scrollbar">
+        <div className="flex-1 px-3 md:px-4 py-4 space-y-1 overflow-y-auto custom-scrollbar">
           {navItems.map(item => (
             <button
               key={item.id}
-              onClick={() => navigate(`${portalPrefix}/${item.id}`)}
-              className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 group relative overflow-hidden ${
-                activeTab === item.id 
-                  ? 'bg-gradient-to-r from-gold/20 to-transparent text-gold border-l-2 border-gold' 
+              onClick={() => navigateTo(item.id)}
+              className={`w-full flex items-center gap-4 px-4 md:px-5 py-3.5 md:py-4 rounded-2xl transition-all duration-300 group relative overflow-hidden ${
+                activeTab === item.id
+                  ? 'bg-gradient-to-r from-gold/20 to-transparent text-gold border-l-2 border-gold'
                   : 'text-slate-400 hover:text-ivoire hover:bg-white/5'
               }`}
             >
-              <item.icon size={20} className={activeTab === item.id ? 'text-gold' : 'text-slate-500 group-hover:text-gold transition-colors duration-500'} />
+              <item.icon size={18} className={activeTab === item.id ? 'text-gold' : 'text-slate-500 group-hover:text-gold transition-colors duration-300'} />
               <span className="text-sm font-bold tracking-tight">{item.label}</span>
               {activeTab === item.id && (
                 <motion.div layoutId="nav-glow" className="absolute inset-0 bg-gold/5 blur-xl -z-10" />
@@ -142,52 +161,60 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
           ))}
         </div>
 
-        <div className="p-8 border-t border-white/5 space-y-4 bg-black/20">
+        <div className="p-6 md:p-8 border-t border-white/5 space-y-3 bg-black/20">
           {userData.role === 'client' && (
-            <Button 
-              variant="ghost" 
-              className="w-full h-12 rounded-2xl border-gold/20 text-gold text-[9px] uppercase font-black tracking-widest gap-2 hover:bg-gold/5"
-              onClick={() => setShowMandateSigning(true)}
+            <Button
+              variant="ghost"
+              className="w-full h-11 rounded-2xl border-gold/20 text-gold text-[9px] uppercase font-black tracking-widest gap-2 hover:bg-gold/5"
+              onClick={() => { setShowMandateSigning(true); setIsSidebarOpen(false); }}
             >
               <PenTool size={14} /> Signer Mandat
             </Button>
           )}
-          
-          <div className="flex items-center gap-4 p-3 glass-card rounded-2xl border border-white/5 hover:border-gold/20 transition-colors group">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-gold/20 to-white/5 flex items-center justify-center text-gold font-serif font-bold shrink-0 shadow-lg border border-gold/10 group-hover:scale-105 transition-transform">
+
+          <div className="flex items-center gap-3 p-3 glass-card rounded-2xl border border-white/5 hover:border-gold/20 transition-colors group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-gold/20 to-white/5 flex items-center justify-center text-gold font-serif font-bold shrink-0 shadow-lg border border-gold/10">
               {userData.fullName?.charAt(0) || userData.displayName?.charAt(0) || 'U'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-black text-silver truncate group-hover:text-ivoire transition-colors">{userData.fullName || userData.displayName}</p>
-              <p className="text-[10px] text-slate-500 uppercase font-black truncate tracking-tighter">
+              <p className="text-sm font-black text-silver truncate">{userData.fullName || userData.displayName}</p>
+              <p className="text-[9px] text-slate-500 uppercase font-black truncate tracking-tighter">
                 {userData.role === 'super_admin' ? 'Propriétaire Suprême' : userData.role === 'sub_admin' ? 'Préparateur Partenaire' : 'Espace Client'}
               </p>
             </div>
           </div>
-          
-          <Button variant="ghost" size="sm" onClick={onLogout} className="w-full gap-2 hover:border-red-500/30 hover:text-red-400 h-12 rounded-2xl">
+
+          <Button variant="ghost" size="sm" onClick={onLogout} className="w-full gap-2 hover:border-red-500/30 hover:text-red-400 h-11 rounded-2xl">
             <LogOut size={14} /> Déconnexion
           </Button>
         </div>
       </motion.nav>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden relative z-10 w-full">
-        <header className="h-20 bg-midnight/40 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-6 md:px-12 shrink-0">
-          <div className="flex items-center gap-6">
-             <button onClick={() => setIsSidebarOpen(true)} className="md:hidden p-3 text-slate-400 bg-white/5 rounded-2xl hover:text-gold transition-colors"><Menu size={20}/></button>
-             <div className="relative hidden md:block w-[450px] group">
+      <main className="flex-1 flex flex-col min-h-screen overflow-hidden relative z-10 w-full md:w-[calc(100%-300px)]">
+        {/* Header */}
+        <header className="h-16 md:h-20 bg-midnight/60 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 md:px-12 shrink-0 sticky top-0 z-10">
+          <div className="flex items-center gap-3 md:gap-6">
+             <button
+               onClick={() => setIsSidebarOpen(true)}
+               className="p-2.5 text-slate-400 bg-white/5 rounded-xl hover:text-gold transition-colors md:hidden"
+             >
+               <Menu size={20}/>
+             </button>
+             <div className="relative hidden md:block w-[400px] group">
                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-gold transition-colors duration-500" size={18} />
                <input type="text" placeholder="Recherche sémantique sécurisée..." className="w-full bg-white/5 border border-white/5 rounded-2xl pl-14 pr-6 py-3 text-sm focus:ring-1 focus:ring-gold/20 focus:bg-white/10 outline-none transition-all placeholder:text-slate-600 font-medium" />
              </div>
+             {/* Mobile logo */}
+             <span className="md:hidden font-serif font-bold text-gold tracking-[0.1em] italic text-xl animated-gradient-text">CF</span>
           </div>
-          <div className="flex items-center gap-3 md:gap-4">
-             <button 
+          <div className="flex items-center gap-2 md:gap-4">
+             <button
                onClick={toggleLanguage}
-               className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-gold/30 transition-all text-slate-400 hover:text-gold cursor-pointer"
+               className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/5 border border-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-gold/30 transition-all text-slate-400 hover:text-gold cursor-pointer"
              >
                <Globe size={12} className="text-gold" />
-               <span>{lang.toUpperCase()}</span>
+               <span className="hidden sm:inline">{lang.toUpperCase()}</span>
              </button>
             <button className="p-2.5 bg-white/5 border border-white/5 hover:border-gold/30 rounded-xl transition-all relative group">
               <Bell size={18} className="text-slate-400 group-hover:text-gold transition-colors" />
@@ -195,16 +222,17 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
             </button>
           </div>
         </header>
-        
-        <div className="flex-1 overflow-y-auto p-4 md:p-10 custom-scrollbar pb-32 md:pb-20 w-full">
+
+        {/* Page content — extra bottom padding on mobile for bottom nav */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-10 custom-scrollbar pb-24 md:pb-10 w-full">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname + currentMode}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-              className="h-full w-full"
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25 }}
+              className="w-full"
             >
               <Routes>
                 {/* Redirections initiales */}
@@ -244,7 +272,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
                   userData.role === 'client' ? <Overview userData={userData} isLoading={false} currentMode={currentMode} onSignMandate={() => setShowMandateSigning(true)} /> : <Navigate to="/dashboard" replace />
                 } />
 
-                {/* Vues Communes mais isolées par RLS */}
+                {/* Vues Communes */}
                 <Route path="transactions" element={<Transactions currentMode={currentMode} isAdmin={userData.role === 'sub_admin' || userData.role === 'super_admin'} />} />
                 <Route path="invoices" element={<Invoices isAdmin={userData.role === 'sub_admin' || userData.role === 'super_admin'} />} />
                 <Route path="messaging" element={<Messaging userData={userData} />} />
@@ -265,11 +293,44 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
         </div>
       </main>
 
+      {/* Mobile Bottom Navigation Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 z-20 md:hidden bg-[#050505]/95 backdrop-blur-3xl border-t border-white/5 safe-area-inset-bottom">
+        <div className="flex items-center justify-around px-2 py-2">
+          {bottomNavItems.map(item => (
+            <button
+              key={item.id}
+              onClick={() => navigateTo(item.id)}
+              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 flex-1 min-w-0 ${
+                activeTab === item.id ? 'text-gold' : 'text-slate-500'
+              }`}
+            >
+              <item.icon size={20} className={activeTab === item.id ? 'text-gold' : ''} />
+              <span className="text-[9px] font-black uppercase tracking-tight truncate w-full text-center leading-tight">
+                {item.label.split(' ')[0]}
+              </span>
+              {activeTab === item.id && (
+                <span className="absolute bottom-0 w-1 h-1 rounded-full bg-gold" />
+              )}
+            </button>
+          ))}
+          {/* More button if more than 5 nav items */}
+          {navItems.length > 5 && (
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 flex-1 text-slate-500"
+            >
+              <Menu size={20} />
+              <span className="text-[9px] font-black uppercase tracking-tight">Plus</span>
+            </button>
+          )}
+        </div>
+      </nav>
+
       {/* Signature du Mandat Électronique */}
       {showMandateSigning && (
-        <EliteSignature 
-          contract={currentContract} 
-          onComplete={() => setShowMandateSigning(false)} 
+        <EliteSignature
+          contract={currentContract}
+          onComplete={() => setShowMandateSigning(false)}
         />
       )}
     </div>

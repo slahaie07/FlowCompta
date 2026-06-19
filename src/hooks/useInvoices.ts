@@ -9,72 +9,76 @@ export function useInvoices(userId?: string, isAdmin: boolean = false) {
 
   useEffect(() => {
     fetchInvoices();
+
+    // Real-time: refresh whenever invoices change
+    const channel = supabase
+      .channel('invoices_realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices' }, () => {
+        fetchInvoices();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [userId, isAdmin]);
 
   const fetchInvoices = async () => {
     setLoading(true);
     try {
-      let uid = '';
-      let userRole = 'client';
-
       const { data: sessData } = await supabase.auth.getSession();
-      if (sessData?.session?.user) {
-        uid = sessData.session.user.id;
-        
-        // Get user role
-        const { data: prof } = await supabase.from('profiles').select('role').eq('id', uid).single();
-        userRole = prof?.role || 'client';
-      }
+      const uid = sessData?.session?.user?.id;
+      if (!uid) { setInvoices([]); return; }
 
-      if (!uid) {
-        setInvoices([]);
-        return;
-      }
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', uid)
+        .single();
+      const userRole = prof?.role || 'client';
 
+      // Join client profile via client_id → profiles.id (FK set in migration)
       let query = supabase
         .from('invoices')
-        .select('*, client:profiles!client_id(full_name, email)')
+        .select('*, client:profiles!invoices_client_profile_fkey(full_name, email)')
         .order('created_at', { ascending: false });
 
-      // Filtrer selon le rôle pour isolation totale
       if (userRole === 'super_admin') {
-        // Super admin voit tout
+        // sees all
       } else if (userRole === 'sub_admin') {
-        // Sub admin voit seulement les factures de ses clients
         query = query.eq('sub_admin_id', uid);
       } else {
-        // Client voit seulement ses factures
+        // client sees their own invoices
         query = query.eq('client_id', uid);
       }
 
-      // Filtre optionnel par client spécifique
-      if (userId) {
+      if (userId && userRole !== 'client') {
         query = query.eq('client_id', userId);
       }
-      
+
       const { data, error } = await query;
       if (error) throw error;
-      
-      const mapped = (data || []).map((inv: any) => ({
+
+      const mapped = (data || []).map((inv: any): Invoice => ({
         id: inv.id,
-        number: inv.numero,
-        clientName: inv.client?.full_name || 'Particulier',
-        clientEmail: inv.client?.email || '',
-        amount: parseFloat(inv.montant_total) || 0,
-        date: new Date(inv.date_emission).getTime(),
+        number: inv.numero || inv.number || '',
+        clientName: inv.client?.full_name || inv.client || 'Particulier',
+        clientEmail: inv.client?.email || inv.client_email || '',
+        amount: parseFloat(inv.montant_total ?? inv.total ?? inv.subtotal ?? 0) || 0,
+        date: inv.date_emission
+          ? new Date(inv.date_emission).getTime()
+          : new Date(inv.inv_date || inv.created_at).getTime(),
         dueDate: inv.date_echeance ? new Date(inv.date_echeance).getTime() : 0,
-        status: mapStatusToFront(inv.statut),
-        userId: inv.client_id,
-        subAdminId: inv.sub_admin_id,
+        status: mapStatus(inv.statut ?? inv.status),
+        userId: inv.client_id || inv.user_id,
+        subAdminId: inv.sub_admin_id || inv.user_id,
         items: [],
-        montantHt: parseFloat(inv.montant_ht) || 0,
-        tps: parseFloat(inv.tps) || 0,
-        tvq: parseFloat(inv.tvq) || 0,
-        montantTotal: parseFloat(inv.montant_total) || 0,
+        montantHt: parseFloat(inv.montant_ht ?? inv.subtotal ?? 0) || 0,
+        tps: parseFloat(inv.tps ?? inv.gst ?? 0) || 0,
+        tvq: parseFloat(inv.tvq ?? inv.qst ?? 0) || 0,
+        montantTotal: parseFloat(inv.montant_total ?? inv.total ?? 0) || 0,
         clientADeclarePaye: inv.client_a_declare_paye ?? false,
         interacReference: inv.interac_reference ?? null,
         datePaiement: inv.date_paiement ?? null,
-      })) as Invoice[];
+      }));
 
       setInvoices(mapped);
     } catch (e) {
@@ -85,57 +89,58 @@ export function useInvoices(userId?: string, isAdmin: boolean = false) {
     }
   };
 
-  const mapStatusToFront = (dbStatus: string): Invoice['status'] => {
-    if (dbStatus === 'payee') return 'paid';
-    if (dbStatus === 'envoyee') return 'pending';
-    if (dbStatus === 'brouillon') return 'draft';
-    return 'overdue';
+  const mapStatus = (s: string): Invoice['status'] => {
+    if (!s) return 'draft';
+    // French statuses
+    if (s === 'payee')    return 'paid';
+    if (s === 'envoyee')  return 'pending';
+    if (s === 'brouillon') return 'draft';
+    if (s === 'annulee')  return 'cancelled';
+    // English statuses (legacy)
+    if (s === 'paid')     return 'paid';
+    if (s === 'pend')     return 'pending';
+    if (s === 'late')     return 'overdue';
+    return 'draft';
   };
 
   const addInvoice = async (data: Omit<Invoice, 'id' | 'userId'>, targetUserId?: string) => {
     try {
       if (!targetUserId) throw new Error("ID Client manquant.");
 
-      let currentUserId = '';
       const { data: sess } = await supabase.auth.getSession();
-      if (sess?.session?.user) {
-        currentUserId = sess.session.user.id;
-      }
-
+      const currentUserId = sess?.session?.user?.id;
       if (!currentUserId) throw new Error("Non authentifié.");
 
-      const newInvoice = {
+      const { error } = await supabase.from('invoices').insert({
+        user_id: currentUserId,
         sub_admin_id: currentUserId,
         client_id: targetUserId,
         numero: data.number,
-        montant_ht: data.amount, // montant HT saisi
+        montant_ht: data.amount,
         statut: 'brouillon',
         date_emission: new Date(data.date).toISOString().split('T')[0],
-        date_echeance: data.dueDate ? new Date(data.dueDate).toISOString().split('T')[0] : null
-      };
+        date_echeance: data.dueDate ? new Date(data.dueDate).toISOString().split('T')[0] : null,
+      });
 
-      const { error } = await supabase.from('invoices').insert(newInvoice);
       if (error) throw error;
-
-      toast.success("Facture créée avec succès (Taxes calculées automatiquement).");
+      toast.success("Facture créée (TPS/TVQ calculées automatiquement).");
       fetchInvoices();
     } catch (e: any) {
-      console.error("Erreur lors de la création de facture :", e);
-      toast.error(e.message || "Erreur de création de facture.");
+      console.error("Erreur création facture:", e);
+      toast.error(e.message || "Erreur de création.");
     }
   };
 
   const updateInvoiceStatus = async (invoiceId: string, status: string, interacRef?: string) => {
     try {
-      const updatePayload: any = { statut: status };
+      const payload: any = { statut: status };
       if (status === 'payee') {
-        updatePayload.date_paiement = new Date().toISOString();
-        if (interacRef) updatePayload.interac_reference = interacRef;
+        payload.date_paiement = new Date().toISOString();
+        if (interacRef) payload.interac_reference = interacRef;
       }
 
-      const { error } = await supabase.from('invoices').update(updatePayload).eq('id', invoiceId);
+      const { error } = await supabase.from('invoices').update(payload).eq('id', invoiceId);
       if (error) throw error;
-
       toast.success("Facture mise à jour.");
       fetchInvoices();
     } catch (e: any) {
@@ -150,14 +155,10 @@ export function useInvoices(userId?: string, isAdmin: boolean = false) {
         .from('invoices')
         .update({ client_a_declare_paye: true })
         .eq('id', invoiceId);
-
       if (error) throw error;
 
-      // Notifier le comptable par courriel
       try {
-        await supabase.functions.invoke('notify-subadmin-payment', {
-          body: { invoiceId }
-        });
+        await supabase.functions.invoke('notify-subadmin-payment', { body: { invoiceId } });
       } catch {
         console.warn("Notification comptable non envoyée (fonction non déployée).");
       }
@@ -166,7 +167,7 @@ export function useInvoices(userId?: string, isAdmin: boolean = false) {
       fetchInvoices();
     } catch (e: any) {
       console.error(e);
-      toast.error(e.message || "Erreur lors de la mise à jour.");
+      toast.error(e.message || "Erreur.");
     }
   };
 

@@ -10,45 +10,50 @@ export function useTransactions(userId?: string, isAdmin: boolean = false) {
   useEffect(() => {
     fetchTransactions();
 
-    // Real-time subscription
     const channel = supabase
-      .channel('schema-db-changes')
+      .channel('transactions_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
         fetchTransactions();
       })
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [userId, isAdmin]);
 
   const fetchTransactions = async () => {
     try {
       let uid = '';
       const { data } = await supabase.auth.getSession();
-      if (data?.session?.user) {
-        uid = data.session.user.id;
-      }
+      if (data?.session?.user) uid = data.session.user.id;
 
       const targetId = userId || uid;
-      if (!targetId) {
-        setTransactions([]);
-        setLoading(false);
-        return;
-      }
+      if (!targetId) { setTransactions([]); setLoading(false); return; }
 
       let query = supabase
         .from('transactions')
         .select('*')
-        .order('date', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (!isAdmin) query = query.eq('user_id', targetId);
-      
+
       const { data: dbData, error } = await query;
       if (error) throw error;
-      
-      setTransactions(dbData || []);
+
+      // Map DB columns → Transaction type (handles both old and new schema)
+      const mapped: Transaction[] = (dbData || []).map((t: any) => ({
+        id: t.id,
+        userId: t.user_id,
+        type: t.type || 'purchase',
+        amount: parseFloat(t.amount) || 0,
+        description: t.description || t.label || '',
+        date: t.date || (t.tx_date ? new Date(t.tx_date).getTime() : new Date(t.created_at).getTime()),
+        status: t.status || 'pending',
+        category: t.category || 'Général',
+        context: (t.context as 'business' | 'personal') || 'business',
+        aiConfidence: t.ai_confidence ?? undefined,
+      }));
+
+      setTransactions(mapped);
     } catch (e) {
       console.error("Transactions error:", e);
       setTransactions([]);
@@ -64,30 +69,23 @@ export function useTransactions(userId?: string, isAdmin: boolean = false) {
         const { data: sess } = await supabase.auth.getSession();
         uid = sess?.session?.user?.id;
       }
-
       if (!uid) throw new Error("Utilisateur non identifié.");
-      
-      const newTx = { ...data, user_id: uid };
 
-      const { data: dbData, error } = await supabase.from('transactions').insert(newTx).select();
+      const newTx = {
+        user_id: uid,
+        label: data.description,        // legacy column
+        description: data.description,  // new column
+        amount: data.amount,
+        tx_date: new Date(data.date).toISOString().split('T')[0], // legacy column
+        date: data.date,                // new column
+        type: data.type,
+        status: data.status || 'pending',
+        category: data.category || 'Général',
+        context: data.context || 'business',
+      };
+
+      const { error } = await supabase.from('transactions').insert(newTx);
       if (error) throw error;
-      
-      // LIVE TRACKER ALERT
-      try {
-        await fetch('/api/webhook/transaction-alert', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            transactionId: dbData[0].id,
-            amount: newTx.amount,
-            vendor: newTx.description,
-            date: new Date(newTx.date).toLocaleDateString(),
-            type: newTx.type
-          })
-        });
-      } catch(e) {
-        console.warn("Live tracker alert failed");
-      }
 
       fetchTransactions();
     } catch (e) {
