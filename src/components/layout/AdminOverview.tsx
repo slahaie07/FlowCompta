@@ -1,4 +1,5 @@
 import { BarChart3, Users, Clock, TrendingUp, ArrowUpRight, Activity, Send } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { UserData, ClientRecord } from '../../types';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
@@ -87,6 +88,40 @@ export function AdminOverview() {
           </div>
         </Card>
       </div>
+
+      {/* Revenue Chart */}
+      <Card className="p-8 glass-card">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-xs font-black text-silver uppercase tracking-[0.3em]">Évolution du Chiffre d'Affaires</h3>
+            <p className="text-[10px] text-slate-500 font-bold mt-1">6 derniers mois — Factures acquittées</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-gold/80" />
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Revenus TTC</span>
+          </div>
+        </div>
+        <div className="h-48">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={stats.monthlyRevenue} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#C6A15B" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#C6A15B" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="month" tick={{ fill: '#4b5563', fontSize: 10, fontWeight: 700 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#4b5563', fontSize: 10, fontWeight: 700 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${(v/1000).toFixed(0)}k$`} width={36} />
+              <Tooltip
+                contentStyle={{ background: '#0B0B0C', border: '1px solid rgba(198,161,91,0.2)', borderRadius: 12, color: '#F3EEE3', fontSize: 11, fontWeight: 700 }}
+                formatter={(v: any) => [`${Number(v).toLocaleString('fr-CA')} $`, 'Revenus']}
+                labelStyle={{ color: '#9ca3af' }}
+              />
+              <Area type="monotone" dataKey="revenue" stroke="#C6A15B" strokeWidth={2} fill="url(#goldGrad)" dot={{ fill: '#C6A15B', r: 3 }} activeDot={{ r: 5, fill: '#C6A15B' }} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Recent Global Activity */}

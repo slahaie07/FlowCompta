@@ -1,4 +1,4 @@
-import { Bell, Search, Settings, Shield, LogOut, Menu, X, LayoutDashboard, Receipt, MessageSquare, Vault as VaultIcon, Globe, HelpCircle, FileText, Users, ShieldCheck, PenTool } from 'lucide-react';
+import { Bell, Search, Settings, Shield, LogOut, Menu, X, LayoutDashboard, Receipt, MessageSquare, Vault as VaultIcon, Globe, HelpCircle, FileText, Users, ShieldCheck, PenTool, Brain, Puzzle } from 'lucide-react';
 import { UserData, Message, AppMode } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
@@ -16,6 +16,7 @@ import { BiometricVerification } from '../ui/BiometricVerification';
 import { EliteSignature } from '../ui/EliteSignature';
 import { useAdminClients } from '../../hooks/useAdminClients';
 import { useTransactions } from '../../hooks/useTransactions';
+import { useUnreadMessages } from '../../hooks/useUnreadMessages';
 import { Button } from '../ui/Button';
 import { ModeSwitcher } from '../ui/ModeSwitcher';
 import { generateContract } from '../../lib/contractEngine';
@@ -27,6 +28,11 @@ import { SuperAdminSubAdmins } from './SuperAdminSubAdmins';
 import { SuperAdminClients } from './SuperAdminClients';
 import { SuperAdminInvoices } from './SuperAdminInvoices';
 import { InteracSettings } from './InteracSettings';
+import { SalesLedger } from './SalesLedger';
+import { ServiceReports } from './ServiceReports';
+import { EliteIntelligence } from './EliteIntelligence';
+import { Integrations } from './Integrations';
+import { BookOpen, Briefcase } from 'lucide-react';
 
 interface DashboardProps {
   userData: UserData;
@@ -45,6 +51,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
   const { transactions } = useTransactions(undefined, userData.role === 'sub_admin' || userData.role === 'super_admin');
   const { lang, toggleLanguage } = useLanguage();
 
+  const { unreadCount: msgUnread, markAllRead } = useUnreadMessages(userData.id, userData.isAdmin);
   const [isVaultUnlocked, setIsVaultUnlocked] = useState(false);
   const [showMandateSigning, setShowMandateSigning] = useState(false);
 
@@ -65,6 +72,8 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
     { id: 'super_subadmins', label: 'Gestion Comptables', icon: Shield },
     { id: 'super_clients', label: 'Tous les Clients', icon: Users },
     { id: 'super_invoices', label: 'Toutes les Factures', icon: FileText },
+    { id: 'sales_ledger', label: 'Grand Livre Global', icon: BookOpen },
+    { id: 'service_reports', label: 'Services & Normes', icon: Briefcase },
     { id: 'messaging', label: 'Support Réseau', icon: MessageSquare },
   ] : userData.role === 'sub_admin' ? [
     { id: 'admin_overview', label: 'Tableau de bord', icon: LayoutDashboard },
@@ -72,6 +81,10 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
     { id: 'transactions', label: 'Journal des flux', icon: Receipt },
     { id: 'invoices', label: 'Factures Clients', icon: FileText },
     { id: 'vault', label: 'Documents Clients', icon: VaultIcon },
+    { id: 'sales_ledger', label: 'Grand Livre Ventes', icon: BookOpen },
+    { id: 'service_reports', label: 'Services Professionnels', icon: Briefcase },
+    { id: 'elite_intelligence', label: 'Intelligence Fiscale IA', icon: Brain },
+    { id: 'integrations', label: 'Automatisations', icon: Puzzle },
     { id: 'interac_settings', label: 'Paramètres Interac', icon: Settings },
     { id: 'messaging', label: 'Canal Messagerie', icon: MessageSquare },
   ] : [
@@ -87,6 +100,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
   const currentContract = generateContract('fr', 'Gestion Comptable ComptaFlow', 249, 'CAD');
 
   const navigateTo = (id: string) => {
+    if (id === 'messaging') markAllRead();
     navigate(`${portalPrefix}/${id}`);
     setIsSidebarOpen(false);
   };
@@ -152,8 +166,18 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
                   : 'text-slate-400 hover:text-ivoire hover:bg-white/5'
               }`}
             >
-              <item.icon size={18} className={activeTab === item.id ? 'text-gold' : 'text-slate-500 group-hover:text-gold transition-colors duration-300'} />
+              <span className="relative">
+                <item.icon size={18} className={activeTab === item.id ? 'text-gold' : 'text-slate-500 group-hover:text-gold transition-colors duration-300'} />
+                {item.id === 'messaging' && msgUnread > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full text-[8px] font-black text-white flex items-center justify-center shadow-lg">
+                    {msgUnread > 9 ? '9+' : msgUnread}
+                  </span>
+                )}
+              </span>
               <span className="text-sm font-bold tracking-tight">{item.label}</span>
+              {item.id === 'messaging' && msgUnread > 0 && (
+                <span className="ml-auto bg-red-500/20 text-red-400 text-[9px] font-black px-1.5 py-0.5 rounded-full">{msgUnread}</span>
+              )}
               {activeTab === item.id && (
                 <motion.div layoutId="nav-glow" className="absolute inset-0 bg-gold/5 blur-xl -z-10" />
               )}
@@ -262,6 +286,18 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
                 } />
                 <Route path="admin_clients" element={
                   userData.role === 'sub_admin' ? <AdminClients clients={adminClients} isAdmin={true} onAddClient={addClient} /> : <Navigate to="/dashboard" replace />
+                } />
+                <Route path="sales_ledger" element={
+                  (userData.role === 'sub_admin' || userData.role === 'super_admin') ? <SalesLedger /> : <Navigate to="/dashboard" replace />
+                } />
+                <Route path="service_reports" element={
+                  (userData.role === 'sub_admin' || userData.role === 'super_admin') ? <ServiceReports /> : <Navigate to="/dashboard" replace />
+                } />
+                <Route path="elite_intelligence" element={
+                  userData.role === 'sub_admin' ? <EliteIntelligence transactions={transactions} userData={userData} /> : <Navigate to="/dashboard" replace />
+                } />
+                <Route path="integrations" element={
+                  userData.role === 'sub_admin' ? <Integrations /> : <Navigate to="/dashboard" replace />
                 } />
                 <Route path="interac_settings" element={
                   userData.role === 'sub_admin' ? <InteracSettings userData={userData} /> : <Navigate to="/dashboard" replace />

@@ -160,7 +160,7 @@ export function useInvoices(userId?: string, isAdmin: boolean = false) {
       try {
         await supabase.functions.invoke('notify-subadmin-payment', { body: { invoiceId } });
       } catch {
-        console.warn("Notification comptable non envoyée (fonction non déployée).");
+        console.warn("Notification comptable non envoyée.");
       }
 
       toast.success("Confirmation de paiement envoyée au comptable.");

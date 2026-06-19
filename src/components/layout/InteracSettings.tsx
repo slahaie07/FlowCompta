@@ -3,8 +3,15 @@ import { supabase } from '../../lib/supabase';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { Mail, HelpCircle, CheckSquare, Square, Shield } from 'lucide-react';
+import { Mail, HelpCircle, CheckSquare, Square, Shield, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
+
+const FEE_OPTIONS = [
+  { value: 'interac', label: 'Interac e-Transfert', desc: 'Aucun frais (0%)', rate: 0, flat: 0 },
+  { value: 'stripe',  label: 'Stripe',              desc: '2.9% + 0.30$ par transaction', rate: 0.029, flat: 0.30 },
+  { value: 'paypal',  label: 'PayPal',              desc: '3.49% + 0.49$ par transaction', rate: 0.0349, flat: 0.49 },
+  { value: 'custom',  label: 'Personnalisé',        desc: 'Définissez votre propre taux', rate: 0, flat: 0 },
+];
 
 interface InteracSettingsProps {
   userData: any;
@@ -14,6 +21,9 @@ export function InteracSettings({ userData }: InteracSettingsProps) {
   const [interacEmail, setInteracEmail] = useState('');
   const [interacQuestion, setInteracQuestion] = useState('');
   const [interacAutodepot, setInteracAutodepot] = useState(true);
+  const [feeType, setFeeType] = useState('interac');
+  const [customFeeRate, setCustomFeeRate] = useState('0');
+  const [customFeeFlat, setCustomFeeFlat] = useState('0');
   const [loading, setLoading] = useState(false);
 
   // Charger les paramètres actuels du sub_admin
@@ -32,6 +42,9 @@ export function InteracSettings({ userData }: InteracSettingsProps) {
           setInteracEmail(data.interac_email || '');
           setInteracQuestion(data.interac_question || '');
           setInteracAutodepot(data.interac_autodepot !== false);
+          setFeeType(data.fee_type || 'interac');
+          setCustomFeeRate(String(data.fee_rate || 0));
+          setCustomFeeFlat(String(data.fee_flat || 0));
         }
       } catch (err) {
         console.error("Erreur de chargement des paramètres Interac :", err);
@@ -44,12 +57,19 @@ export function InteracSettings({ userData }: InteracSettingsProps) {
     e.preventDefault();
     setLoading(true);
     try {
+      const selectedFee = FEE_OPTIONS.find(f => f.value === feeType);
+      const finalRate = feeType === 'custom' ? parseFloat(customFeeRate) / 100 : (selectedFee?.rate ?? 0);
+      const finalFlat = feeType === 'custom' ? parseFloat(customFeeFlat) : (selectedFee?.flat ?? 0);
+
       const { error } = await supabase
         .from('profiles')
         .update({
           interac_email: interacEmail.toLowerCase().trim(),
           interac_question: interacAutodepot ? null : interacQuestion,
-          interac_autodepot: interacAutodepot
+          interac_autodepot: interacAutodepot,
+          fee_type: feeType,
+          fee_rate: finalRate,
+          fee_flat: finalFlat,
         })
         .eq('id', userData.id);
 
@@ -134,10 +154,63 @@ export function InteracSettings({ userData }: InteracSettingsProps) {
             </div>
           )}
 
+          {/* Section frais de traitement */}
+          <div className="space-y-4 pt-4 border-t border-white/5">
+            <div>
+              <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-500 block mb-1 flex items-center gap-2">
+                <DollarSign size={12} className="text-gold" /> Mode de paiement des clients
+              </label>
+              <p className="text-[10px] text-slate-600 mb-4 leading-relaxed">
+                Sélectionnez comment vos clients paient. Les frais seront automatiquement déduits du revenu net dans le Grand Livre.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {FEE_OPTIONS.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setFeeType(opt.value)}
+                    className={`p-4 rounded-2xl text-left border transition-all duration-300 ${
+                      feeType === opt.value ? 'border-gold bg-gold/10 text-gold' : 'border-white/10 bg-white/5 text-slate-400 hover:border-gold/30'
+                    }`}
+                  >
+                    <p className="text-sm font-bold">{opt.label}</p>
+                    <p className="text-[10px] mt-1 opacity-70">{opt.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {feeType === 'custom' && (
+              <div className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-4 duration-300">
+                <Input
+                  label="Taux (%)"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  placeholder="Ex: 2.90"
+                  value={customFeeRate}
+                  onChange={e => setCustomFeeRate(e.target.value)}
+                  className="bg-noir border-white/10"
+                />
+                <Input
+                  label="Frais fixe ($)"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="Ex: 0.30"
+                  value={customFeeFlat}
+                  onChange={e => setCustomFeeFlat(e.target.value)}
+                  className="bg-noir border-white/10"
+                />
+              </div>
+            )}
+          </div>
+
           <Button
             type="submit"
             variant="gold"
-            className="px-12 h-14 uppercase tracking-widest font-black text-xs mt-4"
+            className="px-12 h-14 uppercase tracking-widest font-black text-xs mt-4 w-full"
             isLoading={loading}
           >
             Sauvegarder les Paramètres
