@@ -59,20 +59,21 @@ export function useInvoices(userId?: string, isAdmin: boolean = false) {
         id: inv.id,
         number: inv.numero,
         clientName: inv.client?.full_name || 'Particulier',
-        amount: parseFloat(inv.montant_total),
+        clientEmail: inv.client?.email || '',
+        amount: parseFloat(inv.montant_total) || 0,
         date: new Date(inv.date_emission).getTime(),
         dueDate: inv.date_echeance ? new Date(inv.date_echeance).getTime() : 0,
         status: mapStatusToFront(inv.statut),
         userId: inv.client_id,
+        subAdminId: inv.sub_admin_id,
         items: [],
-        montantHt: parseFloat(inv.montant_ht),
-        tps: parseFloat(inv.tps),
-        tvq: parseFloat(inv.tvq),
-        montantTotal: parseFloat(inv.montant_total),
-        clientADeclarePaye: inv.client_a_declare_paye,
-        interacReference: inv.interac_reference,
-        datePaiement: inv.date_paiement,
-        subAdminId: inv.sub_admin_id
+        montantHt: parseFloat(inv.montant_ht) || 0,
+        tps: parseFloat(inv.tps) || 0,
+        tvq: parseFloat(inv.tvq) || 0,
+        montantTotal: parseFloat(inv.montant_total) || 0,
+        clientADeclarePaye: inv.client_a_declare_paye ?? false,
+        interacReference: inv.interac_reference ?? null,
+        datePaiement: inv.date_paiement ?? null,
       })) as Invoice[];
 
       setInvoices(mapped);
@@ -151,6 +152,16 @@ export function useInvoices(userId?: string, isAdmin: boolean = false) {
         .eq('id', invoiceId);
 
       if (error) throw error;
+
+      // Notifier le comptable par courriel
+      try {
+        await supabase.functions.invoke('notify-subadmin-payment', {
+          body: { invoiceId }
+        });
+      } catch {
+        console.warn("Notification comptable non envoyée (fonction non déployée).");
+      }
+
       toast.success("Confirmation de paiement envoyée au comptable.");
       fetchInvoices();
     } catch (e: any) {
