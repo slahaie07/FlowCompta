@@ -28,6 +28,8 @@ import { SuperAdminSubAdmins } from './SuperAdminSubAdmins';
 import { SuperAdminClients } from './SuperAdminClients';
 import { SuperAdminInvoices } from './SuperAdminInvoices';
 import { InteracSettings } from './InteracSettings';
+import { SalesLedger } from './SalesLedger';
+import { BookOpen } from 'lucide-react';
 
 interface DashboardProps {
   userData: UserData;
@@ -67,6 +69,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
     { id: 'super_subadmins', label: 'Gestion Comptables', icon: Shield },
     { id: 'super_clients', label: 'Tous les Clients', icon: Users },
     { id: 'super_invoices', label: 'Toutes les Factures', icon: FileText },
+    { id: 'sales_ledger', label: 'Grand Livre', icon: BookOpen },
     { id: 'messaging', label: 'Support Réseau', icon: MessageSquare },
   ] : userData.role === 'sub_admin' ? [
     { id: 'admin_overview', label: 'Tableau de bord', icon: LayoutDashboard },
@@ -74,6 +77,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
     { id: 'transactions', label: 'Journal des flux', icon: Receipt },
     { id: 'invoices', label: 'Factures Clients', icon: FileText },
     { id: 'vault', label: 'Documents Clients', icon: VaultIcon },
+    { id: 'sales_ledger', label: 'Grand Livre Ventes', icon: BookOpen },
     { id: 'interac_settings', label: 'Paramètres Interac', icon: Settings },
     { id: 'messaging', label: 'Canal Messagerie', icon: MessageSquare },
   ] : [
@@ -275,6 +279,9 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
                 } />
                 <Route path="admin_clients" element={
                   userData.role === 'sub_admin' ? <AdminClients clients={adminClients} isAdmin={true} onAddClient={addClient} /> : <Navigate to="/dashboard" replace />
+                } />
+                <Route path="sales_ledger" element={
+                  (userData.role === 'sub_admin' || userData.role === 'super_admin') ? <SalesLedger /> : <Navigate to="/dashboard" replace />
                 } />
                 <Route path="interac_settings" element={
                   userData.role === 'sub_admin' ? <InteracSettings userData={userData} /> : <Navigate to="/dashboard" replace />
