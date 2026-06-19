@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
-import { Download, TrendingUp, Receipt, RefreshCw, AlertCircle, ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Download, TrendingUp, Receipt, RefreshCw, AlertCircle, ChevronDown, ChevronUp, Filter, Calendar, Hash, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useSalesLedger } from '../../hooks/useSalesLedger';
+import { supabase } from '../../lib/supabase';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -10,26 +11,71 @@ import { OrganicLoader } from '../ui/OrganicLoader';
 const fmt = (n: number) => n.toLocaleString('fr-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const FEE_LABELS: Record<string, string> = {
-  interac: 'Interac (gratuit)',
-  stripe: 'Stripe (2.9% + 0.30$)',
-  paypal: 'PayPal (3.49%)',
+  interac: 'Interac (0%)',
+  stripe: 'Stripe (2.9%+0.30$)',
+  paypal: 'PayPal (3.49%+0.49$)',
   custom: 'Personnalisé',
 };
+
+const MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
 export function SalesLedger() {
   const { sales, loading, totals, exportCSV, getQuarterlySummary, refreshLedger } = useSalesLedger();
   const [showQuarterly, setShowQuarterly] = useState(false);
   const [filterClient, setFilterClient] = useState('');
+  const [filterMonth, setFilterMonth] = useState<string>('');
+  const [filterYear, setFilterYear] = useState<string>(new Date().getFullYear().toString());
+  const [filterSubAdmin, setFilterSubAdmin] = useState<string>('');
+  const [subAdmins, setSubAdmins] = useState<{ id: string; name: string }[]>([]);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [sortField, setSortField] = useState<'dateVente' | 'revenuNet' | 'montantTtc'>('dateVente');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
+  // Détection super_admin + chargement de la liste des comptables
+  useEffect(() => {
+    async function checkRole() {
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess?.session?.user?.id;
+      if (!uid) return;
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', uid).single();
+      if (profile?.role === 'super_admin') {
+        setIsSuperAdmin(true);
+        const { data: sas } = await supabase
+          .from('profiles')
+          .select('id, full_name, display_name, email')
+          .eq('role', 'sub_admin');
+        setSubAdmins((sas || []).map((s: any) => ({
+          id: s.id,
+          name: s.full_name || s.display_name || s.email || 'Comptable'
+        })));
+      }
+    }
+    checkRole();
+  }, []);
+
   const quarterly = useMemo(() => getQuarterlySummary(), [sales]);
+
+  // Available years derived from data
+  const availableYears = useMemo(() => {
+    const years = new Set(sales.map(s => new Date(s.dateVente).getFullYear().toString()));
+    years.add(new Date().getFullYear().toString());
+    return [...years].sort((a, b) => Number(b) - Number(a));
+  }, [sales]);
 
   const filtered = useMemo(() => {
     let rows = [...sales];
     if (filterClient.trim()) {
       const q = filterClient.toLowerCase();
       rows = rows.filter(s => s.clientName.toLowerCase().includes(q) || s.serviceLabel.toLowerCase().includes(q));
+    }
+    if (filterYear) {
+      rows = rows.filter(s => new Date(s.dateVente).getFullYear().toString() === filterYear);
+    }
+    if (filterMonth) {
+      rows = rows.filter(s => new Date(s.dateVente).getMonth().toString() === filterMonth);
+    }
+    if (filterSubAdmin) {
+      rows = rows.filter(s => s.subAdminId === filterSubAdmin);
     }
     rows.sort((a, b) => {
       const av = sortField === 'dateVente' ? new Date(a.dateVente).getTime() : a[sortField];
@@ -101,6 +147,23 @@ export function SalesLedger() {
         ))}
       </div>
 
+      {/* ── Bannière vue par cabinet (super_admin) ── */}
+      {isSuperAdmin && filterSubAdmin && (
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+          className="p-4 bg-gold/5 border border-gold/20 rounded-2xl flex items-center gap-4">
+          <Shield size={16} className="text-gold shrink-0" />
+          <div>
+            <span className="text-[10px] font-black text-gold uppercase tracking-widest">Vue filtrée — Cabinet :</span>
+            <span className="text-sm text-ivoire font-bold ml-2">
+              {subAdmins.find(s => s.id === filterSubAdmin)?.name}
+            </span>
+          </div>
+          <button onClick={() => setFilterSubAdmin('')} className="ml-auto text-[10px] text-slate-500 hover:text-gold font-black uppercase tracking-widest">
+            Voir tous
+          </button>
+        </motion.div>
+      )}
+
       {/* ── Alerte taxes à remettre ── */}
       {(totals.totalTps + totals.totalTvq) > 0 && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
@@ -156,20 +219,71 @@ export function SalesLedger() {
       </div>
 
       {/* ── Filtres ── */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-wrap">
+        <div className="relative flex-1 min-w-[200px] max-w-xs">
           <Filter size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
-            placeholder="Filtrer par client ou service..."
+            placeholder="Client ou # facture..."
             value={filterClient}
             onChange={e => setFilterClient(e.target.value)}
             className="w-full bg-white/5 border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-sm text-silver outline-none focus:ring-1 focus:ring-gold/30 placeholder:text-slate-600"
           />
         </div>
-        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest shrink-0">
-          {filtered.length} entrée{filtered.length !== 1 ? 's' : ''}
-        </p>
+
+        {/* Filtre Année */}
+        <div className="relative">
+          <Calendar size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <select
+            value={filterYear}
+            onChange={e => setFilterYear(e.target.value)}
+            className="bg-white/5 border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-sm text-silver outline-none focus:ring-1 focus:ring-gold/30 appearance-none cursor-pointer"
+          >
+            <option value="">Toutes les années</option>
+            {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+        </div>
+
+        {/* Filtre Mois */}
+        <div className="relative">
+          <select
+            value={filterMonth}
+            onChange={e => setFilterMonth(e.target.value)}
+            className="bg-white/5 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-silver outline-none focus:ring-1 focus:ring-gold/30 appearance-none cursor-pointer"
+          >
+            <option value="">Tous les mois</option>
+            {MONTHS_FR.map((m, i) => <option key={i} value={i.toString()}>{m}</option>)}
+          </select>
+        </div>
+
+        {/* Filtre Comptable (super_admin seulement) */}
+        {isSuperAdmin && subAdmins.length > 0 && (
+          <div className="relative">
+            <Shield size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gold/50" />
+            <select
+              value={filterSubAdmin}
+              onChange={e => setFilterSubAdmin(e.target.value)}
+              className="bg-gold/5 border border-gold/20 rounded-xl pl-9 pr-4 py-2.5 text-sm text-gold outline-none focus:ring-1 focus:ring-gold/30 appearance-none cursor-pointer"
+            >
+              <option value="">Tous les cabinets</option>
+              {subAdmins.map(sa => <option key={sa.id} value={sa.id}>{sa.name}</option>)}
+            </select>
+          </div>
+        )}
+
+        <div className="flex items-center gap-3 ml-auto">
+          {(filterClient || filterMonth || filterSubAdmin || filterYear !== new Date().getFullYear().toString()) && (
+            <button
+              onClick={() => { setFilterClient(''); setFilterMonth(''); setFilterYear(new Date().getFullYear().toString()); setFilterSubAdmin(''); }}
+              className="text-[10px] text-slate-500 hover:text-gold font-black uppercase tracking-widest transition-colors"
+            >
+              Réinitialiser
+            </button>
+          )}
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest shrink-0">
+            {filtered.length} entrée{filtered.length !== 1 ? 's' : ''}
+          </p>
+        </div>
       </div>
 
       {/* ── Tableau principal — Desktop ── */}
@@ -180,13 +294,14 @@ export function SalesLedger() {
               {[
                 { label: 'Date', field: 'dateVente' },
                 { label: 'Client', field: null },
-                { label: 'Facture / Service', field: null },
+                { label: '# Facture · Service', field: null },
                 { label: 'Mode paiement', field: null },
                 { label: 'Montant HT', field: null },
                 { label: 'TPS (5%)', field: null },
                 { label: 'TVQ (9.975%)', field: null },
                 { label: 'Total TTC', field: 'montantTtc' },
-                { label: 'Frais', field: null },
+                { label: 'Frais réseau', field: null },
+                { label: 'Ref. Interac', field: null },
                 { label: 'Net Réel', field: 'revenuNet' },
               ].map(({ label, field }) => (
                 <th
@@ -205,7 +320,7 @@ export function SalesLedger() {
           <tbody className="divide-y divide-white/[0.03]">
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={10} className="px-5 py-16 text-center text-slate-600 italic font-serif text-xl opacity-40">
+                <td colSpan={11} className="px-5 py-16 text-center text-slate-600 italic font-serif text-xl opacity-40">
                   Aucune vente enregistrée.
                 </td>
               </tr>
@@ -224,18 +339,26 @@ export function SalesLedger() {
                     <div className="text-[9px] text-slate-600">{new Date(sale.dateVente).toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })}</div>
                   </td>
                   <td className="px-5 py-4 font-bold text-ivoire text-sm group-hover:text-gold transition-colors">{sale.clientName}</td>
-                  <td className="px-5 py-4 text-[11px] text-slate-400 font-mono">{sale.serviceLabel}</td>
+                  <td className="px-5 py-4 max-w-[180px]">
+                    <p className="text-[11px] text-slate-300 font-mono font-bold truncate">{sale.serviceLabel}</p>
+                  </td>
                   <td className="px-5 py-4">
-                    <Badge variant="default" className="text-[8px] font-black uppercase tracking-wider bg-white/5 text-slate-400 border-white/10">
+                    <Badge variant="default" className="text-[8px] font-black uppercase tracking-wider bg-white/5 text-slate-400 border-white/10 whitespace-nowrap">
                       {FEE_LABELS[sale.feeType] || sale.feeType}
                     </Badge>
                   </td>
-                  <td className="px-5 py-4 font-mono text-silver text-sm">{fmt(sale.montantHt)} $</td>
-                  <td className="px-5 py-4 font-mono text-amber-400 text-sm">{fmt(sale.tps)} $</td>
-                  <td className="px-5 py-4 font-mono text-amber-400 text-sm">{fmt(sale.tvq)} $</td>
-                  <td className="px-5 py-4 font-mono font-bold text-ivoire text-sm">{fmt(sale.montantTtc)} $</td>
-                  <td className="px-5 py-4 font-mono text-red-400 text-sm">{sale.fraisTraitement > 0 ? `-${fmt(sale.fraisTraitement)} $` : '—'}</td>
-                  <td className="px-5 py-4 font-serif font-bold text-gold text-base">{fmt(sale.revenuNet)} $</td>
+                  <td className="px-5 py-4 font-mono text-silver text-sm whitespace-nowrap">{fmt(sale.montantHt)} $</td>
+                  <td className="px-5 py-4 font-mono text-amber-400 text-sm whitespace-nowrap">{fmt(sale.tps)} $</td>
+                  <td className="px-5 py-4 font-mono text-amber-400 text-sm whitespace-nowrap">{fmt(sale.tvq)} $</td>
+                  <td className="px-5 py-4 font-mono font-bold text-ivoire text-sm whitespace-nowrap">{fmt(sale.montantTtc)} $</td>
+                  <td className="px-5 py-4 font-mono text-red-400 text-sm whitespace-nowrap">{sale.fraisTraitement > 0 ? `-${fmt(sale.fraisTraitement)} $` : '—'}</td>
+                  <td className="px-5 py-4">
+                    {sale.interacReference
+                      ? <span className="text-[10px] font-mono text-sapphire-light bg-sapphire/10 border border-sapphire/20 px-2 py-1 rounded-lg">{sale.interacReference}</span>
+                      : <span className="text-[10px] text-slate-600 italic">Dépôt direct</span>
+                    }
+                  </td>
+                  <td className="px-5 py-4 font-serif font-bold text-gold text-base whitespace-nowrap">{fmt(sale.revenuNet)} $</td>
                 </motion.tr>
               ))}
             </AnimatePresence>
@@ -246,14 +369,15 @@ export function SalesLedger() {
             <tfoot>
               <tr className="border-t-2 border-gold/30 bg-gold/[0.03]">
                 <td colSpan={4} className="px-5 py-5 text-[10px] font-black text-gold uppercase tracking-[0.3em]">
-                  TOTAUX — {totals.countVentes} vente{totals.countVentes !== 1 ? 's' : ''}
+                  TOTAUX — {filtered.length} vente{filtered.length !== 1 ? 's' : ''}
                 </td>
-                <td className="px-5 py-5 font-mono font-bold text-silver">{fmt(totals.totalBrut)} $</td>
-                <td className="px-5 py-5 font-mono font-bold text-amber-400">{fmt(totals.totalTps)} $</td>
-                <td className="px-5 py-5 font-mono font-bold text-amber-400">{fmt(totals.totalTvq)} $</td>
-                <td className="px-5 py-5 font-mono font-bold text-ivoire">{fmt(totals.totalTtc)} $</td>
-                <td className="px-5 py-5 font-mono font-bold text-red-400">{totals.totalFrais > 0 ? `-${fmt(totals.totalFrais)} $` : '—'}</td>
-                <td className="px-5 py-5 font-serif font-bold text-gold text-xl">{fmt(totals.totalNet)} $</td>
+                <td className="px-5 py-5 font-mono font-bold text-silver whitespace-nowrap">{fmt(filtered.reduce((s,r)=>s+r.montantHt,0))} $</td>
+                <td className="px-5 py-5 font-mono font-bold text-amber-400 whitespace-nowrap">{fmt(filtered.reduce((s,r)=>s+r.tps,0))} $</td>
+                <td className="px-5 py-5 font-mono font-bold text-amber-400 whitespace-nowrap">{fmt(filtered.reduce((s,r)=>s+r.tvq,0))} $</td>
+                <td className="px-5 py-5 font-mono font-bold text-ivoire whitespace-nowrap">{fmt(filtered.reduce((s,r)=>s+r.montantTtc,0))} $</td>
+                <td className="px-5 py-5 font-mono font-bold text-red-400 whitespace-nowrap">{filtered.reduce((s,r)=>s+r.fraisTraitement,0) > 0 ? `-${fmt(filtered.reduce((s,r)=>s+r.fraisTraitement,0))} $` : '—'}</td>
+                <td className="px-5 py-5" />
+                <td className="px-5 py-5 font-serif font-bold text-gold text-xl whitespace-nowrap">{fmt(filtered.reduce((s,r)=>s+r.revenuNet,0))} $</td>
               </tr>
             </tfoot>
           )}

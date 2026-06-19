@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 export interface SaleEntry {
   id: string;
   invoiceId: string;
+  subAdminId: string | null;
   clientName: string;
   serviceLabel: string;
   dateVente: string;
@@ -39,6 +40,7 @@ export function useSalesLedger() {
   const mapSale = (row: any): SaleEntry => ({
     id: row.id,
     invoiceId: row.invoice_id,
+    subAdminId: row.sub_admin_id || null,
     clientName: row.client_name || 'Client',
     serviceLabel: row.service_label || 'Service',
     dateVente: row.date_vente,

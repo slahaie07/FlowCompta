@@ -1,4 +1,4 @@
-import { Bell, Search, Settings, Shield, LogOut, Menu, X, LayoutDashboard, Receipt, MessageSquare, Vault as VaultIcon, Globe, HelpCircle, FileText, Users, ShieldCheck, PenTool } from 'lucide-react';
+import { Bell, Search, Settings, Shield, LogOut, Menu, X, LayoutDashboard, Receipt, MessageSquare, Vault as VaultIcon, Globe, HelpCircle, FileText, Users, ShieldCheck, PenTool, Brain, Puzzle } from 'lucide-react';
 import { UserData, Message, AppMode } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
@@ -30,6 +30,8 @@ import { SuperAdminInvoices } from './SuperAdminInvoices';
 import { InteracSettings } from './InteracSettings';
 import { SalesLedger } from './SalesLedger';
 import { ServiceReports } from './ServiceReports';
+import { EliteIntelligence } from './EliteIntelligence';
+import { Integrations } from './Integrations';
 import { BookOpen, Briefcase } from 'lucide-react';
 
 interface DashboardProps {
@@ -70,7 +72,8 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
     { id: 'super_subadmins', label: 'Gestion Comptables', icon: Shield },
     { id: 'super_clients', label: 'Tous les Clients', icon: Users },
     { id: 'super_invoices', label: 'Toutes les Factures', icon: FileText },
-    { id: 'sales_ledger', label: 'Grand Livre', icon: BookOpen },
+    { id: 'sales_ledger', label: 'Grand Livre Global', icon: BookOpen },
+    { id: 'service_reports', label: 'Services & Normes', icon: Briefcase },
     { id: 'messaging', label: 'Support Réseau', icon: MessageSquare },
   ] : userData.role === 'sub_admin' ? [
     { id: 'admin_overview', label: 'Tableau de bord', icon: LayoutDashboard },
@@ -80,6 +83,8 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
     { id: 'vault', label: 'Documents Clients', icon: VaultIcon },
     { id: 'sales_ledger', label: 'Grand Livre Ventes', icon: BookOpen },
     { id: 'service_reports', label: 'Services Professionnels', icon: Briefcase },
+    { id: 'elite_intelligence', label: 'Intelligence Fiscale IA', icon: Brain },
+    { id: 'integrations', label: 'Automatisations', icon: Puzzle },
     { id: 'interac_settings', label: 'Paramètres Interac', icon: Settings },
     { id: 'messaging', label: 'Canal Messagerie', icon: MessageSquare },
   ] : [
@@ -287,6 +292,12 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
                 } />
                 <Route path="service_reports" element={
                   (userData.role === 'sub_admin' || userData.role === 'super_admin') ? <ServiceReports /> : <Navigate to="/dashboard" replace />
+                } />
+                <Route path="elite_intelligence" element={
+                  userData.role === 'sub_admin' ? <EliteIntelligence transactions={transactions} userData={userData} /> : <Navigate to="/dashboard" replace />
+                } />
+                <Route path="integrations" element={
+                  userData.role === 'sub_admin' ? <Integrations /> : <Navigate to="/dashboard" replace />
                 } />
                 <Route path="interac_settings" element={
                   userData.role === 'sub_admin' ? <InteracSettings userData={userData} /> : <Navigate to="/dashboard" replace />
