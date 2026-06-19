@@ -110,10 +110,10 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
 
   return (
     <div className="min-h-screen flex bg-midnight relative overflow-hidden w-full">
-      {/* Background Decor */}
+      {/* Ambient light — subtle, single source */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className={`absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-sapphire/5 rounded-full blur-[120px] transition-colors duration-1000 ${currentMode === 'personal' ? 'bg-gold/5' : ''}`} />
-        <div className={`absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-gold/5 rounded-full blur-[120px] transition-colors duration-1000 ${currentMode === 'personal' ? 'bg-sapphire/5' : ''}`} />
+        <div className="absolute top-0 left-[72px] right-0 h-px bg-gradient-to-r from-gold/20 via-gold/5 to-transparent" />
+        <div className="absolute top-[-20%] right-[-5%] w-[500px] h-[500px] bg-gold/[0.03] rounded-full blur-[150px]" />
       </div>
 
       {/* Mobile overlay backdrop */}
@@ -124,130 +124,188 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsSidebarOpen(false)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 md:hidden"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-20 md:hidden"
           />
         )}
       </AnimatePresence>
 
-      {/* Sidebar — desktop always visible, mobile as drawer */}
-      <motion.nav
-        initial={false}
-        animate={{ x: isSidebarOpen ? 0 : -320 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed md:sticky top-0 h-screen w-[280px] md:w-[300px] bg-[#050505]/95 backdrop-blur-3xl border-r border-white/5 flex flex-col z-30 shrink-0"
-      >
-        <div className="p-6 md:p-8 flex items-center justify-between">
-          <div className="flex items-center gap-4" onClick={() => navigate(portalPrefix)} style={{ cursor: 'pointer' }}>
-             <div className="w-10 h-10 rounded-xl premium-gradient-gold flex items-center justify-center shadow-[0_0_20px_rgba(198,161,91,0.3)]">
-               <Shield size={20} className="text-midnight" />
-             </div>
-             <div>
-               <span className="font-serif font-bold text-gold tracking-[0.1em] italic text-2xl animated-gradient-text block leading-none">CF</span>
-               <span className="text-[8px] uppercase tracking-[0.3em] text-slate-500 font-black mt-1 block">ComptaFlow Elite</span>
-             </div>
-          </div>
-          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden p-2 text-slate-500 hover:text-gold transition-colors"><X size={22}/></button>
-        </div>
+      {/* ── SIDEBAR DESKTOP: slim icon rail ── */}
+      <nav className="hidden md:flex fixed top-0 left-0 h-screen w-[72px] bg-[#060606] border-r border-white/[0.04] flex-col items-center z-30 shrink-0 py-6 gap-2">
+        {/* Logo */}
+        <button onClick={() => navigate(portalPrefix)} className="mb-6 group">
+          <img src="/logo.png" alt="ComptaFlow" className="w-10 h-10 object-contain rounded-xl opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
+        </button>
 
-        {userData.role === 'client' && (
-          <div className="px-6 md:px-8 mb-6">
-             <ModeSwitcher mode={currentMode} onToggle={onToggleMode} />
-          </div>
-        )}
-
-        <div className="flex-1 px-3 md:px-4 py-4 space-y-1 overflow-y-auto custom-scrollbar">
+        {/* Nav icons */}
+        <div className="flex-1 flex flex-col items-center gap-1 overflow-y-auto w-full px-2 custom-scrollbar">
           {navItems.map(item => (
             <button
               key={item.id}
               onClick={() => navigateTo(item.id)}
-              className={`w-full flex items-center gap-4 px-4 md:px-5 py-3.5 md:py-4 rounded-2xl transition-all duration-300 group relative overflow-hidden ${
+              title={item.label}
+              className={`relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 group ${
                 activeTab === item.id
-                  ? 'bg-gradient-to-r from-gold/20 to-transparent text-gold border-l-2 border-gold'
-                  : 'text-slate-400 hover:text-ivoire hover:bg-white/5'
+                  ? 'bg-gold/15 text-gold'
+                  : 'text-slate-600 hover:text-silver hover:bg-white/5'
               }`}
             >
-              <span className="relative">
-                <item.icon size={18} className={activeTab === item.id ? 'text-gold' : 'text-slate-500 group-hover:text-gold transition-colors duration-300'} />
-                {item.id === 'messaging' && msgUnread > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full text-[8px] font-black text-white flex items-center justify-center shadow-lg">
-                    {msgUnread > 9 ? '9+' : msgUnread}
-                  </span>
-                )}
-              </span>
-              <span className="text-sm font-bold tracking-tight">{item.label}</span>
+              <item.icon size={18} />
               {item.id === 'messaging' && msgUnread > 0 && (
-                <span className="ml-auto bg-red-500/20 text-red-400 text-[9px] font-black px-1.5 py-0.5 rounded-full">{msgUnread}</span>
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
               )}
               {activeTab === item.id && (
-                <motion.div layoutId="nav-glow" className="absolute inset-0 bg-gold/5 blur-xl -z-10" />
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-gold rounded-r-full" />
               )}
+              {/* Tooltip */}
+              <span className="absolute left-full ml-3 px-2.5 py-1 bg-[#0a0a0a] border border-white/10 rounded-lg text-[10px] font-bold text-silver whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-150 pointer-events-none z-50 shadow-xl">
+                {item.label}
+              </span>
             </button>
           ))}
         </div>
 
-        <div className="p-6 md:p-8 border-t border-white/5 space-y-3 bg-black/20">
+        {/* Bottom: user avatar + logout */}
+        <div className="flex flex-col items-center gap-2 mt-4">
           {userData.role === 'client' && (
-            <Button
-              variant="ghost"
-              className="w-full h-11 rounded-2xl border-gold/20 text-gold text-[9px] uppercase font-black tracking-widest gap-2 hover:bg-gold/5"
-              onClick={() => { setShowMandateSigning(true); setIsSidebarOpen(false); }}
+            <button
+              title="Signer Mandat"
+              onClick={() => setShowMandateSigning(true)}
+              className="w-11 h-11 rounded-2xl flex items-center justify-center text-gold/60 hover:text-gold hover:bg-gold/10 transition-all"
             >
-              <PenTool size={14} /> Signer Mandat
-            </Button>
+              <PenTool size={16} />
+            </button>
           )}
-
-          <div className="flex items-center gap-3 p-3 glass-card rounded-2xl border border-white/5 hover:border-gold/20 transition-colors group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-gold/20 to-white/5 flex items-center justify-center text-gold font-serif font-bold shrink-0 shadow-lg border border-gold/10">
-              {userData.fullName?.charAt(0) || userData.displayName?.charAt(0) || 'U'}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-black text-silver truncate">{userData.fullName || userData.displayName}</p>
-              <p className="text-[9px] text-slate-500 uppercase font-black truncate tracking-tighter">
-                {userData.role === 'super_admin' ? 'Propriétaire Suprême' : userData.role === 'sub_admin' ? 'Préparateur Partenaire' : 'Espace Client'}
-              </p>
-            </div>
+          <div
+            title={userData.fullName || userData.displayName || 'Compte'}
+            className="w-9 h-9 rounded-xl bg-gradient-to-tr from-gold/30 to-gold/10 border border-gold/20 flex items-center justify-center text-gold font-serif font-bold text-sm cursor-default"
+          >
+            {userData.fullName?.charAt(0) || userData.displayName?.charAt(0) || 'U'}
           </div>
-
-          <Button variant="ghost" size="sm" onClick={onLogout} className="w-full gap-2 hover:border-red-500/30 hover:text-red-400 h-11 rounded-2xl">
-            <LogOut size={14} /> Déconnexion
-          </Button>
+          <button
+            title="Déconnexion"
+            onClick={onLogout}
+            className="w-11 h-11 rounded-2xl flex items-center justify-center text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-all"
+          >
+            <LogOut size={16} />
+          </button>
         </div>
-      </motion.nav>
+      </nav>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-h-screen overflow-hidden relative z-10 w-full md:w-[calc(100%-300px)]">
-        {/* Header */}
-        <header className="h-16 md:h-20 bg-midnight/60 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 md:px-12 shrink-0 sticky top-0 z-10">
-          <div className="flex items-center gap-3 md:gap-6">
-             <button
-               onClick={() => setIsSidebarOpen(true)}
-               className="p-2.5 text-slate-400 bg-white/5 rounded-xl hover:text-gold transition-colors md:hidden"
-             >
-               <Menu size={20}/>
-             </button>
-             <div className="relative hidden md:block w-[400px] group">
-               <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-gold transition-colors duration-500" size={18} />
-               <input type="text" placeholder="Recherche sémantique sécurisée..." className="w-full bg-white/5 border border-white/5 rounded-2xl pl-14 pr-6 py-3 text-sm focus:ring-1 focus:ring-gold/20 focus:bg-white/10 outline-none transition-all placeholder:text-slate-600 font-medium" />
-             </div>
-             {/* Mobile logo */}
-             <span className="md:hidden font-serif font-bold text-gold tracking-[0.1em] italic text-xl animated-gradient-text">CF</span>
+      {/* ── SIDEBAR MOBILE: full drawer ── */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.nav
+            initial={{ x: -280 }}
+            animate={{ x: 0 }}
+            exit={{ x: -280 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+            className="fixed top-0 left-0 h-screen w-[260px] bg-[#060606] border-r border-white/5 flex flex-col z-30 md:hidden"
+          >
+            <div className="p-5 flex items-center justify-between border-b border-white/5">
+              <div className="flex items-center gap-3">
+                <img src="/logo.png" alt="ComptaFlow" className="w-9 h-9 object-contain rounded-lg" />
+                <div>
+                  <p className="font-serif font-bold text-gold text-lg leading-none italic">ComptaFlow</p>
+                  <p className="text-[9px] uppercase tracking-[0.3em] text-slate-500 font-bold mt-0.5">Elite</p>
+                </div>
+              </div>
+              <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-slate-500 hover:text-gold transition-colors">
+                <X size={18}/>
+              </button>
+            </div>
+
+            {userData.role === 'client' && (
+              <div className="px-4 pt-4">
+                <ModeSwitcher mode={currentMode} onToggle={onToggleMode} />
+              </div>
+            )}
+
+            <div className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto custom-scrollbar">
+              {navItems.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => navigateTo(item.id)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative ${
+                    activeTab === item.id
+                      ? 'bg-gold/10 text-gold'
+                      : 'text-slate-500 hover:text-silver hover:bg-white/[0.03]'
+                  }`}
+                >
+                  {activeTab === item.id && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-gold rounded-r-full" />}
+                  <item.icon size={16} />
+                  <span className="text-sm font-semibold tracking-tight">{item.label}</span>
+                  {item.id === 'messaging' && msgUnread > 0 && (
+                    <span className="ml-auto w-5 h-5 bg-red-500 rounded-full text-[9px] font-black text-white flex items-center justify-center">
+                      {msgUnread > 9 ? '9+' : msgUnread}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <div className="p-4 border-t border-white/5 space-y-2">
+              {userData.role === 'client' && (
+                <Button variant="ghost" className="w-full h-10 text-[9px] uppercase font-black tracking-widest gap-2 text-gold hover:bg-gold/5 border-gold/20" onClick={() => { setShowMandateSigning(true); setIsSidebarOpen(false); }}>
+                  <PenTool size={13} /> Signer Mandat
+                </Button>
+              )}
+              <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-gold/25 to-white/5 flex items-center justify-center text-gold font-serif font-bold text-sm border border-gold/15 shrink-0">
+                  {userData.fullName?.charAt(0) || userData.displayName?.charAt(0) || 'U'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-silver truncate">{userData.fullName || userData.displayName}</p>
+                  <p className="text-[9px] text-slate-500 uppercase font-bold truncate tracking-tight">
+                    {userData.role === 'super_admin' ? 'Suprême' : userData.role === 'sub_admin' ? 'Comptable' : 'Client'}
+                  </p>
+                </div>
+                <button onClick={onLogout} title="Déconnexion" className="p-1.5 text-slate-600 hover:text-red-400 transition-colors">
+                  <LogOut size={14} />
+                </button>
+              </div>
+            </div>
+          </motion.nav>
+        )}
+      </AnimatePresence>
+
+      {/* Main Content — offset by sidebar on desktop */}
+      <main className="flex-1 flex flex-col min-h-screen overflow-hidden relative z-10 w-full md:ml-[72px]">
+        {/* Header — minimal */}
+        <header className="h-14 md:h-16 bg-[#060606]/80 backdrop-blur-xl border-b border-white/[0.04] flex items-center justify-between px-4 md:px-8 shrink-0 sticky top-0 z-10">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 text-slate-500 hover:text-gold transition-colors md:hidden"
+            >
+              <Menu size={20}/>
+            </button>
+            <img src="/logo.png" alt="CF" className="w-7 h-7 object-contain opacity-80 md:hidden" />
+            {/* Page title */}
+            <span className="hidden md:block text-[11px] uppercase tracking-[0.35em] font-bold text-slate-600">
+              {navItems.find(n => n.id === activeTab)?.label || 'ComptaFlow'}
+            </span>
           </div>
-          <div className="flex items-center gap-2 md:gap-4">
-             <button
-               onClick={toggleLanguage}
-               className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/5 border border-white/5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-gold/30 transition-all text-slate-400 hover:text-gold cursor-pointer"
-             >
-               <Globe size={12} className="text-gold" />
-               <span className="hidden sm:inline">{lang.toUpperCase()}</span>
-             </button>
-            <button className="p-2.5 bg-white/5 border border-white/5 hover:border-gold/30 rounded-xl transition-all relative group">
-              <Bell size={18} className="text-slate-400 group-hover:text-gold transition-colors" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-gold rounded-full border-2 border-midnight shadow-glow animate-bounce"></span>
+          <div className="flex items-center gap-2 md:gap-3">
+            {userData.role === 'client' && (
+              <div className="hidden md:block">
+                <ModeSwitcher mode={currentMode} onToggle={onToggleMode} />
+              </div>
+            )}
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:text-gold transition-colors text-slate-500 cursor-pointer"
+            >
+              <Globe size={12} className="text-gold/60" />
+              <span className="hidden sm:inline">{lang.toUpperCase()}</span>
+            </button>
+            <button className="p-2 relative group text-slate-500 hover:text-gold transition-colors">
+              <Bell size={17} />
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-gold rounded-full"></span>
             </button>
           </div>
         </header>
 
-        {/* Page content — extra bottom padding on mobile for bottom nav */}
+        {/* Page content */}
         <div className="flex-1 overflow-y-auto p-4 md:p-10 custom-scrollbar pb-24 md:pb-10 w-full">
           <AnimatePresence mode="wait">
             <motion.div
@@ -329,34 +387,31 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-20 md:hidden bg-[#050505]/95 backdrop-blur-3xl border-t border-white/5 safe-area-inset-bottom">
-        <div className="flex items-center justify-around px-2 py-2">
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-20 md:hidden bg-[#060606]/95 backdrop-blur-3xl border-t border-white/[0.04]">
+        <div className="flex items-center justify-around px-1 py-1.5">
           {bottomNavItems.map(item => (
             <button
               key={item.id}
               onClick={() => navigateTo(item.id)}
-              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 flex-1 min-w-0 ${
-                activeTab === item.id ? 'text-gold' : 'text-slate-500'
+              className={`flex flex-col items-center gap-1 px-2 py-2 rounded-xl transition-all duration-200 flex-1 min-w-0 relative ${
+                activeTab === item.id ? 'text-gold' : 'text-slate-600'
               }`}
             >
-              <item.icon size={20} className={activeTab === item.id ? 'text-gold' : ''} />
-              <span className="text-[9px] font-black uppercase tracking-tight truncate w-full text-center leading-tight">
+              <item.icon size={19} />
+              <span className="text-[8px] font-bold uppercase tracking-tight truncate w-full text-center leading-tight opacity-70">
                 {item.label.split(' ')[0]}
               </span>
-              {activeTab === item.id && (
-                <span className="absolute bottom-0 w-1 h-1 rounded-full bg-gold" />
-              )}
+              {activeTab === item.id && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-gold rounded-full" />}
             </button>
           ))}
-          {/* More button if more than 5 nav items */}
           {navItems.length > 5 && (
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className="flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all duration-200 flex-1 text-slate-500"
+              className="flex flex-col items-center gap-1 px-2 py-2 rounded-xl transition-all duration-200 flex-1 text-slate-600"
             >
-              <Menu size={20} />
-              <span className="text-[9px] font-black uppercase tracking-tight">Plus</span>
+              <Menu size={19} />
+              <span className="text-[8px] font-bold uppercase tracking-tight opacity-70">Plus</span>
             </button>
           )}
         </div>
