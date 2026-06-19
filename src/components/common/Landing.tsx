@@ -2,14 +2,6 @@ import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  ChevronRight, 
-  ShieldCheck, 
-  Clock, 
-  CheckCircle, 
-  Users, 
-  Building, 
-  Calculator, 
-  FileText, 
   ArrowRight,
   Menu,
   X,
@@ -19,6 +11,7 @@ import {
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { useLanguage } from '../../hooks/useLanguage';
+import { ServicesCatalogSection } from './ServicesCatalogSection';
 
 export function Landing() {
   const navigate = useNavigate();
@@ -26,6 +19,8 @@ export function Landing() {
   const [scrolled, setScrolled] = useState(false);
   const [showCookieBanner, setShowCookieBanner] = useState(false);
   const { lang, toggleLanguage, t } = useLanguage();
+
+  const goToSignup = () => navigate('/login?next=/onboarding&register=1');
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
@@ -40,12 +35,24 @@ export function Landing() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const services = [
-    { code: "T1 / TP-1", name: t('services.t1_name'), price: t('services.t1_price'), desc: t('services.t1_desc') },
-    { code: "T2125", name: t('services.ta_name'), price: t('services.ta_price'), desc: t('services.ta_desc') },
-    { code: "GL-01", name: t('services.gl_name'), price: t('services.gl_price'), desc: t('services.gl_desc') },
-    { code: "INV-02", name: t('services.inv_name'), price: t('services.inv_price'), desc: t('services.inv_desc') },
-  ];
+  const tickerItems =
+    lang === 'en'
+      ? [
+          'Hourly bookkeeping $45–75/hr',
+          'Monthly packages from $150/mo',
+          'GST/QST filings',
+          'Payroll 1–5 employees',
+          'QuickBooks & Sage setup',
+          'Encrypted vault',
+        ]
+      : [
+          'Tenue de livres 45–75 $/h',
+          'Forfaits dès 150 $/mois',
+          'Déclarations TPS/TVQ',
+          'Paie 1 à 5 employés',
+          'Config. QuickBooks & Sage',
+          'Coffre-fort chiffré',
+        ];
 
   return (
     <div className="min-h-screen bg-noir text-ivoire font-sans selection:bg-gold selection:text-noir overflow-x-hidden">
@@ -65,13 +72,14 @@ export function Landing() {
             
             <button 
               onClick={toggleLanguage} 
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gold/20 bg-white/5 text-[10px] font-bold text-silver uppercase hover:border-gold hover:text-gold transition-all duration-300 cursor-pointer"
+              aria-label={t('portal.changeLanguage')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gold/20 bg-white/5 text-xs font-bold text-silver uppercase hover:border-gold hover:text-gold transition-all duration-300 cursor-pointer focus-ring"
             >
               <Globe size={12} className="text-gold" />
               <span>{lang.toUpperCase()}</span>
             </button>
 
-            <Button variant="gold" size="sm" onClick={() => navigate('/onboarding')} className="shadow-gold/20">{t('nav.becomeClient')}</Button>
+            <Button variant="gold" size="sm" onClick={goToSignup} className="shadow-gold/20">{t('nav.becomeClient')}</Button>
           </div>
 
           <div className="flex items-center gap-4 md:hidden">
@@ -84,7 +92,12 @@ export function Landing() {
               <span>{lang.toUpperCase()}</span>
             </button>
 
-            <button className="text-gold" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            <button
+              className="text-gold focus-ring rounded-lg p-1"
+              aria-label={isMenuOpen ? t('portal.closeMenu') : t('portal.openMenu')}
+              aria-expanded={isMenuOpen}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
               {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
           </div>
@@ -101,7 +114,7 @@ export function Landing() {
             <a href="#processus" onClick={() => setIsMenuOpen(false)} className="text-lg font-serif">{t('nav.mobileFlux')}</a>
             <a href="#faq" onClick={() => setIsMenuOpen(false)} className="text-lg font-serif">{t('nav.mobileFaq')}</a>
             <button onClick={() => navigate('/login')} className="text-lg font-serif text-left">→ {t('nav.clientSpace')}</button>
-            <Button variant="gold" onClick={() => navigate('/onboarding')}>{t('nav.mobileOpen')}</Button>
+            <Button variant="gold" onClick={goToSignup}>{t('nav.mobileOpen')}</Button>
           </motion.div>
         )}
       </nav>
@@ -111,7 +124,7 @@ export function Landing() {
         <div className="absolute left-6 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-2 items-center opacity-30">
           <div className="w-[1px] h-32 bg-gradient-to-b from-transparent to-gold" />
           <span className="rotate-180 [writing-mode:vertical-lr] text-[10px] tracking-[0.6em] uppercase font-bold text-slate-500">
-            {lang === 'fr' ? 'Précision · Fluidité · Excellence' : lang === 'en' ? 'Precision · Fluidity · Excellence' : 'دقة · انسيابية · تميز'}
+            {t('landing.sideTagline')}
           </span>
           <div className="w-[1px] h-32 bg-gradient-to-t from-transparent to-gold" />
         </div>
@@ -125,7 +138,7 @@ export function Landing() {
               className="space-y-8"
             >
               <span className="text-gold text-xs font-bold tracking-[0.4em] uppercase">{t('hero.tagline')}</span>
-              <h1 className="text-6xl md:text-8xl font-serif font-bold leading-[0.95] tracking-tighter">
+              <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-serif font-bold leading-[0.95] tracking-tighter">
                 {t('hero.title1')}<br />
                 <span className="italic text-gold bg-gradient-to-r from-gold-light via-gold to-gold-light bg-clip-text text-transparent">{t('hero.title2')}</span>
               </h1>
@@ -133,7 +146,7 @@ export function Landing() {
                 {t('hero.subtitle')}
               </p>
               <div className="flex flex-wrap gap-4">
-                <Button variant="gold" size="lg" onClick={() => navigate('/onboarding')} className="px-10 py-7 text-lg group">
+                <Button variant="gold" size="lg" onClick={goToSignup} className="px-10 py-7 text-lg group">
                   {t('hero.cta')} <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
                 <Button 
@@ -211,14 +224,7 @@ export function Landing() {
         <div className="flex animate-marquee">
           {[1, 2].map((i) => (
             <div key={i} className="flex shrink-0">
-              {[
-                "T1 / TP-1 Particuliers",
-                "T2125 Travailleurs autonomes",
-                "TPS / TVQ Conformité",
-                "Tenue de livres",
-                "Gestion des stocks",
-                "Coffre-fort chiffré"
-              ].map((text) => (
+              {tickerItems.map((text) => (
                 <span key={text} className="mx-10 text-sm font-serif tracking-[0.2em] text-silver uppercase flex items-center gap-4">
                   <span className="w-1.5 h-1.5 rounded-full bg-gold" /> {text}
                 </span>
@@ -230,38 +236,33 @@ export function Landing() {
 
       {/* Services Section */}
       <section id="services" className="py-32 relative">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-20">
-          <div className="lg:sticky lg:top-32 h-fit space-y-8">
-            <span className="text-gold text-xs font-bold tracking-[0.4em] uppercase">
-              {lang === 'fr' ? 'Article I — Le registre' : lang === 'en' ? 'Article I — The Registry' : 'المادة الأولى — السجل'}
-            </span>
-            <h2 className="text-5xl font-serif font-bold tracking-tight leading-tight">{t('services.title')}</h2>
-            <p className="text-silver font-light leading-relaxed">{t('services.subtitle')}</p>
-            <Button variant="gold" size="lg" onClick={() => navigate('/onboarding')}>{t('services.composer')}</Button>
-          </div>
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-16 lg:gap-20 mb-16">
+            <div className="lg:sticky lg:top-32 h-fit space-y-8">
+              <span className="text-gold text-xs font-bold tracking-[0.4em] uppercase">
+                {t('landing.registry')}
+              </span>
+              <h2 className="text-4xl md:text-5xl font-serif font-bold tracking-tight leading-tight">
+                {t('services.title')}
+              </h2>
+              <p className="text-silver font-light leading-relaxed">{t('services.subtitle')}</p>
+              <div className="flex flex-col gap-2 text-xs text-slate-500">
+                <a href="#tarif-horaire" className="hover:text-gold transition-colors">
+                  → {t('services.categories.hourly.title')}
+                </a>
+                <a href="#forfaits-mensuels" className="hover:text-gold transition-colors">
+                  → {t('services.categories.monthly.title')}
+                </a>
+                <a href="#services-carte" className="hover:text-gold transition-colors">
+                  → {t('services.categories.alacarte.title')}
+                </a>
+              </div>
+              <Button variant="gold" size="lg" onClick={goToSignup}>
+                {t('services.composer')}
+              </Button>
+            </div>
 
-          <div className="border-t border-gold/30">
-            {services.map((svc, i) => (
-              <motion.div 
-                key={svc.code}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group py-8 border-b border-white/10 flex flex-col md:flex-row md:items-center gap-8 cursor-pointer hover:bg-gold/[0.03] transition-colors px-4 -mx-4 rounded-lg"
-                onClick={() => navigate('/onboarding')}
-              >
-                <span className="text-slate-500 font-serif text-sm tracking-widest">{svc.code}</span>
-                <div className="flex-1 space-y-1">
-                  <h3 className="text-2xl font-serif group-hover:text-gold transition-colors">{svc.name}</h3>
-                  <p className="text-silver text-sm font-light max-w-xl">{svc.desc}</p>
-                </div>
-                <div className="text-right">
-                  <span className="block text-3xl font-serif text-gold border-b-2 border-double border-gold pb-1">{svc.price}</span>
-                  <span className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mt-2 block">{t('services.perMandate')}</span>
-                </div>
-              </motion.div>
-            ))}
+            <ServicesCatalogSection t={t} />
           </div>
         </div>
       </section>
@@ -339,19 +340,6 @@ export function Landing() {
           </div>
         </div>
       </footer>
-
-      <style>{`
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-          animation: marquee 40s linear infinite;
-        }
-        details > summary::-webkit-details-marker {
-          display: none;
-        }
-      `}</style>
 
       {showCookieBanner && (
         <motion.div 

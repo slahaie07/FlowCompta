@@ -36,21 +36,26 @@ export const CONFIG = {
   // Paramètres Métier
   FEES: {
     SETUP: 60.00,
-    T1: 89.00,
-    TA: 199.00,
-    T2: 749.00,
-    BOOKKEEPING: 249.00,
-    STOCKS: 179.00,
-    CFO: 499.00
+    HOURLY_BOOKKEEPING: 60.00,
+    MONTHLY_MICRO: 200.00,
+    MONTHLY_SMALL: 400.00,
+    MONTHLY_SME: 650.00,
+    GST_QST: 48.00,
+    PAYROLL: 65.00,
+    T4_RELEVE1: 75.00,
+    CATCH_UP: 60.00,
+    SOFTWARE_SETUP: 225.00,
+    TAX_HELP_AUTONOMOUS: 225.00,
   },
 
   // Sécurité & App
   APP: {
     NAME: 'Comptaflow',
     VERSION: '1.0.0-PROD',
-    SUPER_ADMIN_EMAILS: ['admin@comptaflow.ca', 's.lahaie07@gmail.com'],
-    SUB_ADMIN_EMAILS: ['comptable@comptaflow.ca', 'partenaire@comptaflow.ca'],
-    SUPPORT_EMAIL: 'support@comptaflow.ca',
+    SUPER_ADMIN_EMAILS: ['admin@compta-flow.net', 's.lahaie07@gmail.com'],
+    SUB_ADMIN_EMAILS: ['comptable@compta-flow.net', 'partenaire@compta-flow.net'],
+    SUPPORT_EMAIL: 'support@compta-flow.net',
+    SITE_URL: 'https://compta-flow.net',
     INTERAC_EMAIL: 's.lahaie07@gmail.com',
   }
 };

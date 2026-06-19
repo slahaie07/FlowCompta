@@ -39,6 +39,13 @@ const stripe = new Stripe(stripeKey, { apiVersion: '2025-02-24.acacia' as any })
 const twilioClient = twilio(twilioSid, twilioToken);
 const ADMIN_PHONE = '+18192158545';
 
+// --- SUPABASE CLIENT SETUP ---
+const supabaseUrl = sanitizeEnvVar(process.env.VITE_SUPABASE_URL) || 'https://hnxdlzdgiascuawgydir.supabase.co';
+const supabaseAnonKey = sanitizeEnvVar(process.env.VITE_SUPABASE_ANON_KEY) || '';
+const serviceRoleKey = sanitizeEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY) || '';
+
+const supabase = createClient(supabaseUrl, serviceRoleKey || supabaseAnonKey);
+
 // --- DATABASE PERSISTENCE ---
 const DB_PATH = path.join(process.cwd(), 'local_db.json');
 const getDb = () => { try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf8')); } catch { return {}; } };
@@ -106,7 +113,7 @@ const botLog = (action: string, target: string, details: string) => {
 const sendSupremeEmail = async (to: string, subject: string, html: string) => {
     if (!process.env.RESEND_API_KEY) return;
     await resend.emails.send({
-        from: 'Comptaflow <support@comptaflow.ca>',
+        from: 'Comptaflow <support@compta-flow.net>',
         to: [to],
         subject: subject,
         html: `<div style="font-family:serif;background:#050505;color:#F5F1E8;padding:50px;border:1px solid #D4AF37;">
@@ -473,7 +480,7 @@ app.post('/api/payment/create-checkout', async (req, res) => {
                 customer_email: customerEmail,
                 client_reference_id: reference,
                 success_url: `${req.headers.origin || 'https://compta-flow.net'}/success?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `${req.headers.origin || 'https://compta-flow.net'}/dashboard/pricing`,
+                cancel_url: `${req.headers.origin || 'https://compta-flow.net'}/portal/client/services`,
             });
 
             botLog('PAYMENT_CHECKOUT_CREATED', reference, `Session Stripe créée: ${session.id}`);
@@ -497,7 +504,7 @@ app.post('/api/payment/setup-direct-debit', async (req, res) => {
       mode: 'setup',
       customer: customer.id,
       success_url: `${req.headers.origin}/success?setup_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin}/dashboard/pricing`,
+      cancel_url: `${req.headers.origin}/portal/client/services`,
       payment_method_options: {
         acss_debit: {
           mandate_options: {
@@ -726,7 +733,7 @@ app.post('/api/invoices/reconcile', async (req, res) => {
       try {
         const resend = new Resend(resendKey);
         await resend.emails.send({
-          from: 'Facturation ComptaFlow <noreply@appiapro.ca>',
+          from: 'Facturation ComptaFlow <noreply@compta-flow.net>',
           to: invoice.profiles.email,
           subject: `Confirmation de réception de votre virement Interac - Facture ${invoiceNumber}`,
           text: `Bonjour ${invoice.profiles.full_name || 'Client'},\n\nNous confirmons la bonne réception de votre virement Interac d'un montant de ${invoice.montant_total} $ (Réf Interac: ${interacRef}).\n\nVotre facture ${invoiceNumber} est maintenant marquée comme payée.\n\nCordialement,\nL'équipe ComptaFlow`
@@ -1197,6 +1204,93 @@ app.post('/api/profile/export', rateLimiter(5, 60000), async (req, res) => {
     },
     data: exportPayload
   }, null, 2));
+});
+
+// --- SUPER ADMIN: provision sub_admin accounts (service role) ---
+async function getSuperAdminFromRequest(req: express.Request) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) return null;
+
+  const token = authHeader.slice(7);
+  if (!serviceRoleKey) return null;
+
+  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  const { data: userData, error: userError } = await adminClient.auth.getUser(token);
+  if (userError || !userData.user) return null;
+
+  const { data: profile } = await adminClient
+    .from('profiles')
+    .select('role')
+    .eq('id', userData.user.id)
+    .single();
+
+  if (profile?.role !== 'super_admin') return null;
+  return { user: userData.user, adminClient };
+}
+
+app.post('/api/admin/create-sub-admin', async (req, res) => {
+  const ctx = await getSuperAdminFromRequest(req);
+  if (!ctx) {
+    return res.status(403).json({ error: 'Accès réservé au super administrateur.' });
+  }
+
+  const { fullName, email, password } = req.body || {};
+  if (!fullName || !email || !password) {
+    return res.status(400).json({ error: 'fullName, email et password sont requis.' });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'Mot de passe trop court (min. 6 caractères).' });
+  }
+
+  try {
+    const cleanEmail = String(email).toLowerCase().trim();
+    const { data: created, error: createError } = await ctx.adminClient.auth.admin.createUser({
+      email: cleanEmail,
+      password,
+      email_confirm: true,
+      user_metadata: { full_name: fullName },
+    });
+
+    if (createError) throw createError;
+
+    const userId = created.user?.id;
+    if (!userId) throw new Error('Utilisateur non créé.');
+
+    const { error: profileError } = await ctx.adminClient.from('profiles').upsert({
+      id: userId,
+      email: cleanEmail,
+      full_name: fullName,
+      display_name: fullName,
+      role: 'sub_admin',
+      status: 'active',
+    });
+
+    if (profileError) throw profileError;
+
+    return res.json({
+      success: true,
+      userId,
+      email: cleanEmail,
+      message: 'Comptable partenaire provisionné.',
+    });
+  } catch (err: any) {
+    console.error('[create-sub-admin]', err.message);
+    return res.status(500).json({ error: err.message || 'Échec de création du comptable.' });
+  }
+});
+
+// --- HEALTH CHECK (monitoring / stress tests) ---
+app.get('/api/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'ComptaFlow',
+    site: 'https://compta-flow.net',
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // ============================================================

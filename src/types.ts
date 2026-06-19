@@ -1,6 +1,22 @@
 export type AppMode = 'personal' | 'business';
 export type AppState = 'login' | 'onboarding' | 'success' | 'dashboard';
-export type DashboardTab = 'overview' | 'transactions' | 'invoices' | 'messaging' | 'vault' | 'integrations' | 'support' | 'pricing' | 'faq' | 'admin_overview' | 'admin_clients';
+export type PortalRole = 'client' | 'sub_admin' | 'super_admin';
+export type DashboardTab =
+  | 'overview'
+  | 'services'
+  | 'transactions'
+  | 'invoices'
+  | 'messaging'
+  | 'vault'
+  | 'support'
+  | 'faq'
+  | 'admin_overview'
+  | 'admin_clients'
+  | 'interac_settings'
+  | 'super_overview'
+  | 'super_subadmins'
+  | 'super_clients'
+  | 'super_invoices';
 
 export interface Invoice {
   id: string;
@@ -50,12 +66,16 @@ export interface NewsUpdate {
 }
 
 export interface UserNeeds {
-  t1: boolean;
-  ta: boolean;
-  t2: boolean;
-  bookkeeping: boolean;
-  stocks: boolean;
-  cfo: boolean;
+  hourlyBookkeeping: boolean;
+  monthlyMicro: boolean;
+  monthlySmall: boolean;
+  monthlySme: boolean;
+  gstQst: boolean;
+  payroll: boolean;
+  t4Releve1: boolean;
+  catchUp: boolean;
+  softwareSetup: boolean;
+  taxHelpAutonomous: boolean;
 }
 
 export interface UserData {
@@ -74,6 +94,7 @@ export interface UserData {
   incomeBracket?: string;
   employeeCount?: number | string;
   needs?: UserNeeds | string[] | any;
+  selectedServiceId?: string;
   isAdmin?: boolean;
   createdAt?: number;
   activeMode?: AppMode;

@@ -34,7 +34,7 @@ test('Loi 25 : Suppression de compte autorisée', async () => {
 test('Loi 25 : Refus de suppression pour rétention légale (factures impayées/déclarations fiscales)', async () => {
   const baseUrl = 'http://localhost:3000';
   const userId = 'mock_client_id'; // a des déclarations fiscales ou factures
-  const email = 'client@comptaflow.ca';
+  const email = 'client@compta-flow.net';
 
   // Simulation d'un rejet (Loi 25 / obligations fiscales de 7 ans)
   (global.fetch as any).mockResolvedValueOnce({
@@ -64,7 +64,7 @@ test('Loi 25 : Refus de suppression pour rétention légale (factures impayées/
 test('Loi 25 : Droit à la portabilité (Export de données)', async () => {
   const baseUrl = 'http://localhost:3000';
   const userId = 'mock_client_id';
-  const email = 'client@comptaflow.ca';
+  const email = 'client@compta-flow.net';
 
   // Simulation d'une exportation réussie
   const mockExportResponse = {

@@ -27,6 +27,7 @@
     "node_modules",
     "dist",
     "backups",
-    "supabase"
+    "supabase",
+    "src/_archive"
   ]
 }

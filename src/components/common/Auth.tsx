@@ -1,12 +1,13 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { Mail, Key, UserPlus, LogIn, ShieldAlert, ArrowLeft, ArrowRight, ShieldCheck, RefreshCw, User } from 'lucide-react';
+import { Mail, Key, UserPlus, LogIn, ShieldAlert, ArrowLeft, ArrowRight, RefreshCw, User } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { CONFIG } from '../../lib/config';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { toast } from 'sonner';
+import { useLanguage } from '../../hooks/useLanguage';
 
 interface AuthProps {
   onAuthentication: (email: string) => void;
@@ -16,11 +17,16 @@ interface AuthProps {
 type AuthView = 'choice' | 'login' | 'register';
 
 export function Auth({ onAuthentication, mockLogin }: AuthProps) {
-  const [view, setView] = useState<AuthView>('choice');
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { t } = useLanguage();
+  const nextPath = searchParams.get('next') || '/portal';
+  const [view, setView] = useState<AuthView>(() =>
+    searchParams.get('register') === '1' ? 'register' : 'choice'
+  );
   const [emailInput, setEmailInput] = useState('');
   const [password, setPassword] = useState('');
   const [fullNameInput, setFullNameInput] = useState('');
-  const [roleInput, setRoleInput] = useState<'sub_admin' | 'client'>('client');
   const [subAdminIdInput, setSubAdminIdInput] = useState('');
   const [subAdminsList, setSubAdminsList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -94,6 +100,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
         }
         onAuthentication(cleanEmail);
         toast.success("Connexion de démonstration réussie.");
+        navigate(nextPath);
       }, 1200);
       return;
     }
@@ -103,7 +110,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
         if (!fullNameInput) {
           throw new Error("Veuillez saisir votre nom complet.");
         }
-        if (roleInput === 'client' && !subAdminIdInput) {
+        if (!subAdminIdInput) {
           throw new Error("Veuillez sélectionner votre comptable partenaire.");
         }
 
@@ -111,11 +118,11 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
           email: cleanEmail,
           password,
           options: {
-            emailRedirectTo: window.location.origin + '/dashboard',
+            emailRedirectTo: window.location.origin + '/portal',
             data: {
               full_name: fullNameInput,
-              role: roleInput,
-              sub_admin_id: roleInput === 'client' ? subAdminIdInput : null
+              role: 'client',
+              sub_admin_id: subAdminIdInput
             }
           }
         });
@@ -144,6 +151,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
         if (data.user) {
           onAuthentication(data.user.email!);
           toast.success("Session authentifiée.");
+          navigate(nextPath);
         }
       }
     } catch (err: any) {
@@ -154,7 +162,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
   };
 
   return (
-    <div className="relative min-h-screen bg-midnight text-silver flex items-center justify-center py-20 px-6 overflow-hidden">
+    <div className="relative min-h-screen bg-noir text-ivoire flex items-center justify-center py-20 px-6 overflow-hidden">
       {/* Background Glows */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-gold/5 rounded-full blur-[150px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-sapphire/5 rounded-full blur-[150px] pointer-events-none" />
@@ -169,12 +177,12 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
             className="w-full max-w-2xl text-center space-y-12 relative z-10"
           >
              <div className="space-y-4">
-                <span className="text-xs uppercase tracking-[0.4em] font-black text-gold">Québec • Aide Comptable & Tenue de Livres</span>
-                <h1 className="text-6xl md:text-7xl font-serif font-bold text-ivoire tracking-tight italic leading-tight">
+                <span className="text-xs uppercase tracking-[0.4em] font-black text-gold">{t('auth.tagline')}</span>
+                <h1 className="text-5xl md:text-7xl font-serif font-bold text-ivoire tracking-tight italic leading-tight">
                   Portail <span className="animated-gradient-text">ComptaFlow.</span>
                 </h1>
                 <p className="text-slate-400 font-light text-base max-w-lg mx-auto leading-relaxed">
-                  Système de gestion financière et fiscale hautement sécurisé pour entrepreneurs canadiens.
+                  {t('auth.subtitle')}
                 </p>
              </div>
 
@@ -189,8 +197,8 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                       <LogIn size={32} />
                    </div>
                    <div className="space-y-2 relative z-10">
-                      <h3 className="text-2xl font-serif text-ivoire">Espace Privé</h3>
-                      <p className="text-sm text-slate-500 font-light italic">S'identifier et accéder à ses portails</p>
+                      <h3 className="text-2xl font-serif text-ivoire">{t('auth.privateSpace')}</h3>
+                      <p className="text-sm text-slate-500 font-light italic">{t('auth.privateSpaceDesc')}</p>
                    </div>
                 </button>
 
@@ -204,8 +212,8 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                       <UserPlus size={32} />
                    </div>
                    <div className="space-y-2 relative z-10">
-                      <h3 className="text-2xl font-serif text-ivoire">Créer un Dossier</h3>
-                      <p className="text-sm text-slate-500 font-light italic">Nouveau comptable ou client final</p>
+                      <h3 className="text-2xl font-serif text-ivoire">{t('auth.createFile')}</h3>
+                      <p className="text-sm text-slate-500 font-light italic">{t('auth.createFileDesc')}</p>
                    </div>
                 </button>
              </div>
@@ -224,7 +232,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                 onClick={() => { setView('choice'); setError(''); setEmailNotConfirmed(false); }}
                 className="absolute left-6 top-6 text-slate-500 hover:text-ivoire flex items-center gap-2 text-xs uppercase font-bold tracking-widest transition-colors z-20 cursor-pointer"
               >
-                 <ArrowLeft size={14} /> Retour
+                 <ArrowLeft size={14} /> {t('back')}
               </button>
 
               <div className="flex flex-col items-center text-center space-y-6 pt-6">
@@ -235,10 +243,10 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                 <div className="w-full space-y-6">
                   <div className="space-y-2">
                     <h2 className="text-3xl font-serif text-ivoire tracking-tight italic leading-tight">
-                      {view === 'login' ? "S'identifier." : "Nouveau Dossier."}
+                      {view === 'login' ? t('auth.loginTitle') : t('auth.registerTitle')}
                     </h2>
-                    <p className="text-slate-500 text-[9px] uppercase tracking-[0.2em] font-black">
-                      {view === 'login' ? "Rapprocher vos flux financiers" : "Formulaire d'enregistrement fiscal"}
+                    <p className="text-slate-500 text-xs uppercase tracking-[0.2em] font-black">
+                      {view === 'login' ? t('auth.loginSubtitle') : t('auth.registerSubtitle')}
                     </p>
                   </div>
 
@@ -257,7 +265,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                           isLoading={resending}
                           className="w-full h-10 text-[10px] mt-2 border-red-500/30 text-red-400 font-bold uppercase tracking-widest"
                         >
-                          <RefreshCw size={12} className="mr-1" /> Renvoyer le courriel de validation
+                          <RefreshCw size={12} className="mr-1" /> {t('auth.resendEmail')}
                         </Button>
                       )}
                     </div>
@@ -268,7 +276,8 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                       <>
                         <Input
                           type="text"
-                          placeholder="Nom complet"
+                          label={t('auth.fullName')}
+                          placeholder={t('name_placeholder')}
                           icon={<User size={18} className="text-gold/40" />}
                           value={fullNameInput}
                           onChange={e => setFullNameInput(e.target.value)}
@@ -277,60 +286,51 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                         />
 
                         <div className="space-y-2">
-                          <label className="text-[10px] uppercase tracking-widest font-black text-slate-500 block">Votre statut d'accès</label>
-                          <select
-                            value={roleInput}
-                            onChange={e => setRoleInput(e.target.value as 'sub_admin' | 'client')}
-                            className="w-full h-14 bg-noir border border-white/10 rounded-xl px-5 text-sm font-semibold text-ivoire outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all cursor-pointer"
-                          >
-                            <option value="client">Client final (Entreprise/Individu)</option>
-                            <option value="sub_admin">Préparateur Partenaire (Tenue de livres)</option>
-                          </select>
+                          <label htmlFor="auth-partner" className="text-xs uppercase tracking-widest font-black text-slate-500 block">{t('auth.partnerLabel')}</label>
+                          {subAdminsList.length > 0 ? (
+                            <select
+                              id="auth-partner"
+                              value={subAdminIdInput}
+                              onChange={e => setSubAdminIdInput(e.target.value)}
+                              className="w-full h-14 bg-noir border border-white/10 rounded-xl px-5 text-sm font-semibold text-ivoire outline-none focus-visible:border-gold/50 focus-visible:ring-2 focus-visible:ring-gold/30 transition-all cursor-pointer"
+                            >
+                              {subAdminsList.map(sa => (
+                                <option key={sa.id} value={sa.id}>
+                                  {sa.full_name} ({sa.email})
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <div className="text-xs text-amber-500 italic p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl leading-relaxed">
+                              ⚠️ {t('auth.noPartner')}
+                            </div>
+                          )}
                         </div>
-
-                        {roleInput === 'client' && (
-                          <div className="space-y-2">
-                            <label className="text-[10px] uppercase tracking-widest font-black text-slate-500 block">Comptable Partenaire</label>
-                            {subAdminsList.length > 0 ? (
-                              <select
-                                value={subAdminIdInput}
-                                onChange={e => setSubAdminIdInput(e.target.value)}
-                                className="w-full h-14 bg-noir border border-white/10 rounded-xl px-5 text-sm font-semibold text-ivoire outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/30 transition-all cursor-pointer"
-                              >
-                                {subAdminsList.map(sa => (
-                                  <option key={sa.id} value={sa.id}>
-                                    {sa.full_name} ({sa.email})
-                                  </option>
-                                ))}
-                              </select>
-                            ) : (
-                              <div className="text-xs text-amber-500 italic p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl leading-relaxed">
-                                ⚠️ Aucun comptable partenaire n'est enregistré. Créez d'abord un compte comptable (Sub Admin) ou connectez-vous comme Super Admin pour en créer.
-                              </div>
-                            )}
-                          </div>
-                        )}
                       </>
                     )}
 
                     <Input
                       type="email"
-                      placeholder="Adresse courriel"
+                      label={t('auth.email')}
+                      placeholder="courriel@exemple.com"
                       icon={<Mail size={18} className="text-gold/40" />}
                       value={emailInput}
                       onChange={e => setEmailInput(e.target.value)}
                       required
+                      autoComplete="email"
                       className="bg-noir border-white/5 focus:border-gold/50"
                     />
 
                     <Input
                       type="password"
-                      placeholder="Mot de passe"
+                      label={t('auth.password')}
+                      placeholder="••••••••"
                       icon={<Key size={18} className="text-gold/40" />}
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       required
                       minLength={6}
+                      autoComplete={view === 'login' ? 'current-password' : 'new-password'}
                       className="bg-noir border-white/5 focus:border-gold/50"
                     />
 
@@ -340,7 +340,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                       className="w-full h-16 gap-3 font-bold uppercase tracking-[0.2em] shadow-gold/20 mt-4"
                       isLoading={isLoading}
                     >
-                      {view === 'login' ? "S'identifier" : "Créer le compte"} <ArrowRight size={20}/>
+                      {view === 'login' ? t('auth.submitLogin') : t('auth.submitRegister')} <ArrowRight size={20}/>
                     </Button>
                   </form>
 
@@ -354,7 +354,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                       }}
                       className="text-[10px] text-slate-500 hover:text-gold uppercase tracking-widest font-black transition-colors cursor-pointer"
                     >
-                      {view === 'login' ? "👉 Pas encore inscrit ? Créer un dossier" : "👉 Déjà inscrit ? S'identifier"}
+                      {view === 'login' ? t('auth.switchToRegister') : t('auth.switchToLogin')}
                     </button>
                   </div>
                 </div>
@@ -365,7 +365,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
       </AnimatePresence>
 
       <div className="absolute bottom-8 text-center w-full z-10 px-6">
-         <p className="text-[9px] text-slate-600 uppercase tracking-[0.4em] font-bold">Portail ComptaFlow • Québec • MMXXVI</p>
+         <p className="text-xs text-slate-600 uppercase tracking-[0.4em] font-bold">{t('auth.footer')}</p>
       </div>
     </div>
   );
