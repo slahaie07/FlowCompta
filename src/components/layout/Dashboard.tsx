@@ -16,6 +16,7 @@ import { BiometricVerification } from '../ui/BiometricVerification';
 import { EliteSignature } from '../ui/EliteSignature';
 import { useAdminClients } from '../../hooks/useAdminClients';
 import { useTransactions } from '../../hooks/useTransactions';
+import { useUnreadMessages } from '../../hooks/useUnreadMessages';
 import { Button } from '../ui/Button';
 import { ModeSwitcher } from '../ui/ModeSwitcher';
 import { generateContract } from '../../lib/contractEngine';
@@ -45,6 +46,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
   const { transactions } = useTransactions(undefined, userData.role === 'sub_admin' || userData.role === 'super_admin');
   const { lang, toggleLanguage } = useLanguage();
 
+  const { unreadCount: msgUnread, markAllRead } = useUnreadMessages(userData.id, userData.isAdmin);
   const [isVaultUnlocked, setIsVaultUnlocked] = useState(false);
   const [showMandateSigning, setShowMandateSigning] = useState(false);
 
@@ -87,6 +89,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
   const currentContract = generateContract('fr', 'Gestion Comptable ComptaFlow', 249, 'CAD');
 
   const navigateTo = (id: string) => {
+    if (id === 'messaging') markAllRead();
     navigate(`${portalPrefix}/${id}`);
     setIsSidebarOpen(false);
   };
@@ -152,8 +155,18 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
                   : 'text-slate-400 hover:text-ivoire hover:bg-white/5'
               }`}
             >
-              <item.icon size={18} className={activeTab === item.id ? 'text-gold' : 'text-slate-500 group-hover:text-gold transition-colors duration-300'} />
+              <span className="relative">
+                <item.icon size={18} className={activeTab === item.id ? 'text-gold' : 'text-slate-500 group-hover:text-gold transition-colors duration-300'} />
+                {item.id === 'messaging' && msgUnread > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full text-[8px] font-black text-white flex items-center justify-center shadow-lg">
+                    {msgUnread > 9 ? '9+' : msgUnread}
+                  </span>
+                )}
+              </span>
               <span className="text-sm font-bold tracking-tight">{item.label}</span>
+              {item.id === 'messaging' && msgUnread > 0 && (
+                <span className="ml-auto bg-red-500/20 text-red-400 text-[9px] font-black px-1.5 py-0.5 rounded-full">{msgUnread}</span>
+              )}
               {activeTab === item.id && (
                 <motion.div layoutId="nav-glow" className="absolute inset-0 bg-gold/5 blur-xl -z-10" />
               )}
