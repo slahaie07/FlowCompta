@@ -162,40 +162,68 @@ export function Transactions({ currentMode, isAdmin }: { currentMode: AppMode, i
       </AnimatePresence>
 
       {/* Transactions Visual Grid */}
-      <div className="grid grid-cols-1 gap-6">
+      <div className="space-y-4">
          {filtered.length === 0 && (
-           <Card className="p-32 flex flex-col items-center justify-center text-center space-y-6 glass-card">
-              <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center text-slate-800 border border-white/5 animate-pulse">
-                <Receipt size={48} />
+           <Card className="p-16 md:p-32 flex flex-col items-center justify-center text-center space-y-6 glass-card">
+              <div className="w-16 h-16 md:w-24 md:h-24 bg-white/5 rounded-full flex items-center justify-center text-slate-800 border border-white/5 animate-pulse">
+                <Receipt size={32} />
               </div>
               <div>
-                <p className="text-silver font-serif text-2xl italic opacity-50">Registre Vierge</p>
+                <p className="text-silver font-serif text-xl md:text-2xl italic opacity-50">Registre Vierge</p>
                 <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.4em] mt-2">En attente de pulsations financières</p>
               </div>
            </Card>
          )}
-         
-         <div className="hidden md:block">
-            <Card className="p-0 overflow-hidden glass-card">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 border-b border-white/5">
-                      <tr>
-                        <th className="px-10 py-6">Période</th>
-                        <th className="px-10 py-6">Entité / Nature</th>
-                        <th className="px-10 py-6">Classification</th>
-                        <th className="px-10 py-6 text-right">Montant Certifié</th>
-                        <th className="px-10 py-6">Statut de Conformité</th>
-                        <th className="px-10 py-6"></th>
-                      </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                      {filtered.map((t) => (
-                        <TransactionRow key={t.id} t={t} />
-                      ))}
-                  </tbody>
-                </table>
-            </Card>
-         </div>
+
+         {/* Desktop table */}
+         {filtered.length > 0 && (
+           <div className="hidden md:block">
+              <Card className="p-0 overflow-hidden glass-card">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-white/[0.03] text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 border-b border-white/5">
+                        <tr>
+                          <th className="px-10 py-6">Période</th>
+                          <th className="px-10 py-6">Entité / Nature</th>
+                          <th className="px-10 py-6">Classification</th>
+                          <th className="px-10 py-6 text-right">Montant Certifié</th>
+                          <th className="px-10 py-6">Statut de Conformité</th>
+                          <th className="px-10 py-6"></th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                        {filtered.map((t) => (
+                          <TransactionRow key={t.id} t={t} />
+                        ))}
+                    </tbody>
+                  </table>
+              </Card>
+           </div>
+         )}
+
+         {/* Mobile cards */}
+         {filtered.length > 0 && (
+           <div className="md:hidden space-y-3">
+             {filtered.map((t) => (
+               <Card key={t.id} className="p-4 glass-card flex items-center gap-4">
+                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shrink-0 ${t.type === 'sale' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-gold/10 text-gold border-gold/20'}`}>
+                   <Receipt size={18} />
+                 </div>
+                 <div className="flex-1 min-w-0">
+                   <p className="text-sm font-bold text-ivoire truncate">{t.description}</p>
+                   <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">
+                     {new Date(t.date).toLocaleDateString('fr-CA')} · {t.category}
+                   </p>
+                 </div>
+                 <div className="text-right shrink-0">
+                   <p className={`text-base font-serif font-bold ${t.type === 'sale' ? 'text-green-400' : 'text-gold'}`}>
+                     {t.type === 'sale' ? '+' : '-'}{t.amount.toLocaleString('fr-CA', { minimumFractionDigits: 2 })} $
+                   </p>
+                   <p className="text-[9px] text-slate-500 uppercase font-bold mt-0.5">{t.status === 'reconciled' ? '✓ Rapproché' : t.status === 'quarantine' ? '⚠ Litige' : '⏳ Analyse'}</p>
+                 </div>
+               </Card>
+             ))}
+           </div>
+         )}
       </div>
     </div>
   );

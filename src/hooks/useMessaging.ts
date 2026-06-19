@@ -6,11 +6,18 @@ export function useMessaging(userData: UserData | null, targetClientId?: string)
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Détermine de quel dossier on charge les messages
   const effectiveUserId = userData?.isAdmin && targetClientId ? targetClientId : userData?.id;
 
+  const mapMessage = (d: any): Message => ({
+    id: d.id,
+    sender: d.sender === 'accountant' ? 'cpa' : d.sender,
+    text: d.body || d.text || '',
+    timestamp: new Date(d.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    clientName: userData?.displayName || 'Utilisateur',
+  });
+
   useEffect(() => {
-    if (!effectiveUserId) return;
+    if (!effectiveUserId) { setLoading(false); return; }
 
     const fetchMessages = async () => {
       setLoading(true);
@@ -19,21 +26,13 @@ export function useMessaging(userData: UserData | null, targetClientId?: string)
           .from('messages')
           .select('*')
           .eq('user_id', effectiveUserId)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: true });
 
         if (!error && data) {
-          setMessages(
-            data.map(d => ({
-              id: d.id,
-              sender: d.sender,
-              text: d.text,
-              timestamp: new Date(d.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              clientName: d.client_name
-            }))
-          );
+          setMessages(data.map(mapMessage));
         }
       } catch (err) {
-        console.warn("Échec récupération des messages réels (offline ?)");
+        console.warn("Récupération des messages échouée:", err);
       } finally {
         setLoading(false);
       }
@@ -41,67 +40,42 @@ export function useMessaging(userData: UserData | null, targetClientId?: string)
 
     fetchMessages();
 
-    // Inscription aux événements Realtime
-    let channel: any;
-    try {
-      channel = supabase
-        .channel(`messages_${effectiveUserId}`)
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'messages', filter: `user_id=eq.${effectiveUserId}` },
-          (payload) => {
-            const newMsg = payload.new;
-            setMessages(prev => [{
-              id: newMsg.id,
-              sender: newMsg.sender,
-              text: newMsg.text,
-              timestamp: new Date(newMsg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              clientName: newMsg.client_name
-            }, ...prev]);
-          }
-        )
-        .subscribe();
-    } catch (e) {
-      console.warn("Realtime channel subscription bypassed.");
-    }
+    const channel = supabase
+      .channel(`messages_${effectiveUserId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages', filter: `user_id=eq.${effectiveUserId}` },
+        (payload) => setMessages(prev => [...prev, mapMessage(payload.new)])
+      )
+      .subscribe();
 
-    return () => {
-      if (channel) {
-        try {
-          supabase.removeChannel(channel);
-        } catch (e) {}
-      }
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [effectiveUserId]);
 
   const sendMessage = async (text: string) => {
     if (!effectiveUserId || !userData) return;
 
-    const newMessage: Message = {
+    const optimistic: Message = {
       id: Date.now().toString(),
       sender: userData.isAdmin ? 'cpa' : 'client',
       text,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      clientName: userData.displayName || 'Cabinet'
+      clientName: userData.displayName || 'Utilisateur',
     };
 
-    // Optimistic UI update
-    const tempId = Date.now().toString();
-    setMessages(prev => [newMessage, ...prev]);
+    setMessages(prev => [...prev, optimistic]);
 
     try {
-      const { error } = await supabase.from('messages').insert([{
+      const { error } = await supabase.from('messages').insert({
         user_id: effectiveUserId,
-        sender: newMessage.sender,
-        text: newMessage.text,
-        client_name: newMessage.clientName
-      }]);
-      
+        sender: userData.isAdmin ? 'accountant' : 'client',
+        body: text,
+      });
+
       if (error) throw error;
-    } catch (error) {
-      console.error("Message send error:", error);
-      // Rollback optimistic update
-      setMessages(prev => prev.filter(m => m.id !== tempId));
+    } catch (err) {
+      console.error("Erreur envoi message:", err);
+      setMessages(prev => prev.filter(m => m.id !== optimistic.id));
     }
   };
 
