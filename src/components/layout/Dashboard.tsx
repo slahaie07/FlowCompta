@@ -32,7 +32,8 @@ import { SalesLedger } from './SalesLedger';
 import { ServiceReports } from './ServiceReports';
 import { EliteIntelligence } from './EliteIntelligence';
 import { Integrations } from './Integrations';
-import { BookOpen, Briefcase } from 'lucide-react';
+import { LegalCharter } from './LegalCharter';
+import { BookOpen, Briefcase, Scale } from 'lucide-react';
 
 interface DashboardProps {
   userData: UserData;
@@ -74,6 +75,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
     { id: 'super_invoices', label: 'Toutes les Factures', icon: FileText },
     { id: 'sales_ledger', label: 'Grand Livre Global', icon: BookOpen },
     { id: 'service_reports', label: 'Services & Normes', icon: Briefcase },
+    { id: 'legal_charter', label: 'Charte Légale', icon: Scale },
     { id: 'messaging', label: 'Support Réseau', icon: MessageSquare },
   ] : userData.role === 'sub_admin' ? [
     { id: 'admin_overview', label: 'Tableau de bord', icon: LayoutDashboard },
@@ -83,6 +85,7 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
     { id: 'vault', label: 'Documents Clients', icon: VaultIcon },
     { id: 'sales_ledger', label: 'Grand Livre Ventes', icon: BookOpen },
     { id: 'service_reports', label: 'Services Professionnels', icon: Briefcase },
+    { id: 'legal_charter', label: 'Charte Légale', icon: Scale },
     { id: 'elite_intelligence', label: 'Intelligence Fiscale IA', icon: Brain },
     { id: 'integrations', label: 'Automatisations', icon: Puzzle },
     { id: 'interac_settings', label: 'Paramètres Interac', icon: Settings },
@@ -350,6 +353,9 @@ export function Dashboard({ userData, adminMessages, onSendMessage, onLogout, cu
                 } />
                 <Route path="service_reports" element={
                   (userData.role === 'sub_admin' || userData.role === 'super_admin') ? <ServiceReports /> : <Navigate to="/dashboard" replace />
+                } />
+                <Route path="legal_charter" element={
+                  (userData.role === 'sub_admin' || userData.role === 'super_admin') ? <LegalCharter /> : <Navigate to="/dashboard" replace />
                 } />
                 <Route path="elite_intelligence" element={
                   userData.role === 'sub_admin' ? <EliteIntelligence transactions={transactions} userData={userData} /> : <Navigate to="/dashboard" replace />

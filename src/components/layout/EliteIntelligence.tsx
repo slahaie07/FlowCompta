@@ -1,4 +1,4 @@
-import { Brain, Sparkles, TrendingUp, AlertTriangle, Calculator, BarChart2, Zap, Flame, Users2, ArrowRight, ShieldAlert } from 'lucide-react';
+import { Brain, Sparkles, TrendingUp, AlertTriangle, Calculator, BarChart2, Zap, Flame, Users2, ArrowRight, ShieldAlert, ChevronDown } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Card } from '../ui/Card';
@@ -8,8 +8,85 @@ import { Transaction, UserData } from '../../types';
 import { formatCAD } from '../../lib/financeUtils';
 import { toast } from 'sonner';
 
+// ─── Catalogue de services avec tarifs ────────────────────────────────────────
+const SERVICE_CATALOGUE = [
+  {
+    id: 't1',
+    label: 'Déclaration T1 / TP-1 — Particuliers',
+    price: 89,
+    tps: 89 * 0.05,
+    tvq: 89 * 0.09975,
+    description: 'Déclaration fédérale T1 + provinciale TP-1 Québec, optimisation des crédits.',
+    timeEstimate: '2–4 h',
+    category: 'Fiscalité Particuliers',
+  },
+  {
+    id: 'ta',
+    label: 'Travailleur Autonome — Annexe T2125',
+    price: 149,
+    tps: 149 * 0.05,
+    tvq: 149 * 0.09975,
+    description: 'Revenus d\'entreprise, dépenses déductibles, acomptes provisionnels.',
+    timeEstimate: '3–5 h',
+    category: 'Fiscalité Particuliers',
+  },
+  {
+    id: 't2',
+    label: 'Déclaration T2 / CO-17 — Société',
+    price: 349,
+    tps: 349 * 0.05,
+    tvq: 349 * 0.09975,
+    description: 'Déclaration corporative fédérale + provinciale, préparation des données pour le CPA.',
+    timeEstimate: '6–10 h',
+    category: 'Fiscalité Corporative',
+  },
+  {
+    id: 'livres',
+    label: 'Tenue de Livres — Mensuelle',
+    price: 199,
+    tps: 199 * 0.05,
+    tvq: 199 * 0.09975,
+    description: 'Saisie, conciliation bancaire, suivi recevables/payables, DAS mensuel.',
+    timeEstimate: '4–8 h/mois',
+    category: 'Services Continus',
+  },
+  {
+    id: 'placements',
+    label: 'Revenus de Placements — T3/T5',
+    price: 99,
+    tps: 99 * 0.05,
+    tvq: 99 * 0.09975,
+    description: 'Feuillets T3, T5, REER, CELI, gains en capital, conversion de devises.',
+    timeEstimate: '1–3 h',
+    category: 'Fiscalité Particuliers',
+  },
+  {
+    id: 'cfo',
+    label: 'CFO Virtuel — Mensuel',
+    price: 499,
+    tps: 499 * 0.05,
+    tvq: 499 * 0.09975,
+    description: 'Tableaux de bord, prévisions, analyses budgétaires, rapport de gestion mensuel.',
+    timeEstimate: '8–16 h/mois',
+    category: 'Services Conseil',
+  },
+  {
+    id: 'paie',
+    label: 'Gestion de la Paie — Par employé',
+    price: 25,
+    tps: 25 * 0.05,
+    tvq: 25 * 0.09975,
+    description: 'Calcul salaires, DAS, talons de paie, T4/RL-1 annuels.',
+    timeEstimate: '0.5 h/employé',
+    category: 'Services Continus',
+  },
+];
+
 export function EliteIntelligence({ transactions, userData }: { transactions: Transaction[], userData: UserData }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [selectedService, setSelectedService] = useState<typeof SERVICE_CATALOGUE[0] | null>(null);
+  const [serviceQty, setServiceQty] = useState(1);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [insight, setInsight] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'tax' | 'analyst' | 'risk' | 'benchmark' | 'warroom'>('tax');
 
@@ -99,6 +176,12 @@ export function EliteIntelligence({ transactions, userData }: { transactions: Tr
     }
   };
 
+  const svc = selectedService;
+  const subtotal = svc ? svc.price * serviceQty : 0;
+  const tpsTotal = svc ? svc.tps * serviceQty : 0;
+  const tvqTotal = svc ? svc.tvq * serviceQty : 0;
+  const total = subtotal + tpsTotal + tvqTotal;
+
   return (
     <div className="space-y-8">
       <header className="flex items-center gap-4">
@@ -110,6 +193,112 @@ export function EliteIntelligence({ transactions, userData }: { transactions: Tr
           <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em]">Propulsé par Gemini 1.5 Ultra-Core</p>
         </div>
       </header>
+
+      {/* ── Calculateur de Service ── */}
+      <Card className="p-6 premium-border-gold relative overflow-hidden" glow="gold">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-gold/5 blur-3xl rounded-full -mr-20 -mt-20 pointer-events-none" />
+        <div className="flex items-center gap-3 mb-5">
+          <Calculator size={18} className="text-gold" />
+          <h3 className="text-sm font-black uppercase tracking-[0.3em] text-slate-400">Calculateur de Service</h3>
+          <Badge variant="gold" className="bg-gold/10 text-gold border-gold/20 text-[9px] font-black uppercase tracking-wider ml-auto">TPS + TVQ inclus</Badge>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Dropdown selector */}
+          <div className="md:col-span-2 relative">
+            <label className="text-[9px] uppercase tracking-[0.25em] font-black text-slate-600 block mb-2">Service</label>
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="w-full flex items-center justify-between px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-left hover:border-gold/30 transition-all group"
+            >
+              <div>
+                {svc ? (
+                  <>
+                    <p className="text-sm font-bold text-ivoire">{svc.label}</p>
+                    <p className="text-[10px] text-slate-500 mt-0.5">{svc.category} · {svc.timeEstimate}</p>
+                  </>
+                ) : (
+                  <p className="text-sm text-slate-500">Sélectionner un service...</p>
+                )}
+              </div>
+              <ChevronDown size={16} className={`text-slate-500 group-hover:text-gold transition-all duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+              {dropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute top-full left-0 right-0 mt-2 z-50 bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl"
+                >
+                  {SERVICE_CATALOGUE.map((s, i) => (
+                    <button
+                      key={s.id}
+                      onClick={() => { setSelectedService(s); setDropdownOpen(false); setServiceQty(1); }}
+                      className={`w-full flex items-center justify-between px-5 py-3.5 hover:bg-gold/5 transition-colors text-left border-b border-white/[0.04] last:border-0 ${svc?.id === s.id ? 'bg-gold/10' : ''}`}
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-ivoire">{s.label}</p>
+                        <p className="text-[10px] text-slate-500 mt-0.5">{s.category}</p>
+                      </div>
+                      <span className="text-gold font-bold text-sm ml-4 shrink-0">{s.price} $/unité</span>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Qty */}
+          <div>
+            <label className="text-[9px] uppercase tracking-[0.25em] font-black text-slate-600 block mb-2">Quantité / Unités</label>
+            <input
+              type="number"
+              min={1}
+              max={100}
+              value={serviceQty}
+              onChange={e => setServiceQty(Math.max(1, parseInt(e.target.value) || 1))}
+              className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-ivoire text-sm font-bold focus:outline-none focus:border-gold/30 transition-all"
+            />
+          </div>
+        </div>
+
+        {/* Result */}
+        <AnimatePresence>
+          {svc && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-5 pt-5 border-t border-white/5"
+            >
+              <p className="text-[10px] text-slate-500 mb-4 leading-relaxed">{svc.description}</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { label: 'Sous-total HT', value: `${subtotal.toFixed(2)} $`, muted: false },
+                  { label: 'TPS (5%)', value: `${tpsTotal.toFixed(2)} $`, muted: true },
+                  { label: 'TVQ (9.975%)', value: `${tvqTotal.toFixed(2)} $`, muted: true },
+                  { label: 'Total TTC', value: `${total.toFixed(2)} $`, muted: false, gold: true },
+                ].map(row => (
+                  <div key={row.label} className={`p-4 rounded-xl ${row.gold ? 'bg-gold/10 border border-gold/20' : 'bg-white/[0.03] border border-white/5'}`}>
+                    <p className="text-[9px] uppercase tracking-widest font-black text-slate-500 mb-1">{row.label}</p>
+                    <p className={`text-lg font-serif font-bold ${row.gold ? 'text-gold' : 'text-ivoire'}`}>{row.value}</p>
+                  </div>
+                ))}
+              </div>
+              <Button
+                variant="gold"
+                className="mt-4 w-full h-12 uppercase tracking-widest font-black text-xs gap-2"
+                onClick={() => toast.success(`Devis ${svc.label} — ${total.toFixed(2)} $ TTC généré et prêt à envoyer.`)}
+              >
+                <Zap size={14} /> Générer Devis Automatique
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Card>
 
       {/* Neural 3D Pulse Visualization */}
       <Card className="p-10 premium-border-gold overflow-hidden relative group">
