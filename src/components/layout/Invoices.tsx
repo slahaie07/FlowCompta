@@ -12,6 +12,17 @@ import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 import { toast } from 'sonner';
 
+// ─── Sanitisation HTML pour éviter XSS dans le PDF ───────────────────────────
+function esc(val: any): string {
+  if (val === null || val === undefined) return '';
+  return String(val)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // ─── Impression PDF native ────────────────────────────────────────────────────
 function printInvoice(invoice: any, subAdminInterac: any) {
   const win = window.open('', '_blank');
@@ -71,8 +82,8 @@ function printInvoice(invoice: any, subAdminInterac: any) {
       <div class="brand-sub">PLATEFORME COMPTABLE CERTIFIÉE QUÉBEC</div>
     </div>
     <div class="invoice-meta">
-      <div class="invoice-num">${invoice.number}</div>
-      <div><span class="badge">${statusLabel}</span></div>
+      <div class="invoice-num">${esc(invoice.number)}</div>
+      <div><span class="badge">${esc(statusLabel)}</span></div>
       <div style="font-size:11px;color:#888;font-family:Arial,sans-serif;margin-top:8px;">
         Émise le ${dateEmission}<br/>Échéance : ${dateEcheance}
       </div>
@@ -82,12 +93,12 @@ function printInvoice(invoice: any, subAdminInterac: any) {
   <div class="client-section">
     <div class="client-block">
       <div class="section-title">Facturé à</div>
-      <div class="client-name">${invoice.clientName}</div>
+      <div class="client-name">${esc(invoice.clientName)}</div>
     </div>
     ${subAdminInterac?.full_name ? `<div class="client-block" style="text-align:right">
       <div class="section-title">Émis par</div>
-      <div class="client-name">${subAdminInterac.full_name}</div>
-      ${subAdminInterac.interac_email ? `<div style="font-size:12px;color:#888;font-family:Arial,sans-serif;margin-top:4px;">${subAdminInterac.interac_email}</div>` : ''}
+      <div class="client-name">${esc(subAdminInterac.full_name)}</div>
+      ${subAdminInterac.interac_email ? `<div style="font-size:12px;color:#888;font-family:Arial,sans-serif;margin-top:4px;">${esc(subAdminInterac.interac_email)}</div>` : ''}
     </div>` : ''}
   </div>
 
@@ -116,16 +127,16 @@ function printInvoice(invoice: any, subAdminInterac: any) {
   ${invoice.status !== 'paid' && subAdminInterac?.interac_email ? `
   <div class="interac-box">
     <div class="interac-title">Instructions de paiement — Virement Interac</div>
-    <div class="interac-row"><strong>Destinataire :</strong> ${subAdminInterac.full_name || 'Votre comptable'}</div>
-    <div class="interac-row"><strong>Adresse de virement :</strong> ${subAdminInterac.interac_email}</div>
+    <div class="interac-row"><strong>Destinataire :</strong> ${esc(subAdminInterac.full_name || 'Votre comptable')}</div>
+    <div class="interac-row"><strong>Adresse de virement :</strong> ${esc(subAdminInterac.interac_email)}</div>
     <div class="interac-row"><strong>Montant exact :</strong> ${(invoice.montantTotal ?? invoice.amount).toFixed(2)} $ CAD</div>
     <div class="interac-row"><strong>Dépôt automatique :</strong> ${subAdminInterac.interac_autodepot ? 'Oui (aucune question requise)' : 'Non'}</div>
-    ${!subAdminInterac.interac_autodepot && subAdminInterac.interac_question ? `<div class="interac-row"><strong>Question de sécurité :</strong> ${subAdminInterac.interac_question}</div>` : ''}
+    ${!subAdminInterac.interac_autodepot && subAdminInterac.interac_question ? `<div class="interac-row"><strong>Question de sécurité :</strong> ${esc(subAdminInterac.interac_question)}</div>` : ''}
   </div>` : ''}
 
   ${invoice.status === 'paid' ? `
   <div class="ref-box">
-    ✅ Facture acquittée — Référence Interac : <strong>${invoice.interacReference || 'Dépôt direct'}</strong>
+    ✅ Facture acquittée — Référence Interac : <strong>${esc(invoice.interacReference || 'Dépôt direct')}</strong>
     ${invoice.datePaiement ? ` — Payée le ${new Date(invoice.datePaiement).toLocaleDateString('fr-CA')}` : ''}
   </div>` : ''}
 
@@ -137,8 +148,9 @@ function printInvoice(invoice: any, subAdminInterac: any) {
 }
 
 // ─── Validation référence Interac ─────────────────────────────────────────────
+// Format réel : 6 à 20 caractères alphanumériques (ex: AB123456, 2024XXXX)
 function validateInteracRef(ref: string): boolean {
-  return ref.trim().length >= 6;
+  return /^[A-Za-z0-9\-]{6,20}$/.test(ref.trim());
 }
 
 // ─── Composant principal ──────────────────────────────────────────────────────

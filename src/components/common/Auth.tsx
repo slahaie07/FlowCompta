@@ -51,9 +51,10 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
     }
   }, [view]);
 
-  // Mode de détection démo/local
+  // Mode démo: uniquement en localhost/développement, jamais en production
   const checkIsMock = (email: string) => {
-    return email.toLowerCase().includes('mock') || !window.navigator.onLine;
+    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    return isDev && email.toLowerCase().includes('mock');
   };
 
   // Resend confirmation email
@@ -86,15 +87,14 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
     const isMock = checkIsMock(cleanEmail);
 
     if (isMock) {
+      // Uniquement en développement local — jamais en production
       setTimeout(() => {
         setIsLoading(false);
         const finalRole = cleanEmail.includes('super') ? 'super_admin' : cleanEmail.includes('sub') ? 'sub_admin' : 'client';
-        if (mockLogin) {
-          mockLogin(cleanEmail, finalRole);
-        }
+        if (mockLogin) mockLogin(cleanEmail, finalRole);
         onAuthentication(cleanEmail);
-        toast.success("Connexion de démonstration réussie.");
-      }, 1200);
+        toast.success("Connexion de démonstration (développement uniquement).");
+      }, 800);
       return;
     }
 
@@ -105,6 +105,12 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
         }
         if (roleInput === 'client' && !subAdminIdInput) {
           throw new Error("Veuillez sélectionner votre comptable partenaire.");
+        }
+        if (password.length < 12) {
+          throw new Error("Le mot de passe doit comporter au moins 12 caractères.");
+        }
+        if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+          throw new Error("Le mot de passe doit contenir au moins une majuscule et un chiffre.");
         }
 
         const { data, error: signUpError } = await supabase.auth.signUp({
@@ -330,7 +336,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       required
-                      minLength={6}
+                      minLength={12}
                       className="bg-noir border-white/5 focus:border-gold/50"
                     />
 

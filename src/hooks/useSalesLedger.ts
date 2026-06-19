@@ -90,21 +90,9 @@ export function useSalesLedger() {
     // Real-time: écoute les nouvelles ventes capturées par le trigger DB
     const channel = supabase
       .channel('sales_ledger_realtime')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'sales_ledger' }, (payload) => {
-        const newSale = mapSale(payload.new);
-        setSales(prev => {
-          const updated = [newSale, ...prev];
-          setTotals(computeTotals(updated));
-          return updated;
-        });
-        // Alerte push admin — notification dorée non intrusive
-        toast.success(
-          `💰 Vente confirmée : ${newSale.clientName} — ${newSale.revenuNet.toLocaleString('fr-CA', { minimumFractionDigits: 2 })} $ net`,
-          {
-            duration: 8000,
-            description: `Ref Interac : ${newSale.interacReference || 'Dépôt direct'} · Facture ${newSale.serviceLabel}`,
-          }
-        );
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sales_ledger' }, () => {
+        // Refetch complet pour INSERT/UPDATE/DELETE
+        fetchSales();
       })
       .subscribe();
 

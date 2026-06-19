@@ -5,24 +5,47 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Badge } from '../ui/Badge';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
 import { toast } from 'sonner';
+
+const SUPPORT_EMAIL = import.meta.env.VITE_SUPPORT_EMAIL || 'support@compta-flow.net';
 
 export function Support() {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { userData } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
-    toast.success("Ticket de support enregistré avec succès.");
-    setTimeout(() => setSent(false), 5000);
+    if (!subject.trim() || !message.trim()) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase.from('support_tickets').insert({
+        user_id: userData?.id || null,
+        user_email: userData?.email || null,
+        subject: subject.trim(),
+        message: message.trim(),
+        status: 'open',
+      });
+      if (error) throw error;
+      setSent(true);
+      setSubject('');
+      setMessage('');
+      toast.success("Ticket enregistré — vous recevrez une réponse sous 24h ouvrables.");
+      setTimeout(() => setSent(false), 6000);
+    } catch {
+      toast.error("Impossible d'envoyer le ticket. Utilisez le chat ou le courriel direct.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCopySMS = () => {
-    navigator.clipboard.writeText('+18195551234');
-    toast.success("Numéro d'assistance prioritaire copié dans le presse-papiers.");
+  const handleCopyPhone = () => {
+    toast.info("Contactez votre comptable via le canal de messagerie sécurisé.");
   };
 
   return (
@@ -58,7 +81,7 @@ export function Support() {
                       />
                    </div>
                    <div className="pt-4">
-                      <Button variant="gold" className="w-full h-14 gap-2" type="submit">
+                      <Button variant="gold" className="w-full h-14 gap-2" type="submit" isLoading={loading}>
                          Envoyer au préparateur <Send size={18}/>
                       </Button>
                    </div>
@@ -71,23 +94,23 @@ export function Support() {
            <Card className="p-6 space-y-6">
               <h4 className="text-xs uppercase font-bold text-slate-500 tracking-widest border-b border-white/5 pb-4">Contacts Directs</h4>
               
-              <div className="flex items-center gap-4 group cursor-pointer" onClick={() => window.location.href='mailto:s.lahaie07@gmail.com'}>
+              <div className="flex items-center gap-4 group cursor-pointer" onClick={() => window.location.href=`mailto:${SUPPORT_EMAIL}`}>
                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-midnight transition-all">
                     <Mail size={18} />
                  </div>
                  <div>
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-tighter">Courriel</p>
-                    <p className="text-sm text-silver font-medium">s.lahaie07@gmail.com</p>
+                    <p className="text-sm text-silver font-medium">{SUPPORT_EMAIL}</p>
                   </div>
               </div>
 
-              <div className="flex items-center gap-4 group cursor-pointer" onClick={handleCopySMS}>
+              <div className="flex items-center gap-4 group cursor-pointer" onClick={handleCopyPhone}>
                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-sapphire-light group-hover:bg-sapphire group-hover:text-white transition-all">
                     <Phone size={18} />
                  </div>
                  <div>
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-tighter">Urgence (SMS)</p>
-                    <p className="text-sm text-silver font-medium">+1 (819) XXX-XXXX</p>
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-tighter">Urgence</p>
+                    <p className="text-sm text-silver font-medium">Via messagerie sécurisée</p>
                  </div>
               </div>
 

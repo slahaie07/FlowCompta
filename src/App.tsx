@@ -85,7 +85,8 @@ function AppContent() {
     );
   }
 
-  const isProfileComplete = userData && (userData.role !== 'client' || userData.fullName);
+  // Tous les rôles doivent avoir un fullName pour accéder au dashboard
+  const isProfileComplete = userData && userData.fullName && userData.fullName.trim().length > 0;
 
   return (
     <Routes>

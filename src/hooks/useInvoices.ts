@@ -90,17 +90,14 @@ export function useInvoices(userId?: string, isAdmin: boolean = false) {
   };
 
   const mapStatus = (s: string): Invoice['status'] => {
-    if (!s) return 'draft';
-    // French statuses
-    if (s === 'payee')    return 'paid';
-    if (s === 'envoyee')  return 'pending';
-    if (s === 'brouillon') return 'draft';
-    if (s === 'annulee')  return 'cancelled';
-    // English statuses (legacy)
-    if (s === 'paid')     return 'paid';
-    if (s === 'pend')     return 'pending';
-    if (s === 'late')     return 'overdue';
-    return 'draft';
+    const STATUS_MAP: Record<string, Invoice['status']> = {
+      payee: 'paid', paid: 'paid',
+      envoyee: 'pending', pend: 'pending',
+      brouillon: 'draft',
+      annulee: 'cancelled',
+      late: 'overdue',
+    };
+    return STATUS_MAP[s] ?? 'draft';
   };
 
   const addInvoice = async (data: Omit<Invoice, 'id' | 'userId'>, targetUserId?: string) => {

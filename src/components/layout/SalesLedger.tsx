@@ -83,7 +83,7 @@ export function SalesLedger() {
       return sortDir === 'desc' ? (bv as number) - (av as number) : (av as number) - (bv as number);
     });
     return rows;
-  }, [sales, filterClient, sortField, sortDir]);
+  }, [sales, filterClient, filterMonth, filterYear, filterSubAdmin, sortField, sortDir]);
 
   const toggleSort = (field: typeof sortField) => {
     if (sortField === field) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
