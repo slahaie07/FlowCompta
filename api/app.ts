@@ -42,11 +42,24 @@ const twilioClient = twilio(twilioSid, twilioToken);
 const ADMIN_PHONE = '+18192158545';
 
 // --- SUPABASE CLIENT SETUP ---
-const supabaseUrl = sanitizeEnvVar(process.env.VITE_SUPABASE_URL) || 'https://hnxdlzdgiascuawgydir.supabase.co';
-const supabaseAnonKey = sanitizeEnvVar(process.env.VITE_SUPABASE_ANON_KEY) || '';
+// Server-side env names first — VITE_* may be build-time only on Vercel functions
+const supabaseUrl =
+  sanitizeEnvVar(process.env.SUPABASE_URL) ||
+  sanitizeEnvVar(process.env.VITE_SUPABASE_URL) ||
+  'https://hnxdlzdgiascuawgydir.supabase.co';
+const supabaseAnonKey =
+  sanitizeEnvVar(process.env.SUPABASE_ANON_KEY) ||
+  sanitizeEnvVar(process.env.VITE_SUPABASE_ANON_KEY) ||
+  '';
 const serviceRoleKey = sanitizeEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY) || '';
 
-const supabase = createClient(supabaseUrl, serviceRoleKey || supabaseAnonKey);
+// createClient throws on empty key — must not crash cold start (health/status routes)
+const supabaseClientKey =
+  serviceRoleKey ||
+  supabaseAnonKey ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIn0.placeholder';
+
+const supabase = createClient(supabaseUrl, supabaseClientKey);
 
 // --- DATABASE PERSISTENCE ---
 const DB_PATH = path.join(process.cwd(), 'local_db.json');
@@ -1529,7 +1542,10 @@ app.get('/sitemap.xml', (_req, res) => {
 // ============================================================
 
 const setupStatic = async () => {
-  if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
+  // Vercel serves the SPA via vercel.json rewrites — this function is API-only
+  if (process.env.VERCEL) return;
+
+  if (process.env.NODE_ENV === "production") {
     const distPath = path.join(process.cwd(), 'dist');
     if (fs.existsSync(distPath)) app.use(express.static(distPath));
     app.get('*', (req, res) => {
