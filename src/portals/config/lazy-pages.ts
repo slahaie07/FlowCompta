@@ -14,6 +14,9 @@ export const LazySupport = lazy(() =>
 export const LazyServiceProcedure = lazy(() =>
   import('../client/pages/ServiceProcedure').then((m) => ({ default: m.ServiceProcedure }))
 );
+export const LazyQuoteEstimate = lazy(() =>
+  import('../client/pages/QuoteEstimate').then((m) => ({ default: m.QuoteEstimate }))
+);
 
 // ——— Sub-admin portal ———
 export const LazyAdminOverview = lazy(() =>

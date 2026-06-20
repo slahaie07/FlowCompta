@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, CheckCircle } from 'lucide-react';
+import { ChevronDown, CheckCircle, Calculator } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -143,6 +143,14 @@ export function ServiceSelector({ userData, onSaved }: ServiceSelectorProps) {
           </p>
         </div>
       )}
+
+      <Button
+        variant="secondary"
+        className="w-full h-11 gap-2"
+        onClick={() => portalNavigate('quote')}
+      >
+        <Calculator size={16} /> {translate('serviceSelector.getEstimate')}
+      </Button>
 
       <Button variant="gold" className="w-full h-12" onClick={handleSave} isLoading={saving}>
         {translate('serviceSelector.confirm')}

@@ -7,12 +7,14 @@ import { Landing } from './components/common/Landing';
 import { Onboarding } from './components/auth/Onboarding';
 import { SuccessScreen } from './components/SuccessScreen';
 import { PortalDashboard, getPortalHomePath, LegacyDashboardRedirect } from './portals';
+import { LegacyPortalSlugRedirect } from './portals/shared/LegacyPortalSlugRedirect';
 import { Privacy } from './components/common/Privacy';
 import { Showcase } from './components/common/Showcase';
 import { Terms } from './components/common/Terms';
 import { Legal } from './components/common/Legal';
 import { Cookies } from './components/common/Cookies';
 import { RegionalLanding } from './components/common/RegionalLanding';
+import { EstimatePage } from './components/common/EstimatePage';
 import { LegalCookieBanner } from './components/common/LegalCookieBanner';
 import { OrganicLoader } from './components/ui/OrganicLoader';
 import { CanadaNetworkProvider } from './context/CanadaNetworkProvider';
@@ -155,6 +157,7 @@ function AppContent() {
       <Route path="/legal" element={<Legal />} />
       <Route path="/cookies" element={<Cookies />} />
       <Route path="/ca/:slug" element={<RegionalLanding />} />
+      <Route path="/estimate" element={<EstimatePage />} />
       <Route path="/showcase" element={<Showcase />} />
 
       <Route
@@ -198,6 +201,15 @@ function AppContent() {
       <Route path="/portal/client/*" element={portalElement} />
       <Route path="/portal/admin/*" element={portalElement} />
       <Route path="/portal/owner/*" element={portalElement} />
+      {/* Alias URL (sub-admin / super-admin) → slugs canoniques */}
+      <Route
+        path="/portal/sub-admin/*"
+        element={<LegacyPortalSlugRedirect fromSlug="sub-admin" toSlug="admin" />}
+      />
+      <Route
+        path="/portal/super-admin/*"
+        element={<LegacyPortalSlugRedirect fromSlug="super-admin" toSlug="owner" />}
+      />
 
       {/* Redirection racine portail */}
       <Route

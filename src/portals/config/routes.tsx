@@ -7,6 +7,7 @@ import {
   LazyFAQ,
   LazySupport,
   LazyServiceProcedure,
+  LazyQuoteEstimate,
   LazyAdminOverview,
   LazyAdminClients,
   LazyInteracSettings,
@@ -15,7 +16,6 @@ import {
   LazySuperAdminOverview,
   LazySuperAdminSubAdmins,
   LazySuperAdminClients,
-  LazySuperAdminInvoices,
   LazyTransactions,
   LazyInvoices,
   LazyVault,
@@ -41,6 +41,11 @@ export const PORTAL_ROUTES: PortalRouteDefinition[] = [
     path: 'procedure',
     roles: ['client'],
     render: () => <LazyServiceProcedure />,
+  },
+  {
+    path: 'quote',
+    roles: ['client'],
+    render: () => <LazyQuoteEstimate />,
   },
   {
     path: 'services',
@@ -96,7 +101,7 @@ export const PORTAL_ROUTES: PortalRouteDefinition[] = [
   {
     path: 'super_invoices',
     roles: ['super_admin'],
-    render: () => <LazySuperAdminInvoices />,
+    render: () => <LazyInvoices isAdmin />,
   },
 
   // ——— Shared (role-scoped via config) ———

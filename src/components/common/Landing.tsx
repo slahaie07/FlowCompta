@@ -58,6 +58,7 @@ export function Landing() {
 
           <div className="hidden md:flex items-center gap-8">
             <a href="#services" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.services')}</a>
+            <button onClick={() => navigate('/estimate')} className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.getEstimate')}</button>
             <a href="#processus" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.processus')}</a>
             <a href="#faq" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.faq')}</a>
             <button onClick={() => navigate('/login')} className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.clientSpace')}</button>
@@ -140,6 +141,14 @@ export function Landing() {
               <div className="flex flex-wrap gap-4">
                 <Button variant="gold" size="lg" onClick={goToSignup} className="px-10 py-7 text-lg group">
                   {t('hero.cta')} <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  onClick={() => navigate('/estimate')}
+                  className="px-8 py-7 text-lg glass-button border-gold/20"
+                >
+                  {t('hero.estimateCta')}
                 </Button>
                 <Button 
                   variant="secondary" 

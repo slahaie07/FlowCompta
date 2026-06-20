@@ -118,7 +118,8 @@ export const i18n = {
       mobileMenuTitle: "Le registre des services",
       mobileFlux: "Le flux",
       mobileFaq: "Questions fréquentes",
-      mobileOpen: "Ouvrir mon dossier"
+      mobileOpen: "Ouvrir mon dossier",
+      getEstimate: "Obtenir une estimation"
     },
 
     // Hero
@@ -128,6 +129,7 @@ export const i18n = {
       title2: "claire et sans paperasse.",
       subtitle: "Comptaflow réunit votre tenue de livres, vos déclarations de revenus et d'impôts dans un seul flux d'aide comptable : un portail, des prix fermes, zéro tracas.",
       cta: "Demander une soumission",
+      estimateCta: "Obtenir une estimation",
       googleLogin: "Espace Client",
       preview: "Aperçu client",
       item1: "Tenue de livres — mai 2026",
@@ -268,6 +270,7 @@ export const i18n = {
         support: "Centre d'Aide",
         client_messaging: "Contacter mon comptable",
         services: "Services & Tarifs",
+        quote: "Estimation tarifaire",
         procedure: "Mon parcours dossier"
       },
       overview: {
@@ -309,7 +312,70 @@ export const i18n = {
       placeholder: "— Sélectionnez un service —",
       confirm: "Confirmer mon choix de service",
       selectWarning: "Veuillez choisir un service dans la liste.",
-      saved: "Votre service a été enregistré. Suivez maintenant votre parcours dossier."
+      saved: "Votre service a été enregistré. Suivez maintenant votre parcours dossier.",
+      getEstimate: "Obtenir une estimation tarifaire"
+    },
+
+    pricingQuestionnaire: {
+      badge: "Estimation rapide",
+      title: "Quel budget pour votre mandat ?",
+      subtitle: "Répondez à quelques questions pour obtenir une fourchette indicative en dollars canadiens.",
+      progress: "Question {current} sur {total}",
+      showEstimate: "Voir mon estimation",
+      disclaimer: "Estimation indicative seulement — devis final par votre CPA après analyse du dossier.",
+      skipVolume: "Volume non applicable pour ce service.",
+      noAddons: "Aucun complément suggéré pour ce mandat.",
+      q: {
+        service: "Quel service recherchez-vous ?",
+        province: "Dans quelle province opérez-vous ?",
+        profile: "Quel est votre profil ?",
+        volume: "Quel est votre volume d'activité mensuel ?",
+        employees: "Combien d'employés avez-vous ?",
+        addons: "Souhaitez-vous ajouter des services complémentaires ?",
+        urgency: "Quel est votre délai souhaité ?"
+      },
+      profile: {
+        personal: { title: "Particulier / autonome", desc: "Revenus personnels ou activité très légère." },
+        business: { title: "Petite entreprise", desc: "Entreprise en croissance, facturation régulière." },
+        sme: { title: "PME", desc: "Volume élevé, paie ou multi-comptes." }
+      },
+      volume: {
+        low: { title: "Faible", desc: "Moins de 20 transactions / mois." },
+        medium: { title: "Modéré", desc: "20 à 100 transactions / mois." },
+        high: { title: "Élevé", desc: "Plus de 100 transactions / mois." }
+      },
+      employees: {
+        none: { title: "Aucun employé", desc: "Travailleur autonome sans paie." },
+        small: { title: "1 à 5 employés", desc: "Petite équipe à gérer." },
+        medium: { title: "6 employés et plus", desc: "Paie plus complexe." }
+      },
+      urgency: {
+        standard: { title: "Délai normal", desc: "Ouverture de dossier sous 5 à 10 jours ouvrables." },
+        priority: { title: "Prioritaire", desc: "Besoin sous 2 semaines (+15 % indicatif)." }
+      },
+      provinces: {
+        QC: "Québec", ON: "Ontario", BC: "Colombie-Britannique", AB: "Alberta",
+        MB: "Manitoba", NB: "Nouveau-Brunswick", NL: "Terre-Neuve", NS: "Nouvelle-Écosse",
+        PE: "Î.-P.-É.", SK: "Saskatchewan", YT: "Yukon", NT: "T.N.-O.", NU: "Nunavut"
+      },
+      units: {
+        hourly: "/ mandat horaire estimé",
+        monthly: "/ mois",
+        oneTime: " (forfait unique)",
+        perDeclaration: "/ déclaration"
+      },
+      result: {
+        title: "Votre estimation",
+        range: "Fourchette indicative",
+        typical: "Montant médian",
+        taxesHint: "Taxes applicables (sur le montant médian)",
+        totalWithTax: "Total estimé avec taxes"
+      },
+      cta: {
+        continue: "Continuer vers mon espace",
+        signup: "Créer mon compte",
+        restart: "Recommencer"
+      }
     },
 
     journey: {
@@ -922,7 +988,8 @@ export const i18n = {
       mobileMenuTitle: "Our Services",
       mobileFlux: "The Flow",
       mobileFaq: "Frequently Asked Questions",
-      mobileOpen: "Start My File"
+      mobileOpen: "Start My File",
+      getEstimate: "Get a price estimate"
     },
 
     // Hero
@@ -932,6 +999,7 @@ export const i18n = {
       title2: "clear and paperless.",
       subtitle: "Comptaflow brings together your tax declarations, bookkeeping, and daily finances into a single bookkeeping assistance flow: one portal, fixed rates, zero paperwork.",
       cta: "Request a Quote",
+      estimateCta: "Get a price estimate",
       googleLogin: "Client Area",
       preview: "Client Preview",
       item1: "Bookkeeping — May 2026",
@@ -1072,6 +1140,7 @@ export const i18n = {
         support: "Help Center",
         client_messaging: "Contact my bookkeeper",
         services: "Services & Pricing",
+        quote: "Price estimate",
         procedure: "My file path"
       },
       overview: {
@@ -1113,7 +1182,70 @@ export const i18n = {
       placeholder: "— Select a service —",
       confirm: "Confirm my service choice",
       selectWarning: "Please choose a service from the list.",
-      saved: "Your service has been saved. Follow your guided file path now."
+      saved: "Your service has been saved. Follow your guided file path now.",
+      getEstimate: "Get a price estimate"
+    },
+
+    pricingQuestionnaire: {
+      badge: "Quick estimate",
+      title: "What budget for your mandate?",
+      subtitle: "Answer a few questions to get an indicative range in Canadian dollars.",
+      progress: "Question {current} of {total}",
+      showEstimate: "See my estimate",
+      disclaimer: "Indicative estimate only — final quote by your CPA after file review.",
+      skipVolume: "Volume not applicable for this service.",
+      noAddons: "No suggested add-ons for this mandate.",
+      q: {
+        service: "Which service do you need?",
+        province: "Which province do you operate in?",
+        profile: "What is your profile?",
+        volume: "What is your monthly activity volume?",
+        employees: "How many employees do you have?",
+        addons: "Would you like complementary services?",
+        urgency: "What timeline do you need?"
+      },
+      profile: {
+        personal: { title: "Individual / self-employed", desc: "Personal income or very light activity." },
+        business: { title: "Small business", desc: "Growing company with regular billing." },
+        sme: { title: "SME", desc: "Higher volume, payroll or multiple accounts." }
+      },
+      volume: {
+        low: { title: "Low", desc: "Fewer than 20 transactions / month." },
+        medium: { title: "Moderate", desc: "20 to 100 transactions / month." },
+        high: { title: "High", desc: "More than 100 transactions / month." }
+      },
+      employees: {
+        none: { title: "No employees", desc: "Self-employed without payroll." },
+        small: { title: "1 to 5 employees", desc: "Small team to manage." },
+        medium: { title: "6+ employees", desc: "More complex payroll." }
+      },
+      urgency: {
+        standard: { title: "Standard timeline", desc: "File opening within 5–10 business days." },
+        priority: { title: "Priority", desc: "Needed within 2 weeks (+15% indicative)." }
+      },
+      provinces: {
+        QC: "Quebec", ON: "Ontario", BC: "British Columbia", AB: "Alberta",
+        MB: "Manitoba", NB: "New Brunswick", NL: "Newfoundland", NS: "Nova Scotia",
+        PE: "P.E.I.", SK: "Saskatchewan", YT: "Yukon", NT: "N.W.T.", NU: "Nunavut"
+      },
+      units: {
+        hourly: "/ estimated hourly mandate",
+        monthly: "/ month",
+        oneTime: " (one-time fee)",
+        perDeclaration: "/ filing"
+      },
+      result: {
+        title: "Your estimate",
+        range: "Indicative range",
+        typical: "Midpoint amount",
+        taxesHint: "Applicable taxes (on midpoint amount)",
+        totalWithTax: "Estimated total with taxes"
+      },
+      cta: {
+        continue: "Continue to my portal",
+        signup: "Create my account",
+        restart: "Start over"
+      }
     },
 
     journey: {
@@ -1687,7 +1819,8 @@ export const i18n = {
       mobileMenuTitle: "خدماتنا",
       mobileFlux: "التدفق",
       mobileFaq: "الأسئلة الشائعة",
-      mobileOpen: "بدء ملفي"
+      mobileOpen: "بدء ملفي",
+      getEstimate: "احصل على تقدير"
     },
     hero: {
       tagline: "خدمات مسك الدفاتر والمساعدة المحاسبية · كندا",
@@ -1695,6 +1828,7 @@ export const i18n = {
       title2: "واضح وخالي من الأوراق.",
       subtitle: "يجمع كومبتا فلو مسك الدفاتر وإقرارات ضريبة الدخل والضرائب في تدفق واحد مساعدة محاسبية.",
       cta: "طلب عرض سعر",
+      estimateCta: "احصل على تقدير",
       googleLogin: "بوابة العميل",
       preview: "معاينة العميل",
       item1: "إقرار T1 — تم إرساله إلى مصلحة الضرائب",
@@ -1802,6 +1936,7 @@ export const i18n = {
         sales_ledger_global: "دفتر المبيعات العام",
         service_reports: "تقارير الخدمات",
         overview: "وضعي",
+        quote: "تقدير السعر",
         services: "الخدمات والأسعار",
         transactions: "سجل المعاملات",
         invoices: "فواتيري",
@@ -1869,7 +2004,70 @@ export const i18n = {
       placeholder: "— اختر خدمة —",
       confirm: "تأكيد اختيار الخدمة",
       selectWarning: "يرجى اختيار خدمة من القائمة.",
-      saved: "تم حفظ خدمتك. تابع الآن مسار ملفك."
+      saved: "تم حفظ خدمتك. تابع الآن مسار ملفك.",
+      getEstimate: "احصل على تقدير السعر"
+    },
+
+    pricingQuestionnaire: {
+      badge: "تقدير سريع",
+      title: "ما الميزانية لتفويضك؟",
+      subtitle: "أجب عن بعض الأسئلة للحصول على نطاق تقديري بالدولار الكندي.",
+      progress: "السؤال {current} من {total}",
+      showEstimate: "عرض تقديري",
+      disclaimer: "تقدير إرشادي فقط — العرض النهائي من محاسبك بعد مراجعة الملف.",
+      skipVolume: "الحجم غير منطبق على هذه الخدمة.",
+      noAddons: "لا توجد إضافات مقترحة لهذا التفويض.",
+      q: {
+        service: "ما الخدمة التي تحتاجها؟",
+        province: "في أي مقاطعة تعمل؟",
+        profile: "ما هو ملفك؟",
+        volume: "ما حجم نشاطك الشهري؟",
+        employees: "كم عدد الموظفين لديك؟",
+        addons: "هل تريد خدمات إضافية؟",
+        urgency: "ما المهلة المطلوبة؟"
+      },
+      profile: {
+        personal: { title: "فرد / مستقل", desc: "دخل شخصي أو نشاط خفيف جداً." },
+        business: { title: "شركة صغيرة", desc: "شركة نامية مع فوترة منتظمة." },
+        sme: { title: "مؤسسة صغيرة ومتوسطة", desc: "حجم مرتفع، رواتب أو حسابات متعددة." }
+      },
+      volume: {
+        low: { title: "منخفض", desc: "أقل من 20 معاملة / شهر." },
+        medium: { title: "متوسط", desc: "20 إلى 100 معاملة / شهر." },
+        high: { title: "مرتفع", desc: "أكثر من 100 معاملة / شهر." }
+      },
+      employees: {
+        none: { title: "بدون موظفين", desc: "مستقل بدون رواتب." },
+        small: { title: "1 إلى 5 موظفين", desc: "فريق صغير." },
+        medium: { title: "6 موظفين فأكثر", desc: "رواتب أكثر تعقيداً." }
+      },
+      urgency: {
+        standard: { title: "مهلة عادية", desc: "فتح الملف خلال 5–10 أيام عمل." },
+        priority: { title: "أولوية", desc: "مطلوب خلال أسبوعين (+15٪ تقديري)." }
+      },
+      provinces: {
+        QC: "كébec", ON: "أونتاريو", BC: "كolumbia-Britannique", AB: "أAlberta",
+        MB: "Manitoba", NB: "Nouveau-Brunswick", NL: "Terre-Neuve", NS: "Nouvelle-Écosse",
+        PE: "Î.-P.-É.", SK: "Saskatchewan", YT: "Yukon", NT: "T.N.-O.", NU: "Nunavut"
+      },
+      units: {
+        hourly: "/ تقدير بالساعة",
+        monthly: "/ شهر",
+        oneTime: " (رسوم لمرة واحدة)",
+        perDeclaration: "/ إقرار"
+      },
+      result: {
+        title: "تقديرك",
+        range: "نطاق تقديري",
+        typical: "المبلغ الوسطي",
+        taxesHint: "الضرائب المطبقة (على المبلغ الوسطي)",
+        totalWithTax: "الإجمالي المقدر مع الضرائب"
+      },
+      cta: {
+        continue: "المتابعة إلى بوابتي",
+        signup: "إنشاء حسابي",
+        restart: "إعادة البدء"
+      }
     },
 
     support: {
