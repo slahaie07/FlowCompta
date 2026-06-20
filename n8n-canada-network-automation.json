@@ -1,0 +1,93 @@
+{
+  "name": "ComptaFlow — Surveillance Réseau Canada",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 6 }]
+        }
+      },
+      "id": "cron-network",
+      "name": "Cron 6h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://compta-flow.net/api/network/status",
+        "options": {}
+      },
+      "id": "check-status",
+      "name": "Status Réseau",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://compta-flow.net/api/health",
+        "options": {}
+      },
+      "id": "check-health",
+      "name": "Health Check",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 480]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "status-ok",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "ok",
+              "operator": { "type": "string", "operation": "notEquals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-unhealthy",
+      "name": "Si problème",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [720, 480]
+    },
+    {
+      "parameters": {
+        "fromEmail": "monitor@compta-flow.net",
+        "toEmail": "support@compta-flow.net",
+        "subject": "⚠️ Alerte réseau ComptaFlow Canada",
+        "emailFormat": "text",
+        "text": "Le health check de compta-flow.net a échoué.\n\nVérifiez : https://compta-flow.net/api/network/status"
+      },
+      "id": "alert-email",
+      "name": "Alerte Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [960, 400]
+    }
+  ],
+  "connections": {
+    "Cron 6h": {
+      "main": [[
+        { "node": "Status Réseau", "type": "main", "index": 0 },
+        { "node": "Health Check", "type": "main", "index": 0 }
+      ]]
+    },
+    "Health Check": {
+      "main": [[{ "node": "Si problème", "type": "main", "index": 0 }]]
+    },
+    "Si problème": {
+      "main": [
+        [{ "node": "Alerte Email", "type": "main", "index": 0 }],
+        []
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": [{ "name": "canada-network" }, { "name": "compta-flow" }]
+}
