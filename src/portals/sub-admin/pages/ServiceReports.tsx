@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   FileText, User, Building2, BookOpen, BarChart3, Briefcase,
   CheckCircle, Clock, AlertCircle, ChevronDown, ChevronRight,
   Download, Calendar, Shield, Star, TrendingUp, ArrowRight,
-  FileCheck, Layers, DollarSign, ClipboardList, Zap
+  FileCheck, Layers, DollarSign, ClipboardList, Zap, Calculator
 } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
+import { usePortalPath } from '../../../hooks/usePortalNavigate';
+import { REPORT_SERVICE_TO_CATALOG } from '../../../lib/servicesCatalog';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -606,8 +609,16 @@ function ServiceCard({ service, isSelected, onClick }: { service: ServiceDefinit
 export function ServiceReports() {
   const [selectedId, setSelectedId] = useState<string>('t1');
   const [activeTab, setActiveTab] = useState<'overview' | 'pipeline' | 'report' | 'deadlines'>('overview');
+  const navigate = useNavigate();
+  const portalPath = usePortalPath();
 
   const service = SERVICES.find(s => s.id === selectedId)!;
+
+  const openQuoteCalculator = () => {
+    const catalogId = REPORT_SERVICE_TO_CATALOG[selectedId];
+    const base = portalPath('quote');
+    navigate(catalogId ? `${base}?service=${catalogId}` : base);
+  };
 
   const tabs = [
     { id: 'overview',  label: 'Vue d\'ensemble',  icon: <Layers size={13} /> },
@@ -678,6 +689,12 @@ export function ServiceReports() {
                     </div>
                   </div>
                   <p className="text-sm text-slate-400 mt-4 leading-relaxed max-w-2xl">{service.description}</p>
+                  <div className="mt-6">
+                    <Button variant="secondary" className="gap-2" onClick={openQuoteCalculator}>
+                      <Calculator size={16} />
+                      Calculateur de devis
+                    </Button>
+                  </div>
                 </div>
               </Card>
 

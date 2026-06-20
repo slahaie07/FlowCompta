@@ -95,5 +95,34 @@ describe('pricingEstimator', () => {
   it('suggests relevant add-ons per service', () => {
     expect(getRecommendedAddOns('monthlySme')).toContain('payroll');
     expect(getRecommendedAddOns('payroll')).toContain('t4Releve1');
+    expect(getRecommendedAddOns('corporateT2')).toContain('gstQst');
+  });
+
+  it('returns fiscal T1 estimate as one-time fee', () => {
+    const result = calculatePricingEstimate({
+      ...baseAnswers,
+      serviceId: 'personalTaxT1',
+      profileType: 'personal',
+    });
+    expect(result.billingUnit).toBe('oneTime');
+    expect(result.amountTypical).toBeGreaterThanOrEqual(80);
+  });
+
+  it('scales corporate T2 with employee band', () => {
+    const small = calculatePricingEstimate({
+      ...baseAnswers,
+      serviceId: 'corporateT2',
+      profileType: 'sme',
+      volumeBand: 'medium',
+      employeeBand: 'none',
+    });
+    const medium = calculatePricingEstimate({
+      ...baseAnswers,
+      serviceId: 'corporateT2',
+      profileType: 'sme',
+      volumeBand: 'medium',
+      employeeBand: 'medium',
+    });
+    expect(medium.amountTypical).toBeGreaterThan(small.amountTypical);
   });
 });

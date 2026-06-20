@@ -131,6 +131,38 @@ function computeCoreEstimate(answers: PricingQuestionnaireAnswers): {
         breakdown.push({ labelKey: 't4Employees', amount: count });
         break;
       }
+      case 'personalTaxT1':
+      case 'investmentStocks':
+        typical = base * profileMul;
+        billingUnit = 'oneTime';
+        breakdown.push({ labelKey: 'profile', amount: profileMul });
+        break;
+      case 'selfEmployedTa':
+        typical = base * volumeMul * profileMul;
+        billingUnit = 'oneTime';
+        breakdown.push({ labelKey: 'volume', amount: volumeMul });
+        breakdown.push({ labelKey: 'profile', amount: profileMul });
+        break;
+      case 'corporateT2':
+        typical = base * volumeMul * profileMul * EMPLOYEE_MULTIPLIER[answers.employeeBand];
+        billingUnit = 'oneTime';
+        breakdown.push({ labelKey: 'volume', amount: volumeMul });
+        breakdown.push({ labelKey: 'profile', amount: profileMul });
+        breakdown.push({ labelKey: 'employees', amount: EMPLOYEE_MULTIPLIER[answers.employeeBand] });
+        break;
+      case 'bookkeepingManaged':
+        typical = base * volumeMul * profileMul;
+        billingUnit = 'monthly';
+        breakdown.push({ labelKey: 'volume', amount: volumeMul });
+        breakdown.push({ labelKey: 'profile', amount: profileMul });
+        break;
+      case 'virtualCfo':
+        typical = base * volumeMul * profileMul * EMPLOYEE_MULTIPLIER[answers.employeeBand];
+        billingUnit = 'monthly';
+        breakdown.push({ labelKey: 'volume', amount: volumeMul });
+        breakdown.push({ labelKey: 'profile', amount: profileMul });
+        breakdown.push({ labelKey: 'employees', amount: EMPLOYEE_MULTIPLIER[answers.employeeBand] });
+        break;
       case 'softwareSetup':
       case 'taxHelpAutonomous':
         typical = base * profileMul;
@@ -181,6 +213,11 @@ export function getRecommendedAddOns(serviceId: ServiceId): ServiceId[] {
     monthlySme: ['payroll', 'gstQst'],
     hourlyBookkeeping: ['catchUp'],
     payroll: ['t4Releve1'],
+    personalTaxT1: ['investmentStocks'],
+    selfEmployedTa: ['gstQst', 'catchUp'],
+    corporateT2: ['payroll', 'gstQst'],
+    bookkeepingManaged: ['gstQst', 'payroll'],
+    virtualCfo: ['bookkeepingManaged'],
   };
   return map[serviceId] ?? [];
 }

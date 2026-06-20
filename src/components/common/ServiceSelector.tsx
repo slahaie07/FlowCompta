@@ -6,7 +6,8 @@ import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { UserData } from '../../types';
 import { supabase } from '../../lib/supabase';
-import { usePortalNavigate } from '../../hooks/usePortalNavigate';
+import { useNavigate } from 'react-router-dom';
+import { usePortalPath } from '../../hooks/usePortalNavigate';
 import { useLanguage } from '../../hooks/useLanguage';
 import {
   SERVICE_CATALOG,
@@ -24,7 +25,8 @@ interface ServiceSelectorProps {
 
 export function ServiceSelector({ userData, onSaved }: ServiceSelectorProps) {
   const { t: translate } = useLanguage();
-  const portalNavigate = usePortalNavigate();
+  const navigate = useNavigate();
+  const portalPath = usePortalPath();
   const currentId = userData.selectedServiceId || '';
   const [selected, setSelected] = useState<ServiceId | ''>(currentId);
   const [saving, setSaving] = useState(false);
@@ -56,7 +58,7 @@ export function ServiceSelector({ userData, onSaved }: ServiceSelectorProps) {
       if (error) throw error;
       toast.success(translate('serviceSelector.saved'));
       onSaved?.();
-      portalNavigate('procedure');
+      navigate(portalPath('procedure'));
     } catch (err: any) {
       toast.error(err.message || translate('serviceSelector.selectWarning'));
     } finally {
@@ -86,9 +88,19 @@ export function ServiceSelector({ userData, onSaved }: ServiceSelectorProps) {
         <p className="text-xs text-slate-500 italic">
           {translate('serviceSelector.changeHint')}
         </p>
-        <Button variant="secondary" className="w-full" onClick={() => portalNavigate('procedure')}>
-          {translate('serviceSelector.viewProcedure')}
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            variant="secondary"
+            className="flex-1"
+            onClick={() => navigate(`${portalPath('quote')}?service=${selectedService.id}`)}
+          >
+            <Calculator size={16} className="mr-2" />
+            {translate('serviceSelector.getEstimate')}
+          </Button>
+          <Button variant="secondary" className="flex-1" onClick={() => navigate(portalPath('procedure'))}>
+            {translate('serviceSelector.viewProcedure')}
+          </Button>
+        </div>
       </Card>
     );
   }
@@ -147,7 +159,11 @@ export function ServiceSelector({ userData, onSaved }: ServiceSelectorProps) {
       <Button
         variant="secondary"
         className="w-full h-11 gap-2"
-        onClick={() => portalNavigate('quote')}
+        onClick={() => {
+          const quotePath = portalPath('quote');
+          const query = selected ? `?service=${selected}` : '';
+          navigate(`${quotePath}${query}`);
+        }}
       >
         <Calculator size={16} /> {translate('serviceSelector.getEstimate')}
       </Button>

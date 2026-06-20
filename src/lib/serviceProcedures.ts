@@ -459,6 +459,156 @@ export const SERVICE_PROCEDURES: Record<ServiceId, ServiceProcedure> = {
       baseDeliveryStep(6),
     ],
   },
+
+  personalTaxT1: {
+    serviceId: 'personalTaxT1',
+    estimatedDays: 15,
+    steps: [
+      baseMandateStep(1),
+      baseVaultDocsStep(2, [
+        { id: 'income_slips', labelKey: 'procedure.docs.incomeSlips', required: true },
+        { id: 'expense_summary', labelKey: 'procedure.docs.expenseSummary', required: false },
+      ]),
+      {
+        id: 'tax_organize',
+        order: 3,
+        titleKey: 'procedure.taxHelpAutonomous.steps.organize.title',
+        descKey: 'procedure.taxHelpAutonomous.steps.organize.desc',
+        portalPath: 'vault',
+        documents: [],
+        fields: [{ id: 'tax_year', labelKey: 'procedure.fields.taxYear', required: true }],
+      },
+      baseCpaReviewStep(4),
+      baseDeliveryStep(5),
+    ],
+  },
+
+  selfEmployedTa: {
+    serviceId: 'selfEmployedTa',
+    estimatedDays: 21,
+    steps: [
+      baseMandateStep(1),
+      baseVaultDocsStep(2, [
+        { id: 't2125_support', labelKey: 'procedure.docs.t2125Support', required: true },
+        { id: 'bank_statements', labelKey: 'procedure.docs.bankStatements', required: true },
+        { id: 'expense_summary', labelKey: 'procedure.docs.expenseSummary', required: true },
+      ]),
+      {
+        id: 'tax_organize',
+        order: 3,
+        titleKey: 'procedure.taxHelpAutonomous.steps.organize.title',
+        descKey: 'procedure.taxHelpAutonomous.steps.organize.desc',
+        portalPath: 'vault',
+        documents: [],
+        fields: [
+          { id: 'tax_year', labelKey: 'procedure.fields.taxYear', required: true },
+          { id: 'gst_account', labelKey: 'procedure.fields.gstAccount', required: true },
+        ],
+      },
+      baseCpaReviewStep(4),
+      baseDeliveryStep(5),
+    ],
+  },
+
+  corporateT2: {
+    serviceId: 'corporateT2',
+    estimatedDays: 45,
+    steps: [
+      baseMandateStep(1),
+      baseVaultDocsStep(2, [
+        { id: 'bank_statements', labelKey: 'procedure.docs.bankStatements', required: true },
+        { id: 'prior_ledger', labelKey: 'procedure.docs.priorLedger', required: true },
+        { id: 'articles_incorp', labelKey: 'procedure.docs.articlesIncorp', required: true },
+      ]),
+      {
+        id: 'corporate_scope',
+        order: 3,
+        titleKey: 'procedure.monthly.steps.bankAccess.title',
+        descKey: 'procedure.monthly.steps.bankAccess.desc',
+        portalPath: 'messaging',
+        documents: [],
+        fields: [
+          { id: 'fiscal_year_end', labelKey: 'procedure.fields.fiscalYearEnd', required: true },
+          { id: 'employee_count', labelKey: 'procedure.fields.employeeCount', required: true },
+        ],
+      },
+      baseCpaReviewStep(4),
+      baseDeliveryStep(5),
+    ],
+  },
+
+  bookkeepingManaged: {
+    serviceId: 'bookkeepingManaged',
+    estimatedDays: 21,
+    steps: [
+      baseMandateStep(1),
+      baseVaultDocsStep(2, [
+        { id: 'bank_statements', labelKey: 'procedure.docs.bankStatements', required: true },
+        { id: 'sales_invoices', labelKey: 'procedure.docs.salesInvoices', required: true },
+        { id: 'expense_receipts', labelKey: 'procedure.docs.expenseReceipts', required: true },
+      ]),
+      {
+        id: 'monthly_cycle',
+        order: 3,
+        titleKey: 'procedure.monthlyMicro.steps.cycle.title',
+        descKey: 'procedure.monthlyMicro.steps.cycle.desc',
+        portalPath: 'transactions',
+        documents: [],
+        fields: [],
+      },
+      baseCpaReviewStep(4),
+      baseDeliveryStep(5),
+    ],
+  },
+
+  investmentStocks: {
+    serviceId: 'investmentStocks',
+    estimatedDays: 14,
+    steps: [
+      baseMandateStep(1),
+      baseVaultDocsStep(2, [
+        { id: 'income_slips', labelKey: 'procedure.docs.incomeSlips', required: true },
+        { id: 'investment_statements', labelKey: 'procedure.docs.investmentStatements', required: true },
+      ]),
+      {
+        id: 'tax_organize',
+        order: 3,
+        titleKey: 'procedure.taxHelpAutonomous.steps.organize.title',
+        descKey: 'procedure.taxHelpAutonomous.steps.organize.desc',
+        portalPath: 'vault',
+        documents: [],
+        fields: [{ id: 'tax_year', labelKey: 'procedure.fields.taxYear', required: true }],
+      },
+      baseCpaReviewStep(4),
+      baseDeliveryStep(5),
+    ],
+  },
+
+  virtualCfo: {
+    serviceId: 'virtualCfo',
+    estimatedDays: 30,
+    steps: [
+      baseMandateStep(1),
+      baseVaultDocsStep(2, [
+        { id: 'bank_statements', labelKey: 'procedure.docs.bankStatements', required: true },
+        { id: 'prior_ledger', labelKey: 'procedure.docs.priorLedger', required: true },
+      ]),
+      {
+        id: 'cfo_diagnostic',
+        order: 3,
+        titleKey: 'procedure.monthly.steps.bankAccess.title',
+        descKey: 'procedure.monthly.steps.bankAccess.desc',
+        portalPath: 'messaging',
+        documents: [],
+        fields: [
+          { id: 'fiscal_year_end', labelKey: 'procedure.fields.fiscalYearEnd', required: true },
+          { id: 'employee_count', labelKey: 'procedure.fields.employeeCount', required: true },
+        ],
+      },
+      baseCpaReviewStep(4),
+      baseDeliveryStep(5),
+    ],
+  },
 };
 
 export function getServiceProcedure(serviceId: ServiceId): ServiceProcedure {

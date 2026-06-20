@@ -77,6 +77,12 @@ export interface UserNeeds {
   catchUp: boolean;
   softwareSetup: boolean;
   taxHelpAutonomous: boolean;
+  personalTaxT1: boolean;
+  selfEmployedTa: boolean;
+  corporateT2: boolean;
+  bookkeepingManaged: boolean;
+  investmentStocks: boolean;
+  virtualCfo: boolean;
 }
 
 export interface UserData {

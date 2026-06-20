@@ -62,11 +62,20 @@ const OptionButton: FC<{
 }
 
 function buildQuestionSteps(serviceId: ServiceId): number[] {
+  const skipVolume = [
+    'softwareSetup',
+    'taxHelpAutonomous',
+    't4Releve1',
+    'personalTaxT1',
+    'investmentStocks',
+  ];
+  const withEmployees = ['payroll', 't4Releve1', 'monthlySme', 'corporateT2', 'virtualCfo'];
+
   const steps = [0, 1, 2];
-  if (!['softwareSetup', 'taxHelpAutonomous', 't4Releve1'].includes(serviceId)) {
+  if (!skipVolume.includes(serviceId)) {
     steps.push(3);
   }
-  if (['payroll', 't4Releve1', 'monthlySme'].includes(serviceId)) {
+  if (withEmployees.includes(serviceId)) {
     steps.push(4);
   }
   steps.push(5);

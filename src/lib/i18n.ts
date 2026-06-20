@@ -52,6 +52,10 @@ export const i18n = {
         alacarte: {
           title: "3. Services à la carte",
           subtitle: "Besoins précis et récurrents, à prix fixes ou sur mesure."
+        },
+        fiscal: {
+          title: "4. Services fiscaux & conseil",
+          subtitle: "Déclarations, fiscalité corporative, placements et CFO virtuel."
         }
       },
       items: {
@@ -104,6 +108,36 @@ export const i18n = {
           name: "Aide impôt travailleur autonome",
           desc: "Rassembler et structurer vos chiffres avant transmission à votre comptable.",
           price: "150 $ – 300 $"
+        },
+        personalTaxT1: {
+          name: "Déclaration T1 / TP-1",
+          desc: "Préparation complète et optimisée de votre déclaration de revenus de particulier.",
+          price: "89 $ / dossier"
+        },
+        selfEmployedTa: {
+          name: "Travailleur autonome (T2125 & taxes)",
+          desc: "Fiscalité complète : T2125, TPS/TVH/TVP et déclarations annuelles.",
+          price: "199 $ / dossier"
+        },
+        corporateT2: {
+          name: "Société incorporée T2 / CO-17",
+          desc: "Déclarations corporatives, états financiers de compilation et optimisation fiscale.",
+          price: "749 $ / exercice"
+        },
+        bookkeepingManaged: {
+          name: "Tenue de livres gérée",
+          desc: "Tenue mensuelle rigoureuse, réconciliation et rapports financiers professionnels.",
+          price: "Sur devis — à partir de 350 $ / mois"
+        },
+        investmentStocks: {
+          name: "Revenus de placement (T5008)",
+          desc: "Gains en capital, dividendes, crypto et optimisation des placements.",
+          price: "149 $ / dossier"
+        },
+        virtualCfo: {
+          name: "CFO virtuel",
+          desc: "Stratégie financière, budgets, KPI et accompagnement décisionnel.",
+          price: "Sur devis — à partir de 1 500 $ / mois"
         }
       }
     },
@@ -997,6 +1031,10 @@ export const i18n = {
         alacarte: {
           title: "3. À la carte services",
           subtitle: "Specific recurring needs at fixed or custom rates."
+        },
+        fiscal: {
+          title: "4. Tax & advisory services",
+          subtitle: "Personal and corporate returns, investments and virtual CFO."
         }
       },
       items: {
@@ -1049,6 +1087,36 @@ export const i18n = {
           name: "Self-employed tax prep help",
           desc: "Gather and organize your numbers before sending to your accountant.",
           price: "$150 – $300"
+        },
+        personalTaxT1: {
+          name: "T1 / TP-1 personal tax return",
+          desc: "Complete preparation and optimization of your personal income tax return.",
+          price: "$89 / file"
+        },
+        selfEmployedTa: {
+          name: "Self-employed (T2125 & sales tax)",
+          desc: "Full tax package: T2125, GST/HST/PST and annual filings.",
+          price: "$199 / file"
+        },
+        corporateT2: {
+          name: "Incorporated company T2 / CO-17",
+          desc: "Corporate returns, compilation financials and tax optimization.",
+          price: "$749 / fiscal year"
+        },
+        bookkeepingManaged: {
+          name: "Managed bookkeeping",
+          desc: "Rigorous monthly books, reconciliation and professional financial reports.",
+          price: "Custom quote — from $350 / mo"
+        },
+        investmentStocks: {
+          name: "Investment income (T5008)",
+          desc: "Capital gains, dividends, crypto and investment tax optimization.",
+          price: "$149 / file"
+        },
+        virtualCfo: {
+          name: "Virtual CFO",
+          desc: "Financial strategy, budgets, KPIs and executive decision support.",
+          price: "Custom quote — from $1,500 / mo"
         }
       }
     },

@@ -9,11 +9,16 @@ import {
   RefreshCw,
   Monitor,
   HelpCircle,
+  User,
+  Zap,
+  BookOpen,
+  BarChart3,
+  Briefcase,
   type LucideIcon,
 } from 'lucide-react';
 import type { UserNeeds } from '../types';
 
-export type ServiceCategory = 'hourly' | 'monthly' | 'alacarte';
+export type ServiceCategory = 'hourly' | 'monthly' | 'alacarte' | 'fiscal';
 
 export type ServiceId = keyof UserNeeds;
 
@@ -97,9 +102,66 @@ export const SERVICE_CATALOG: ServiceDefinition[] = [
     estimateFee: 225,
     icon: HelpCircle,
   },
+  {
+    id: 'personalTaxT1',
+    code: 'T1',
+    category: 'fiscal',
+    estimateFee: 89,
+    icon: User,
+  },
+  {
+    id: 'selfEmployedTa',
+    code: 'TA',
+    category: 'fiscal',
+    estimateFee: 199,
+    icon: Zap,
+  },
+  {
+    id: 'corporateT2',
+    code: 'T2',
+    category: 'fiscal',
+    estimateFee: 749,
+    icon: Building2,
+  },
+  {
+    id: 'bookkeepingManaged',
+    code: 'BK',
+    category: 'fiscal',
+    estimateFee: 350,
+    icon: BookOpen,
+  },
+  {
+    id: 'investmentStocks',
+    code: 'INV',
+    category: 'fiscal',
+    estimateFee: 149,
+    icon: BarChart3,
+  },
+  {
+    id: 'virtualCfo',
+    code: 'CFO',
+    category: 'fiscal',
+    estimateFee: 1500,
+    icon: Briefcase,
+  },
 ];
 
-export const SERVICE_CATEGORIES: ServiceCategory[] = ['hourly', 'monthly', 'alacarte'];
+/** IDs utilisés dans Rapports services (sub-admin) → catalogue calculateur */
+export const REPORT_SERVICE_TO_CATALOG: Record<string, ServiceId> = {
+  t1: 'personalTaxT1',
+  ta: 'selfEmployedTa',
+  t2: 'corporateT2',
+  bookkeeping: 'bookkeepingManaged',
+  stocks: 'investmentStocks',
+  cfo: 'virtualCfo',
+};
+
+export const SERVICE_CATEGORIES: ServiceCategory[] = ['hourly', 'monthly', 'alacarte', 'fiscal'];
+
+export function isServiceId(value: string | null | undefined): value is ServiceId {
+  if (!value) return false;
+  return SERVICE_CATALOG.some((s) => s.id === value);
+}
 
 export function createEmptyUserNeeds(): UserNeeds {
   return {
@@ -113,6 +175,12 @@ export function createEmptyUserNeeds(): UserNeeds {
     catchUp: false,
     softwareSetup: false,
     taxHelpAutonomous: false,
+    personalTaxT1: false,
+    selfEmployedTa: false,
+    corporateT2: false,
+    bookkeepingManaged: false,
+    investmentStocks: false,
+    virtualCfo: false,
   };
 }
 
