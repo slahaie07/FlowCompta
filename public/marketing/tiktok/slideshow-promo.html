@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1080, height=1920, initial-scale=1" />
+  <title>ComptaFlow — TikTok Slideshow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Outfit', sans-serif;
+    }
+    .phone {
+      width: 1080px;
+      height: 1920px;
+      position: relative;
+      overflow: hidden;
+      background: #0A0A0A;
+    }
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 64px;
+      text-align: center;
+      opacity: 0;
+      animation: slideShow 25s infinite;
+    }
+    .slide:nth-child(1) { animation-delay: 0s; }
+    .slide:nth-child(2) { animation-delay: 5s; }
+    .slide:nth-child(3) { animation-delay: 10s; }
+    .slide:nth-child(4) { animation-delay: 15s; }
+    .slide:nth-child(5) { animation-delay: 20s; }
+    @keyframes slideShow {
+      0%, 2% { opacity: 0; transform: scale(1.05); }
+      4%, 18% { opacity: 1; transform: scale(1); }
+      20%, 100% { opacity: 0; transform: scale(0.98); }
+    }
+    .slide img.bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.85) 100%);
+      z-index: 1;
+    }
+    .content { position: relative; z-index: 2; }
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 96px;
+      font-weight: 700;
+      font-style: italic;
+      color: #D4AF37;
+      line-height: 1.05;
+      margin-bottom: 32px;
+    }
+    p {
+      font-size: 42px;
+      color: #F5F1E8;
+      font-weight: 300;
+      line-height: 1.35;
+      max-width: 900px;
+    }
+    .cta {
+      margin-top: 48px;
+      font-size: 36px;
+      font-weight: 600;
+      color: #0A0A0A;
+      background: #D4AF37;
+      padding: 24px 48px;
+      border-radius: 999px;
+    }
+    .logo {
+      position: absolute;
+      bottom: 80px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      z-index: 3;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      color: rgba(245,241,232,0.7);
+      letter-spacing: 0.2em;
+    }
+    .hint {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      color: #666;
+      font-size: 12px;
+      max-width: 320px;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone" id="capture">
+    <div class="slide">
+      <img class="bg" src="tiktok-01-hero-vertical.png" alt="" />
+      <div class="overlay"></div>
+      <div class="content">
+        <h1>ComptaFlow</h1>
+        <p>La comptabilité qui coule de source. Pour les entrepreneurs du Québec.</p>
+      </div>
+    </div>
+    <div class="slide">
+      <img class="bg" src="tiktok-02-trois-raisons.png" alt="" />
+      <div class="overlay"></div>
+      <div class="content">
+        <h1>3 raisons</h1>
+        <p>Quitter Excel. Portail 24/7. Expert CPA à portée de clic.</p>
+      </div>
+    </div>
+    <div class="slide">
+      <img class="bg" src="tiktok-03-interac.png" alt="" />
+      <div class="overlay"></div>
+      <div class="content">
+        <h1>Interac</h1>
+        <p>Payez vos factures en virement Interac — simple et sécurisé.</p>
+      </div>
+    </div>
+    <div class="slide">
+      <img class="bg" src="tiktok-04-estimation-prix.png" alt="" />
+      <div class="overlay"></div>
+      <div class="content">
+        <h1>2 minutes</h1>
+        <p>Estimez vos frais comptables avant même de vous inscrire.</p>
+      </div>
+    </div>
+    <div class="slide">
+      <div class="overlay" style="background:#0A0A0A;"></div>
+      <div class="content">
+        <h1>Prêt?</h1>
+        <p>Ouvrez votre dossier dès aujourd'hui.</p>
+        <div class="cta">compta-flow.net</div>
+      </div>
+    </div>
+    <div class="logo">COMPTAFLOW • QUÉBEC</div>
+  </div>
+  <p class="hint">Enregistrez cet écran en 9:16 (OBS / Win+G) — boucle 25 s, 5 slides × 5 s. Ouvrez en plein écran F11.</p>
+</body>
+</html>
