@@ -1,4 +1,4 @@
-import app from './api/index.ts';
+import app from './api/app.ts';
 import dotenv from 'dotenv';
 dotenv.config();
 

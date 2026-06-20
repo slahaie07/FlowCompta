@@ -5,7 +5,7 @@
   "outputDirectory": "dist",
   "regions": ["yul1"],
   "functions": {
-    "api/index.ts": {
+    "api/index.cjs": {
       "maxDuration": 60
     }
   },
@@ -62,11 +62,11 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.ts"
+      "destination": "/api/index.cjs"
     },
     {
       "source": "/sitemap.xml",
-      "destination": "/api/index.ts"
+      "destination": "/api/index.cjs"
     },
     {
       "source": "/(.*)",
