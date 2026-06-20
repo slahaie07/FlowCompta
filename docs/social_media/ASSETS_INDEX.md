@@ -79,8 +79,10 @@ https://compta-flow.net/marketing/instagram/instagram-square-serenite.png
 
 ## Fichiers associés
 
+- `docs/social_media/PUBLISH_PACK.md` — **pack complet prêt à publier** (TikTok, IG, LinkedIn, Facebook, GBP)
+- `docs/social_media/FREE_CANADA_LISTINGS.md` — annuaires gratuits Canada + instructions GSC/Bing
 - `docs/social_media/STRATEGY.md` — charte et piliers éditoriaux
-- `docs/social_media/POSTS.md` — légendes prêtes à publier
+- `docs/social_media/POSTS.md` — légendes courtes (legacy)
 - `docs/social_media/TIKTOK_SCRIPTS.md` — scripts vidéo
 
 ---

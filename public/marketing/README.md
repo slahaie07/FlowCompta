@@ -16,9 +16,11 @@ public/marketing/
 ## Démarrage rapide
 
 1. **Images** — voir `docs/social_media/ASSETS_INDEX.md`
-2. **Légendes FR/EN** — `docs/social_media/POSTS.md`
-3. **Vidéos TikTok** — `docs/social_media/TIKTOK_SCRIPTS.md`
-4. **Slideshow enregistrable** — ouvrir `tiktok/slideshow-promo.html` en plein écran, enregistrer avec Win+G ou OBS
+2. **Pack publication** — `docs/social_media/PUBLISH_PACK.md`
+3. **Listings Canada** — `docs/social_media/FREE_CANADA_LISTINGS.md`
+4. **Légendes courtes** — `docs/social_media/POSTS.md`
+5. **Vidéos TikTok** — `docs/social_media/TIKTOK_SCRIPTS.md`
+6. **Slideshow enregistrable** — ouvrir `tiktok/slideshow-promo.html` en plein écran, enregistrer avec Win+G ou OBS
 
 ## Charte
 
