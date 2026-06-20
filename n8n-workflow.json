@@ -1,79 +1,10 @@
 {
-  "name": "ComptaFlow - Paiement et Onboarding Automatisé",
-  "nodes": [
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "comptaflow-stripe-webhook",
-        "options": {}
-      },
-      "name": "Stripe Webhook",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
-      "position": [250, 300],
-      "webhookId": "9ac10e82-xxxx-xxxx-xxxx"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{$json.body.type}}",
-              "value2": "checkout.session.completed"
-            }
-          ]
-        }
-      },
-      "name": "Check Payment Success",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [450, 300]
-    },
-    {
-      "parameters": {
-        "fromEmail": "Equipe ComptaFlow <noreply@compta-flow.net>",
-        "toEmail": "={{$json.body.data.object.customer_email}}",
-        "ccEmail": "s.lahaie07@gmail.com",
-        "subject": "Confirmation de paiement et début de vos services comptables - ComptaFlow",
-        "text": "=Bonjour,\n\nNous confirmons la réception de votre paiement pour votre intégration aux services comptables.\n\nVoici le résumé de votre situation:\nEntreprise: {{$json.body.data.object.metadata.entreprise}}\nNEQ: {{$json.body.data.object.metadata.neq}}\nNAS Fourni: {{$json.body.data.object.metadata.nas}}\n\nProchaines étapes:\n1. Connectez-vous à votre portail ComptaFlow.\n2. Déposez les documents initiaux manquants (avis de cotisation).\n3. Notre équipe procèdera à l'analyse sous 24 à 48h.\n\nCordialement,\nL'équipe ComptaFlow",
-        "options": {}
-      },
-      "name": "Send Email Summary",
-      "type": "n8n-nodes-base.emailSend",
-      "typeVersion": 1,
-      "position": [700, 200],
-      "credentials": {
-        "smtp": {
-          "id": "1",
-          "name": "AppiaPro SMTP Server"
-        }
-      }
-    }
-  ],
-  "connections": {
-    "Stripe Webhook": {
-      "main": [
-        [
-          {
-            "node": "Check Payment Success",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Check Payment Success": {
-      "main": [
-        [
-          {
-            "node": "Send Email Summary",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    }
+  "name": "ComptaFlow - Réconciliation Interac (alias)",
+  "meta": {
+    "description": "Utilisez plutôt n8n-interac-reconciliation.json — ce fichier redirige vers le workflow Interac principal."
   },
+  "nodes": [],
+  "connections": {},
   "active": false,
   "settings": {}
 }
