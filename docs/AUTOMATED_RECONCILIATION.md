@@ -35,7 +35,19 @@ L'endpoint exposé par ComptaFlow est :
 
 ---
 
-## ⚙️ 3. Structure du Workflow n8n
+## ⚙️ 3. Import rapide dans n8n
+
+1. Dans n8n : **Workflows → Import from File**
+2. Sélectionnez **`n8n-interac-reconciliation.json`** à la racine du dépôt FlowCompta
+3. Configurez les credentials :
+   - **IMAP** : boîte qui reçoit les notifications Interac de votre banque
+   - **SMTP / Resend** : alertes succès / échec
+4. Variables d'environnement n8n :
+   - `COMPTAFLOW_ADMIN_SECRET` = valeur de `ADMIN_SECRET` sur Vercel
+   - `COMPTAFLOW_ALERT_EMAIL` = courriel du comptable (optionnel)
+5. Activez le workflow
+
+### Structure du workflow importé
 
 ### Étape 1 : Déclencheur Courriel (Gmail ou IMAP)
 * **Nœud** : *Gmail Trigger* (On Message Received) ou *IMAP Email*

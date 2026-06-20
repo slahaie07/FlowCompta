@@ -1,49 +1,53 @@
 {
-  "name": "ComptaFlow - Onboarding Automatisé",
+  "name": "ComptaFlow - Onboarding Automatisé (Interac)",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "comptaflow-onboarding-webhook",
+        "path": "comptaflow-onboarding",
         "options": {}
       },
-      "name": "Stripe Payment Success",
+      "id": "webhook-onboarding",
+      "name": "Webhook onboarding client",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
+      "typeVersion": 2,
       "position": [100, 300],
       "webhookId": "comptaflow-onboarding-trigger"
     },
     {
       "parameters": {
-        "fromEmail": "Comptaflow <support@compta-flow.net>",
-        "toEmail": "={{$json.body.customer_details.email}}",
-        "subject": "Bienvenue chez ComptaFlow - Votre Onboarding commence ici 🚀",
-        "html": "=<h1>Bienvenue {{$json.body.customer_details.name}} !</h1><p>Nous sommes ravis de vous accompagner dans la gestion de votre entreprise.</p><p>Votre compte est désormais actif. <a href='https://compta-flow.net/portal/client/overview'>Accéder à mon portail</a></p><p>Prochaine étape : choisissez votre service puis suivez votre <a href='https://compta-flow.net/portal/client/procedure'>parcours dossier</a>.</p><p>À très vite,<br>L'équipe Comptaflow</p>",
+        "method": "POST",
+        "url": "https://compta-flow.net/api/webhook/onboarding-complete",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"userId\": \"{{ $json.body.userId }}\",\n  \"email\": \"{{ $json.body.email }}\",\n  \"displayName\": \"{{ $json.body.displayName }}\",\n  \"province\": \"{{ $json.body.province || 'QC' }}\",\n  \"language\": \"{{ $json.body.language || 'fr' }}\"\n}",
         "options": {}
       },
-      "name": "Send Welcome Email",
-      "type": "n8n-nodes-base.emailSend",
-      "typeVersion": 1,
-      "position": [400, 300],
-      "credentials": {
-        "smtp": {
-          "id": "YOUR_RESEND_SMTP_ID",
-          "name": "Resend SMTP"
-        }
-      }
+      "id": "call-comptaflow",
+      "name": "Courriel bienvenue ComptaFlow",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [360, 300]
     },
     {
       "parameters": {
         "resource": "folder",
-        "name": "={{$json.body.customer_details.name}} - Archives Fiscales",
+        "name": "={{ $json.body.displayName || $json.body.email }} - Archives Fiscales",
         "parentFolder": "YOUR_ROOT_FOLDER_ID"
       },
-      "name": "Create Client Vault",
+      "id": "drive-folder",
+      "name": "Dossier Google Drive client",
       "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 2,
-      "position": [650, 300],
+      "typeVersion": 3,
+      "position": [620, 300],
       "credentials": {
-        "googleDriveApi": {
+        "googleDriveOAuth2Api": {
           "id": "YOUR_GOOGLE_DRIVE_ID",
           "name": "Google Drive Account"
         }
@@ -51,29 +55,17 @@
     }
   ],
   "connections": {
-    "Stripe Payment Success": {
-      "main": [
-        [
-          {
-            "node": "Send Welcome Email",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+    "Webhook onboarding client": {
+      "main": [[{ "node": "Courriel bienvenue ComptaFlow", "type": "main", "index": 0 }]]
     },
-    "Send Welcome Email": {
-      "main": [
-        [
-          {
-            "node": "Create Client Vault",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+    "Courriel bienvenue ComptaFlow": {
+      "main": [[{ "node": "Dossier Google Drive client", "type": "main", "index": 0 }]]
     }
   },
   "active": false,
-  "settings": {}
+  "settings": { "executionOrder": "v1" },
+  "tags": [{ "name": "onboarding" }, { "name": "compta-flow" }],
+  "meta": {
+    "description": "Déclencher depuis Supabase (nouveau profil) ou manuellement. Corps: { userId, email, displayName, province, language }. Pas de Stripe — onboarding après inscription."
+  }
 }

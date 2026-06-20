@@ -1,0 +1,148 @@
+{
+  "name": "ComptaFlow — Réconciliation Interac e-Transfer",
+  "nodes": [
+    {
+      "parameters": {
+        "mailbox": "INBOX",
+        "postProcessAction": "read",
+        "options": {
+          "customEmailConfig": "={{ $env.IMAP_CUSTOM_CONFIG || '' }}"
+        }
+      },
+      "id": "imap-trigger",
+      "name": "Courriel Interac (IMAP)",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "credentials": {
+        "imap": {
+          "id": "YOUR_IMAP_CREDENTIAL_ID",
+          "name": "Boîte comptable Interac"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = ($input.first().json.textPlain || $input.first().json.textHtml || $input.first().json.text || '').toString();\nconst subject = ($input.first().json.subject || '').toString();\nconst combined = `${subject}\\n${body}`;\n\nconst invoiceMatch = combined.match(/FAC-\\d{4}-\\d{4}/i);\nconst invoiceNumber = invoiceMatch ? invoiceMatch[0].toUpperCase() : null;\n\nconst amountMatch = combined.match(/(\\d+[\\.,]\\d{2})\\s?\\$?/);\nconst amount = amountMatch ? parseFloat(amountMatch[1].replace(',', '.')) : null;\n\nconst refMatch = combined.match(/\\b(CA[A-Z0-9]{6,})\\b/i);\nconst interacRef = refMatch ? refMatch[1].toUpperCase() : null;\n\nreturn [{\n  json: {\n    invoiceNumber,\n    amount,\n    interacRef,\n    subject,\n    hasRequiredFields: Boolean(invoiceNumber && interacRef)\n  }\n}];"
+      },
+      "id": "extract-fields",
+      "name": "Extraire facture / montant / réf",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "has-invoice",
+              "leftValue": "={{ $json.hasRequiredFields }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-valid",
+      "name": "Champs valides ?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://compta-flow.net/api/invoices/reconcile",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.COMPTAFLOW_ADMIN_SECRET }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"invoiceNumber\": \"{{ $json.invoiceNumber }}\",\n  \"amount\": {{ $json.amount ?? 'null' }},\n  \"interacRef\": \"{{ $json.interacRef }}\"\n}",
+        "options": {}
+      },
+      "id": "reconcile-api",
+      "name": "POST ComptaFlow reconcile",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 220]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@compta-flow.net",
+        "toEmail": "={{ $env.COMPTAFLOW_ALERT_EMAIL || 'support@compta-flow.net' }}",
+        "subject": "=✅ Interac réconcilié — {{ $('Extraire facture / montant / réf').item.json.invoiceNumber }}",
+        "emailFormat": "text",
+        "text": "=Facture {{ $('Extraire facture / montant / réf').item.json.invoiceNumber }} marquée payée.\nRéf Interac: {{ $('Extraire facture / montant / réf').item.json.interacRef }}\nMontant: {{ $('Extraire facture / montant / réf').item.json.amount }}"
+      },
+      "id": "notify-success",
+      "name": "Notifier succès",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1200, 220],
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_RESEND_SMTP_ID",
+          "name": "Resend SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@compta-flow.net",
+        "toEmail": "={{ $env.COMPTAFLOW_ALERT_EMAIL || 'support@compta-flow.net' }}",
+        "subject": "=⚠️ Interac non parsé — {{ $json.subject }}",
+        "emailFormat": "text",
+        "text": "Impossible d'extraire FAC-XXXX-XXXX ou référence Interac du courriel.\nVérifiez manuellement dans le portail sub-admin."
+      },
+      "id": "notify-skip",
+      "name": "Alerter courriel ignoré",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [960, 420],
+      "credentials": {
+        "smtp": {
+          "id": "YOUR_RESEND_SMTP_ID",
+          "name": "Resend SMTP"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Courriel Interac (IMAP)": {
+      "main": [[{ "node": "Extraire facture / montant / réf", "type": "main", "index": 0 }]]
+    },
+    "Extraire facture / montant / réf": {
+      "main": [[{ "node": "Champs valides ?", "type": "main", "index": 0 }]]
+    },
+    "Champs valides ?": {
+      "main": [
+        [{ "node": "POST ComptaFlow reconcile", "type": "main", "index": 0 }],
+        [{ "node": "Alerter courriel ignoré", "type": "main", "index": 0 }]
+      ]
+    },
+    "POST ComptaFlow reconcile": {
+      "main": [[{ "node": "Notifier succès", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": false,
+  "tags": [{ "name": "interac" }, { "name": "compta-flow" }, { "name": "billing" }],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "description": "Import dans n8n → configurer IMAP + variable COMPTAFLOW_ADMIN_SECRET (= ADMIN_SECRET Vercel). Filtrez la boîte sur notify@payments.interac.ca ou votre banque."
+  }
+}

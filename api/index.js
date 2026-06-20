@@ -2026,6 +2026,40 @@ app.post("/api/support/ai-chat", async (req, res) => {
     );
   }
 });
+async function getAuthenticatedUserFromRequest(req) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  if (!serviceRoleKey) return null;
+  const token = authHeader.slice(7);
+  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false }
+  });
+  const { data: userData, error: userError } = await adminClient.auth.getUser(token);
+  if (userError || !userData.user) return null;
+  return {
+    user: userData.user,
+    adminClient
+  };
+}
+function assertSelfServiceTarget(authUser, body) {
+  const bodyUserId = body.userId ? String(body.userId) : void 0;
+  const bodyEmail = body.email ? String(body.email).toLowerCase().trim() : void 0;
+  const authEmail = authUser.user.email?.toLowerCase();
+  if (bodyUserId && bodyUserId !== authUser.user.id) {
+    return { ok: false, status: 403, error: "Vous ne pouvez agir que sur votre propre compte." };
+  }
+  if (bodyEmail && authEmail && bodyEmail !== authEmail) {
+    return { ok: false, status: 403, error: "Vous ne pouvez agir que sur votre propre compte." };
+  }
+  return { ok: true };
+}
+async function getSuperAdminFromRequest(req) {
+  const ctx = await getAuthenticatedUserFromRequest(req);
+  if (!ctx) return null;
+  const { data: profile } = await ctx.adminClient.from("profiles").select("role").eq("id", ctx.user.id).single();
+  if (profile?.role !== "super_admin") return null;
+  return { user: ctx.user, adminClient: ctx.adminClient };
+}
 app.post("/api/invoices/reconcile", async (req, res) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
@@ -2114,13 +2148,16 @@ L'\xE9quipe ComptaFlow`
   }
 });
 app.post("/api/profile/delete", async (req, res) => {
-  const { userId, email } = req.body;
-  if (!userId && !email) {
-    botLog("DELETE_PROFILE_BAD_REQUEST", "System", "Tentative de suppression de compte sans identifiants.");
-    return res.status(400).json({ error: "userId ou email requis pour la suppression." });
+  const authCtx = await getAuthenticatedUserFromRequest(req);
+  if (!authCtx) {
+    return res.status(401).json({ error: "Authentification requise (Bearer token Supabase)." });
   }
-  let targetUserId = userId;
-  let targetEmail = email;
+  const selfCheck = assertSelfServiceTarget(authCtx, req.body || {});
+  if (selfCheck.ok === false) {
+    return res.status(selfCheck.status).json({ error: selfCheck.error });
+  }
+  let targetUserId = authCtx.user.id;
+  let targetEmail = authCtx.user.email;
   const db = getDb();
   let foundInLocalDb = false;
   if (db.profiles) {
@@ -2155,7 +2192,7 @@ app.post("/api/profile/delete", async (req, res) => {
     }
   }
   if (!targetUserId) {
-    botLog("DELETE_PROFILE_NOT_FOUND", "System", `Utilisateur non trouv\xE9 pour la suppression: ID=${userId}, Email=${email}`);
+    botLog("DELETE_PROFILE_NOT_FOUND", "System", `Utilisateur non trouv\xE9 pour la suppression: ID=${targetUserId}, Email=${targetEmail}`);
     return res.status(404).json({ error: "Utilisateur non trouv\xE9." });
   }
   botLog("DELETE_PROFILE_REQUEST", targetUserId, `Loi 25 - Demande de suppression pour ${targetEmail}`);
@@ -2318,13 +2355,16 @@ app.post("/api/profile/delete", async (req, res) => {
   });
 });
 app.post("/api/profile/export", rateLimiter(5, 6e4), async (req, res) => {
-  const { userId, email } = req.body;
-  if (!userId && !email) {
-    botLog("EXPORT_PROFILE_BAD_REQUEST", "System", "Tentative d'exportation de donn\xE9es sans identifiants.");
-    return res.status(400).json({ error: "userId ou email requis pour l'exportation." });
+  const authCtx = await getAuthenticatedUserFromRequest(req);
+  if (!authCtx) {
+    return res.status(401).json({ error: "Authentification requise (Bearer token Supabase)." });
   }
-  let targetUserId = userId;
-  let targetEmail = email;
+  const selfCheck = assertSelfServiceTarget(authCtx, req.body || {});
+  if (selfCheck.ok === false) {
+    return res.status(selfCheck.status).json({ error: selfCheck.error });
+  }
+  let targetUserId = authCtx.user.id;
+  let targetEmail = authCtx.user.email;
   const db = getDb();
   let foundInLocalDb = false;
   let localData = {};
@@ -2448,7 +2488,7 @@ app.post("/api/profile/export", rateLimiter(5, 6e4), async (req, res) => {
   }
   const exportPayload = foundInLocalDb ? { ...localData, source: "mock_local_db" } : { ...dbData, source: "production_db" };
   if (!exportPayload.profile && !foundInLocalDb) {
-    botLog("EXPORT_PROFILE_NOT_FOUND", "System", `Tentative d'export pour un utilisateur inexistant: ID=${userId}, Email=${email}`);
+    botLog("EXPORT_PROFILE_NOT_FOUND", "System", `Tentative d'export pour un utilisateur inexistant: ID=${targetUserId}, Email=${targetEmail}`);
     return res.status(404).json({ error: "Profil utilisateur introuvable pour l'exportation." });
   }
   botLog("EXPORT_PROFILE_SUCCESS", targetUserId || "unknown", `Donn\xE9es export\xE9es pour ${targetEmail}`);
@@ -2464,20 +2504,6 @@ app.post("/api/profile/export", rateLimiter(5, 6e4), async (req, res) => {
     data: exportPayload
   }, null, 2));
 });
-async function getSuperAdminFromRequest(req) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith("Bearer ")) return null;
-  const token = authHeader.slice(7);
-  if (!serviceRoleKey) return null;
-  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { autoRefreshToken: false, persistSession: false }
-  });
-  const { data: userData, error: userError } = await adminClient.auth.getUser(token);
-  if (userError || !userData.user) return null;
-  const { data: profile } = await adminClient.from("profiles").select("role").eq("id", userData.user.id).single();
-  if (profile?.role !== "super_admin") return null;
-  return { user: userData.user, adminClient };
-}
 app.post("/api/admin/create-sub-admin", async (req, res) => {
   const ctx = await getSuperAdminFromRequest(req);
   if (!ctx) {

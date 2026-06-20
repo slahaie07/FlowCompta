@@ -1,8 +1,7 @@
 import { test, expect, vi } from 'vitest';
 
 /**
- * Test de Suppression de Compte - Conformité Loi 25 (Right to be Forgotten)
- * Vérifie le comportement de l'endpoint et le blocage légal en cas de déclarations ou factures en cours.
+ * Loi 25 — suppression / export (JWT Supabase requis côté API réelle).
  */
 test('Loi 25 : Suppression de compte autorisée', async () => {
   const baseUrl = 'http://localhost:3000';
@@ -21,7 +20,10 @@ test('Loi 25 : Suppression de compte autorisée', async () => {
 
   const res = await fetch(`${baseUrl}/api/profile/delete`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer mock-jwt-token',
+    },
     body: JSON.stringify({ userId, email })
   });
 
@@ -50,7 +52,10 @@ test('Loi 25 : Refus de suppression pour rétention légale (factures impayées/
 
   const res = await fetch(`${baseUrl}/api/profile/delete`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer mock-jwt-token',
+    },
     body: JSON.stringify({ userId, email })
   });
 
@@ -86,7 +91,10 @@ test('Loi 25 : Droit à la portabilité (Export de données)', async () => {
 
   const res = await fetch(`${baseUrl}/api/profile/export`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer mock-jwt-token',
+    },
     body: JSON.stringify({ userId, email })
   });
 

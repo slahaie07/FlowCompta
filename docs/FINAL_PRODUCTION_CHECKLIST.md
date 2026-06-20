@@ -9,7 +9,7 @@ ComptaFlow n'accepte **que le virement Interac e-Transfer**. Aucune carte de cr�
 
 - [x] **Flux client** : instructions Interac sur chaque facture (courriel du `sub_admin` configuré dans le portail)
 - [x] **Confirmation manuelle** : le comptable confirme la réception avec la référence bancaire
-- [ ] **Réconciliation automatique (n8n)** : importer `n8n-onboarding-automation.json` et configurer le webhook
+- [ ] **Réconciliation automatique (n8n)** : importer **`n8n-interac-reconciliation.json`**
   - Cible : `POST https://compta-flow.net/api/invoices/reconcile`
   - Corps : `{ "invoiceNumber", "amount", "interacRef" }`
   - Auth : `Authorization: Bearer <ADMIN_SECRET>`
@@ -25,7 +25,8 @@ ComptaFlow n'accepte **que le virement Interac e-Transfer**. Aucune carte de cr�
 
 ### 🤖 3. Activation de l'IA & Onboarding (n8n)
 - [x] **Automatisation d'Onboarding prête** : Le fichier d'importation `n8n-onboarding-automation.json` a été généré et validé.
-- [ ] **Importation n8n** : Importer le fichier dans votre instance n8n.
+- [ ] **Importation n8n onboarding** : `n8n-onboarding-automation.json` (webhook post-inscription, sans paiement)
+- [ ] **Importation n8n Interac** : `n8n-interac-reconciliation.json`
 - [ ] **Connexions API** : Relier vos comptes Google Drive et Resend (SMTP).
 - [ ] **Webhook Interac n8n** : Relier la détection de virements entrants à `/api/invoices/reconcile`.
 
@@ -40,5 +41,5 @@ ComptaFlow n'accepte **que le virement Interac e-Transfer**. Aucune carte de cr�
 **STATUT ACTUEL :**
 * **Moteur (Frontend & Backend)** : 🟢 **100% OPÉRATIONNEL** (Tous les tests passent, compilation vérifiée).
 * **Base de données** : 🟢 **PRÊTE** (Schéma Supabase et RLS optimisés).
-* **Paiements** : 🟢 **Interac e-Transfer** — flux manuel opérationnel ; réconciliation n8n en attente.
+* **Paiements** : 🟢 **Interac e-Transfer** — flux manuel opérationnel ; importer `n8n-interac-reconciliation.json` pour l'auto-réconciliation.
 * **Intégration externe** : 🟡 **n8n onboarding + marketing** à importer.

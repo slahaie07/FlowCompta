@@ -715,6 +715,57 @@ app.post('/api/support/ai-chat', async (req, res) => {
   }
 });
 
+// --- Auth helpers (JWT Supabase) ---
+async function getAuthenticatedUserFromRequest(req: express.Request) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  if (!serviceRoleKey) return null;
+
+  const token = authHeader.slice(7);
+  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  const { data: userData, error: userError } = await adminClient.auth.getUser(token);
+  if (userError || !userData.user) return null;
+
+  return {
+    user: userData.user,
+    adminClient,
+  };
+}
+
+function assertSelfServiceTarget(
+  authUser: { user: User },
+  body: { userId?: string; email?: string }
+): { ok: true } | { ok: false; status: number; error: string } {
+  const bodyUserId = body.userId ? String(body.userId) : undefined;
+  const bodyEmail = body.email ? String(body.email).toLowerCase().trim() : undefined;
+  const authEmail = authUser.user.email?.toLowerCase();
+
+  if (bodyUserId && bodyUserId !== authUser.user.id) {
+    return { ok: false, status: 403, error: 'Vous ne pouvez agir que sur votre propre compte.' };
+  }
+  if (bodyEmail && authEmail && bodyEmail !== authEmail) {
+    return { ok: false, status: 403, error: 'Vous ne pouvez agir que sur votre propre compte.' };
+  }
+  return { ok: true };
+}
+
+async function getSuperAdminFromRequest(req: express.Request) {
+  const ctx = await getAuthenticatedUserFromRequest(req);
+  if (!ctx) return null;
+
+  const { data: profile } = await ctx.adminClient
+    .from('profiles')
+    .select('role')
+    .eq('id', ctx.user.id)
+    .single();
+
+  if (profile?.role !== 'super_admin') return null;
+  return { user: ctx.user, adminClient: ctx.adminClient };
+}
+
 // --- AUTOMATED INTERAC E-TRANSFER RECONCILIATION VIA n8n ---
 app.post('/api/invoices/reconcile', async (req, res) => {
   const authHeader = req.headers.authorization;
@@ -826,15 +877,18 @@ app.post('/api/invoices/reconcile', async (req, res) => {
 
 // --- LOI 25 : AUTOMATED ACCOUNT DELETION ("Right to be Forgotten" / Droit à l'oubli) ---
 app.post('/api/profile/delete', async (req, res) => {
-  const { userId, email } = req.body;
-
-  if (!userId && !email) {
-    botLog('DELETE_PROFILE_BAD_REQUEST', 'System', 'Tentative de suppression de compte sans identifiants.');
-    return res.status(400).json({ error: "userId ou email requis pour la suppression." });
+  const authCtx = await getAuthenticatedUserFromRequest(req);
+  if (!authCtx) {
+    return res.status(401).json({ error: 'Authentification requise (Bearer token Supabase).' });
   }
 
-  let targetUserId = userId;
-  let targetEmail = email;
+  const selfCheck = assertSelfServiceTarget(authCtx, req.body || {});
+  if (selfCheck.ok === false) {
+    return res.status(selfCheck.status).json({ error: selfCheck.error });
+  }
+
+  let targetUserId = authCtx.user.id;
+  let targetEmail = authCtx.user.email;
 
   // 1. Resolve from local_db.json if available
   const db = getDb();
@@ -876,7 +930,7 @@ app.post('/api/profile/delete', async (req, res) => {
   }
 
   if (!targetUserId) {
-    botLog('DELETE_PROFILE_NOT_FOUND', 'System', `Utilisateur non trouvé pour la suppression: ID=${userId}, Email=${email}`);
+    botLog('DELETE_PROFILE_NOT_FOUND', 'System', `Utilisateur non trouvé pour la suppression: ID=${targetUserId}, Email=${targetEmail}`);
     return res.status(404).json({ error: "Utilisateur non trouvé." });
   }
 
@@ -1085,15 +1139,18 @@ app.post('/api/profile/delete', async (req, res) => {
 
 // --- LOI 25 : DROIT À LA PORTABILITÉ DES DONNÉES ("Right to Portability" / Item 109) ---
 app.post('/api/profile/export', rateLimiter(5, 60000), async (req, res) => {
-  const { userId, email } = req.body;
-
-  if (!userId && !email) {
-    botLog('EXPORT_PROFILE_BAD_REQUEST', 'System', "Tentative d'exportation de données sans identifiants.");
-    return res.status(400).json({ error: "userId ou email requis pour l'exportation." });
+  const authCtx = await getAuthenticatedUserFromRequest(req);
+  if (!authCtx) {
+    return res.status(401).json({ error: 'Authentification requise (Bearer token Supabase).' });
   }
 
-  let targetUserId = userId;
-  let targetEmail = email;
+  const selfCheck = assertSelfServiceTarget(authCtx, req.body || {});
+  if (selfCheck.ok === false) {
+    return res.status(selfCheck.status).json({ error: selfCheck.error });
+  }
+
+  let targetUserId = authCtx.user.id;
+  let targetEmail = authCtx.user.email;
 
   // 1. Resolve from local_db.json if available
   const db = getDb();
@@ -1237,7 +1294,7 @@ app.post('/api/profile/export', rateLimiter(5, 60000), async (req, res) => {
   const exportPayload = foundInLocalDb ? { ...localData, source: "mock_local_db" } : { ...dbData, source: "production_db" };
 
   if (!exportPayload.profile && !foundInLocalDb) {
-    botLog('EXPORT_PROFILE_NOT_FOUND', 'System', `Tentative d'export pour un utilisateur inexistant: ID=${userId}, Email=${email}`);
+    botLog('EXPORT_PROFILE_NOT_FOUND', 'System', `Tentative d'export pour un utilisateur inexistant: ID=${targetUserId}, Email=${targetEmail}`);
     return res.status(404).json({ error: "Profil utilisateur introuvable pour l'exportation." });
   }
 
@@ -1258,30 +1315,6 @@ app.post('/api/profile/export', rateLimiter(5, 60000), async (req, res) => {
 });
 
 // --- SUPER ADMIN: provision sub_admin accounts (service role) ---
-async function getSuperAdminFromRequest(req: express.Request) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer ')) return null;
-
-  const token = authHeader.slice(7);
-  if (!serviceRoleKey) return null;
-
-  const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-
-  const { data: userData, error: userError } = await adminClient.auth.getUser(token);
-  if (userError || !userData.user) return null;
-
-  const { data: profile } = await adminClient
-    .from('profiles')
-    .select('role')
-    .eq('id', userData.user.id)
-    .single();
-
-  if (profile?.role !== 'super_admin') return null;
-  return { user: userData.user, adminClient };
-}
-
 app.post('/api/admin/create-sub-admin', async (req, res) => {
   const ctx = await getSuperAdminFromRequest(req);
   if (!ctx) {
