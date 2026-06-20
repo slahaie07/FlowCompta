@@ -1,4 +1,4 @@
--- Google OAuth: populate profile names from provider metadata (full_name, name)
+-- Optional: populate profile names from auth metadata (full_name, name). Not required for email-only auth.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 DECLARE

@@ -157,7 +157,7 @@ export function Landing() {
                   className="px-8 py-7 text-lg glass-button border-gold/20 flex gap-3 items-center group"
                 >
                   <LogIn size={20} className="group-hover:scale-110 transition-transform text-gold" />
-                  {t('hero.googleLogin')}
+                  {t('hero.clientArea')}
                 </Button>
               </div>
             </motion.div>

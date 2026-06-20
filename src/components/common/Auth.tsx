@@ -8,9 +8,8 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { toast } from 'sonner';
 import { useLanguage } from '../../hooks/useLanguage';
-import { getAuthRedirectUrl, signInWithGoogle } from '../../lib/authOAuth';
+import { getAuthRedirectUrl } from '../../lib/authOAuth';
 import { mapSupabaseAuthError } from '../../lib/authErrors';
-import { GoogleAuthButton } from './GoogleAuthButton';
 
 interface AuthProps {
   onAuthentication: (email: string) => void;
@@ -38,20 +37,28 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
   const [fullNameInput, setFullNameInput] = useState('');
   const [subAdminIdInput, setSubAdminIdInput] = useState('');
   const [subAdminsList, setSubAdminsList] = useState<any[]>([]);
+  const [partnersLoading, setPartnersLoading] = useState(false);
+  const [partnersLoadError, setPartnersLoadError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
   const [resending, setResending] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
 
   // Charger la liste des comptables partenaires (sub_admins) pour les nouveaux clients
   useEffect(() => {
     async function loadSubAdmins() {
+      setPartnersLoading(true);
+      setPartnersLoadError(false);
       try {
         const { data, error } = await supabase
           .from('profiles')
           .select('id, full_name, email')
           .eq('role', 'sub_admin');
+        if (error) {
+          setPartnersLoadError(true);
+          setSubAdminsList([]);
+          return;
+        }
         if (data) {
           setSubAdminsList(data);
           if (data.length > 0) {
@@ -60,6 +67,10 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
         }
       } catch (err) {
         console.error("Impossible de charger les sub-admins :", err);
+        setPartnersLoadError(true);
+        setSubAdminsList([]);
+      } finally {
+        setPartnersLoading(false);
       }
     }
     if (view === 'register') {
@@ -70,23 +81,6 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
   // Mode de détection démo/local
   const checkIsMock = (email: string) => {
     return email.toLowerCase().includes('mock') || !window.navigator.onLine;
-  };
-
-  // Resend confirmation email
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
-    setError('');
-    try {
-      await signInWithGoogle(nextPath);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Échec de la connexion Google.";
-      if (message.includes('provider is not enabled') || message.includes('Unsupported provider')) {
-        setError(t('auth.googleNotEnabled'));
-      } else {
-        setError(message);
-      }
-      setGoogleLoading(false);
-    }
   };
 
   const handleResendConfirmation = async () => {
@@ -144,7 +138,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
         if (!fullNameInput) {
           throw new Error("Veuillez saisir votre nom complet.");
         }
-        if (!subAdminIdInput) {
+        if (!subAdminIdInput && subAdminsList.length > 0) {
           throw new Error("Veuillez sélectionner votre comptable partenaire.");
         }
 
@@ -276,15 +270,6 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                    </div>
                 </button>
              </div>
-
-             <div className="max-w-xl mx-auto space-y-4 pt-2">
-               <p className="text-[10px] uppercase tracking-[0.35em] font-black text-slate-600">{t('auth.orDivider')}</p>
-               <GoogleAuthButton
-                 label={t('auth.continueWithGoogle')}
-                 onClick={handleGoogleSignIn}
-                 isLoading={googleLoading}
-               />
-             </div>
           </motion.div>
         ) : (
           <motion.div
@@ -339,17 +324,6 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                     </div>
                   )}
 
-                  <GoogleAuthButton
-                    label={t('auth.continueWithGoogle')}
-                    onClick={handleGoogleSignIn}
-                    isLoading={googleLoading}
-                    className="mb-2"
-                  />
-
-                  <p className="text-center text-[10px] uppercase tracking-[0.35em] font-black text-slate-600">
-                    {t('auth.orDivider')}
-                  </p>
-
                   <form onSubmit={handleAuthSubmit} className="space-y-5 text-left">
                     {view === 'register' && (
                       <>
@@ -366,7 +340,11 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
 
                         <div className="space-y-2">
                           <label htmlFor="auth-partner" className="text-xs uppercase tracking-widest font-black text-slate-500 block">{t('auth.partnerLabel')}</label>
-                          {subAdminsList.length > 0 ? (
+                          {partnersLoading ? (
+                            <div className="text-xs text-slate-500 italic p-4 bg-white/5 border border-white/10 rounded-xl">
+                              {t('auth.partnersLoading')}
+                            </div>
+                          ) : subAdminsList.length > 0 ? (
                             <select
                               id="auth-partner"
                               value={subAdminIdInput}
@@ -380,8 +358,15 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                               ))}
                             </select>
                           ) : (
-                            <div className="text-xs text-amber-500 italic p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl leading-relaxed">
-                              ⚠️ {t('auth.noPartner')}
+                            <div className="text-xs text-amber-500 p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl leading-relaxed space-y-3">
+                              <p>⚠️ {partnersLoadError ? t('auth.partnersLoadError') : t('auth.noPartner')}</p>
+                              <p className="text-slate-400">{t('auth.contactSupportHint')}</p>
+                              <a
+                                href="mailto:support@compta-flow.net?subject=Inscription%20ComptaFlow"
+                                className="inline-flex text-gold hover:underline font-bold uppercase tracking-wider text-[10px]"
+                              >
+                                {t('auth.contactSupport')}
+                              </a>
                             </div>
                           )}
                         </div>
@@ -418,7 +403,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                       variant="gold"
                       className="w-full h-16 gap-3 font-bold uppercase tracking-[0.2em] shadow-gold/20 mt-4"
                       isLoading={isLoading}
-                      disabled={view === 'register' && subAdminsList.length === 0}
+                      disabled={view === 'register' && (partnersLoading || subAdminsList.length === 0)}
                     >
                       {view === 'login' ? t('auth.submitLogin') : t('auth.submitRegister')} <ArrowRight size={20}/>
                     </Button>

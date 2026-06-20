@@ -34,30 +34,45 @@ Copiez `.env.example` et renseignez au minimum :
 
 Sans `GOOGLE_GEMINI_API_KEY`, le chat support fonctionne en mode mock. Sans `ADMIN_SECRET`, les endpoints internes agents sont refusés.
 
-### Connexion Google (OAuth)
+### Authentification courriel (PKCE)
 
-La connexion « Continuer avec Google » utilise **Supabase Auth** (PKCE). Aucune clé Google n'est requise dans `.env` — tout se configure dans les consoles Supabase et Google Cloud.
+L'inscription et la confirmation par courriel utilisent **Supabase Auth** (PKCE). Configurez dans **Supabase Dashboard** → **Authentication → URL Configuration** :
 
-1. **Google Cloud Console** ([console.cloud.google.com](https://console.cloud.google.com))
-   - Créer un projet (ou réutiliser un existant).
-   - **APIs & Services → OAuth consent screen** : type External, domaines autorisés `compta-flow.net`.
-   - **Credentials → Create OAuth client ID** : type **Web application**.
-   - **Authorized redirect URIs** :
-     - `https://<VOTRE_PROJECT_REF>.supabase.co/auth/v1/callback`
-   - Copier **Client ID** et **Client Secret**.
+- **Site URL** : `https://compta-flow.net` (prod) ou `http://localhost:5173` (dev).
+- **Redirect URLs** (allow list) :
+  - `http://localhost:5173/auth/callback`
+  - `https://compta-flow.net/auth/callback`
 
-2. **Supabase Dashboard** → **Authentication → Providers → Google**
-   - Activer Google, coller Client ID et Client Secret.
+Flux applicatif : `/login` → inscription/connexion courriel → lien de confirmation → `/auth/callback` → onboarding si profil incomplet (province) → portail selon le rôle.
 
-3. **Supabase** → **Authentication → URL Configuration**
-   - **Site URL** : `https://compta-flow.net` (prod) ou `http://localhost:5173` (dev).
-   - **Redirect URLs** (allow list) :
-     - `http://localhost:5173/auth/callback`
-     - `https://compta-flow.net/auth/callback`
+## 💻 Développement local (Windows PowerShell)
 
-4. Appliquer la migration SQL `supabase/migrations/20260619_google_oauth_profile.sql` (profil `client` + nom Google).
+Aucun Git Bash requis — tous les scripts npm utilisent `tsx` directement.
 
-Flux applicatif : `/login` → Google → `/auth/callback` → onboarding si profil incomplet (province) → portail selon le rôle.
+```powershell
+npm install
+npm run dev
+
+# Qualité
+npm run lint
+npm test
+npm run promotion:check
+
+# Seed comptes admin (dry run)
+npm run seed:admins:dry-run
+
+# Seed live — mot de passe en argument (recommandé)
+npm run seed:admins -- --password=votre-mot-de-passe
+
+# ou variable d'environnement PowerShell
+$env:SEED_ADMIN_PASSWORD = "votre-mot-de-passe"
+npm run seed:admins
+
+# Setup guidé Windows (migrations SQL + instructions)
+npm run setup:windows
+```
+
+Référence complète : **`docs/DEV_COMMANDS.md`**
 
 ## 📚 Documentation pour l'Architecte
 - `PROJECT_BLUEPRINT.md` : Guide suprême de l'architecture.

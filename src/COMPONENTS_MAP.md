@@ -10,7 +10,7 @@ Ce document identifie chaque composant du système, sa fonction technique et son
 
 ## 📁 Composants de Vue (`src/components/`)
 *   **AdminClients.tsx** : Tableau de bord de supervision pour le cabinet. Liste et filtre les clients. [OPÉRATIONNEL]
-*   **Auth.tsx** : Système d'authentification double (Google + Magic Link). [OPÉRATIONNEL]
+*   **Auth.tsx** : Authentification courriel / mot de passe (Supabase PKCE). [OPÉRATIONNEL]
 *   **Dashboard.tsx** : Coque principale avec navigation latérale et header translucide. [OPÉRATIONNEL]
 *   **Integrations.tsx** : Gestionnaire de connecteurs Google Workspace (Gmail, Sheets, Calendar). [OPÉRATIONNEL]
 *   **Messaging.tsx** : Chat sécurisé temps réel entre le client et le CPA. [OPÉRATIONNEL]

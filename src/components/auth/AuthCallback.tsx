@@ -12,14 +12,14 @@ export function AuthCallback() {
   useEffect(() => {
     let cancelled = false;
 
-    async function completeOAuth() {
+    async function completeAuthCallback() {
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
-      const oauthError = params.get('error');
-      const oauthErrorDescription = params.get('error_description');
+      const authError = params.get('error');
+      const authErrorDescription = params.get('error_description');
 
-      if (oauthError) {
-        toast.error(oauthErrorDescription || 'Connexion Google annulée.');
+      if (authError) {
+        toast.error(authErrorDescription || 'Connexion annulée.');
         if (!cancelled) navigate('/login', { replace: true });
         return;
       }
@@ -34,21 +34,21 @@ export function AuthCallback() {
             error,
           } = await supabase.auth.getSession();
           if (error) throw error;
-          if (!session) throw new Error('Session introuvable après la connexion Google.');
+          if (!session) throw new Error('Session introuvable après la confirmation du courriel.');
         }
 
         if (!cancelled) {
-          toast.success('Connexion Google réussie.');
+          toast.success('Connexion réussie.');
           navigate(nextPath.startsWith('/') ? nextPath : `/${nextPath}`, { replace: true });
         }
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Erreur de connexion Google.';
+        const message = err instanceof Error ? err.message : 'Erreur de connexion.';
         toast.error(message);
         if (!cancelled) navigate('/login', { replace: true });
       }
     }
 
-    void completeOAuth();
+    void completeAuthCallback();
     return () => {
       cancelled = true;
     };
@@ -58,7 +58,7 @@ export function AuthCallback() {
     <div className="min-h-screen bg-noir text-ivoire flex flex-col items-center justify-center gap-8">
       <OrganicLoader label="FLOW" size="md" />
       <p className="text-slate-500 font-serif italic text-lg animate-pulse">
-        Finalisation de votre connexion Google…
+        Finalisation de votre connexion…
       </p>
     </div>
   );
