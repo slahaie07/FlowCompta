@@ -74,7 +74,7 @@ try {
   console.log('\n--- npm run build ---\n');
   execSync('npm run build', { stdio: 'inherit', cwd: root });
   check('build', true, 'Vite + API bundle OK');
-  check('api/index.cjs', fileExists('api/index.cjs'), 'Bundle Vercel généré');
+  check('api/index.js', fileExists('api/index.js'), 'Bundle Vercel généré');
 } catch {
   check('build', false, 'Build en échec');
 }

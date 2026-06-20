@@ -1,10 +1,12 @@
 node_modules/
 build/
 dist/
-api/serverless.cjs
-api/serverless.cjs.map
+api/index.js
+api/index.js.map
 api/index.cjs
 api/index.cjs.map
+api/serverless.cjs
+api/serverless.cjs.map
 coverage/
 .DS_Store
 *.log

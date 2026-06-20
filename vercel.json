@@ -8,8 +8,7 @@
   ],
   "functions": {
     "api/index.js": {
-      "maxDuration": 60,
-      "includeFiles": "api/serverless.cjs"
+      "maxDuration": 60
     }
   },
   "headers": [
