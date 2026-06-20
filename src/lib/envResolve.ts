@@ -1,5 +1,8 @@
 /** Resolve Supabase env from Vercel integration names or ComptaFlow VITE_* names. */
 
+/** Canonical Supabase project ref (prod). */
+export const SUPABASE_PROJECT_REF = 'unvyxfxlzhnutpugjxhe';
+
 const sanitize = (val: string | undefined): string =>
   (val ?? '').replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
 
@@ -19,7 +22,7 @@ export function resolveSupabaseUrl(): string {
     read('SUPABASE_URL') ||
     read('VITE_SUPABASE_URL') ||
     read('NEXT_PUBLIC_SUPABASE_URL') ||
-    'https://unvyxfxlzhnutpugjxhe.supabase.co'
+    `https://${SUPABASE_PROJECT_REF}.supabase.co`
   );
 }
 

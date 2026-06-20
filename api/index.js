@@ -1242,6 +1242,7 @@ var PORTAL_HOME_BY_ROLE = {
 };
 
 // src/lib/envResolve.ts
+var SUPABASE_PROJECT_REF = "unvyxfxlzhnutpugjxhe";
 var sanitize = (val) => (val ?? "").replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
 function read(key) {
   if (typeof import.meta !== "undefined" && import.meta.env?.[key] != null) {
@@ -1253,7 +1254,7 @@ function read(key) {
   return void 0;
 }
 function resolveSupabaseUrl() {
-  return read("SUPABASE_URL") || read("VITE_SUPABASE_URL") || read("NEXT_PUBLIC_SUPABASE_URL") || "https://hnxdlzdgiascuawgydir.supabase.co";
+  return read("SUPABASE_URL") || read("VITE_SUPABASE_URL") || read("NEXT_PUBLIC_SUPABASE_URL") || `https://${SUPABASE_PROJECT_REF}.supabase.co`;
 }
 function resolveSupabaseAnonKey() {
   return read("SUPABASE_ANON_KEY") || read("NEXT_PUBLIC_SUPABASE_ANON_KEY") || read("SUPABASE_PUBLISHABLE_KEY") || read("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY") || read("VITE_SUPABASE_ANON_KEY") || "";
@@ -1989,7 +1990,7 @@ app.post("/api/profile/delete", async (req, res) => {
       foundInLocalDb = true;
     }
   }
-  const projectRef = "hnxdlzdgiascuawgydir";
+  const projectRef = "unvyxfxlzhnutpugjxhe";
   if (serviceRoleKey && (!targetUserId || !targetEmail)) {
     try {
       const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
@@ -2199,7 +2200,7 @@ app.post("/api/profile/export", rateLimiter(5, 6e4), async (req, res) => {
       localData.messages = db.messages ? db.messages.filter((m) => m.userId === targetUserId || m.user_id === targetUserId) : [];
     }
   }
-  const projectRef = "hnxdlzdgiascuawgydir";
+  const projectRef = "unvyxfxlzhnutpugjxhe";
   let dbData = {};
   let foundInDb = false;
   if (serviceRoleKey && !targetUserId?.startsWith("mock_")) {

@@ -103,7 +103,7 @@ Mise à jour :
 ## 5. Actions restantes (côté propriétaire)
 
 1. **Vercel** — ajouter `SUPABASE_SERVICE_ROLE_KEY` en production  
-   - Supabase → [Settings → API](https://supabase.com/dashboard/project/hnxdlzdgiascuawgydir/settings/api) → `service_role`  
+   - Supabase → [Settings → API](https://supabase.com/dashboard/project/unvyxfxlzhnutpugjxhe/settings/api) → `service_role`  
    - Puis `npm run vercel:sync-env` (avec `VERCEL_TOKEN` + `.env.local`) ou collage manuel dans Vercel
 2. **Supabase RLS** — erreur `42P17` (récursion) sur le sélecteur de partenaires :
    ```bash

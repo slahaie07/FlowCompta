@@ -7,11 +7,12 @@
 import fs from 'fs';
 import path from 'path';
 import pg from 'pg';
+import { SUPABASE_PROJECT_REF } from '../src/lib/envResolve';
 
 const { Client } = pg;
 const root = process.cwd();
 const migrationsDir = path.join(root, 'supabase', 'migrations');
-const projectRef = 'hnxdlzdgiascuawgydir';
+const projectRef = SUPABASE_PROJECT_REF;
 
 function getConnectionConfigs(): Array<
   | { kind: 'url'; connectionString: string }

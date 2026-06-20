@@ -6,7 +6,7 @@ Ce guide explique comment appliquer la structure multi-locataire à 3 rôles (`s
 
 ## 1. Ordre des Migrations (SQL Supabase)
 
-1. Ouvrez l'éditeur SQL de votre tableau de bord Supabase (projet `hnxdlzdgiascuawgydir`).
+1. Ouvrez l'éditeur SQL de votre tableau de bord Supabase (projet `unvyxfxlzhnutpugjxhe`).
 2. Copiez l'intégralité du contenu de `comptaflow_migration.sql` situé à la racine du projet.
 3. Exécutez le script dans l'éditeur SQL Supabase.
    - Ce script va drop les anciennes tables, créer la nouvelle table `profiles` (avec support rôles et Interac), créer les tables métier (`clients`, `documents`, `messages`, `invoices`), configurer les triggers de calcul automatique de taxes Québec et de synchronisation d'inscription, puis activer la sécurité Row Level Security (RLS) sur toutes les tables.

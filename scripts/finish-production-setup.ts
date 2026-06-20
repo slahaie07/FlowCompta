@@ -2,10 +2,11 @@
  * Vérification finale + instructions pour compléter la prod.
  * Usage: npm run finish:setup
  */
-import { execSync } from 'child_process';
+import 'dotenv/config';
+import { SUPABASE_PROJECT_REF } from '../src/lib/envResolve';
 
 const BASE = process.env.COMPTAFLOW_URL || 'https://compta-flow.net';
-const PROJECT_REF = 'hnxdlzdgiascuawgydir';
+const PROJECT_REF = SUPABASE_PROJECT_REF;
 const ANON = process.env.VITE_SUPABASE_ANON_KEY || '';
 
 async function checkHealth() {
