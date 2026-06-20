@@ -196,7 +196,7 @@ export const i18n = {
       admin: "Administration",
       copyright: "© 2026 Comptaflow — Canada",
       contact: "Nous contacter",
-      contactHint: "Une question ? Écrivez-nous."
+      contactHint: "Une question ? Écrivez-nous à comptaflow.officiel@gmail.com"
     },
 
     auth: {
@@ -381,6 +381,7 @@ export const i18n = {
       cta: {
         continue: "Continuer vers mon espace",
         signup: "Créer mon compte",
+        requestQuote: "Envoyer ma soumission",
         restart: "Recommencer"
       },
       staff: {
@@ -411,7 +412,7 @@ export const i18n = {
       titleAccent: "Transparence.",
       subtitle: "Sécurité • Confidentialité • Support",
       moreQuestions: "Encore des questions ?",
-      moreDesc: "Notre équipe de support et nos préparateurs sont disponibles sous 24 heures.",
+      moreDesc: "Notre équipe vous répond sous 24 h à comptaflow.officiel@gmail.com ou via le centre d'aide.",
       openTicket: "Ouvrir un ticket de support",
       q1: "Mes données financières sont-elles en sécurité ?",
       a1: "Absolument. ComptaFlow utilise le chiffrement AES-256 pour tous vos documents. Vos données sont isolées via des politiques RLS garantissant que seul vous et votre préparateur assigné y accédez.",
@@ -472,7 +473,7 @@ export const i18n = {
       subtitle: "Votre préparateur à portée de clic",
       formTitle: "Envoyer un message formel",
       sentTitle: "Message acheminé avec succès !",
-      sentDesc: "Votre préparateur vous répondra sous 24 h ouvrables.",
+      sentDesc: "Votre message a été préparé dans votre courriel — envoyez-le à comptaflow.officiel@gmail.com. Réponse sous 24 h ouvrables.",
       subject: "Objet de la demande",
       subjectPlaceholder: "ex: Question sur ma déclaration de taxes…",
       message: "Message détaillé",
@@ -497,7 +498,7 @@ export const i18n = {
       chatPlaceholder: "Écrivez votre message…",
       onlineNow: "En ligne · répond en direct",
       typingPrefix: "écrit",
-      chatError: "Petit contretemps technique — réessayez dans un instant ou écrivez-nous par courriel.",
+      chatError: "Petit contretemps technique — réessayez ou écrivez-nous à {email}.",
       welcomeMessage: "Bonjour ! Je suis {name}, votre interlocutrice ComptaFlow. Comment puis-je vous aider ?"
     },
 
@@ -1108,7 +1109,7 @@ export const i18n = {
       admin: "Administration",
       copyright: "© 2026 Comptaflow — Canada",
       contact: "Contact us",
-      contactHint: "Questions? Email us."
+      contactHint: "Questions? Email us at comptaflow.officiel@gmail.com"
     },
 
     auth: {
@@ -1293,6 +1294,7 @@ export const i18n = {
       cta: {
         continue: "Continue to my portal",
         signup: "Create my account",
+        requestQuote: "Send my quote request",
         restart: "Start over"
       },
       staff: {
@@ -1323,7 +1325,7 @@ export const i18n = {
       titleAccent: "Center.",
       subtitle: "Security • Privacy • Support",
       moreQuestions: "Still have questions?",
-      moreDesc: "Our support team and bookkeepers are available within 24 hours.",
+      moreDesc: "Our team replies within 24 hours at comptaflow.officiel@gmail.com or via the help center.",
       openTicket: "Open a support ticket",
       q1: "Is my financial data secure?",
       a1: "Absolutely. ComptaFlow uses AES-256 encryption for all documents. Data is isolated via RLS policies so only you and your assigned bookkeeper can access it.",
@@ -1384,7 +1386,7 @@ export const i18n = {
       subtitle: "Your bookkeeper within reach",
       formTitle: "Send a formal message",
       sentTitle: "Message sent successfully!",
-      sentDesc: "Your bookkeeper will respond within 24 business hours.",
+      sentDesc: "Your message is ready in your email app — send it to comptaflow.officiel@gmail.com. Reply within 24 business hours.",
       subject: "Request subject",
       subjectPlaceholder: "e.g. Question about my GST filing…",
       message: "Detailed message",
@@ -1409,7 +1411,7 @@ export const i18n = {
       chatPlaceholder: "Type your message…",
       onlineNow: "Online · replying live",
       typingPrefix: "is typing",
-      chatError: "Brief technical issue — try again or email us.",
+      chatError: "Brief technical issue — try again or email us at {email}.",
       welcomeMessage: "Hi! I'm {name}, your ComptaFlow contact. How can I help you today?"
     },
 
@@ -1970,7 +1972,7 @@ export const i18n = {
       admin: "الإدارة",
       copyright: "© 2026 كومبتا فلو — كندا",
       contact: "اتصل بنا",
-      contactHint: "أسئلة؟ راسلنا."
+      contactHint: "أسئلة؟ راسلنا على comptaflow.officiel@gmail.com"
     },
 
     landing: {
@@ -2166,6 +2168,7 @@ export const i18n = {
       cta: {
         continue: "المتابعة إلى بوابتي",
         signup: "إنشاء حسابي",
+        requestQuote: "إرسال طلب التسعير",
         restart: "إعادة البدء"
       }
     },
@@ -2176,7 +2179,7 @@ export const i18n = {
       subtitle: "محاسبك على بعد نقرة",
       formTitle: "إرسال رسالة رسمية",
       sentTitle: "تم إرسال الرسالة بنجاح!",
-      sentDesc: "سيرد محاسبك خلال 24 ساعة عمل.",
+      sentDesc: "تم تجهيز رسالتك في تطبيق البريد — أرسلها إلى comptaflow.officiel@gmail.com. الرد خلال 24 ساعة عمل.",
       subject: "موضوع الطلب",
       subjectPlaceholder: "مثال: سؤال حول إقرار TPS…",
       message: "رسالة مفصلة",
@@ -2201,7 +2204,7 @@ export const i18n = {
       chatPlaceholder: "اكتب رسالتك…",
       onlineNow: "متصل · يرد مباشرة",
       typingPrefix: "يكتب",
-      chatError: "عطل تقني بسيط — أعد المحاولة أو راسلنا بالبريد.",
+      chatError: "عطل تقني بسيط — أعد المحاولة أو راسلنا على {email}.",
       welcomeMessage: "مرحباً! أنا {name}، مسؤولتك في ComptaFlow. كيف يمكنني مساعدتك؟"
     },
 

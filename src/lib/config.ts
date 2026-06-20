@@ -57,9 +57,13 @@ export const CONFIG = {
     SUB_ADMIN_EMAILS: ['comptable@compta-flow.net', 'partenaire@compta-flow.net'],
     SUPPORT_EMAIL: 'comptaflow.officiel@gmail.com',
     SITE_URL: 'https://compta-flow.net',
-    INTERAC_EMAIL: 's.lahaie07@gmail.com',
+    /** Destinataire par défaut des virements Interac plateforme (distinct des comptes auth admin). */
+    INTERAC_EMAIL: 'comptaflow.officiel@gmail.com',
   }
 };
+
+/** Courriel officiel support / soumissions / reçus — source unique côté app. */
+export const SUPPORT_EMAIL = CONFIG.APP.SUPPORT_EMAIL;
 
 /**
  * Validation de l'intégrité du système au démarrage.

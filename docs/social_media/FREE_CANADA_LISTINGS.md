@@ -3,7 +3,7 @@
 > **Objectif** : Maximiser la visibilité SEO locale/nationale sans budget pub.  
 > **Site** : https://compta-flow.net  
 > **Sitemap** : https://compta-flow.net/sitemap.xml  
-> **Courriel** : support@compta-flow.net  
+> **Courriel** : comptaflow.officiel@gmail.com  
 > **Script ping** : `npx tsx scripts/ping-search-engines.ts`
 
 ---
@@ -207,7 +207,7 @@ ComptaFlow — plateforme comptable premium pour entrepreneurs canadiens. Tenue 
 ### Description longue (750 caractères max)
 
 ```
-ComptaFlow est une plateforme comptable premium pour entrepreneurs et PME partout au Canada. Services : tenue de livres horaire (45–75 $/h) ou forfaitaire (dès 150 $/mois), déclarations TPS/TVQ/TVH, paie, feuillets T4/Relevé 1, configuration QuickBooks et Sage. Portail client sécurisé 24/7, coffre-fort chiffré AES-256, conformité PIPEDA et Loi 25, hébergement des données au Canada. Paiement par Interac e-Transfer. Ouverture de dossier gratuite — vous ne payez que pour les travaux effectués. Service bilingue français/anglais. https://compta-flow.net — support@compta-flow.net
+ComptaFlow est une plateforme comptable premium pour entrepreneurs et PME partout au Canada. Services : tenue de livres horaire (45–75 $/h) ou forfaitaire (dès 150 $/mois), déclarations TPS/TVQ/TVH, paie, feuillets T4/Relevé 1, configuration QuickBooks et Sage. Portail client sécurisé 24/7, coffre-fort chiffré AES-256, conformité PIPEDA et Loi 25, hébergement des données au Canada. Paiement par Interac e-Transfer. Ouverture de dossier gratuite — vous ne payez que pour les travaux effectués. Service bilingue français/anglais. https://compta-flow.net — comptaflow.officiel@gmail.com
 ```
 
 ### Description courte (250 caractères)

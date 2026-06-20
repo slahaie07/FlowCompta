@@ -59,7 +59,7 @@
     {
       "parameters": {
         "fromEmail": "monitor@compta-flow.net",
-        "toEmail": "support@compta-flow.net",
+        "toEmail": "comptaflow.officiel@gmail.com",
         "subject": "⚠️ Alerte réseau ComptaFlow Canada",
         "emailFormat": "text",
         "text": "Le health check de compta-flow.net a échoué.\n\nVérifiez : https://compta-flow.net/api/network/status"

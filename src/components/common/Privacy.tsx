@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Shield, Key, FileLock, UserCheck } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { CONFIG } from '../../lib/config';
 
 export function Privacy() {
   const navigate = useNavigate();
@@ -116,7 +117,7 @@ export function Privacy() {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Courriel :</span>
-                <a href="mailto:s.lahaie07@gmail.com" className="text-gold hover:underline">s.lahaie07@gmail.com</a>
+                <a href={`mailto:${CONFIG.APP.SUPPORT_EMAIL}`} className="text-gold hover:underline">{CONFIG.APP.SUPPORT_EMAIL}</a>
               </div>
             </div>
           </section>

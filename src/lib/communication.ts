@@ -1,4 +1,7 @@
+import { CONFIG } from './config';
 import { supabase } from './supabase';
+
+const ADMIN_NOTIFY_EMAIL = CONFIG.APP.SUPPORT_EMAIL;
 
 /**
  * Service de communication ComptaFlow
@@ -36,7 +39,7 @@ export const communicationService = {
     const N8N_URL = import.meta.env.VITE_N8N_INVOICE_WEBHOOK_URL;
     
     await this._postToAutomation(N8N_URL, {
-      adminEmail: 's.lahaie07@gmail.com',
+      adminEmail: ADMIN_NOTIFY_EMAIL,
       type: 'INVOICE_CREATED',
       data: invoiceData,
       timestamp: new Date().toISOString()
@@ -50,7 +53,7 @@ export const communicationService = {
     const N8N_URL = import.meta.env.VITE_N8N_SUBSCRIPTION_WEBHOOK_URL;
     
     await this._postToAutomation(N8N_URL, {
-      adminEmail: 's.lahaie07@gmail.com',
+      adminEmail: ADMIN_NOTIFY_EMAIL,
       type: 'NEW_SUBSCRIPTION',
       client: userData.displayName,
       email: userData.email,
@@ -69,7 +72,7 @@ export const communicationService = {
     const N8N_URL = import.meta.env.VITE_N8N_SUBSCRIPTION_WEBHOOK_URL;
     
     await this._postToAutomation(N8N_URL, {
-      adminEmail: 's.lahaie07@gmail.com',
+      adminEmail: ADMIN_NOTIFY_EMAIL,
       type: 'MANUAL_PAYMENT_PENDING',
       client: userData.displayName,
       email: userData.email,

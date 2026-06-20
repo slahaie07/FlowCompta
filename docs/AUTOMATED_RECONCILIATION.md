@@ -47,7 +47,7 @@ L'endpoint exposé par ComptaFlow est :
    - **SMTP / Resend** : alertes succès / échec
 4. Variables d'environnement n8n :
    - `COMPTAFLOW_ADMIN_SECRET` = valeur de `ADMIN_SECRET` sur Vercel
-   - `COMPTAFLOW_ALERT_EMAIL` = courriel du comptable (optionnel)
+   - `COMPTAFLOW_ALERT_EMAIL` = `comptaflow.officiel@gmail.com` (boîte support / reçus / alertes)
 5. Activez le workflow
 
 ### Structure du workflow importé

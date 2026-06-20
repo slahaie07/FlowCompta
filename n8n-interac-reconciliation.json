@@ -83,7 +83,7 @@
     {
       "parameters": {
         "fromEmail": "noreply@compta-flow.net",
-        "toEmail": "={{ $env.COMPTAFLOW_ALERT_EMAIL || 'support@compta-flow.net' }}",
+        "toEmail": "={{ $env.COMPTAFLOW_ALERT_EMAIL || 'comptaflow.officiel@gmail.com' }}",
         "subject": "=✅ Interac réconcilié — {{ $('Extraire facture / montant / réf').item.json.invoiceNumber }}",
         "emailFormat": "text",
         "text": "=Facture {{ $('Extraire facture / montant / réf').item.json.invoiceNumber }} marquée payée.\nRéf Interac: {{ $('Extraire facture / montant / réf').item.json.interacRef }}\nMontant: {{ $('Extraire facture / montant / réf').item.json.amount }}"
@@ -103,7 +103,7 @@
     {
       "parameters": {
         "fromEmail": "noreply@compta-flow.net",
-        "toEmail": "={{ $env.COMPTAFLOW_ALERT_EMAIL || 'support@compta-flow.net' }}",
+        "toEmail": "={{ $env.COMPTAFLOW_ALERT_EMAIL || 'comptaflow.officiel@gmail.com' }}",
         "subject": "=⚠️ Interac non parsé — {{ $json.subject }}",
         "emailFormat": "text",
         "text": "Impossible d'extraire FAC-XXXX-XXXX ou référence Interac du courriel.\nVérifiez manuellement dans le portail sub-admin."

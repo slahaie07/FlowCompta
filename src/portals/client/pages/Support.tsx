@@ -23,6 +23,8 @@ export function Support() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const mailto = `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+    window.location.href = mailto;
     setSent(true);
     toast.success(t('support.ticketSaved'));
     setTimeout(() => setSent(false), 5000);

@@ -4,6 +4,7 @@ import { Button } from '../../../components/ui/Button';
 import { useLanguage } from '../../../hooks/useLanguage';
 import { DEFAULT_PERSONA, formatResponseTime } from '../../../agents/personas';
 import type { PublicSupportReply } from '../../../agents/types';
+import { CONFIG } from '../../../lib/config';
 
 interface ChatMessage {
   id: string;
@@ -140,7 +141,7 @@ export function SupportLiveChat({ province, userId, selectedServiceId }: Support
         {
           id: `err-${Date.now()}`,
           role: 'advisor',
-          text: t('support.chatError'),
+          text: t('support.chatError').replace('{email}', CONFIG.APP.SUPPORT_EMAIL),
           advisorName: DEFAULT_PERSONA.displayName,
           advisorInitials: DEFAULT_PERSONA.initials,
           timeLabel: formatResponseTime(new Date().toISOString(), lang),

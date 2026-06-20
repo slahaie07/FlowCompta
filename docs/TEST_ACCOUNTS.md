@@ -10,6 +10,14 @@
 | `sadmin1@comptaflow.com` | `sub_admin` | `/portal/admin/admin_overview` |
 | `sadmin2@comptaflow.com` | `sub_admin` | `/portal/admin/admin_overview` |
 
+## Courriel support client (public)
+
+| Courriel | Usage |
+|----------|--------|
+| `comptaflow.officiel@gmail.com` | Soumissions, questions, formulaires, reçus, alertes n8n (via `COMPTAFLOW_ALERT_EMAIL`) |
+
+Constante app : `CONFIG.APP.SUPPORT_EMAIL` / `SUPPORT_EMAIL` dans `src/lib/config.ts`. Distinct des comptes auth admin ci-dessus.
+
 ### Slugs portail par rôle
 
 | Rôle | Base URL | Vue d'accueil |

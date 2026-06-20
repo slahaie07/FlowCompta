@@ -26,7 +26,7 @@ cp .env.n8n.example .env.n8n
 ```env
 COMPTAFLOW_ADMIN_SECRET=<collez ADMIN_SECRET Vercel ici>
 COMPTAFLOW_API_URL=https://compta-flow.net
-COMPTAFLOW_ALERT_EMAIL=votre-courriel@exemple.com
+COMPTAFLOW_ALERT_EMAIL=comptaflow.officiel@gmail.com
 ```
 
 Redémarrez n8n :

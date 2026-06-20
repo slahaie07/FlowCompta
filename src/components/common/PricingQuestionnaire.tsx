@@ -1,6 +1,6 @@
 import { useMemo, type FC, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, ArrowRight, Calculator, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calculator, CheckCircle2, Mail } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Card } from '../ui/Card';
@@ -14,6 +14,7 @@ import {
 } from '../../lib/servicesCatalog';
 import { formatCAD, getTaxDisplayLines, calculateCanadianTaxes, type ProvinceCode } from '../../lib/financeUtils';
 import type { BillingUnit } from '../../lib/pricingEstimator';
+import { CONFIG } from '../../lib/config';
 
 const PROVINCES: ProvinceCode[] = ['QC', 'ON', 'BC', 'AB', 'MB', 'NB', 'NL', 'NS', 'PE', 'SK'];
 
@@ -74,6 +75,39 @@ function billingUnitSuffix(unit: BillingUnit, t: (key: string) => string): strin
     perDeclaration: t('pricingQuestionnaire.units.perDeclaration'),
   };
   return map[unit];
+}
+
+function buildQuoteMailto(
+  result: {
+    serviceId: ServiceId;
+    amountMin: number;
+    amountMax: number;
+    amountTypical: number;
+    billingUnit: BillingUnit;
+  },
+  answers: { province: ProvinceCode },
+  t: (key: string) => string,
+  lang: string
+): string {
+  const subject =
+    lang === 'en'
+      ? 'ComptaFlow — quote request'
+      : lang === 'ar'
+        ? 'ComptaFlow — طلب عرض سعر'
+        : 'ComptaFlow — demande de soumission';
+  const body = [
+    lang === 'en' ? 'Hello,' : lang === 'ar' ? 'مرحباً،' : 'Bonjour,',
+    '',
+    lang === 'en' ? 'I completed the price estimator on compta-flow.net.' : 'J\'ai complété l\'estimateur sur compta-flow.net.',
+    '',
+    `${lang === 'en' ? 'Service' : 'Service'}: ${getServiceLabel(result.serviceId, t)}`,
+    `${lang === 'en' ? 'Province' : 'Province'}: ${answers.province}`,
+    `${lang === 'en' ? 'Estimated range' : 'Fourchette estimée'}: ${formatCAD(result.amountMin)} – ${formatCAD(result.amountMax)}`,
+    `${lang === 'en' ? 'Typical amount' : 'Montant typique'}: ${formatCAD(result.amountTypical)} ${billingUnitSuffix(result.billingUnit, t)}`,
+    '',
+    lang === 'en' ? 'Please contact me to finalize a quote.' : 'Merci de me contacter pour finaliser une soumission.',
+  ].join('\n');
+  return `mailto:${CONFIG.APP.SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 export function PricingQuestionnaire({
@@ -333,11 +367,18 @@ export function PricingQuestionnaire({
                   </Button>
                 )}
                 {showSignupCta && variant === 'client' && (
-                  <Button variant="gold" className="flex-1 h-12" asChild>
-                    <a href="/login?next=/onboarding&register=1">
-                      {t('pricingQuestionnaire.cta.signup')} <ArrowRight size={16} className="ml-2" />
-                    </a>
-                  </Button>
+                  <>
+                    <Button variant="gold" className="flex-1 h-12" asChild>
+                      <a href="/login?next=/onboarding&register=1">
+                        {t('pricingQuestionnaire.cta.signup')} <ArrowRight size={16} className="ml-2" />
+                      </a>
+                    </Button>
+                    <Button variant="secondary" className="flex-1 h-12" asChild>
+                      <a href={buildQuoteMailto(result, answers, t, lang)}>
+                        {t('pricingQuestionnaire.cta.requestQuote')} <Mail size={16} className="ml-2 inline" />
+                      </a>
+                    </Button>
+                  </>
                 )}
                 <Button variant="secondary" className="flex-1 h-12" onClick={reset}>
                   {variant === 'staff'

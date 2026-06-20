@@ -255,7 +255,7 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
                         <div className="text-[10px] space-y-1.5 text-slate-400 font-medium">
                           <div className="flex justify-between">
                             <span>Destinataire Interac :</span>
-                            <span className="text-ivoire font-bold">{cpaInfo?.interac_email || cpaInfo?.email || 'virement@compta-flow.net'}</span>
+                            <span className="text-ivoire font-bold">{cpaInfo?.interac_email || cpaInfo?.email || CONFIG.APP.INTERAC_EMAIL}</span>
                           </div>
                           <div className="flex justify-between">
                             <span>Réf / Message :</span>

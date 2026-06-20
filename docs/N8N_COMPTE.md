@@ -60,7 +60,7 @@ Sur l'édition communautaire self-hosted, définissez les variables dans **`.env
 
 - `COMPTAFLOW_ADMIN_SECRET` = même valeur que `ADMIN_SECRET` sur Vercel
 - `COMPTAFLOW_API_URL` = `https://compta-flow.net`
-- `COMPTAFLOW_ALERT_EMAIL` = courriel pour les alertes
+- `COMPTAFLOW_ALERT_EMAIL` = courriel officiel support (`comptaflow.officiel@gmail.com`)
 
 Redémarrez n8n après modification : `docker compose restart n8n`
 

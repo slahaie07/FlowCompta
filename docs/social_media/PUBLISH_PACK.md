@@ -394,7 +394,7 @@ Cabinets CPA : offrez à vos clients un portail premium.
 
 ComptaFlow — messagerie, documents, facturation Interac et suivi de mandats. Partenariat pour moderniser l'expérience client sans sacrifier la rigueur professionnelle.
 
-Contact : support@compta-flow.net
+Contact : comptaflow.officiel@gmail.com
 https://compta-flow.net
 ```
 **Hashtags** : `#CPA #CabinetComptable #ComptaFlow #SaaS #Fintech`
@@ -402,7 +402,7 @@ https://compta-flow.net
 **EN** : CPA firms: give clients a premium portal. Messaging, docs, Interac billing — all in one.
 
 ### Facebook / Instagram
-**Caption FR** : Cabinets comptables — modernisez l'expérience client avec ComptaFlow. Partenariat → support@compta-flow.net
+**Caption FR** : Cabinets comptables — modernisez l'expérience client avec ComptaFlow. Partenariat → comptaflow.officiel@gmail.com
 
 ---
 
@@ -448,7 +448,7 @@ Premium accounting platform for Canadian SMBs. Bookkeeping, tax filings, payroll
 - Configuration logiciel comptable
 
 **Site web** : https://compta-flow.net  
-**Courriel** : support@compta-flow.net
+**Courriel** : comptaflow.officiel@gmail.com
 
 ---
 

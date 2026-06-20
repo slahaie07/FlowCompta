@@ -488,6 +488,81 @@ var routerIntentSchema = {
   required: ["intent"]
 };
 
+// src/lib/envResolve.ts
+var SUPABASE_PROJECT_REF = "unvyxfxlzhnutpugjxhe";
+var sanitize = (val) => (val ?? "").replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+function read(key) {
+  if (typeof import.meta !== "undefined" && import.meta.env?.[key] != null) {
+    return sanitize(String(import.meta.env[key]));
+  }
+  if (typeof process !== "undefined" && process.env?.[key] != null) {
+    return sanitize(process.env[key]);
+  }
+  return void 0;
+}
+function resolveSupabaseUrl() {
+  return read("SUPABASE_URL") || read("VITE_SUPABASE_URL") || read("NEXT_PUBLIC_SUPABASE_URL") || `https://${SUPABASE_PROJECT_REF}.supabase.co`;
+}
+function resolveSupabaseAnonKey() {
+  return read("SUPABASE_ANON_KEY") || read("NEXT_PUBLIC_SUPABASE_ANON_KEY") || read("SUPABASE_PUBLISHABLE_KEY") || read("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY") || read("VITE_SUPABASE_ANON_KEY") || "";
+}
+function resolveSupabaseServiceRoleKey() {
+  return read("SUPABASE_SERVICE_ROLE_KEY") || read("SUPABASE_SECRET_KEY") || "";
+}
+
+// src/lib/config.ts
+var sanitizeVar = (val) => {
+  if (!val) return "";
+  return val.replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+};
+var getEnvVar = (key) => {
+  if (typeof import.meta !== "undefined" && import.meta.env) {
+    return import.meta.env[key];
+  }
+  if (typeof process !== "undefined" && process.env) {
+    return process.env[key];
+  }
+  return void 0;
+};
+var CONFIG = {
+  // Supabase (VITE_*, NEXT_PUBLIC_*, or Vercel integration SUPABASE_*)
+  SUPABASE_URL: resolveSupabaseUrl(),
+  SUPABASE_ANON_KEY: resolveSupabaseAnonKey() || sanitizeVar(getEnvVar("VITE_SUPABASE_ANON_KEY") || ""),
+  // Automations (n8n)
+  WEBHOOKS: {
+    INVOICE: sanitizeVar(getEnvVar("VITE_N8N_INVOICE_WEBHOOK_URL")),
+    SUBSCRIPTION: sanitizeVar(getEnvVar("VITE_N8N_SUBSCRIPTION_WEBHOOK_URL"))
+  },
+  // Paiements — Interac e-Transfer uniquement (aucune carte / PayPal)
+  PAYMENT_METHOD: "interac",
+  // Paramètres Métier
+  FEES: {
+    SETUP: 60,
+    HOURLY_BOOKKEEPING: 60,
+    MONTHLY_MICRO: 200,
+    MONTHLY_SMALL: 400,
+    MONTHLY_SME: 650,
+    GST_QST: 48,
+    PAYROLL: 65,
+    T4_RELEVE1: 75,
+    CATCH_UP: 60,
+    SOFTWARE_SETUP: 225,
+    TAX_HELP_AUTONOMOUS: 225
+  },
+  // Sécurité & App
+  APP: {
+    NAME: "Comptaflow",
+    VERSION: "1.0.0-PROD",
+    SUPER_ADMIN_EMAILS: ["admin@compta-flow.net", "s.lahaie07@gmail.com"],
+    SUB_ADMIN_EMAILS: ["comptable@compta-flow.net", "partenaire@compta-flow.net"],
+    SUPPORT_EMAIL: "comptaflow.officiel@gmail.com",
+    SITE_URL: "https://compta-flow.net",
+    /** Destinataire par défaut des virements Interac plateforme (distinct des comptes auth admin). */
+    INTERAC_EMAIL: "comptaflow.officiel@gmail.com"
+  }
+};
+var SUPPORT_EMAIL = CONFIG.APP.SUPPORT_EMAIL;
+
 // src/agents/mock-llm.ts
 var MOCK_INTENT_HINTS = [
   { pattern: /\b(tps|tvh|tvq|tvp|gst|qst|déclar|fiscal|tax|impôt)\b/i, intent: "TAX" },
@@ -526,9 +601,9 @@ var MOCK_ANSWERS = {
     ar: "\u0627\u0631\u0641\u0639 \u0627\u0644\u0643\u0634\u0648\u0641 \u0648\u0627\u0644\u0625\u064A\u0635\u0627\u0644\u0627\u062A \u0625\u0644\u0649 \u0627\u0644\u062E\u0632\u0646\u0629\u061B \u0633\u064A\u0635\u0646\u0651\u0641\u0647\u0627 \u0645\u062D\u0627\u0633\u0628\u0643. \u0627\u0644\u0645\u0637\u0627\u0628\u0642\u0629 \u0627\u0644\u0628\u0646\u0643\u064A\u0629 \u0641\u064A \u0627\u0644\u0645\u0639\u0627\u0645\u0644\u0627\u062A."
   },
   TECHNICAL: {
-    fr: "Pour un probl\xE8me technique, d\xE9crivez ce que vous voyez \xE0 l\u2019\xE9cran. En attendant, vous pouvez aussi nous \xE9crire via le formulaire de support.",
-    en: "For a technical issue, describe what you see on screen. You can also reach us via the support form.",
-    ar: "\u0644\u0648\u0635\u0641 \u0645\u0634\u0643\u0644\u0629 \u062A\u0642\u0646\u064A\u0629\u060C \u0627\u0634\u0631\u062D \u0645\u0627 \u062A\u0631\u0627\u0647 \u0639\u0644\u0649 \u0627\u0644\u0634\u0627\u0634\u0629. \u064A\u0645\u0643\u0646\u0643 \u0623\u064A\u0636\u0627\u064B \u0645\u0631\u0627\u0633\u0644\u062A\u0646\u0627 \u0639\u0628\u0631 \u0646\u0645\u0648\u0630\u062C \u0627\u0644\u062F\u0639\u0645."
+    fr: `Pour un probl\xE8me technique, d\xE9crivez ce que vous voyez \xE0 l'\xE9cran. Vous pouvez aussi nous \xE9crire \xE0 ${SUPPORT_EMAIL}.`,
+    en: `For a technical issue, describe what you see on screen. You can also email us at ${SUPPORT_EMAIL}.`,
+    ar: `\u0644\u0648\u0635\u0641 \u0645\u0634\u0643\u0644\u0629 \u062A\u0642\u0646\u064A\u0629\u060C \u0627\u0634\u0631\u062D \u0645\u0627 \u062A\u0631\u0627\u0647 \u0639\u0644\u0649 \u0627\u0644\u0634\u0627\u0634\u0629. \u064A\u0645\u0643\u0646\u0643 \u0623\u064A\u0636\u0627\u064B \u0645\u0631\u0627\u0633\u0644\u062A\u0646\u0627 \u0639\u0644\u0649 ${SUPPORT_EMAIL}.`
   },
   SALES: {
     fr: "Nos forfaits sont list\xE9s dans Services. Apr\xE8s s\xE9lection, un devis personnalis\xE9 vous sera transmis sous 24 h ouvrables.",
@@ -561,9 +636,9 @@ var MOCK_ANSWERS = {
     ar: "\u0627\u0641\u062A\u062D \u0645\u0633\u0627\u0631 \u0627\u0644\u0645\u0644\u0641 \u0644\u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0645\u0633\u062A\u0646\u062F\u0627\u062A \u0648\u0627\u0644\u062E\u0637\u0648\u0627\u062A. \u0636\u0639 \u0639\u0644\u0627\u0645\u0629 \u0639\u0644\u0649 \u0643\u0644 \u062E\u0637\u0648\u0629."
   },
   GENERAL: {
-    fr: "Bonjour ! Je suis votre interlocutrice ComptaFlow. Posez une question sur vos taxes, la paie, vos factures ou votre parcours dossier \u2014 je vous guide.",
-    en: "Hello! I'm your ComptaFlow contact. Ask about taxes, payroll, invoices or your file path \u2014 I'll guide you.",
-    ar: "\u0645\u0631\u062D\u0628\u0627\u064B! \u0623\u0646\u0627 \u0645\u0633\u0624\u0648\u0644\u062A\u0643 \u0641\u064A ComptaFlow. \u0627\u0633\u0623\u0644 \u0639\u0646 \u0627\u0644\u0636\u0631\u0627\u0626\u0628 \u0623\u0648 \u0627\u0644\u0631\u0648\u0627\u062A\u0628 \u0623\u0648 \u0627\u0644\u0641\u0648\u0627\u062A\u064A\u0631 \u0623\u0648 \u0645\u0633\u0627\u0631 \u0645\u0644\u0641\u0643."
+    fr: `Bonjour ! Je suis votre interlocutrice ComptaFlow. Posez une question sur vos taxes, la paie, vos factures ou votre parcours dossier \u2014 ou \xE9crivez-nous \xE0 ${SUPPORT_EMAIL}.`,
+    en: `Hello! I'm your ComptaFlow contact. Ask about taxes, payroll, invoices or your file path \u2014 or email us at ${SUPPORT_EMAIL}.`,
+    ar: `\u0645\u0631\u062D\u0628\u0627\u064B! \u0623\u0646\u0627 \u0645\u0633\u0624\u0648\u0644\u062A\u0643 \u0641\u064A ComptaFlow. \u0627\u0633\u0623\u0644 \u0639\u0646 \u0627\u0644\u0636\u0631\u0627\u0626\u0628 \u0623\u0648 \u0627\u0644\u0631\u0648\u0627\u062A\u0628 \u0623\u0648 \u0627\u0644\u0641\u0648\u0627\u062A\u064A\u0631 \u2014 \u0623\u0648 \u0631\u0627\u0633\u0644\u0646\u0627 \u0639\u0644\u0649 ${SUPPORT_EMAIL}.`
   }
 };
 function createMockLLMClient() {
@@ -1240,28 +1315,6 @@ var PORTAL_HOME_BY_ROLE = {
   sub_admin: "/portal/admin/admin_overview"
 };
 
-// src/lib/envResolve.ts
-var SUPABASE_PROJECT_REF = "unvyxfxlzhnutpugjxhe";
-var sanitize = (val) => (val ?? "").replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
-function read(key) {
-  if (typeof import.meta !== "undefined" && import.meta.env?.[key] != null) {
-    return sanitize(String(import.meta.env[key]));
-  }
-  if (typeof process !== "undefined" && process.env?.[key] != null) {
-    return sanitize(process.env[key]);
-  }
-  return void 0;
-}
-function resolveSupabaseUrl() {
-  return read("SUPABASE_URL") || read("VITE_SUPABASE_URL") || read("NEXT_PUBLIC_SUPABASE_URL") || `https://${SUPABASE_PROJECT_REF}.supabase.co`;
-}
-function resolveSupabaseAnonKey() {
-  return read("SUPABASE_ANON_KEY") || read("NEXT_PUBLIC_SUPABASE_ANON_KEY") || read("SUPABASE_PUBLISHABLE_KEY") || read("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY") || read("VITE_SUPABASE_ANON_KEY") || "";
-}
-function resolveSupabaseServiceRoleKey() {
-  return read("SUPABASE_SERVICE_ROLE_KEY") || read("SUPABASE_SECRET_KEY") || "";
-}
-
 // api/lib/supabaseMigrations.ts
 import fs from "fs";
 import path from "path";
@@ -1482,6 +1535,8 @@ var agenticModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 var resend = new Resend(resendKey);
 var twilioClient = twilio(twilioSid, twilioToken);
 var ADMIN_PHONE = "+18192158545";
+var PLATFORM_SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || SUPPORT_EMAIL;
+var PLATFORM_INTERAC_EMAIL = process.env.INTERAC_EMAIL || CONFIG.APP.INTERAC_EMAIL;
 var supabaseUrl = resolveSupabaseUrl();
 var supabaseAnonKey = resolveSupabaseAnonKey();
 var serviceRoleKey = resolveSupabaseServiceRoleKey();
@@ -1749,7 +1804,7 @@ Type: ${type}`;
       console.log(`[SMS MOCK to ${ADMIN_PHONE}] 
 ${summaryMsg}`);
     }
-    await sendSupremeEmail("s.lahaie07@gmail.com", `Alerte Transaction: ${vendor}`, `
+    await sendSupremeEmail(PLATFORM_SUPPORT_EMAIL, `Alerte Transaction: ${vendor}`, `
       <h2>Nouvelle Transaction D\xE9tect\xE9e</h2>
       <p><strong>Fournisseur:</strong> ${vendor}</p>
       <p><strong>Montant:</strong> ${amount} $</p>
@@ -1796,7 +1851,7 @@ app.post("/api/payment/create-checkout", async (req, res) => {
   await sendSupremeEmail(customerEmail, `Action : Virement Comptaflow ${reference}`, `
             <h2>Validation de votre mandat</h2>
             <p>Veuillez effectuer le virement de <strong>${items.reduce((a, b) => a + b.price, 0) + 60}$</strong>.</p>
-            <p>Destinataire: <strong>s.lahaie07@gmail.com</strong><br>R\xE9f\xE9rence: <strong>${reference}</strong></p>
+            <p>Destinataire: <strong>${PLATFORM_INTERAC_EMAIL}</strong><br>R\xE9f\xE9rence: <strong>${reference}</strong></p>
         `);
   return res.json({ success: true, manual: true, method: "interac", reference });
 });
@@ -1941,6 +1996,13 @@ app.post("/api/webhook/onboarding-complete", async (req, res) => {
     };
     if (process.env.RESEND_API_KEY) {
       await sendSupremeEmail(email, subjects[lang], htmlBodies[lang]);
+      await sendSupremeEmail(
+        PLATFORM_SUPPORT_EMAIL,
+        `[ComptaFlow] Nouvelle inscription \u2014 ${displayName || email}`,
+        `<p>Nouveau client inscrit : <strong>${displayName || email}</strong></p>
+         <p>Province : ${province || "QC"} \xB7 Langue : ${lang}</p>
+         <p><a href="${portalUrl}">Portail client</a></p>`
+      );
     }
     if (userId && serviceRoleKey) {
       const { data: profile } = await supabase.from("profiles").select("metadata").eq("id", userId).single();
@@ -2660,6 +2722,7 @@ app.get("/sitemap.xml", (_req, res) => {
   const base = "https://compta-flow.net";
   const paths = [
     "/",
+    "/estimate",
     "/privacy",
     "/terms",
     "/legal",

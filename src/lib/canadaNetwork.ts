@@ -4,6 +4,7 @@
  */
 
 import type { ProvinceCode } from './financeUtils';
+import { SUPPORT_EMAIL } from './config';
 
 export type PrivacyLaw = 'loi25' | 'pipeda' | 'pipeda_bc' | 'pipa_ab';
 
@@ -32,7 +33,7 @@ export interface LegalPattern {
 export const SITE = {
   domain: 'compta-flow.net',
   url: 'https://compta-flow.net',
-  supportEmail: 'comptaflow.officiel@gmail.com',
+  supportEmail: SUPPORT_EMAIL,
   privacyEmail: 'privacy@compta-flow.net',
   dataRegion: 'ca-central-1',
   publisher: 'ComptaFlow',

@@ -1,6 +1,7 @@
 import type { LLMClient } from './types';
 import { getAgentForIntent } from './registry';
 import type { AgentIntent } from './types';
+import { SUPPORT_EMAIL } from '../lib/config';
 
 const MOCK_INTENT_HINTS: { pattern: RegExp; intent: AgentIntent }[] = [
   { pattern: /\b(tps|tvh|tvq|tvp|gst|qst|déclar|fiscal|tax|impôt)\b/i, intent: 'TAX' },
@@ -41,9 +42,9 @@ const MOCK_ANSWERS: Record<AgentIntent, { fr: string; en: string; ar: string }> 
     ar: 'ارفع الكشوف والإيصالات إلى الخزنة؛ سيصنّفها محاسبك. المطابقة البنكية في المعاملات.',
   },
   TECHNICAL: {
-    fr: 'Pour un problème technique, décrivez ce que vous voyez à l’écran. En attendant, vous pouvez aussi nous écrire via le formulaire de support.',
-    en: 'For a technical issue, describe what you see on screen. You can also reach us via the support form.',
-    ar: 'لوصف مشكلة تقنية، اشرح ما تراه على الشاشة. يمكنك أيضاً مراسلتنا عبر نموذج الدعم.',
+    fr: `Pour un problème technique, décrivez ce que vous voyez à l'écran. Vous pouvez aussi nous écrire à ${SUPPORT_EMAIL}.`,
+    en: `For a technical issue, describe what you see on screen. You can also email us at ${SUPPORT_EMAIL}.`,
+    ar: `لوصف مشكلة تقنية، اشرح ما تراه على الشاشة. يمكنك أيضاً مراسلتنا على ${SUPPORT_EMAIL}.`,
   },
   SALES: {
     fr: 'Nos forfaits sont listés dans Services. Après sélection, un devis personnalisé vous sera transmis sous 24 h ouvrables.',
@@ -76,9 +77,9 @@ const MOCK_ANSWERS: Record<AgentIntent, { fr: string; en: string; ar: string }> 
     ar: 'افتح مسار الملف لقائمة المستندات والخطوات. ضع علامة على كل خطوة.',
   },
   GENERAL: {
-    fr: 'Bonjour ! Je suis votre interlocutrice ComptaFlow. Posez une question sur vos taxes, la paie, vos factures ou votre parcours dossier — je vous guide.',
-    en: 'Hello! I\'m your ComptaFlow contact. Ask about taxes, payroll, invoices or your file path — I\'ll guide you.',
-    ar: 'مرحباً! أنا مسؤولتك في ComptaFlow. اسأل عن الضرائب أو الرواتب أو الفواتير أو مسار ملفك.',
+    fr: `Bonjour ! Je suis votre interlocutrice ComptaFlow. Posez une question sur vos taxes, la paie, vos factures ou votre parcours dossier — ou écrivez-nous à ${SUPPORT_EMAIL}.`,
+    en: `Hello! I'm your ComptaFlow contact. Ask about taxes, payroll, invoices or your file path — or email us at ${SUPPORT_EMAIL}.`,
+    ar: `مرحباً! أنا مسؤولتك في ComptaFlow. اسأل عن الضرائب أو الرواتب أو الفواتير — أو راسلنا على ${SUPPORT_EMAIL}.`,
   },
 };
 

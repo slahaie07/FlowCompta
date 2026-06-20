@@ -19,6 +19,7 @@ import {
 } from '../src/lib/envResolve';
 import type { User } from '@supabase/supabase-js';
 import { applySupabaseMigrations } from './lib/supabaseMigrations';
+import { CONFIG, SUPPORT_EMAIL } from '../src/lib/config';
 const { Client } = pg;
 
 dotenv.config();
@@ -44,6 +45,8 @@ const agenticModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 const resend = new Resend(resendKey);
 const twilioClient = twilio(twilioSid, twilioToken);
 const ADMIN_PHONE = '+18192158545';
+const PLATFORM_SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || SUPPORT_EMAIL;
+const PLATFORM_INTERAC_EMAIL = process.env.INTERAC_EMAIL || CONFIG.APP.INTERAC_EMAIL;
 
 // --- SUPABASE CLIENT SETUP ---
 // envResolve: Vercel integration SUPABASE_* + legacy VITE_* / SUPABASE_SERVICE_ROLE_KEY
@@ -369,7 +372,7 @@ app.post('/api/webhook/transaction-alert', async (req, res) => {
       console.log(`[SMS MOCK to ${ADMIN_PHONE}] \n${summaryMsg}`);
     }
 
-    await sendSupremeEmail('s.lahaie07@gmail.com', `Alerte Transaction: ${vendor}`, `
+    await sendSupremeEmail(PLATFORM_SUPPORT_EMAIL, `Alerte Transaction: ${vendor}`, `
       <h2>Nouvelle Transaction Détectée</h2>
       <p><strong>Fournisseur:</strong> ${vendor}</p>
       <p><strong>Montant:</strong> ${amount} $</p>
@@ -426,7 +429,7 @@ app.post('/api/payment/create-checkout', async (req, res) => {
     await sendSupremeEmail(customerEmail, `Action : Virement Comptaflow ${reference}`, `
             <h2>Validation de votre mandat</h2>
             <p>Veuillez effectuer le virement de <strong>${items.reduce((a: any, b: any) => a + b.price, 0) + 60}$</strong>.</p>
-            <p>Destinataire: <strong>s.lahaie07@gmail.com</strong><br>Référence: <strong>${reference}</strong></p>
+            <p>Destinataire: <strong>${PLATFORM_INTERAC_EMAIL}</strong><br>Référence: <strong>${reference}</strong></p>
         `);
     return res.json({ success: true, manual: true, method: 'interac', reference });
 });
@@ -606,6 +609,13 @@ app.post('/api/webhook/onboarding-complete', async (req, res) => {
 
     if (process.env.RESEND_API_KEY) {
       await sendSupremeEmail(email, subjects[lang], htmlBodies[lang]);
+      await sendSupremeEmail(
+        PLATFORM_SUPPORT_EMAIL,
+        `[ComptaFlow] Nouvelle inscription — ${displayName || email}`,
+        `<p>Nouveau client inscrit : <strong>${displayName || email}</strong></p>
+         <p>Province : ${province || 'QC'} · Langue : ${lang}</p>
+         <p><a href="${portalUrl}">Portail client</a></p>`
+      );
     }
 
     if (userId && serviceRoleKey) {
