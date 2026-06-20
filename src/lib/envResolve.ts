@@ -19,7 +19,7 @@ export function resolveSupabaseUrl(): string {
     read('SUPABASE_URL') ||
     read('VITE_SUPABASE_URL') ||
     read('NEXT_PUBLIC_SUPABASE_URL') ||
-    'https://hnxdlzdgiascuawgydir.supabase.co'
+    'https://unvyxfxlzhnutpugjxhe.supabase.co'
   );
 }
 

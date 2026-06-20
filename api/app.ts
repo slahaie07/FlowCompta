@@ -916,7 +916,7 @@ app.post('/api/profile/delete', async (req, res) => {
   }
 
   // 2. Resolve from Supabase if needed and available
-  const projectRef = 'hnxdlzdgiascuawgydir';
+  const projectRef = 'unvyxfxlzhnutpugjxhe';
 
   if (serviceRoleKey && (!targetUserId || !targetEmail)) {
     try {
@@ -1182,7 +1182,7 @@ app.post('/api/profile/export', rateLimiter(5, 60000), async (req, res) => {
   }
 
   // 2. Resolve from Supabase / Postgres if needed
-  const projectRef = 'hnxdlzdgiascuawgydir';
+  const projectRef = 'unvyxfxlzhnutpugjxhe';
 
   let dbData: any = {};
   let foundInDb = false;
