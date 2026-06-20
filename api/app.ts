@@ -12,6 +12,7 @@ import twilio from 'twilio';
 import pg from 'pg';
 import { createClient } from '@supabase/supabase-js';
 import { runAgentOrchestrator, listAgents, AGENT_REGISTRY, toPublicSupportReply } from '../src/agents/index';
+import { runInternalCronJob, INTERNAL_CRON_JOBS } from './internal-jobs';
 const { Client } = pg;
 
 dotenv.config();
@@ -567,7 +568,11 @@ app.get('/api/cron/elite-hunter', async (req, res) => {
        industry: industries[Math.floor(Math.random() * industries.length)]
     };
 
-    const prompt = `${AGENT_REGISTRY['marketing-hunter'].systemPrompt}
+    const geminiLive = geminiKey && geminiKey !== 'mock_gemini_api_key' && !geminiKey.startsWith('mock_');
+    let sniperMessage = `Bonjour ${mockLead.name}, ComptaFlow accompagne les ${mockLead.industry} québécois en tenue de livres et fiscalité.`;
+
+    if (geminiLive) {
+      const prompt = `${AGENT_REGISTRY['marketing-hunter'].systemPrompt}
 
 Profil LinkedIn:
 Nom: ${mockLead.name}
@@ -575,8 +580,9 @@ Titre: ${mockLead.title}
 Entreprise: ${mockLead.company}
 Industrie: ${mockLead.industry}`;
 
-    const result = await agenticModel.generateContent(prompt);
-    const sniperMessage = await result.response.text();
+      const result = await agenticModel.generateContent(prompt);
+      sniperMessage = await result.response.text();
+    }
 
     const sAdmin = createClient(sanitizeEnvVar(process.env.VITE_SUPABASE_URL || ''), sanitizeEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY) || sanitizeEnvVar(process.env.VITE_SUPABASE_ANON_KEY || ''));
     
@@ -594,7 +600,7 @@ Industrie: ${mockLead.industry}`;
     if (error) throw error;
 
     botLog('ELITE_HUNTER_CRON', 'Success', `Lead acquis : ${mockLead.company}`);
-    res.json({ success: true, message: "La chasse a été fructueuse." });
+    res.json({ success: true, message: "La chasse a été fructueuse.", geminiLive });
   } catch (error: any) {
     botLog('ELITE_HUNTER_CRON_ERROR', 'System', error.message);
     res.status(500).json({ error: error.message });
@@ -605,9 +611,135 @@ Industrie: ${mockLead.industry}`;
 function isInternalAgentRequest(req: express.Request): boolean {
   const secret = req.headers['x-comptaflow-internal'];
   if (secret && String(secret) === ADMIN_SECRET) return true;
+  const bearer = req.headers.authorization?.split(' ')[1];
+  if (bearer && bearer === ADMIN_SECRET) return true;
   return false;
 }
 
+// --- INTERNAL CRON (ADMIN_SECRET / X-ComptaFlow-Internal) ---
+app.get('/api/cron/agent-health', async (req, res) => {
+  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (process.env.NODE_ENV === 'production') return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const geminiLive = !!(geminiKey && geminiKey !== 'mock_gemini_api_key' && !geminiKey.startsWith('mock_'));
+  const result = runInternalCronJob('agent-health', { geminiConfigured: geminiLive });
+  botLog('CRON_AGENT_HEALTH', 'System', result.message);
+  res.json(result);
+});
+
+app.get('/api/internal/cron', (_req, res) => {
+  res.json({
+    jobs: INTERNAL_CRON_JOBS,
+    auth: 'X-ComptaFlow-Internal header or Authorization: Bearer CRON_SECRET',
+    examples: INTERNAL_CRON_JOBS.map((j) => `POST /api/internal/cron/${j}`),
+  });
+});
+
+app.post('/api/internal/cron/:job', async (req, res) => {
+  if (!isInternalAgentRequest(req)) {
+    const cronAuth = req.headers.authorization;
+    const cronSecret = process.env.CRON_SECRET;
+    if (!cronSecret || cronAuth !== `Bearer ${cronSecret}`) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+  }
+
+  const job = String(req.params.job || '');
+  const geminiLive = !!(geminiKey && geminiKey !== 'mock_gemini_api_key' && !geminiKey.startsWith('mock_'));
+
+  if (job === 'elite-hunter' || job === 'marketing-hunter') {
+    const stub = runInternalCronJob(job, { geminiConfigured: geminiLive });
+    botLog('INTERNAL_CRON', job, stub.message);
+    return res.json({
+      ...stub,
+      liveEndpoint: 'GET /api/cron/elite-hunter (Bearer CRON_SECRET) — planifié quotidiennement via vercel.json',
+    });
+  }
+
+  const result = runInternalCronJob(job, { geminiConfigured: geminiLive });
+  botLog('INTERNAL_CRON', job, result.message);
+  res.status(result.success ? 200 : 400).json(result);
+});
+
+// --- ONBOARDING WEBHOOK (n8n / parcours client) ---
+app.post('/api/webhook/onboarding-complete', async (req, res) => {
+  const { userId, email, displayName, province, language } = req.body || {};
+
+  if (!email || typeof email !== 'string') {
+    return res.status(400).json({ error: 'email requis' });
+  }
+
+  try {
+    botLog('ONBOARDING_COMPLETE', userId || email, `Province: ${province || 'QC'}`);
+
+    const portalUrl = 'https://compta-flow.net/portal/client/overview';
+    const procedureUrl = 'https://compta-flow.net/portal/client/procedure';
+    const lang = language === 'en' ? 'en' : language === 'ar' ? 'ar' : 'fr';
+
+    const subjects = {
+      fr: 'Bienvenue chez ComptaFlow — vos prochaines étapes',
+      en: 'Welcome to ComptaFlow — your next steps',
+      ar: 'مرحباً بكم في ComptaFlow — الخطوات التالية',
+    };
+
+    const htmlBodies = {
+      fr: `<p>Bonjour ${displayName || ''},</p>
+        <p>Votre compte est actif. <strong>Prochaine étape :</strong> choisissez votre service dans l'aperçu, puis suivez votre <a href="${procedureUrl}">parcours dossier</a>.</p>
+        <p><a href="${portalUrl}">Accéder à mon portail</a></p>`,
+      en: `<p>Hello ${displayName || ''},</p>
+        <p>Your account is active. <strong>Next step:</strong> pick your service in Overview, then follow your <a href="${procedureUrl}">guided file path</a>.</p>
+        <p><a href="${portalUrl}">Open my portal</a></p>`,
+      ar: `<p>مرحباً ${displayName || ''},</p>
+        <p>حسابك نشط. <strong>الخطوة التالية:</strong> اختر خدمتك ثم اتبع <a href="${procedureUrl}">مسار ملفك</a>.</p>
+        <p><a href="${portalUrl}">فتح بوابتي</a></p>`,
+    };
+
+    if (process.env.RESEND_API_KEY) {
+      await sendSupremeEmail(email, subjects[lang], htmlBodies[lang]);
+    }
+
+    if (userId && serviceRoleKey) {
+      const { data: profile } = await supabase.from('profiles').select('metadata').eq('id', userId).single();
+      const existingMeta = (profile?.metadata as Record<string, unknown>) || {};
+      await supabase
+        .from('profiles')
+        .update({
+          metadata: {
+            ...existingMeta,
+            onboardingCompletedAt: new Date().toISOString(),
+            province: province || existingMeta.province || 'QC',
+            onboardingWebhook: true,
+          },
+        })
+        .eq('id', userId);
+    }
+
+    res.json({
+      success: true,
+      emailSent: !!process.env.RESEND_API_KEY,
+      portalUrl,
+      procedureUrl,
+      n8nHint: 'Import n8n-onboarding-automation.json — webhook POST /api/webhook/onboarding-complete',
+    });
+  } catch (error: any) {
+    botLog('ONBOARDING_WEBHOOK_ERROR', email, error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// --- INTERNAL BOT LOGS (audit trail) ---
+app.get('/api/internal/bot-logs', async (req, res) => {
+  if (!isInternalAgentRequest(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const limit = Math.min(parseInt(String(req.query.limit || '50'), 10) || 50, 200);
+  const db = getDb();
+  const logs = (db.bot_logs || []).slice(-limit).reverse();
+  res.json({ logs, count: logs.length });
+});
+
+// --- AGENTIC MIND (interne — non exposé aux clients) ---
 app.get('/api/internal/agents', async (req, res) => {
   if (!isInternalAgentRequest(req)) {
     const ctx = await getSuperAdminFromRequest(req);
@@ -1298,11 +1430,21 @@ app.post('/api/admin/create-sub-admin', async (req, res) => {
 
 // --- HEALTH CHECK (monitoring / stress tests) ---
 app.get('/api/health', (_req, res) => {
+  const geminiLive = !!(geminiKey && geminiKey !== 'mock_gemini_api_key' && !geminiKey.startsWith('mock_'));
   res.json({
     status: 'ok',
     service: 'ComptaFlow',
     site: 'https://compta-flow.net',
     timestamp: new Date().toISOString(),
+    env: {
+      gemini: geminiLive ? 'live' : 'mock-fallback',
+      supabase: supabaseUrl ? 'configured' : 'missing',
+      serviceRole: serviceRoleKey ? 'configured' : 'missing',
+      resend: process.env.RESEND_API_KEY ? 'configured' : 'missing',
+      adminSecret: process.env.ADMIN_SECRET ? 'configured' : 'default-fallback',
+      cronSecret: process.env.CRON_SECRET ? 'configured' : 'missing',
+    },
+    agents: listAgents({ internal: false }).length,
   });
 });
 
