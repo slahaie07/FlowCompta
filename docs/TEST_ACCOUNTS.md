@@ -47,7 +47,9 @@ SEED_ADMIN_PASSWORD='***' npm run seed:admins
 
 - `npm run setup:print-sql` — SQL copy-paste bundle
 - `scripts/combined-migrations.sql` + `scripts/seed-admins-manual.sql` — dashboard only
-- `POST /api/bootstrap-admins` — après déploiement Vercel (ADMIN_SECRET + service role)
+- `POST /api/bootstrap-admins` — après déploiement Vercel (`ADMIN_SECRET` + service role) ; corps JSON `{"password":"..."}`
+
+Les trois comptes ci-dessus correspondent à `SEED_ADMIN_ACCOUNTS` dans `src/lib/seedAdminAccounts.ts`.
 
 Options :
 

@@ -2,9 +2,33 @@
 -- ComptaFlow — combined migrations (one paste in Supabase SQL Editor)
 -- =============================================================================
 -- Prerequisite: base schema from comptaflow_migration.sql already applied.
--- Order: RLS hardening → OAuth profile names → partner directory RLS.
+-- Order: RLS recursion fix → hardening → partner directory RLS.
 -- Safe to re-run (CREATE OR REPLACE / DROP IF EXISTS).
 -- =============================================================================
+
+-- ─── 0. Fix RLS recursion (42P17) — REQUIRED for partner picker ──────────────
+
+CREATE OR REPLACE FUNCTION public.get_user_role()
+RETURNS TEXT
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+SET row_security = off
+AS $$
+  SELECT role FROM public.profiles WHERE id = auth.uid();
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_sub_admin_id()
+RETURNS UUID
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+SET row_security = off
+AS $$
+  SELECT sub_admin_id FROM public.profiles WHERE id = auth.uid();
+$$;
 
 -- ─── 1. RLS hardening + signup trigger ───────────────────────────────────────
 
@@ -82,8 +106,8 @@ FOR UPDATE
 USING (auth.uid() = id)
 WITH CHECK (
   auth.uid() = id
-  AND role = (SELECT p.role FROM public.profiles p WHERE p.id = auth.uid())
-  AND sub_admin_id IS NOT DISTINCT FROM (SELECT p.sub_admin_id FROM public.profiles p WHERE p.id = auth.uid())
+  AND role = public.get_user_role()
+  AND sub_admin_id IS NOT DISTINCT FROM public.get_sub_admin_id()
 );
 
 -- ─── 2. Partner directory (anon signup partner picker) ───────────────────────
