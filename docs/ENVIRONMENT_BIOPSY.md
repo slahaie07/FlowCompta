@@ -91,9 +91,12 @@ Suppression du versioning Git pour :
 
 Mise à jour :
 
-- `.gitignore` — empêche le retour des backups / binaires
+- `.gitignore` — empêche le retour des backups / binaires / `local_db.json` / `api/index.js`
 - `.env.example` — `CRON_SECRET`, `RESEND_API_KEY`, `STRIPE_SECRET_KEY`
 - `deploy-gh-pages.yml` — plus de déploiement automatique concurrent
+- `canada-network.yml` — déploiement Vercel preview sur branches `cursor/**`
+- Retrait dépendances `firebase` / `firebase-admin` (auth Supabase uniquement)
+- `local_db.example.json` — modèle pour le fallback dev local
 
 ---
 
