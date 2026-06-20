@@ -15,7 +15,7 @@ Le projet utilise une architecture hybride pour garantir une viabilité de 100% 
 
 ## 📋 2. CONFIGURATION SYSTÈME CENTRALE (`src/lib/config.ts`)
 Toutes les variables sont centralisées. Le système injecte les clés Cloud si présentes, sinon il utilise les valeurs de sécurité par défaut.
-- **Admin Emails** : `['admin@comptaflow.ca', 's.lahaie07@gmail.com']`
+- **Admin Emails** : `['admin@compta-flow.net', 's.lahaie07@gmail.com']`
 - **Frais de dossier** : 60,00 $ (CONFIG.FEES.SETUP)
 - **Mensualité PME** : 449,00 $ (CONFIG.FEES.MONTHLY_BUSINESS)
 

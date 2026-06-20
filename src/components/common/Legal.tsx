@@ -21,12 +21,12 @@ export function Legal() {
         </button>
 
         <header className="space-y-4 mb-12">
-          <span className="text-gold text-xs font-bold tracking-[0.4em] uppercase">Cadre Législatif • Québec</span>
+          <span className="text-gold text-xs font-bold tracking-[0.4em] uppercase">Cadre Législatif • Canada</span>
           <h1 className="text-4xl md:text-5xl font-serif font-bold tracking-tight">
             Mentions <span className="text-gold italic">Légales</span>
           </h1>
           <p className="text-silver text-sm font-light">
-            Conformément aux lois applicables au Québec et au Canada concernant l'identification d'entreprise en ligne.
+            Conformément aux lois applicables au Canada concernant l'identification d'entreprise en ligne.
           </p>
         </header>
 
@@ -50,12 +50,12 @@ export function Legal() {
                 <span className="text-ivoire font-medium">Sébastien Lahaie</span>
               </div>
               <div className="flex justify-between border-b border-white/5 pb-2">
-                <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">NEQ (Québec) :</span>
+                <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Numéro d'entreprise :</span>
                 <span className="text-ivoire font-mono">2276543210</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Siège social :</span>
-                <span className="text-ivoire">Québec, QC, Canada</span>
+                <span className="text-ivoire">Canada</span>
               </div>
             </div>
           </section>
@@ -70,7 +70,7 @@ export function Legal() {
               ComptaFlow est un service de préparation de déclarations de revenus, de tenue de livres et d'aide comptable. 
             </p>
             <p className="text-silver text-sm font-light leading-relaxed">
-              <strong>Mise en garde réglementaire</strong> : ComptaFlow n'est pas un cabinet d'experts-comptables agréés (CPA) et ses employés n'utilisent pas le titre de CPA. Tous les livrables d'états financiers certifiés ou d'audits officiels sont délégués et visés par des <strong>comptables agréés externes partenaires</strong> en conformité avec la Loi sur les comptables agréés du Québec.
+              <strong>Mise en garde réglementaire</strong> : ComptaFlow n'est pas un cabinet d'experts-comptables agréés (CPA) et ses employés n'utilisent pas le titre de CPA. Tous les livrables d'états financiers certifiés ou d'audits officiels sont délégués et visés par des <strong>comptables agréés externes partenaires</strong>, conformément aux lois professionnelles applicables dans chaque province.
             </p>
           </section>
 
@@ -86,7 +86,7 @@ export function Legal() {
             <ul className="space-y-2 text-sm text-silver font-light pl-4">
               <li className="flex items-center gap-2">• <Mail size={14} className="text-gold"/> Courriel : <a href="mailto:support@compta-flow.net" className="text-gold hover:underline">support@compta-flow.net</a></li>
               <li className="flex items-center gap-2">• <Phone size={14} className="text-gold"/> Téléphone : +1 (800) 555-0199 (Support Prioritaire)</li>
-              <li className="flex items-center gap-2">• <MapPin size={14} className="text-gold"/> Ville/Région : Québec, QC, Canada</li>
+              <li className="flex items-center gap-2">• <MapPin size={14} className="text-gold"/> Pays : Canada</li>
             </ul>
           </section>
 

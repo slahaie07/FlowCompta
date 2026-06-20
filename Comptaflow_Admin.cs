@@ -64,7 +64,7 @@ namespace Comptaflow_Admin_Cockpit
 
         private void LaunchAdmin(object sender, EventArgs e)
         {
-            string url = "https://comptaflow-platform.vercel.app/admin";
+            string url = "https://compta-flow.net/admin";
             // Launch in App Mode (Dedicated window)
             try {
                 Process.Start("msedge", "--app=" + url);

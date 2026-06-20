@@ -123,7 +123,7 @@ export function useInvoices(userId?: string, isAdmin: boolean = false) {
       });
 
       if (error) throw error;
-      toast.success("Facture créée (TPS/TVQ calculées automatiquement).");
+      toast.success("Facture créée (taxes canadiennes calculées selon la province).");
       fetchInvoices();
     } catch (e: any) {
       console.error("Erreur création facture:", e);

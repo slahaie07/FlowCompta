@@ -1,6 +1,6 @@
 # Comptaflow — La comptabilité qui coule de source 🚀
 
-![Comptaflow Banner](https://comptaflow-platform.vercel.app/og-image.png)
+![Comptaflow Banner](https://compta-flow.net/og-image.png)
 
 Comptaflow est un cabinet comptable de nouvelle génération basé au Québec, fusionnant l'expertise fiscale traditionnelle avec une infrastructure technologique de pointe. 
 
@@ -20,7 +20,7 @@ Le projet est structuré autour de quatre piliers fondamentaux :
 
 ## 🚀 Déploiement
 La plateforme est déployée en production sur **Vercel** :
-👉 [https://comptaflow-platform.vercel.app/](https://comptaflow-platform.vercel.app/)
+👉 [https://compta-flow.net/](https://compta-flow.net/)
 
 ## 📚 Documentation pour l'Architecte
 - `PROJECT_BLUEPRINT.md` : Guide suprême de l'architecture.

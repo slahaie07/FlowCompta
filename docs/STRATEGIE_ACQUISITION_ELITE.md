@@ -22,7 +22,7 @@ L'IA (Gemini 2.5) génère un message *unique* pour chaque prospect.
 *   **Volume** : Envoi de petits volumes très ciblés. Taux d'ouverture attendu : > 60%. Taux de réponse : > 15%.
 
 ### Phase 3 : Inbound Marketing (L'Aimant à Clients)
-Attirez les clients vers vous avec des outils gratuits hébergés sur `agy-platform.vercel.app` :
+Attirez les clients vers vous avec des outils gratuits hébergés sur `compta-flow.net` :
 1. **L'Outil Gratuit** : Mettez en ligne un "Calculateur de Runway SaaS" ou un "Test de Santé Fiscale". Pour voir les résultats, l'utilisateur doit laisser son email.
 2. **Retargeting** : Utilisez la balise Meta Pixel ou Google Tag Manager pour recibler les visiteurs de votre site avec des publicités haut de gamme.
 

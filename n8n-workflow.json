@@ -31,7 +31,7 @@
     },
     {
       "parameters": {
-        "fromEmail": "Equipe ComptaFlow <noreply@appiapro.ca>",
+        "fromEmail": "Equipe ComptaFlow <noreply@compta-flow.net>",
         "toEmail": "={{$json.body.data.object.customer_email}}",
         "ccEmail": "s.lahaie07@gmail.com",
         "subject": "Confirmation de paiement et début de vos services comptables - ComptaFlow",

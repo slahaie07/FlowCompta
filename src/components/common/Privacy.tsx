@@ -21,13 +21,13 @@ export function Privacy() {
         </button>
 
         <header className="space-y-4 mb-12">
-          <span className="text-gold text-xs font-bold tracking-[0.4em] uppercase">Conformité Loi 25 · Québec</span>
+          <span className="text-gold text-xs font-bold tracking-[0.4em] uppercase">Conformité PIPEDA · Loi 25 (QC) · Canada</span>
           <h1 className="text-4xl md:text-5xl font-serif font-bold tracking-tight">
             Politique de Confidentialité et<br />
             <span className="text-gold italic">Protection des Renseignements Personnels</span>
           </h1>
           <p className="text-silver text-sm font-light">
-            Dernière mise à jour : 16 Juin 2026. Cette politique décrit nos engagements conformément à la Loi 25 sur la protection des renseignements personnels au Québec.
+            Dernière mise à jour : 16 Juin 2026. Cette politique décrit nos engagements conformément à la Loi sur la protection des renseignements personnels et les documents électroniques (PIPEDA) au Canada, ainsi qu'à la Loi 25 au Québec le cas échéant.
           </p>
         </header>
 
@@ -43,7 +43,7 @@ export function Privacy() {
             </p>
             <ul className="list-disc pl-6 text-silver text-sm font-light space-y-2">
               <li><strong>Informations d'identité et de contact</strong> : Nom, courriel, téléphone, adresse résidentielle.</li>
-              <li><strong>Informations d'entreprise</strong> : Nom commercial, NEQ (Numéro d'Entreprise du Québec).</li>
+              <li><strong>Informations d'entreprise</strong> : Nom commercial, numéro d'entreprise provincial (NEQ, BN, etc.).</li>
               <li><strong>Renseignements fiscaux</strong> : NAS (Numéro d'Assurance Sociale) uniquement pour les déclarations d'impôts de particuliers (T1), revenus d'entreprise, factures, pièces justificatives.</li>
               <li><strong>Données financières</strong> : Relevés de transactions, informations de paiement chiffrées via Stripe.</li>
             </ul>
@@ -59,7 +59,7 @@ export function Privacy() {
               Les renseignements personnels collectés sont exclusivement utilisés pour :
             </p>
             <ul className="list-disc pl-6 text-silver text-sm font-light space-y-2">
-              <li>Traiter et télétransmettre vos déclarations d'impôts à l'ARC (Agence du revenu du Canada) et à Revenu Québec.</li>
+              <li>Traiter et télétransmettre vos déclarations d'impôts à l'ARC (Agence du revenu du Canada) et aux administrations fiscales provinciales compétentes.</li>
               <li>Effectuer vos rapprochements bancaires et livrer vos rapports de tenue de livres mensuels.</li>
               <li>Gérer votre abonnement client et traiter vos facturations chiffrées.</li>
               <li>Assurer un support client rapide et sécurisé avec votre préparateur attitré.</li>
@@ -93,7 +93,7 @@ export function Privacy() {
             </p>
             <ul className="list-disc pl-6 text-silver text-sm font-light space-y-2">
               <li><strong>Rétractation du Consentement</strong> : Vous pouvez fermer votre espace client et exiger le retrait de vos renseignements personnels à tout moment.</li>
-              <li><strong>Réglementation Fiscale</strong> : Veuillez noter que les documents comptables et déclarations fiscales transmis officiellement doivent être conservés pendant une période légale obligatoire de <strong>sept (7) ans</strong> suivant la fin de l'année d'imposition concernée, conformément aux normes de l'ARC, de Revenu Québec et des lois fiscales en vigueur.</li>
+              <li><strong>Réglementation Fiscale</strong> : Veuillez noter que les documents comptables et déclarations fiscales transmis officiellement doivent être conservés pendant une période légale obligatoire de <strong>sept (7) ans</strong> suivant la fin de l'année d'imposition concernée, conformément aux normes de l'ARC, des administrations fiscales provinciales et des lois fiscales en vigueur au Canada.</li>
             </ul>
           </section>
 
@@ -123,7 +123,7 @@ export function Privacy() {
         </main>
 
         <footer className="mt-12 text-center text-xs text-slate-500 font-light">
-          Comptaflow est une plateforme technologique dédiée aux services de tenue de livres et d'aide comptable au Québec.
+          Comptaflow est une plateforme technologique dédiée aux services de tenue de livres et d'aide comptable partout au Canada.
         </footer>
       </div>
     </div>

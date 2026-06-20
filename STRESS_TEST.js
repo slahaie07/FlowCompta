@@ -9,7 +9,7 @@ export const options = {
   ],
 };
 
-const BASE_URL = 'https://comptaflow-elite.vercel.app';
+const BASE_URL = 'https://compta-flow.net';
 
 export default function () {
   // 1. Navigation Landing Page

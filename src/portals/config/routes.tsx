@@ -6,6 +6,7 @@ import {
   LazyPricing,
   LazyFAQ,
   LazySupport,
+  LazyServiceProcedure,
   LazyAdminOverview,
   LazyAdminClients,
   LazyInteracSettings,
@@ -35,6 +36,11 @@ export const PORTAL_ROUTES: PortalRouteDefinition[] = [
         onRefreshProfile={ctx.onRefreshProfile}
       />
     ),
+  },
+  {
+    path: 'procedure',
+    roles: ['client'],
+    render: () => <LazyServiceProcedure />,
   },
   {
     path: 'services',

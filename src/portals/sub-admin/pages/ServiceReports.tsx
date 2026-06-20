@@ -51,7 +51,7 @@ const SERVICES: ServiceDefinition[] = [
     normRef: 'LIR art. 150 · LI Qc art. 1000',
     color: 'sapphire',
     description:
-      'Préparation complète et optimisée de votre déclaration de revenus de particulier (fédéral T1 + provincial TP-1 Québec) selon les normes de l\'ARC et de Revenu Québec.',
+      'Préparation complète et optimisée de votre déclaration de revenus de particulier (T1 fédéral + déclaration provinciale selon votre province) selon les normes de l\'ARC et des administrations fiscales provinciales.',
     scope: [
       'Collecte et analyse de tous les feuillets (T4, T5, T3, T4A, RL-1, RL-3, etc.)',
       'Optimisation des crédits d\'impôt fédéraux et provinciaux',
@@ -64,7 +64,7 @@ const SERVICES: ServiceDefinition[] = [
     ],
     exclusions: [
       'Revenus d\'entreprise complexes (voir forfait TA)',
-      'Réclamations de TPS/TVQ (voir forfait TA)',
+      'Réclamations de TPS/TVH/TVP (voir forfait TA)',
       'États financiers certifiés (mandat CPA)',
     ],
     pipeline: [
@@ -128,19 +128,19 @@ const SERVICES: ServiceDefinition[] = [
     id: 'ta',
     icon: <Zap size={22} />,
     name: 'Travailleur Autonome',
-    subtitle: 'T2125 & TPS/TVQ',
+    subtitle: 'T2125 & TPS/TVH/TVP',
     code: 'TA',
     price: '199 $',
     normRef: 'LIR art. 9-37 · LTA art. 165 · LTVQ art. 16',
     color: 'gold',
     description:
-      'Gestion complète de la fiscalité des travailleurs autonomes : revenus d\'entreprise, déductions admissibles, déclarations TPS/TVQ trimestrielles et déclaration T2125.',
+      'Gestion complète de la fiscalité des travailleurs autonomes : revenus d\'entreprise, déductions admissibles, déclarations TPS/TVH/TVP trimestrielles et déclaration T2125.',
     scope: [
       'Tenue de livres mensuelle (catégorisation des revenus/dépenses)',
       'Préparation du T2125 — État des résultats des activités d\'une entreprise',
-      'Calcul et déclarations TPS/TVQ (mensuelles, trimestrielles ou annuelles)',
+      'Calcul et déclarations TPS/TVH/TVP (mensuelles, trimestrielles ou annuelles)',
       'Optimisation de toutes les dépenses admissibles (bureau à domicile, véhicule, formations)',
-      'Méthode rapide de comptabilisation TPS/TVQ si avantageuse',
+      'Méthode rapide de comptabilisation TPS/TVH/TVP si avantageuse',
       'Calcul des déductions pour amortissement (DPA) de classe 10, 12, 50',
       'Planification des acomptes provisionnels trimestriels',
       'Préparation T1 + TP-1 incluant revenus d\'entreprise',
@@ -154,8 +154,8 @@ const SERVICES: ServiceDefinition[] = [
       {
         phase: '01',
         title: 'Ouverture & Analyse',
-        description: 'Évaluation de la structure d\'affaires et du registre TPS/TVQ.',
-        deliverables: ['Numéro TPS/TVQ vérifié', 'Mandat signé', 'Calendrier des remises'],
+        description: 'Évaluation de la structure d\'affaires et du registre TPS/TVH/TVP.',
+        deliverables: ['Numéro TPS/TVH/TVP vérifié', 'Mandat signé', 'Calendrier des remises'],
         timeline: 'Semaine 1',
         status: 'complete',
       },
@@ -177,7 +177,7 @@ const SERVICES: ServiceDefinition[] = [
       },
       {
         phase: '04',
-        title: 'Déclarations TPS/TVQ',
+        title: 'Déclarations TPS/TVH/TVP',
         description: 'Préparation et soumission des remises de taxes de vente.',
         deliverables: ['Formulaire GST34', 'Formulaire VD-353', 'Confirmation de soumission'],
         timeline: 'Selon fréquence',
@@ -195,17 +195,17 @@ const SERVICES: ServiceDefinition[] = [
     reportSections: [
       'État des résultats annuel (revenus vs dépenses)',
       'Tableau des déductions admissibles par catégorie',
-      'Récapitulatif TPS/TVQ — Collectée vs Payée vs Remise nette',
+      'Récapitulatif TPS/TVH/TVP — Collectée vs Payée vs Remise nette',
       'Calcul DPA par classe d\'actifs',
       'Acomptes provisionnels recommandés',
       'Économies fiscales réalisées vs année précédente',
       'Recommandations stratégiques (incorporation, REER, etc.)',
     ],
     deadlines: [
-      { label: 'Remise TPS/TVQ trimestrielle Q1', date: '30 avril', critical: true },
-      { label: 'Remise TPS/TVQ trimestrielle Q2', date: '31 juillet', critical: true },
-      { label: 'Remise TPS/TVQ trimestrielle Q3', date: '31 octobre', critical: true },
-      { label: 'Remise TPS/TVQ trimestrielle Q4', date: '31 janvier', critical: true },
+      { label: 'Remise TPS/TVH/TVP trimestrielle Q1', date: '30 avril', critical: true },
+      { label: 'Remise TPS/TVH/TVP trimestrielle Q2', date: '31 juillet', critical: true },
+      { label: 'Remise TPS/TVH/TVP trimestrielle Q3', date: '31 octobre', critical: true },
+      { label: 'Remise TPS/TVH/TVP trimestrielle Q4', date: '31 janvier', critical: true },
       { label: 'Déclaration T1 TA', date: '15 juin', critical: false },
       { label: 'Solde d\'impôt dû', date: '30 avril', critical: false },
     ],
@@ -222,7 +222,7 @@ const SERVICES: ServiceDefinition[] = [
     description:
       'Gestion fiscale complète des petites et moyennes sociétés incorporées : déclaration T2 fédérale, CO-17 provinciale, états financiers non audités, et stratégie rémunération optimale.',
     scope: [
-      'Préparation de la déclaration T2 (fédérale) et CO-17 (Québec)',
+      'Préparation de la déclaration T2 (fédérale) et de la déclaration provinciale des sociétés (selon province)',
       'États financiers annuels — Mission de compilation (non audités)',
       'Tenue de livres annuelle ou trimestrielle de la société',
       'Stratégie optimale dividendes vs salaires vs bonus',
@@ -230,7 +230,7 @@ const SERVICES: ServiceDefinition[] = [
       'Réconciliation des comptes de dividendes en capital (CDC)',
       'Gestion du compte de revenu à taux d\'imposition général (CRTIG)',
       'Préparation des feuillets T5 (dividendes) et T4 si applicable',
-      'Déclarations TPS/TVQ de la société',
+      'Déclarations TPS/TVH/TVP de la société',
     ],
     exclusions: [
       'Mission d\'examen ou audit (mandat CPA obligatoire)',
@@ -626,7 +626,7 @@ export function ServiceReports() {
         <div className="flex items-center gap-3 mt-3">
           <span className="w-8 h-[1px] bg-gold/50"></span>
           <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em]">
-            Structure complète & normes ARC · Revenu Québec · CPA Canada
+            Structure complète & normes ARC · administrations provinciales · CPA Canada
           </p>
         </div>
       </header>
@@ -789,7 +789,7 @@ export function ServiceReports() {
                       <div className="mt-8 p-6 rounded-2xl border border-white/5 bg-white/[0.01]">
                         <p className="text-[10px] text-slate-500 leading-relaxed">
                           <strong className="text-slate-400">Format de livraison :</strong> PDF premium avec en-tête professionnel, table des matières, signatures numériques et archivage dans votre Coffre-Fort sécurisé.
-                          Conforme aux normes de présentation CPA Canada et aux exigences de documentation de l\'ARC et Revenu Québec.
+                          Conforme aux normes de présentation CPA Canada et aux exigences de documentation de l\'ARC et administrations fiscales provinciales.
                         </p>
                       </div>
                     </Card>
@@ -826,7 +826,7 @@ export function ServiceReports() {
                       <div className="mt-8 p-6 rounded-2xl bg-amber-500/5 border border-amber-500/20">
                         <p className="text-xs text-amber-400 leading-relaxed">
                           <strong>⚠ Pénalités de retard :</strong> L\'ARC impose une pénalité de 5% du solde impayé plus 1% par mois de retard (max 12 mois) pour les déclarations en retard.
-                          Revenu Québec applique des pénalités similaires selon la Loi sur l\'administration fiscale.
+                          administrations fiscales provinciales applique des pénalités similaires selon la Loi sur l\'administration fiscale.
                           Notre service inclut des rappels automatiques 30 et 7 jours avant chaque échéance.
                         </p>
                       </div>

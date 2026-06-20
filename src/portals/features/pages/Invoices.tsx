@@ -11,6 +11,31 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../../../hooks/useAuth';
 import { supabase } from '../../../lib/supabase';
 import { toast } from 'sonner';
+import {
+  calculateCanadianTaxes,
+  getTaxDisplayLines,
+  getTaxSubtitle,
+  normalizeProvinceCode,
+  type ProvinceCode,
+} from '../../../lib/financeUtils';
+
+function buildPrintTaxRows(invoice: { montantHt?: number; tps?: number; tvq?: number; tvh?: number; amount?: number }) {
+  const subtotal = invoice.montantHt ?? invoice.amount ?? 0;
+  const rows = [
+    `<div class="total-row"><span>Sous-total HT</span><span>${subtotal.toFixed(2)} $</span></div>`,
+  ];
+  if ((invoice.tvh ?? 0) > 0) {
+    rows.push(`<div class="total-row"><span>TVH harmonisée</span><span>${(invoice.tvh ?? 0).toFixed(2)} $</span></div>`);
+  } else {
+    if ((invoice.tps ?? 0) > 0) {
+      rows.push(`<div class="total-row"><span>TPS fédérale (5%)</span><span>${(invoice.tps ?? 0).toFixed(2)} $</span></div>`);
+    }
+    if ((invoice.tvq ?? 0) > 0) {
+      rows.push(`<div class="total-row"><span>Taxe provinciale</span><span>${(invoice.tvq ?? 0).toFixed(2)} $</span></div>`);
+    }
+  }
+  return rows.join('');
+}
 
 // ─── Impression PDF native ────────────────────────────────────────────────────
 function printInvoice(invoice: any, subAdminInterac: any) {
@@ -68,7 +93,7 @@ function printInvoice(invoice: any, subAdminInterac: any) {
   <div class="header">
     <div>
       <div class="brand">ComptaFlow</div>
-      <div class="brand-sub">PLATEFORME COMPTABLE CERTIFIÉE QUÉBEC</div>
+      <div class="brand-sub">PLATEFORME COMPTABLE CERTIFIÉE · CANADA</div>
     </div>
     <div class="invoice-meta">
       <div class="invoice-num">${invoice.number}</div>
@@ -107,9 +132,7 @@ function printInvoice(invoice: any, subAdminInterac: any) {
   </table>
 
   <div class="totals">
-    <div class="total-row"><span>Sous-total HT</span><span>${(invoice.montantHt ?? 0).toFixed(2)} $</span></div>
-    <div class="total-row"><span>TPS fédérale (5%)</span><span>${(invoice.tps ?? 0).toFixed(2)} $</span></div>
-    <div class="total-row"><span>TVQ provinciale (9.975%)</span><span>${(invoice.tvq ?? 0).toFixed(2)} $</span></div>
+    ${buildPrintTaxRows(invoice)}
     <div class="total-final"><span>Total TTC</span><span>${(invoice.montantTotal ?? invoice.amount).toFixed(2)} $</span></div>
   </div>
 
@@ -129,11 +152,22 @@ function printInvoice(invoice: any, subAdminInterac: any) {
     ${invoice.datePaiement ? ` — Payée le ${new Date(invoice.datePaiement).toLocaleDateString('fr-CA')}` : ''}
   </div>` : ''}
 
-  <div class="footer">ComptaFlow — compta-flow.net — TPS/TVQ conformes Revenu Québec</div>
+  <div class="footer">ComptaFlow — compta-flow.net — Taxes conformes ARC et administrations provinciales</div>
   <script>window.onload=()=>{window.print();}</script>
 </body>
 </html>`);
   win.document.close();
+}
+
+function renderStoredTaxLines(invoice: { tps?: number; tvq?: number; tvh?: number }) {
+  const lines: { label: string; value: number }[] = [];
+  if ((invoice.tvh ?? 0) > 0) {
+    lines.push({ label: 'TVH harmonisée', value: invoice.tvh ?? 0 });
+  } else {
+    if ((invoice.tps ?? 0) > 0) lines.push({ label: 'TPS fédérale (5 %)', value: invoice.tps ?? 0 });
+    if ((invoice.tvq ?? 0) > 0) lines.push({ label: 'Taxe provinciale', value: invoice.tvq ?? 0 });
+  }
+  return lines;
 }
 
 // ─── Validation référence Interac ─────────────────────────────────────────────
@@ -272,11 +306,14 @@ export function Invoices({ isAdmin = false }: { isAdmin?: boolean }) {
     refreshInvoices();
   };
 
-  // Calculs taxes à la volée
+  // Calculs taxes à la volée (selon province du client)
   const amountVal = parseFloat(newAmount) || 0;
-  const tpsPreview = Math.round(amountVal * 0.05 * 100) / 100;
-  const tvqPreview = Math.round(amountVal * 0.09975 * 100) / 100;
-  const totalPreview = Math.round((amountVal + tpsPreview + tvqPreview) * 100) / 100;
+  const invoiceProvince: ProvinceCode = normalizeProvinceCode(
+    clients.find((cl) => cl.id === selectedClientId)?.province || userData?.province
+  );
+  const taxPreviewResult = calculateCanadianTaxes(amountVal, invoiceProvince);
+  const taxPreviewLines = getTaxDisplayLines(taxPreviewResult, invoiceProvince, 'fr');
+  const taxSubtitle = getTaxSubtitle(invoiceProvince, 'fr');
 
   // Compter les alertes "déclaré payé" pour le sous-admin
   const pendingDeclarations = invoices.filter(i => i.clientADeclarePaye && i.status === 'pending').length;
@@ -290,7 +327,7 @@ export function Invoices({ isAdmin = false }: { isAdmin?: boolean }) {
           </h1>
           <div className="flex items-center gap-3 mt-3">
             <span className="w-8 h-[1px] bg-gold/50"></span>
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em]">Québec TPS (5%) & TVQ (9.975%) certifiées</p>
+            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em]">Taxes canadiennes · {taxSubtitle}</p>
           </div>
         </div>
 
@@ -353,13 +390,17 @@ export function Invoices({ isAdmin = false }: { isAdmin?: boolean }) {
 
               {amountVal > 0 && (
                 <div className="mt-8 p-6 bg-white/[0.02] border border-white/5 rounded-2xl max-w-md space-y-3 animate-in fade-in duration-300">
-                  <h4 className="text-xs uppercase tracking-widest text-slate-400 font-bold">Aperçu taxation Québec :</h4>
+                  <h4 className="text-xs uppercase tracking-widest text-slate-400 font-bold">Aperçu taxation ({invoiceProvince}) :</h4>
                   <div className="flex justify-between text-sm"><span className="text-slate-500">Sous-total HT :</span><span className="text-silver font-mono">{amountVal.toFixed(2)} $</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-slate-500">TPS Fédérale (5.0%) :</span><span className="text-silver font-mono">{tpsPreview.toFixed(2)} $</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-slate-500">TVQ Provinciale (9.975%) :</span><span className="text-silver font-mono">{tvqPreview.toFixed(2)} $</span></div>
+                  {taxPreviewLines.map((line) => (
+                    <div key={line.label} className="flex justify-between text-sm">
+                      <span className="text-slate-500">{line.label} :</span>
+                      <span className="text-silver font-mono">{line.amount.toFixed(2)} $</span>
+                    </div>
+                  ))}
                   <div className="border-t border-white/10 pt-2 flex justify-between text-base font-bold">
                     <span className="text-gold">Total TTC estimé :</span>
-                    <span className="text-gold font-serif">{totalPreview.toFixed(2)} $</span>
+                    <span className="text-gold font-serif">{taxPreviewResult.total.toFixed(2)} $</span>
                   </div>
                 </div>
               )}
@@ -455,8 +496,12 @@ export function Invoices({ isAdmin = false }: { isAdmin?: boolean }) {
 
             <div className="space-y-3 bg-white/[0.02] p-6 border border-white/5 rounded-2xl mb-6 text-sm">
               <div className="flex justify-between"><span className="text-slate-500">Sous-total HT :</span><span className="font-mono text-silver">{(selectedInvoice.montantHt ?? 0).toFixed(2)} $</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">TPS (5%) :</span><span className="font-mono text-silver">{(selectedInvoice.tps ?? 0).toFixed(2)} $</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">TVQ (9.975%) :</span><span className="font-mono text-silver">{(selectedInvoice.tvq ?? 0).toFixed(2)} $</span></div>
+              {renderStoredTaxLines(selectedInvoice).map((line) => (
+                <div key={line.label} className="flex justify-between">
+                  <span className="text-slate-500">{line.label} :</span>
+                  <span className="font-mono text-silver">{line.value.toFixed(2)} $</span>
+                </div>
+              ))}
               <div className="border-t border-white/10 pt-2 flex justify-between font-bold text-base text-gold">
                 <span>Total TTC :</span><span>{(selectedInvoice.montantTotal ?? selectedInvoice.amount).toFixed(2)} $</span>
               </div>
@@ -558,8 +603,12 @@ export function Invoices({ isAdmin = false }: { isAdmin?: boolean }) {
 
             <div className="space-y-3 bg-white/[0.02] p-6 border border-white/5 rounded-2xl mb-6 text-sm">
               <div className="flex justify-between"><span className="text-slate-500">Sous-total HT :</span><span className="font-mono text-silver">{(selectedInvoice.montantHt ?? 0).toFixed(2)} $</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">TPS (5%) :</span><span className="font-mono text-silver">{(selectedInvoice.tps ?? 0).toFixed(2)} $</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">TVQ (9.975%) :</span><span className="font-mono text-silver">{(selectedInvoice.tvq ?? 0).toFixed(2)} $</span></div>
+              {renderStoredTaxLines(selectedInvoice).map((line) => (
+                <div key={line.label} className="flex justify-between">
+                  <span className="text-slate-500">{line.label} :</span>
+                  <span className="font-mono text-silver">{line.value.toFixed(2)} $</span>
+                </div>
+              ))}
               <div className="border-t border-white/10 pt-2 flex justify-between font-bold text-base text-gold">
                 <span>Total à transférer :</span><span>{(selectedInvoice.montantTotal ?? selectedInvoice.amount).toFixed(2)} $</span>
               </div>

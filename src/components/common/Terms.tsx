@@ -37,7 +37,7 @@ export function Terms() {
               1. Description des Services et Rôle
             </h2>
             <p className="text-silver text-sm font-light leading-relaxed">
-              ComptaFlow fournit des services de tenue de livres, de préparation de relevés financiers non certifiés et de préparation d'impôts personnels et autonomes au Québec. Nous ne fournissons pas d'opinion d'audit public réservée aux CPA auditeurs. Toutes nos prestations s'effectuent sous un régime d'assistance administrative comptable.
+              ComptaFlow fournit des services de tenue de livres, de préparation de relevés financiers non certifiés et de préparation d'impôts personnels et autonomes partout au Canada. Nous ne fournissons pas d'opinion d'audit public réservée aux CPA auditeurs. Toutes nos prestations s'effectuent sous un régime d'assistance administrative comptable.
             </p>
           </section>
 
@@ -48,7 +48,7 @@ export function Terms() {
               2. Responsabilité du Client
             </h2>
             <p className="text-silver text-sm font-light leading-relaxed">
-              L'utilisateur s'engage à fournir des informations financières complètes, véridiques et exactes. ComptaFlow ne pourra être tenu responsable des pénalités fiscales imposées par l'ARC ou Revenu Québec découlant de pièces justificatives manquantes, de fausses déclarations, ou de délais de dépôt causés par la non-transmission des documents requis dans le coffre-fort dans les temps prescrits.
+              L'utilisateur s'engage à fournir des informations financières complètes, véridiques et exactes. ComptaFlow ne pourra être tenu responsable des pénalités fiscales imposées par l'ARC ou les administrations fiscales provinciales découlant de pièces justificatives manquantes, de fausses déclarations, ou de délais de dépôt causés par la non-transmission des documents requis dans le coffre-fort dans les temps prescrits.
             </p>
           </section>
 
@@ -59,7 +59,7 @@ export function Terms() {
               3. Protection des Renseignements Personnels
             </h2>
             <p className="text-silver text-sm font-light leading-relaxed">
-              Toutes les données déposées sont stockées de façon sécurisée au Canada et chiffrées (AES-256). Nous nous conformons pleinement aux dispositions de la Loi 25 (Québec) sur la protection des données personnelles. Vous pouvez exiger la suppression de votre compte conformément à notre Politique de Confidentialité.
+              Toutes les données déposées sont stockées de façon sécurisée au Canada et chiffrées (AES-256). Nous nous conformons à la LPRPDE (PIPEDA) et, le cas échéant, à la Loi 25 (Québec). Vous pouvez exiger la suppression de votre compte conformément à notre Politique de Confidentialité.
             </p>
           </section>
 

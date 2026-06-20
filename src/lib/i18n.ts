@@ -32,7 +32,7 @@ export const i18n = {
       consulting: "Commis comptable & Tenue de livres",
       stocks: "Gestion des stocks",
       title: "Nos services et tarifs",
-      subtitle: "Tarifs transparents pour la tenue de livres, la paie et l'aide comptable au Québec. Forfaits mensuels, tarif horaire ou services à la carte — choisissez ce qui correspond à votre réalité.",
+      subtitle: "Tarifs transparents pour la tenue de livres, la paie et l'aide comptable partout au Canada. Forfaits mensuels, tarif horaire ou services à la carte — choisissez ce qui correspond à votre réalité.",
       composer: "Demander une soumission",
       perMandate: "Tarif indicatif",
       perHour: "À l'heure",
@@ -76,7 +76,7 @@ export const i18n = {
           price: "500 $ – 800 $+ / mois"
         },
         gstQst: {
-          name: "Déclaration des taxes (TPS/TVQ)",
+          name: "Déclaration des taxes (TPS/TVH/TVP)",
           desc: "Préparation et transmission de vos déclarations de taxes — mensuelle ou trimestrielle.",
           price: "35 $ – 60 $ / décl."
         },
@@ -123,7 +123,7 @@ export const i18n = {
 
     // Hero
     hero: {
-      tagline: "Services de tenue de livres & d'aide comptable · Québec",
+      tagline: "Services de tenue de livres & d'aide comptable · Canada",
       title1: "Votre tenue de livres,",
       title2: "claire et sans paperasse.",
       subtitle: "Comptaflow réunit votre tenue de livres, vos déclarations de revenus et d'impôts dans un seul flux d'aide comptable : un portail, des prix fermes, zéro tracas.",
@@ -133,7 +133,7 @@ export const i18n = {
       item1: "Tenue de livres — mai 2026",
       item1Val: "Conciliée",
       item2: "Documents reçus au coffre-fort",
-      item3: "Déclaration TPS/TVQ",
+      item3: "Déclarations taxes fédérales et provinciales",
       item3Val: "Transmise",
       item4: "Forfait mensuel actif",
       item4Val: "Micro-entreprise",
@@ -174,7 +174,7 @@ export const i18n = {
       q3: "Mes documents sont-ils en sécurité ?",
       a3: "Oui. Vos fichiers sont transmis chiffrés (TLS) et stockés dans une base de données hébergée au Canada, accessible uniquement par vous et votre préparateur comptable.",
       q4: "Les prix affichés incluent-ils les taxes ?",
-      a4: "Non. Les tarifs sont hors taxes (TPS 5 % et TVQ 9,975 % en sus au Québec). Un devis détaillé vous est remis avant confirmation du mandat.",
+      a4: "Non. Les tarifs sont hors taxes (TPS, TVH, TVQ, TVP, etc. selon votre province). Un devis détaillé vous est remis avant confirmation du mandat.",
     },
 
     // Cookies
@@ -187,16 +187,16 @@ export const i18n = {
 
     // Footer
     footer: {
-      taxDisclaimer: "Les prix affichés sont hors taxes (TPS 5 % et TVQ 9,975 % en sus).",
+      taxDisclaimer: "Les prix affichés sont hors taxes (TPS, TVH, TVQ ou TVP selon la province).",
       privacy: "Confidentialité (Loi 25)",
       terms: "Conditions de service",
       legal: "Mentions légales",
       admin: "Administration",
-      copyright: "© 2026 Comptaflow — Québec, Canada"
+      copyright: "© 2026 Comptaflow — Canada"
     },
 
     auth: {
-      tagline: "Québec • Aide Comptable & Tenue de Livres",
+      tagline: "Canada • Aide Comptable & Tenue de Livres",
       subtitle: "Système de gestion financière et fiscale hautement sécurisé pour entrepreneurs canadiens.",
       privateSpace: "Espace Privé",
       privateSpaceDesc: "S'identifier et accéder à ses portails",
@@ -219,7 +219,7 @@ export const i18n = {
       submitRegister: "Créer le compte",
       switchToRegister: "Pas encore inscrit ? Créer un dossier",
       switchToLogin: "Déjà inscrit ? S'identifier",
-      footer: "Portail ComptaFlow • Québec • MMXXVI"
+      footer: "Portail ComptaFlow • Canada • MMXXVI"
     },
 
     portal: {
@@ -267,7 +267,8 @@ export const i18n = {
         faq: "Sécurité & FAQ",
         support: "Centre d'Aide",
         client_messaging: "Contacter mon comptable",
-        services: "Services & Tarifs"
+        services: "Services & Tarifs",
+        procedure: "Mon parcours dossier"
       },
       overview: {
         greeting: "Bonjour,",
@@ -287,7 +288,7 @@ export const i18n = {
         uploading: "Téléversement en cours…",
         uploadHint: "PDF, Image ou Excel • Max 4 Mo",
         mandateTitle: "Mandat de Gestion Électronique",
-        mandateDesc: "Votre mandat de tenue de livres et d'aide comptable est signé et conforme aux exigences de Revenu Québec.",
+        mandateDesc: "Votre mandat de tenue de livres et d'aide comptable est signé et conforme aux exigences de l'ARC et des administrations fiscales provinciales.",
         viewMandate: "Voir le Mandat Signé",
         billing: "Facturation & Interac",
         upToDate: "Votre dossier est à jour",
@@ -301,6 +302,7 @@ export const i18n = {
       activeLabel: "Service actif",
       confirmed: "Confirmé",
       changeHint: "Pour changer de service, contactez votre comptable via la messagerie.",
+      viewProcedure: "Voir mon parcours dossier",
       chooseLabel: "Choisir votre service",
       chooseTitle: "Quel mandat souhaitez-vous ouvrir ?",
       chooseDesc: "Sélectionnez le service qui correspond à vos besoins. Un devis personnalisé vous sera transmis après validation.",
@@ -323,7 +325,7 @@ export const i18n = {
       a2: "Toutes les données sont stockées sur des serveurs sécurisés au Canada (Canada-Central), conformément aux lois canadiennes sur la protection des renseignements personnels.",
       q3: "Comment fonctionne la liaison avec mon préparateur ?",
       a3: "Dès qu'un document est téléversé, votre préparateur est notifié. Les échanges se font via notre canal direct chiffré.",
-      q4: "Respectez-vous la Loi 25 (Québec) ?",
+      q4: "Respectez-vous les lois canadiennes sur la protection des données (PIPEDA, Loi 25 au Québec) ?",
       a4: "Oui. Nous avons nommé un responsable de la protection des données et tracé chaque accès pour assurer une transparence totale.",
       q5: "Pourquoi un délai pour l'ouverture du dossier ?",
       a5: "Chaque nouveau client fait l'objet d'une vérification de conformité manuelle (NEQ/NAS) avant l'activation des outils."
@@ -378,7 +380,7 @@ export const i18n = {
       sentTitle: "Message acheminé avec succès !",
       sentDesc: "Votre préparateur vous répondra sous 24 h ouvrables.",
       subject: "Objet de la demande",
-      subjectPlaceholder: "ex: Question sur ma déclaration TPS…",
+      subjectPlaceholder: "ex: Question sur ma déclaration de taxes…",
       message: "Message détaillé",
       messagePlaceholder: "Décrivez votre besoin avec précision…",
       send: "Envoyer au préparateur",
@@ -395,7 +397,153 @@ export const i18n = {
       byAppt: "Sur RDV",
       closed: "Fermé",
       secureLine: "Votre ligne est sécurisée par chiffrement de bout en bout.",
-      smsCopied: "Numéro d'assistance copié dans le presse-papiers."
+      smsCopied: "Numéro d'assistance copié dans le presse-papiers.",
+      liveChatTitle: "Conversation directe",
+      liveChatDesc: "Réponse en quelques instants, comme avec votre cabinet.",
+      chatPlaceholder: "Écrivez votre message…",
+      onlineNow: "En ligne · répond en direct",
+      typingPrefix: "écrit",
+      chatError: "Petit contretemps technique — réessayez dans un instant ou écrivez-nous par courriel."
+    },
+
+    procedure: {
+      tag: "Parcours guidé",
+      title: "Votre",
+      titleAccent: "dossier",
+      subtitle: "Documents à fournir, informations requises et étapes jusqu'à la clôture — guidé par votre équipe ComptaFlow.",
+      noService: "Choisissez un service pour afficher le parcours complet (documents, infos, étapes).",
+      selectService: "— Sélectionner un service —",
+      viewPath: "Voir le parcours",
+      browseServices: "Parcourir les services",
+      step: "Étape",
+      done: "Complété",
+      progress: "Avancement",
+      nextStep: "Prochaine étape",
+      allComplete: "Parcours complété — votre comptable finalise le livrable.",
+      requiredDocs: "Documents",
+      requiredInfo: "Informations",
+      optional: "optionnel",
+      markComplete: "Marquer complété",
+      markIncomplete: "Marquer incomplet",
+      goToStep: "Aller à cette étape",
+      estimatedDays: "Délai indicatif : {days} jours ouvrables",
+      cpaNote: "Chaque étape est validée par un CPA du réseau ComptaFlow. Les calculs fiscaux et comptables sont revus avant tout livrable.",
+      common: {
+        steps: {
+          mandate: { title: "Mandat & profil", desc: "Signez votre mandat et complétez votre profil (province, entreprise)." },
+          documents: { title: "Dépôt des documents", desc: "Téléversez les pièces requises dans votre coffre-fort sécurisé." },
+          cpaReview: { title: "Revue CPA", desc: "Votre comptable valide les informations et répond à vos questions." },
+          delivery: { title: "Clôture & facturation", desc: "Réception du livrable et règlement des honoraires." }
+        },
+        docs: { signedMandate: "Mandat signé" },
+        fields: {
+          profileComplete: "Profil complété",
+          province: "Province fiscale confirmée",
+          questionsAnswered: "Questions du CPA répondues",
+          invoiceSettled: "Honoraires réglés"
+        }
+      },
+      docs: {
+        bankStatements: "Relevés bancaires (3 derniers mois)",
+        receipts: "Reçus et pièces justificatives",
+        priorLedger: "Grand livre antérieur (si disponible)",
+        salesInvoices: "Factures de vente",
+        expenseReceipts: "Reçus de dépenses",
+        creditCard: "Relevés carte de crédit",
+        payrollRegister: "Registre de paie",
+        employeeRoster: "Liste des employés (NAS, adresse, poste)",
+        voidCheque: "Spécimen de chèque / dépôt direct",
+        priorPayStubs: "Talons de paie antérieurs",
+        salesSummary: "Sommaire des ventes de la période",
+        purchaseSummary: "Sommaire des achats",
+        priorFilings: "Déclarations antérieures",
+        yearPayrollSummary: "Sommaire paie annuel",
+        rl1DataQc: "Données Relevé 1 (Québec)",
+        t4Slips: "Feuillets T4 / Relevé 1 finalisés",
+        allBankStatements: "Tous les relevés bancaires (période visée)",
+        allReceipts: "Toutes les pièces justificatives",
+        priorReturns: "Déclarations antérieures",
+        openingBalances: "Balances d'ouverture",
+        vendorList: "Liste fournisseurs / clients",
+        t2125Support: "Revenus et dépenses d'entreprise (T2125)",
+        incomeSlips: "Relevés T4/Relevé 1 reçus",
+        expenseSummary: "Sommaire des dépenses",
+        organizedPackage: "Dossier structuré pour votre CPA"
+      },
+      fields: {
+        periodRange: "Période visée",
+        volumeEstimate: "Volume estimé (transactions/mois)",
+        bankAccounts: "Comptes bancaires à concilier",
+        fiscalYearEnd: "Date de fin d'exercice",
+        employeeCount: "Nombre d'employés",
+        businessNumber: "Numéro d'entreprise (NE/NEQ)",
+        gstAccount: "Compte TPS/TVH",
+        provincialTaxAccount: "Compte taxe provinciale (TVQ/TVP)",
+        reportingPeriod: "Période de déclaration",
+        payFrequency: "Fréquence de paie",
+        provinceWork: "Province de travail des employés",
+        taxYear: "Année fiscale",
+        monthsBehind: "Nombre de mois en retard",
+        lastFiledPeriod: "Dernière période produite",
+        softwareName: "Logiciel comptable",
+        chartOfAccounts: "Plan comptable souhaité",
+        selfEmploymentType: "Type d'activité autonome"
+      },
+      hourlyBookkeeping: {
+        steps: {
+          scope: { title: "Cadrage du mandat", desc: "Précisez la période et le volume avec votre comptable." },
+          work: { title: "Tenue de livres", desc: "Saisie, catégorisation et conciliation en cours." }
+        }
+      },
+      monthly: {
+        steps: {
+          bankAccess: { title: "Accès & paramètres", desc: "Indiquez vos comptes et la fin d'exercice." }
+        }
+      },
+      monthlyMicro: { steps: { cycle: { title: "Cycle mensuel", desc: "Tenue de livres légère et suivi fiscal de base." } } },
+      monthlySmall: { steps: { cycle: { title: "Cycle mensuel", desc: "Conciliation et rapports mensuels." } } },
+      monthlySme: {
+        steps: {
+          payroll: { title: "Mise en place paie", desc: "Configurez la paie pour votre équipe." },
+          cycle: { title: "Cycle complet PME", desc: "Tenue de livres + paie + rapports." }
+        }
+      },
+      gstQst: {
+        steps: {
+          taxNumbers: { title: "Numéros fiscaux", desc: "Confirmez vos numéros TPS/TVH et provinciaux." },
+          filing: { title: "Préparation déclaration", desc: "Compilation et validation avant transmission." }
+        }
+      },
+      payroll: {
+        steps: {
+          info: { title: "Informations paie", desc: "Fréquence, province et effectif." },
+          run: { title: "Traitement paie", desc: "Calcul des salaires et déductions." }
+        }
+      },
+      t4Releve1: {
+        steps: {
+          prep: { title: "Préparation feuillets", desc: "Compilation des données annuelles." },
+          delivery: { title: "Remise des feuillets", desc: "T4 et Relevé 1 disponibles au coffre-fort." }
+        }
+      },
+      catchUp: {
+        steps: {
+          scope: { title: "Évaluation du retard", desc: "Définissez l'étendue de la remise à niveau." },
+          work: { title: "Remise à niveau", desc: "Mise à jour de la comptabilité en retard." }
+        }
+      },
+      softwareSetup: {
+        steps: {
+          choice: { title: "Choix logiciel", desc: "QuickBooks, Sage ou autre — paramètres initiaux." },
+          session: { title: "Session configuration", desc: "Installation et formation avec le support." }
+        }
+      },
+      taxHelpAutonomous: {
+        steps: {
+          organize: { title: "Organisation fiscale", desc: "Structurez vos revenus et dépenses autonomes." },
+          handoff: { title: "Transmission CPA", desc: "Dossier prêt pour votre déclaration." }
+        }
+      }
     },
 
     messaging: {
@@ -437,10 +585,10 @@ export const i18n = {
     pricing: {
       badge: "Tarifs transparents",
       legalTitle: "Transparence & cadre légal",
-      legalSubtitle: "Notre périmètre d'intervention au Québec",
+      legalSubtitle: "Notre périmètre d'intervention au Canada",
       weDo: "Ce que nous réalisons",
       weDo1: "Tenue de livres mensuelle, forfaits et mandats horaires.",
-      weDo2: "Déclarations TPS/TVQ et préparation des feuillets T4 / Relevé 1.",
+      weDo2: "Déclarations taxes fédérales/provinciales et préparation des feuillets T4 / Relevé 1.",
       weDo3: "Traitement de la paie pour 1 à 5 employés.",
       weDo4: "Configuration logicielle (QuickBooks, Sage) et aide impôt travailleur autonome.",
       cpaTitle: "Ce qui est confié à un CPA*",
@@ -464,7 +612,7 @@ export const i18n = {
     invoices: {
       title: "Registre",
       titleAccent: "Factures.",
-      subtitle: "Québec TPS (5 %) & TVQ (9,975 %) certifiées",
+      subtitle: "Taxes canadiennes (TPS · TVH · TVQ · TVP selon province)",
       newInvoice: "Nouvelle facture",
       emitTitle: "Émission de facture",
       emitSubtitle: "Génération avec taxes provinciales intégrées",
@@ -472,10 +620,10 @@ export const i18n = {
       selectClient: "Client destinataire",
       selectClientPlaceholder: "Sélectionner un client…",
       amountHt: "Montant hors taxes ($ HT)",
-      taxPreview: "Aperçu de la taxation du Québec",
+      taxPreview: "Aperçu taxation provinciale",
       subtotal: "Sous-total HT",
-      gst: "TPS fédérale (5 %)",
-      qst: "TVQ provinciale (9,975 %)",
+      gst: "TPS / TVH fédérale",
+      qst: "Taxe provinciale (TVQ, TVP, etc.)",
       totalEstimated: "Total TTC estimé",
       cancel: "Annuler",
       createDraft: "Créer le brouillon",
@@ -565,16 +713,16 @@ export const i18n = {
       subtitle: "Audit global de la facturation et des taxes perçues (Lecture seule)",
       searchPlaceholder: "Rechercher facture, client ou cabinet…",
       statTotalHt: "Total facturé HT",
-      statTotalTps: "Total TPS perçu (5 %)",
-      statTotalTvq: "Total TVQ perçu (9,975 %)",
+      statTotalTps: "Total TPS/TVH perçu",
+      statTotalTvq: "Total taxes provinciales perçues",
       statTotalPaid: "Total encaissé",
       statTotalPending: "Total en attente",
       colNumber: "Numéro",
       colClient: "Client",
       colFirm: "Cabinet comptable",
       colSubtotal: "Sous-total HT",
-      colTps: "TPS",
-      colTvq: "TVQ",
+      colTps: "TPS/TVH",
+      colTvq: "Provincial",
       colTotal: "Total TTC",
       colStatus: "Statut",
       colIssueDate: "Date émission",
@@ -617,7 +765,7 @@ export const i18n = {
       netRevenue: "Revenu net cabinet (95 %)",
       netCollected: "Net encaissé",
       clientPortfolio: "Portefeuille clients",
-      compliantFiles: "Dossiers conformes ARC/RQ",
+      compliantFiles: "Dossiers conformes ARC / provinces",
       workflow: "Flux de travail",
       criticalPriority: "Priorité critique",
       activityFeed: "Flux d'activité du réseau",
@@ -680,7 +828,7 @@ export const i18n = {
       consulting: "Bookkeeping Clerk & Bookkeeping",
       stocks: "Inventory Management",
       title: "Our services & pricing",
-      subtitle: "Transparent rates for bookkeeping, payroll and accounting support in Quebec. Monthly packages, hourly billing or à la carte services — pick what fits your business.",
+      subtitle: "Transparent rates for bookkeeping, payroll and accounting support across Canada. Monthly packages, hourly billing or à la carte services — pick what fits your business.",
       composer: "Request a Quote",
       perMandate: "Indicative rate",
       perHour: "Per hour",
@@ -771,7 +919,7 @@ export const i18n = {
 
     // Hero
     hero: {
-      tagline: "Bookkeeping & Tax Support Services · Quebec",
+      tagline: "Bookkeeping & Tax Support Services · Canada",
       title1: "Your bookkeeping,",
       title2: "clear and paperless.",
       subtitle: "Comptaflow brings together your tax declarations, bookkeeping, and daily finances into a single bookkeeping assistance flow: one portal, fixed rates, zero paperwork.",
@@ -822,7 +970,7 @@ export const i18n = {
       q3: "Are my documents secure?",
       a3: "Yes. Files are encrypted in transit (TLS) and stored in a Canadian-hosted database, accessible only by you and your bookkeeper.",
       q4: "Do displayed prices include taxes?",
-      a4: "No. Rates exclude taxes (5% GST and 9.975% QST in Quebec). A detailed quote is provided before mandate confirmation.",
+      a4: "No. Rates exclude taxes (GST, HST, QST, PST, etc. depending on your province). A detailed quote is provided before mandate confirmation.",
     },
 
     // Cookies
@@ -835,16 +983,16 @@ export const i18n = {
 
     // Footer
     footer: {
-      taxDisclaimer: "Displayed prices exclude taxes (5% GST and 9.975% QST will be added).",
+      taxDisclaimer: "Displayed prices exclude taxes (GST, HST, QST or PST depending on province).",
       privacy: "Privacy Policy (Law 25)",
       terms: "Terms of Service",
       legal: "Legal Notice",
       admin: "Administration",
-      copyright: "© 2026 Comptaflow — Quebec, Canada"
+      copyright: "© 2026 Comptaflow — Canada"
     },
 
     auth: {
-      tagline: "Quebec • Bookkeeping & Accounting Support",
+      tagline: "Canada • Bookkeeping & Accounting Support",
       subtitle: "Highly secure financial and tax management for Canadian entrepreneurs.",
       privateSpace: "Private Portal",
       privateSpaceDesc: "Sign in and access your dashboards",
@@ -867,7 +1015,7 @@ export const i18n = {
       submitRegister: "Create account",
       switchToRegister: "Not registered yet? Open a file",
       switchToLogin: "Already registered? Sign in",
-      footer: "ComptaFlow Portal • Quebec • MMXXVI"
+      footer: "ComptaFlow Portal • Canada • MMXXVI"
     },
 
     portal: {
@@ -915,7 +1063,8 @@ export const i18n = {
         faq: "Security & FAQ",
         support: "Help Center",
         client_messaging: "Contact my bookkeeper",
-        services: "Services & Pricing"
+        services: "Services & Pricing",
+        procedure: "My file path"
       },
       overview: {
         greeting: "Hello,",
@@ -935,7 +1084,7 @@ export const i18n = {
         uploading: "Uploading…",
         uploadHint: "PDF, Image or Excel • Max 4 MB",
         mandateTitle: "Electronic Management Mandate",
-        mandateDesc: "Your bookkeeping and accounting mandate is signed and compliant with Revenu Québec requirements.",
+        mandateDesc: "Your bookkeeping and accounting mandate is signed and compliant with CRA and provincial tax authority requirements.",
         viewMandate: "View Signed Mandate",
         billing: "Billing & Interac",
         upToDate: "Your file is up to date",
@@ -949,6 +1098,7 @@ export const i18n = {
       activeLabel: "Active service",
       confirmed: "Confirmed",
       changeHint: "To change service, contact your bookkeeper via messaging.",
+      viewProcedure: "View my file path",
       chooseLabel: "Choose your service",
       chooseTitle: "Which mandate would you like to open?",
       chooseDesc: "Select the service that matches your needs. A personalized quote will follow validation.",
@@ -971,7 +1121,7 @@ export const i18n = {
       a2: "All data is stored on secure servers in Canada (Canada-Central), in compliance with Canadian privacy laws.",
       q3: "How does the link with my bookkeeper work?",
       a3: "When you upload a document, your bookkeeper is notified. Communication happens via our encrypted direct channel.",
-      q4: "Do you comply with Law 25 (Quebec)?",
+      q4: "Do you comply with Canadian privacy laws (PIPEDA, Quebec Law 25)?",
       a4: "Yes. We have appointed a data protection officer and log every access for full transparency.",
       q5: "Why is there a delay to open a file?",
       a5: "Each new client undergoes manual compliance verification (NEQ/NAS) before tools are activated."
@@ -1043,7 +1193,149 @@ export const i18n = {
       byAppt: "By appointment",
       closed: "Closed",
       secureLine: "Your line is secured with end-to-end encryption.",
-      smsCopied: "Support number copied to clipboard."
+      smsCopied: "Support number copied to clipboard.",
+      liveChatTitle: "Direct conversation",
+      liveChatDesc: "A reply in moments, just like your firm.",
+      chatPlaceholder: "Type your message…",
+      onlineNow: "Online · replying live",
+      typingPrefix: "is typing",
+      chatError: "Brief technical issue — try again or email us."
+    },
+
+    procedure: {
+      tag: "Guided path",
+      title: "Your",
+      titleAccent: "file",
+      subtitle: "Required documents, information and steps through completion — guided by your ComptaFlow team.",
+      noService: "Select a service to view the full path (documents, info, steps).",
+      selectService: "— Select a service —",
+      viewPath: "View path",
+      browseServices: "Browse services",
+      step: "Step",
+      done: "Done",
+      progress: "Progress",
+      nextStep: "Next step",
+      allComplete: "Path complete — your bookkeeper is finalizing the deliverable.",
+      requiredDocs: "Documents",
+      requiredInfo: "Information",
+      optional: "optional",
+      markComplete: "Mark complete",
+      markIncomplete: "Mark incomplete",
+      goToStep: "Go to this step",
+      estimatedDays: "Estimated timeline: {days} business days",
+      cpaNote: "Each step is validated by a CPA in the ComptaFlow network. Tax and accounting calculations are reviewed before any deliverable.",
+      common: {
+        steps: {
+          mandate: { title: "Mandate & profile", desc: "Sign your mandate and complete your profile (province, business)." },
+          documents: { title: "Document upload", desc: "Upload required files to your secure vault." },
+          cpaReview: { title: "CPA review", desc: "Your bookkeeper validates information and answers questions." },
+          delivery: { title: "Closure & billing", desc: "Receive deliverables and settle fees." }
+        },
+        docs: { signedMandate: "Signed mandate" },
+        fields: {
+          profileComplete: "Profile complete",
+          province: "Tax province confirmed",
+          questionsAnswered: "CPA questions answered",
+          invoiceSettled: "Fees settled"
+        }
+      },
+      docs: {
+        bankStatements: "Bank statements (last 3 months)",
+        receipts: "Receipts and supporting documents",
+        priorLedger: "Prior ledger (if available)",
+        salesInvoices: "Sales invoices",
+        expenseReceipts: "Expense receipts",
+        creditCard: "Credit card statements",
+        payrollRegister: "Payroll register",
+        employeeRoster: "Employee list (SIN, address, role)",
+        voidCheque: "Void cheque / direct deposit",
+        priorPayStubs: "Prior pay stubs",
+        salesSummary: "Sales summary for period",
+        purchaseSummary: "Purchase summary",
+        priorFilings: "Prior filings",
+        yearPayrollSummary: "Annual payroll summary",
+        rl1DataQc: "RL-1 data (Quebec)",
+        t4Slips: "Final T4 / RL-1 slips",
+        allBankStatements: "All bank statements (period covered)",
+        allReceipts: "All supporting documents",
+        priorReturns: "Prior returns",
+        openingBalances: "Opening balances",
+        vendorList: "Vendor / customer list",
+        t2125Support: "Business income & expenses (T2125)",
+        incomeSlips: "T4/RL-1 slips received",
+        expenseSummary: "Expense summary",
+        organizedPackage: "Organized package for your CPA"
+      },
+      fields: {
+        periodRange: "Period covered",
+        volumeEstimate: "Estimated volume (transactions/month)",
+        bankAccounts: "Bank accounts to reconcile",
+        fiscalYearEnd: "Fiscal year-end date",
+        employeeCount: "Number of employees",
+        businessNumber: "Business number (BN/NEQ)",
+        gstAccount: "GST/HST account",
+        provincialTaxAccount: "Provincial tax account (QST/PST)",
+        reportingPeriod: "Reporting period",
+        payFrequency: "Pay frequency",
+        provinceWork: "Employees' work province",
+        taxYear: "Tax year",
+        monthsBehind: "Months behind",
+        lastFiledPeriod: "Last filed period",
+        softwareName: "Accounting software",
+        chartOfAccounts: "Chart of accounts",
+        selfEmploymentType: "Self-employment activity type"
+      },
+      hourlyBookkeeping: {
+        steps: {
+          scope: { title: "Scope definition", desc: "Confirm period and volume with your bookkeeper." },
+          work: { title: "Bookkeeping work", desc: "Entry, categorization and reconciliation in progress." }
+        }
+      },
+      monthly: { steps: { bankAccess: { title: "Access & settings", desc: "Provide accounts and fiscal year-end." } } },
+      monthlyMicro: { steps: { cycle: { title: "Monthly cycle", desc: "Light bookkeeping and basic tax follow-up." } } },
+      monthlySmall: { steps: { cycle: { title: "Monthly cycle", desc: "Reconciliation and monthly reports." } } },
+      monthlySme: {
+        steps: {
+          payroll: { title: "Payroll setup", desc: "Configure payroll for your team." },
+          cycle: { title: "Full SME cycle", desc: "Bookkeeping + payroll + reports." }
+        }
+      },
+      gstQst: {
+        steps: {
+          taxNumbers: { title: "Tax numbers", desc: "Confirm GST/HST and provincial numbers." },
+          filing: { title: "Return preparation", desc: "Compile and validate before filing." }
+        }
+      },
+      payroll: {
+        steps: {
+          info: { title: "Payroll information", desc: "Frequency, province and headcount." },
+          run: { title: "Payroll processing", desc: "Salary and deduction calculations." }
+        }
+      },
+      t4Releve1: {
+        steps: {
+          prep: { title: "Slip preparation", desc: "Compile annual payroll data." },
+          delivery: { title: "Slip delivery", desc: "T4 and RL-1 available in vault." }
+        }
+      },
+      catchUp: {
+        steps: {
+          scope: { title: "Backlog assessment", desc: "Define catch-up scope." },
+          work: { title: "Catch-up work", desc: "Updating overdue bookkeeping." }
+        }
+      },
+      softwareSetup: {
+        steps: {
+          choice: { title: "Software choice", desc: "QuickBooks, Sage or other — initial setup." },
+          session: { title: "Setup session", desc: "Installation and training with support." }
+        }
+      },
+      taxHelpAutonomous: {
+        steps: {
+          organize: { title: "Tax organization", desc: "Structure self-employment income and expenses." },
+          handoff: { title: "CPA handoff", desc: "File ready for your tax return." }
+        }
+      }
     },
 
     messaging: {
@@ -1085,7 +1377,7 @@ export const i18n = {
     pricing: {
       badge: "Transparent pricing",
       legalTitle: "Transparency & legal scope",
-      legalSubtitle: "Our scope of practice in Quebec",
+      legalSubtitle: "Our scope of practice in Canada",
       weDo: "What we do",
       weDo1: "Monthly bookkeeping, packages and hourly mandates.",
       weDo2: "GST/QST filings and T4 / Relevé 1 preparation.",
@@ -1112,7 +1404,7 @@ export const i18n = {
     invoices: {
       title: "Invoice",
       titleAccent: "Registry.",
-      subtitle: "Quebec GST (5%) & QST (9.975%) certified",
+      subtitle: "Canadian taxes (GST · HST · QST · PST by province)",
       newInvoice: "New invoice",
       emitTitle: "Issue invoice",
       emitSubtitle: "Generation with provincial taxes included",
@@ -1120,7 +1412,7 @@ export const i18n = {
       selectClient: "Recipient client",
       selectClientPlaceholder: "Select a client…",
       amountHt: "Pre-tax amount ($ excl.)",
-      taxPreview: "Quebec tax preview",
+      taxPreview: "Provincial tax preview",
       subtotal: "Subtotal excl. tax",
       gst: "Federal GST (5%)",
       qst: "Provincial QST (9.975%)",
@@ -1213,16 +1505,16 @@ export const i18n = {
       subtitle: "Global billing and tax collection audit (read-only)",
       searchPlaceholder: "Search invoice, client or firm…",
       statTotalHt: "Total billed excl. tax",
-      statTotalTps: "Total GST collected (5%)",
-      statTotalTvq: "Total QST collected (9.975%)",
+      statTotalTps: "Total GST/HST collected",
+      statTotalTvq: "Total provincial tax collected",
       statTotalPaid: "Total collected",
       statTotalPending: "Total pending",
       colNumber: "Number",
       colClient: "Client",
       colFirm: "Accounting firm",
       colSubtotal: "Subtotal excl. tax",
-      colTps: "GST",
-      colTvq: "QST",
+      colTps: "GST/HST",
+      colTvq: "Provincial",
       colTotal: "Total incl. tax",
       colStatus: "Status",
       colIssueDate: "Issue date",
@@ -1265,7 +1557,7 @@ export const i18n = {
       netRevenue: "Net firm revenue (95%)",
       netCollected: "Net collected",
       clientPortfolio: "Client portfolio",
-      compliantFiles: "CRA/RQ compliant files",
+      compliantFiles: "CRA / provincial compliant files",
       workflow: "Workflow",
       criticalPriority: "Critical priority",
       activityFeed: "Network activity feed",
@@ -1357,7 +1649,7 @@ export const i18n = {
         monthlyMicro: { name: "Micro-entreprise", desc: "Peu de transactions.", price: "150–250 $ / mois" },
         monthlySmall: { name: "Petite entreprise", desc: "Volume moyen.", price: "300–500 $ / mois" },
         monthlySme: { name: "PME + paie", desc: "Plusieurs employés.", price: "500–800+ $ / mois" },
-        gstQst: { name: "TPS/TVQ", desc: "Déclarations taxes.", price: "35–60 $ / décl." },
+        gstQst: { name: "Taxes (TPS/TVH/TVP)", desc: "Déclarations fédérales et provinciales.", price: "35–60 $ / décl." },
         payroll: { name: "Paie (1–5 emp.)", desc: "Traitement paie.", price: "50–80 $ / mois" },
         t4Releve1: { name: "T4 / Relevé 1", desc: "Feuillets fin d'année.", price: "50 $ + 25 $ / emp." },
         catchUp: { name: "Compta en retard", desc: "Mise à jour.", price: "50–70 $ / h" },
@@ -1382,7 +1674,7 @@ export const i18n = {
       mobileOpen: "بدء ملفي"
     },
     hero: {
-      tagline: "خدمات مسك الدفاتر والمساعدة المحاسبية · كيبك",
+      tagline: "خدمات مسك الدفاتر والمساعدة المحاسبية · كندا",
       title1: "مسك الدفاتر الخاص بك،",
       title2: "واضح وخالي من الأوراق.",
       subtitle: "يجمع كومبتا فلو مسك الدفاتر وإقرارات ضريبة الدخل والضرائب في تدفق واحد مساعدة محاسبية.",
@@ -1442,7 +1734,7 @@ export const i18n = {
       terms: "شروط الخدمة",
       legal: "الإشعارات القانونية",
       admin: "الإدارة",
-      copyright: "© 2026 كومبتا فلو — كيبك، كندا"
+      copyright: "© 2026 كومبتا فلو — كندا"
     },
 
     landing: {
@@ -1451,7 +1743,7 @@ export const i18n = {
     },
 
     auth: {
-      tagline: "كيبك · مساعدة محاسبية ومسك دفاتر",
+      tagline: "كندا · مساعدة محاسبية ومسك دفاتر",
       subtitle: "نظام إدارة مالية وضريبية آمن لرواد الأعمال الكنديين.",
       privateSpace: "البوابة الخاصة",
       privateSpaceDesc: "تسجيل الدخول والوصول إلى لوحات التحكم",
@@ -1461,7 +1753,7 @@ export const i18n = {
       registerTitle: "ملف جديد.",
       submitLogin: "تسجيل الدخول",
       submitRegister: "إنشاء الحساب",
-      footer: "بوابة ComptaFlow · كيبك · MMXXVI"
+      footer: "بوابة ComptaFlow · كندا · MMXXVI"
     },
 
     portal: {
@@ -1541,7 +1833,13 @@ export const i18n = {
       byAppt: "بموعد",
       closed: "مغلق",
       secureLine: "خطك مؤمَّن بتشفير من طرف إلى طرف.",
-      smsCopied: "تم نسخ رقم المساعدة."
+      smsCopied: "تم نسخ رقم المساعدة.",
+      liveChatTitle: "محادثة مباشرة",
+      liveChatDesc: "رد خلال لحظات، كما مع مكتبك.",
+      chatPlaceholder: "اكتب رسالتك…",
+      onlineNow: "متصل · يرد مباشرة",
+      typingPrefix: "يكتب",
+      chatError: "عطل تقني بسيط — أعد المحاولة أو راسلنا بالبريد."
     },
 
     messaging: {
@@ -1583,10 +1881,10 @@ export const i18n = {
     pricing: {
       badge: "أسعار شفافة",
       legalTitle: "الشفافية والإطار القانوني",
-      legalSubtitle: "نطاق تدخلنا في كيبك",
+      legalSubtitle: "نطاق تدخلنا في كندا",
       weDo: "ما نقوم به",
       weDo1: "مسك دفاتر شهري، باقات وعقود بالساعة.",
-      weDo2: "إقرارات TPS/TVQ وإعداد T4 / Relevé 1.",
+      weDo2: "إقرارات الضرائب الفدرالية/الإقليمية وإعداد T4 / Relevé 1.",
       weDo3: "معالجة رواتب لـ 1 إلى 5 موظفين.",
       weDo4: "إعداد البرمجيات (QuickBooks، Sage) ومساعدة ضريبة العامل المستقل.",
       cpaTitle: "ما يُسند إلى CPA*",
@@ -1610,7 +1908,7 @@ export const i18n = {
     invoices: {
       title: "سجل",
       titleAccent: "الفواتير.",
-      subtitle: "كيبك TPS (5%) و TVQ (9.975%) معتمدة",
+      subtitle: "ضرائب كندية (TPS · TVH · TVQ · TVP حسب المقاطعة)",
       newInvoice: "فاتورة جديدة",
       emitTitle: "إصدار فاتورة",
       emitSubtitle: "إنشاء مع الضرائب الإقليمية المدمجة",
@@ -1618,10 +1916,10 @@ export const i18n = {
       selectClient: "العميل المستلم",
       selectClientPlaceholder: "اختر عميلاً…",
       amountHt: "المبلغ قبل الضريبة ($ HT)",
-      taxPreview: "معاينة ضرائب كيبك",
+      taxPreview: "معاينة الضريبة الإقليمية",
       subtotal: "المجموع الفرعي HT",
-      gst: "TPS فيدرالية (5%)",
-      qst: "TVQ إقليمية (9.975%)",
+      gst: "TPS / TVH فيدرالية",
+      qst: "ضريبة إقليمية (TVQ, TVP, إلخ)",
       totalEstimated: "الإجمالي التقديري شامل الضريبة",
       cancel: "إلغاء",
       createDraft: "إنشاء مسودة",
@@ -1711,16 +2009,16 @@ export const i18n = {
       subtitle: "تدقيق الفوترة العالمية والضرائب المحصلة (للقراءة فقط)",
       searchPlaceholder: "بحث عن فاتورة أو عميل أو مكتب…",
       statTotalHt: "إجمالي الفوترة HT",
-      statTotalTps: "إجمالي TPS المحصل (5%)",
-      statTotalTvq: "إجمالي TVQ المحصل (9.975%)",
+      statTotalTps: "إجمالي TPS/TVH المحصل",
+      statTotalTvq: "إجمالي الضرائب الإقليمية المحصلة",
       statTotalPaid: "إجمالي المحصل",
       statTotalPending: "إجمالي المعلق",
       colNumber: "الرقم",
       colClient: "العميل",
       colFirm: "مكتب المحاسبة",
       colSubtotal: "المجموع الفرعي HT",
-      colTps: "TPS",
-      colTvq: "TVQ",
+      colTps: "TPS/TVH",
+      colTvq: "إقليمي",
       colTotal: "الإجمالي شامل الضريبة",
       colStatus: "الحالة",
       colIssueDate: "تاريخ الإصدار",
@@ -1763,7 +2061,7 @@ export const i18n = {
       netRevenue: "صافي إيرادات المكتب (95%)",
       netCollected: "صافي المحصل",
       clientPortfolio: "محفظة العملاء",
-      compliantFiles: "ملفات متوافقة ARC/RQ",
+      compliantFiles: "ملفات متوافقة ARC / المقاطعات",
       workflow: "سير العمل",
       criticalPriority: "أولوية حرجة",
       activityFeed: "تدفق نشاط الشبكة",

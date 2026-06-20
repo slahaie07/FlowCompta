@@ -189,7 +189,7 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
             </div>
             
             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest justify-center">
-              <ShieldCheck size={14} className="text-gold" /> Certifié conforme Loi 25 & Chiffrement de bout en bout
+              <ShieldCheck size={14} className="text-gold" /> Certifié conforme PIPEDA, Loi 25 (QC) & chiffrement de bout en bout
             </div>
           </Card>
 

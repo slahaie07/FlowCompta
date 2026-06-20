@@ -3,7 +3,7 @@
 Ce document est votre manuel de guerre pour transformer la plateforme Comptaflow en un succès commercial dominant au Québec.
 
 ## 🏁 Phase 1 : Lancement (Jours 1-7)
-1. **Validation Sociale** : Publiez votre lien [https://agy-platform.vercel.app](https://agy-platform.vercel.app) sur LinkedIn et Facebook.
+1. **Validation Sociale** : Publiez votre lien [https://compta-flow.net](https://compta-flow.net) sur LinkedIn et Facebook.
 2. **Le Premier Client** : Utilisez le mode **Virement Interac** pour tester le flux complet sans frais Stripe.
 3. **Optimisation SEO** : J'ai déjà injecté les balises "Comptabilité Québec", "Impôts", "Tenue de livres". Le site est prêt pour Google.
 
