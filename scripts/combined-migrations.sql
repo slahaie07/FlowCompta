@@ -6,7 +6,12 @@
 -- Safe to re-run (CREATE OR REPLACE / DROP IF EXISTS).
 -- =============================================================================
 
--- ─── 0. Fix RLS recursion (42P17) — REQUIRED for partner picker ──────────────
+-- ─── 0. Drop legacy recursive policy (500 on partner picker) ─────────────────
+
+DROP POLICY IF EXISTS "Admin view profiles" ON public.profiles;
+DROP POLICY IF EXISTS "p1" ON public.profiles;
+
+-- ─── 0b. Fix RLS recursion (42P17) — REQUIRED for partner picker ────────────
 
 CREATE OR REPLACE FUNCTION public.get_user_role()
 RETURNS TEXT
@@ -18,6 +23,11 @@ SET row_security = off
 AS $$
   SELECT role FROM public.profiles WHERE id = auth.uid();
 $$;
+
+DROP POLICY IF EXISTS "Super admin view all profiles" ON public.profiles;
+CREATE POLICY "Super admin view all profiles" ON public.profiles
+FOR SELECT TO authenticated
+USING (public.get_user_role() = 'super_admin');
 
 CREATE OR REPLACE FUNCTION public.get_sub_admin_id()
 RETURNS UUID
