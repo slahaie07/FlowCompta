@@ -73,6 +73,8 @@ Redémarrez n8n après modification : `docker compose restart n8n`
 
 Puis **activer** chaque workflow dans l'éditeur n8n.
 
+**Guide détaillé IMAP + ADMIN_SECRET :** `docs/N8N_CONFIGURATION.md`
+
 Voir aussi `AUTOMATED_RECONCILIATION.md`.
 
 ### Arrêter n8n
