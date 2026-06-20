@@ -8,12 +8,19 @@ export const PORTAL_SLUG_BY_ROLE: Record<PortalRole, string> = {
   super_admin: 'owner',
 };
 
+/** Alternate URL slugs → canonical role (e.g. /portal/sub-admin → sub_admin) */
+export const PORTAL_SLUG_ALIASES: Record<string, PortalRole> = {
+  'sub-admin': 'sub_admin',
+  'super-admin': 'super_admin',
+};
+
 export function getPortalSlug(role: PortalRole): string {
   return PORTAL_SLUG_BY_ROLE[role];
 }
 
 export function roleFromPortalSlug(slug: string | undefined): PortalRole | null {
   if (!slug) return null;
+  if (slug in PORTAL_SLUG_ALIASES) return PORTAL_SLUG_ALIASES[slug];
   const match = (Object.entries(PORTAL_SLUG_BY_ROLE) as [PortalRole, string][]).find(
     ([, portalSlug]) => portalSlug === slug
   );

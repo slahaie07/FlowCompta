@@ -9,7 +9,7 @@ import { generateContract } from '../../lib/contractEngine';
 import { useLanguage } from '../../hooks/useLanguage';
 import { PortalNav } from './PortalNav';
 import { PortalRoutes } from './PortalRoutes';
-import { getPortalNav } from '../config';
+import { getPortalNav, isPathAllowedForRole } from '../config';
 import { getPortalBasePath, getActiveSegment } from '../config/paths';
 import type { PortalShellProps, PortalRole, PortalRouteContext } from '../types';
 
@@ -57,6 +57,7 @@ export function PortalShell({
   }, []);
 
   const handleNavigate = (path: string) => {
+    if (!isPathAllowedForRole(path, role)) return;
     navigate(`${portalBasePath}/${path}`);
     if (!isDesktop) setIsSidebarOpen(false);
   };

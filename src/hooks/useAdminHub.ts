@@ -83,32 +83,6 @@ export function useAdminHub() {
       }
       const { count: pendingCount } = await pendingQuery;
 
-      // 4. Recent transactions — fetch then join profiles separately
-      const { data: recentTx } = await supabase
-        .from('transactions')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      const txList = recentTx || [];
-      const userIds = [...new Set(txList.map((t: any) => t.user_id).filter(Boolean))];
-
-      let profileMap: Record<string, string> = {};
-      if (userIds.length > 0) {
-        const { data: txProfiles } = await supabase
-          .from('profiles')
-          .select('id, full_name')
-          .in('id', userIds);
-        profileMap = Object.fromEntries((txProfiles || []).map((p: any) => [p.id, p.full_name]));
-      }
-
-      const enrichedTx = txList.map((t: any) => ({
-        ...t,
-        description: t.description || t.label || '',
-        date: t.date || new Date(t.created_at).getTime(),
-        profiles: { display_name: profileMap[t.user_id] || 'Client' },
-      }));
-
       // 5. Monthly revenue from paid invoices (last 6 months)
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
@@ -137,6 +111,54 @@ export function useAdminHub() {
         }
       });
       const monthlyRevenue = Object.entries(monthMap).map(([month, revenue]) => ({ month, revenue }));
+
+      // 4. Recent transactions — scoped to cabinet clients for sub_admin
+      let txQuery = supabase
+        .from('transactions')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (userRole === 'sub_admin') {
+        const { data: myClients } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('role', 'client')
+          .eq('sub_admin_id', uid);
+        const clientIds = (myClients || []).map((c) => c.id);
+        if (clientIds.length === 0) {
+          setState({
+            totalRevenue: total,
+            pendingTasks: pendingCount || 0,
+            activeClients: clientCount || 0,
+            globalTransactions: [],
+            monthlyRevenue,
+          });
+          return;
+        }
+        txQuery = txQuery.in('user_id', clientIds);
+      }
+
+      const { data: recentTx } = await txQuery;
+
+      const txList = recentTx || [];
+      const userIds = [...new Set(txList.map((t: any) => t.user_id).filter(Boolean))];
+
+      let profileMap: Record<string, string> = {};
+      if (userIds.length > 0) {
+        const { data: txProfiles } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .in('id', userIds);
+        profileMap = Object.fromEntries((txProfiles || []).map((p: any) => [p.id, p.full_name]));
+      }
+
+      const enrichedTx = txList.map((t: any) => ({
+        ...t,
+        description: t.description || t.label || '',
+        date: t.date || new Date(t.created_at).getTime(),
+        profiles: { display_name: profileMap[t.user_id] || 'Client' },
+      }));
 
       setState({
         totalRevenue: total,

@@ -4,6 +4,7 @@ import {
   getPortalPath,
   getActiveSegment,
   legacyDashboardToPortalPath,
+  roleFromPortalSlug,
 } from '../portals/config/paths';
 import { isPathAllowedForRole } from '../portals/config/navigation';
 
@@ -27,6 +28,11 @@ describe('portal paths', () => {
     expect(legacyDashboardToPortalPath('/dashboard/sales_ledger', 'sub_admin')).toBe(
       '/portal/admin/sales_ledger'
     );
+  });
+
+  it('maps legacy portal slug aliases to roles', () => {
+    expect(roleFromPortalSlug('sub-admin')).toBe('sub_admin');
+    expect(roleFromPortalSlug('super-admin')).toBe('super_admin');
   });
 
   it('allows production routes per role', () => {

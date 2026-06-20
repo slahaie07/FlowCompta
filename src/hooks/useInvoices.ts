@@ -111,9 +111,26 @@ export function useInvoices(userId?: string, isAdmin: boolean = false) {
       const currentUserId = sess?.session?.user?.id;
       if (!currentUserId) throw new Error("Non authentifié.");
 
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', currentUserId)
+        .single();
+      const userRole = prof?.role || 'client';
+
+      let subAdminId = currentUserId;
+      if (userRole === 'super_admin') {
+        const { data: clientProf } = await supabase
+          .from('profiles')
+          .select('sub_admin_id')
+          .eq('id', targetUserId)
+          .single();
+        subAdminId = clientProf?.sub_admin_id || currentUserId;
+      }
+
       const { error } = await supabase.from('invoices').insert({
         user_id: currentUserId,
-        sub_admin_id: currentUserId,
+        sub_admin_id: subAdminId,
         client_id: targetUserId,
         numero: data.number,
         montant_ht: data.amount,

@@ -1,68 +1,12 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../../../lib/supabase';
 import { Card } from '../../../components/ui/Card';
-import { Users, Shield, FileText, DollarSign } from 'lucide-react';
+import { Users, Shield, FileText, DollarSign, Clock, MapPin, Tags } from 'lucide-react';
 import { OrganicLoader } from '../../../components/ui/OrganicLoader';
 import { useLanguage } from '../../../hooks/useLanguage';
+import { useSuperAdminLiveStats } from '../../../hooks/useSuperAdminLiveStats';
 
 export function SuperAdminOverview() {
   const { t } = useLanguage();
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    subAdminsCount: 0,
-    clientsCount: 0,
-    totalInvoices: 0,
-    totalRevenue: 0
-  });
-  const [subAdmins, setSubAdmins] = useState<any[]>([]);
-
-  useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      try {
-        const { data: profiles, error: pError } = await supabase
-          .from('profiles')
-          .select('id, role, full_name, email, created_at');
-        if (pError) throw pError;
-
-        const subAdminsList = (profiles || []).filter((p: any) => p.role === 'sub_admin');
-        const clientsList = (profiles || []).filter((p: any) => p.role === 'client');
-
-        const { data: invoices, error: invError } = await supabase
-          .from('invoices')
-          .select('montant_total, statut, sub_admin_id');
-        if (invError) throw invError;
-
-        const totalInvs = invoices?.length || 0;
-        const totalRev = (invoices || [])
-          .filter((i: any) => i.statut === 'payee')
-          .reduce((sum: number, i: any) => sum + parseFloat(i.montant_total || 0), 0);
-
-        setStats({
-          subAdminsCount: subAdminsList.length,
-          clientsCount: clientsList.length,
-          totalInvoices: totalInvs,
-          totalRevenue: totalRev
-        });
-
-        const mappedSubAdmins = subAdminsList.map((sa: any) => {
-          const saClients = clientsList.filter((c: any) => c.sub_admin_id === sa.id).length;
-          const saRevenue = (invoices || [])
-            .filter((i: any) => i.sub_admin_id === sa.id && i.statut === 'payee')
-            .reduce((sum: number, i: any) => sum + parseFloat(i.montant_total || 0), 0);
-
-          return { ...sa, clientsCount: saClients, revenue: saRevenue };
-        });
-
-        setSubAdmins(mappedSubAdmins);
-      } catch (err) {
-        console.error("Erreur de chargement des stats SuperAdmin :", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, []);
+  const { stats, loading } = useSuperAdminLiveStats(true);
 
   if (loading) {
     return (
@@ -72,6 +16,13 @@ export function SuperAdminOverview() {
       </div>
     );
   }
+
+  const provinceEntries = (Object.entries(stats.byProvince) as [string, number][]).sort(
+    (a, b) => b[1] - a[1]
+  );
+  const serviceEntries = (Object.entries(stats.byService) as [string, number][]).sort(
+    (a, b) => b[1] - a[1]
+  );
 
   return (
     <div className="space-y-10">
@@ -85,9 +36,13 @@ export function SuperAdminOverview() {
             <p className="text-slate-500 text-xs font-black uppercase tracking-[0.4em]">{t('superAdmin.subtitle')}</p>
           </div>
         </div>
+        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-400/80 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          {t('superAdmin.live')}
+        </span>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
         <Card className="p-8 space-y-4 premium-border-gold relative overflow-hidden group" glow="gold">
           <div className="flex items-center gap-3 text-slate-500 text-xs font-black uppercase tracking-[0.2em]">
             <Shield size={16} className="text-gold" /> {t('superAdmin.subAdmins')}
@@ -111,6 +66,13 @@ export function SuperAdminOverview() {
 
         <Card className="p-8 space-y-4 glass-card relative overflow-hidden group">
           <div className="flex items-center gap-3 text-slate-500 text-xs font-black uppercase tracking-[0.2em]">
+            <Clock size={16} className="text-amber-400" /> {t('superAdmin.pendingInvoices')}
+          </div>
+          <div className="text-4xl font-serif font-bold text-ivoire">{stats.pendingInvoices}</div>
+        </Card>
+
+        <Card className="p-8 space-y-4 glass-card relative overflow-hidden group">
+          <div className="flex items-center gap-3 text-slate-500 text-xs font-black uppercase tracking-[0.2em]">
             <DollarSign size={16} className="text-gold" /> {t('superAdmin.paidVolume')}
           </div>
           <div className="text-4xl font-serif font-bold text-ivoire">
@@ -125,6 +87,44 @@ export function SuperAdminOverview() {
           <div className="text-4xl font-serif font-bold text-gold">
             {(stats.totalRevenue * 0.05).toLocaleString('fr-CA', { style: 'currency', currency: 'CAD' })}
           </div>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card className="p-8 glass-card space-y-6">
+          <h2 className="text-lg font-serif font-bold text-ivoire flex items-center gap-2">
+            <MapPin size={18} className="text-gold" /> {t('superAdmin.byProvince')}
+          </h2>
+          {provinceEntries.length === 0 ? (
+            <p className="text-slate-500 italic text-sm">{t('superAdmin.noBreakdown')}</p>
+          ) : (
+            <ul className="space-y-3">
+              {provinceEntries.map(([province, count]) => (
+                <li key={province} className="flex justify-between text-sm">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider">{province}</span>
+                  <span className="text-ivoire font-serif font-bold">{count}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
+        <Card className="p-8 glass-card space-y-6">
+          <h2 className="text-lg font-serif font-bold text-ivoire flex items-center gap-2">
+            <Tags size={18} className="text-gold" /> {t('superAdmin.byService')}
+          </h2>
+          {serviceEntries.length === 0 ? (
+            <p className="text-slate-500 italic text-sm">{t('superAdmin.noBreakdown')}</p>
+          ) : (
+            <ul className="space-y-3">
+              {serviceEntries.map(([service, count]) => (
+                <li key={service} className="flex justify-between text-sm">
+                  <span className="text-slate-400 font-mono text-xs">{service}</span>
+                  <span className="text-ivoire font-serif font-bold">{count}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </Card>
       </div>
 
@@ -145,8 +145,8 @@ export function SuperAdminOverview() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {subAdmins.length > 0 ? (
-                subAdmins.map((sa) => (
+              {stats.partners.length > 0 ? (
+                stats.partners.map((sa) => (
                   <tr key={sa.id} className="hover:bg-white/[0.01] transition-colors">
                     <td className="px-8 py-6 font-serif font-bold text-ivoire text-base">{sa.full_name || t('superAdmin.noName')}</td>
                     <td className="px-8 py-6 text-slate-400 font-mono text-xs">{sa.email}</td>
