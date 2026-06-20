@@ -1,33 +1,39 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+
+dotenv.config({ path: '.env.local' });
 dotenv.config();
 
-const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const email = process.env.ADMIN_EMAIL || '';
+const password = process.env.ADMIN_PASSWORD || '';
+
+if (!supabaseUrl || !serviceRoleKey || !email || !password) {
+  console.error('❌ Requis: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, ADMIN_EMAIL, ADMIN_PASSWORD dans .env.local');
+  process.exit(1);
+}
+
+const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
 
 async function setupAdmin() {
-  const email = 's.lahaie07@gmail.com';
-  const password = 'Maison-139';
+  console.log(`🚀 Configuration admin pour : ${email}`);
 
-  console.log(`🚀 Tentative de configuration Admin pour : ${email}`);
-
-  // 1. Création ou récupération de l'utilisateur dans Auth
   const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
-    user_metadata: { display_name: 'Samuel L. (Architecte)' }
+    user_metadata: { display_name: 'Super Admin' },
   });
 
   let userId = '';
 
   if (authError) {
     if (authError.message.includes('already registered')) {
-      console.log('ℹ️ L\'utilisateur existe déjà dans Auth, récupération de l\'ID...');
-      const { data: users } = await supabaseAdmin.auth.admin.listUsers() as any;
-      const existingUser = users?.users?.find((u: any) => u.email === email);
+      const { data: users } = await supabaseAdmin.auth.admin.listUsers();
+      const existingUser = users?.users?.find((u: { email?: string; id: string }) => u.email === email);
       userId = existingUser?.id || '';
     } else {
       console.error('❌ Erreur Auth:', authError.message);
@@ -35,25 +41,22 @@ async function setupAdmin() {
     }
   } else {
     userId = authUser.user.id;
-    console.log('✅ Utilisateur créé avec succès.');
+    console.log('✅ Utilisateur créé.');
   }
 
   if (userId) {
-    // 2. Forcer le rôle Admin dans la table profiles
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .upsert({
-        id: userId,
-        email: email,
-        display_name: 'Samuel L. (Architecte)',
-        role: 'admin',
-        status: 'active'
-      });
+    const { error: profileError } = await supabaseAdmin.from('profiles').upsert({
+      id: userId,
+      email,
+      display_name: 'Super Admin',
+      role: 'super_admin',
+      status: 'active',
+    });
 
     if (profileError) {
       console.error('❌ Erreur Profile:', profileError.message);
     } else {
-      console.log(`🏆 Succès ! Le compte ${email} est désormais ADMINISTRATEUR SUPRÊME.`);
+      console.log(`🏆 Compte ${email} configuré en super_admin.`);
     }
   }
 }
