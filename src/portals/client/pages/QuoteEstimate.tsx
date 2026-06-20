@@ -9,39 +9,31 @@ import type { PortalRole } from '../../types';
 
 function invoiceRouteForRole(role: PortalRole): string {
   if (role === 'super_admin') return 'super_invoices';
-  if (role === 'sub_admin') return 'invoices';
-  return 'overview';
+  return 'invoices';
 }
 
+/** Calculateur réservé aux comptables (sub_admin) et super admin. */
 export function QuoteEstimate() {
   const [searchParams] = useSearchParams();
   const portalNavigate = usePortalNavigate();
   const { userData } = useAuth();
   const { t } = useLanguage();
   const role = (userData?.role ?? 'client') as PortalRole;
-  const isStaff = role === 'sub_admin' || role === 'super_admin';
 
   const serviceFromUrl = searchParams.get('service');
-  const selectedFromProfile = userData?.selectedServiceId;
   const initialServiceId: ServiceId | undefined = isServiceId(serviceFromUrl)
     ? serviceFromUrl
-    : isServiceId(selectedFromProfile)
-      ? selectedFromProfile
-      : undefined;
+    : undefined;
 
   const handleContinue = (_serviceId: ServiceId) => {
-    if (isStaff) {
-      toast.success(t('pricingQuestionnaire.staff.toastReady'));
-      portalNavigate(invoiceRouteForRole(role));
-      return;
-    }
-    portalNavigate('overview');
+    toast.success(t('pricingQuestionnaire.staff.toastReady'));
+    portalNavigate(invoiceRouteForRole(role));
   };
 
   return (
     <div className="py-10 px-2">
       <PricingQuestionnaire
-        variant={isStaff ? 'staff' : 'client'}
+        variant="staff"
         initialServiceId={initialServiceId}
         onContinue={handleContinue}
       />

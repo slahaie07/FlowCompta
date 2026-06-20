@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, CheckCircle, Calculator } from 'lucide-react';
+import { ChevronDown, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -88,19 +88,9 @@ export function ServiceSelector({ userData, onSaved }: ServiceSelectorProps) {
         <p className="text-xs text-slate-500 italic">
           {translate('serviceSelector.changeHint')}
         </p>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            variant="secondary"
-            className="flex-1"
-            onClick={() => navigate(`${portalPath('quote')}?service=${selectedService.id}`)}
-          >
-            <Calculator size={16} className="mr-2" />
-            {translate('serviceSelector.getEstimate')}
-          </Button>
-          <Button variant="secondary" className="flex-1" onClick={() => navigate(portalPath('procedure'))}>
-            {translate('serviceSelector.viewProcedure')}
-          </Button>
-        </div>
+        <Button variant="secondary" className="w-full" onClick={() => navigate(portalPath('procedure'))}>
+          {translate('serviceSelector.viewProcedure')}
+        </Button>
       </Card>
     );
   }
@@ -155,18 +145,6 @@ export function ServiceSelector({ userData, onSaved }: ServiceSelectorProps) {
           </p>
         </div>
       )}
-
-      <Button
-        variant="secondary"
-        className="w-full h-11 gap-2"
-        onClick={() => {
-          const quotePath = portalPath('quote');
-          const query = selected ? `?service=${selected}` : '';
-          navigate(`${quotePath}${query}`);
-        }}
-      >
-        <Calculator size={16} /> {translate('serviceSelector.getEstimate')}
-      </Button>
 
       <Button variant="gold" className="w-full h-12" onClick={handleSave} isLoading={saving}>
         {translate('serviceSelector.confirm')}

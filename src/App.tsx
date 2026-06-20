@@ -16,7 +16,6 @@ import { Terms } from './components/common/Terms';
 import { Legal } from './components/common/Legal';
 import { Cookies } from './components/common/Cookies';
 import { RegionalLanding } from './components/common/RegionalLanding';
-import { EstimatePage } from './components/common/EstimatePage';
 import { LegalCookieBanner } from './components/common/LegalCookieBanner';
 import { OrganicLoader } from './components/ui/OrganicLoader';
 import { CanadaNetworkProvider } from './context/CanadaNetworkProvider';
@@ -174,7 +173,6 @@ function AppContent() {
       <Route path="/legal" element={<Legal />} />
       <Route path="/cookies" element={<Cookies />} />
       <Route path="/ca/:slug" element={<RegionalLanding />} />
-      <Route path="/estimate" element={<EstimatePage />} />
       <Route path="/showcase" element={<Showcase />} />
 
       <Route path="/auth/callback" element={<AuthCallback />} />

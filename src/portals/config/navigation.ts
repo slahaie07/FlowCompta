@@ -22,7 +22,6 @@ export const CLIENT_PORTAL_NAV: PortalNavSection[] = [
     sectionKey: 'workspace',
     items: [
       { path: 'overview', labelKey: 'overview', icon: LayoutDashboard },
-      { path: 'quote', labelKey: 'quote', icon: Calculator },
       { path: 'services', labelKey: 'services', icon: Tags },
       { path: 'procedure', labelKey: 'procedure', icon: ClipboardList },
     ],

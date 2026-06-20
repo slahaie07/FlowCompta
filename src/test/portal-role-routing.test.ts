@@ -24,6 +24,12 @@ describe('portal role routing', () => {
     expect(isPathAllowedForRole('service_reports', 'client')).toBe(false);
   });
 
+  it('restricts quote calculator to admin and super admin only', () => {
+    expect(isPathAllowedForRole('quote', 'client')).toBe(false);
+    expect(isPathAllowedForRole('quote', 'sub_admin')).toBe(true);
+    expect(isPathAllowedForRole('quote', 'super_admin')).toBe(true);
+  });
+
   it('allows super_admin network routes only for super_admin', () => {
     for (const path of ['super_overview', 'super_subadmins', 'super_clients', 'super_invoices']) {
       expect(isPathAllowedForRole(path, 'super_admin')).toBe(true);

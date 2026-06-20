@@ -52,7 +52,7 @@ export function ServicesCatalogSection({ t, compact = false }: ServicesCatalogSe
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.05 }}
                   className="group py-6 md:py-8 border-b border-white/10 flex flex-col md:flex-row md:items-center gap-6 cursor-pointer hover:bg-gold/[0.03] transition-colors px-4 -mx-4 rounded-lg"
-                  onClick={() => navigate(`/estimate?service=${svc.id}`)}
+                  onClick={() => navigate('/login?next=/onboarding&register=1')}
                 >
                   <span className="text-slate-500 font-serif text-sm tracking-widest shrink-0">
                     {svc.code}

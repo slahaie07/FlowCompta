@@ -44,7 +44,7 @@ export const PORTAL_ROUTES: PortalRouteDefinition[] = [
   },
   {
     path: 'quote',
-    roles: ['client', 'sub_admin', 'super_admin'],
+    roles: ['sub_admin', 'super_admin'],
     render: () => <LazyQuoteEstimate />,
   },
   {
