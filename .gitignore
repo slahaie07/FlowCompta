@@ -12,6 +12,7 @@ coverage/
 .env*
 !.env.example
 .vercel
+vercel_env*.txt
 .secrets.local.txt
 
 # Local command outputs (debug)
@@ -22,7 +23,7 @@ go-live-report.txt
 deploy-meta.json
 test-run.log
 
-# Artefacts locaux / binaires — ne pas versionner
+# Artefacts locaux / binaires â€” ne pas versionner
 backups/
 src/_archive/
 local_db.json
