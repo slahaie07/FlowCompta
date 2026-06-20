@@ -145,7 +145,7 @@ const sendSupremeEmail = async (to: string, subject: string, html: string) => {
 
 app.post('/api/setup-admin', async (req, res) => {
   const { secret } = req.body;
-  if (secret !== 'Maison-139') {
+  if (!ADMIN_SECRET || secret !== ADMIN_SECRET) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
