@@ -93,6 +93,30 @@ function AppContent() {
     }
 
     await refreshProfile();
+
+    try {
+      await fetch('/api/webhook/onboarding-complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          email: data.email || user.email,
+          displayName: data.displayName,
+          province: data.province,
+          language: data.language || 'fr',
+        }),
+      });
+    } catch {
+      /* email/webhook best-effort */
+    }
+
+    toast.success(
+      data.language === 'en'
+        ? 'Welcome! Pick your service, then follow your guided file path.'
+        : data.language === 'ar'
+          ? 'مرحباً! اختر خدمتك ثم اتبع مسار ملفك.'
+          : 'Bienvenue ! Choisissez votre service, puis suivez votre parcours dossier.'
+    );
     navigate('/portal/client/overview');
   };
 

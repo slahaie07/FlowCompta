@@ -1,4 +1,5 @@
-import { createGeminiClient, routerIntentSchema } from './gemini-client';
+import { createGeminiClient, isMockGeminiKey, routerIntentSchema } from './gemini-client';
+import { createMockLLMClient } from './mock-llm';
 import { buildHumanConversationPrompt, getPersonaForAgent } from './personas';
 import { requiresCpaSupervision, runCpaSupervisorReview } from './cpa-review';
 import { buildProcedureContextBlock } from './procedure-context';
@@ -97,7 +98,7 @@ export async function runAgentOrchestrator(
   options: OrchestratorOptions = {}
 ): Promise<AgentRunResult> {
   const started = Date.now();
-  const llm = options.llm ?? createGeminiClient();
+  const llm = options.llm ?? (isMockGeminiKey() ? createMockLLMClient() : createGeminiClient());
   const ctx: AgentContext = input.context ?? {};
 
   let intent: AgentIntent;

@@ -58,12 +58,7 @@ export function SupportLiveChat({ province, userId, selectedServiceId }: Support
   useEffect(() => {
     if (initialized) return;
     setInitialized(true);
-    const welcome =
-      lang === 'en'
-        ? `Hi! I'm ${DEFAULT_PERSONA.displayName}, your ComptaFlow contact. How can I help you today?`
-        : lang === 'ar'
-          ? `مرحباً! أنا ${DEFAULT_PERSONA.displayName}، مسؤولتك في ComptaFlow. كيف يمكنني مساعدتك؟`
-          : `Bonjour ! Je suis ${DEFAULT_PERSONA.displayName}, votre interlocutrice ComptaFlow. Comment puis-je vous aider ?`;
+    const welcome = t('support.welcomeMessage').replace('{name}', DEFAULT_PERSONA.displayName);
     setMessages([
       {
         id: 'welcome',

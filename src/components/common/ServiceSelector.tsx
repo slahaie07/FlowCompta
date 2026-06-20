@@ -56,6 +56,7 @@ export function ServiceSelector({ userData, onSaved }: ServiceSelectorProps) {
       if (error) throw error;
       toast.success(translate('serviceSelector.saved'));
       onSaved?.();
+      portalNavigate('procedure');
     } catch (err: any) {
       toast.error(err.message || translate('serviceSelector.selectWarning'));
     } finally {

@@ -5,6 +5,7 @@ import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { TaxPredictor } from './TaxPredictor';
 import { ServiceSelector } from '../../../components/common/ServiceSelector';
+import { ClientJourneyNudge } from '../../../components/common/ClientJourneyNudge';
 import { motion } from 'motion/react';
 import { useInvoices } from '../../../hooks/useInvoices';
 import { useDocuments } from '../../../hooks/useDocuments';
@@ -112,6 +113,8 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
            </Button>
         </div>
       </header>
+
+      <ClientJourneyNudge userData={userData} />
 
       <ServiceSelector userData={userData} onSaved={onRefreshProfile} />
 

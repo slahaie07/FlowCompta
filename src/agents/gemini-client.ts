@@ -8,8 +8,15 @@ function sanitizeKey(val: string | undefined): string {
   return val.replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
 }
 
+const MOCK_KEY = 'mock_gemini_api_key';
+
+export function isMockGeminiKey(apiKey?: string): boolean {
+  const key = sanitizeKey(apiKey ?? process.env.GOOGLE_GEMINI_API_KEY) || MOCK_KEY;
+  return !key || key === MOCK_KEY || key.startsWith('mock_');
+}
+
 export function createGeminiClient(apiKey?: string): LLMClient {
-  const key = sanitizeKey(apiKey ?? process.env.GOOGLE_GEMINI_API_KEY) || 'mock_gemini_api_key';
+  const key = sanitizeKey(apiKey ?? process.env.GOOGLE_GEMINI_API_KEY) || MOCK_KEY;
   const genAI = new GoogleGenerativeAI(key);
 
   return {

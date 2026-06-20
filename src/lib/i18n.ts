@@ -309,7 +309,14 @@ export const i18n = {
       placeholder: "— Sélectionnez un service —",
       confirm: "Confirmer mon choix de service",
       selectWarning: "Veuillez choisir un service dans la liste.",
-      saved: "Votre service a été enregistré. Notre équipe vous contactera pour la suite."
+      saved: "Votre service a été enregistré. Suivez maintenant votre parcours dossier."
+    },
+
+    journey: {
+      tag: "Prochaine étape",
+      pickService: "Choisissez votre service ci-dessous pour démarrer votre parcours guidé.",
+      continue: "Continuer mon parcours",
+      openProcedure: "Ouvrir mon parcours dossier"
     },
 
     faqPortal: {
@@ -403,7 +410,8 @@ export const i18n = {
       chatPlaceholder: "Écrivez votre message…",
       onlineNow: "En ligne · répond en direct",
       typingPrefix: "écrit",
-      chatError: "Petit contretemps technique — réessayez dans un instant ou écrivez-nous par courriel."
+      chatError: "Petit contretemps technique — réessayez dans un instant ou écrivez-nous par courriel.",
+      welcomeMessage: "Bonjour ! Je suis {name}, votre interlocutrice ComptaFlow. Comment puis-je vous aider ?"
     },
 
     procedure: {
@@ -1105,7 +1113,14 @@ export const i18n = {
       placeholder: "— Select a service —",
       confirm: "Confirm my service choice",
       selectWarning: "Please choose a service from the list.",
-      saved: "Your service has been saved. Our team will contact you shortly."
+      saved: "Your service has been saved. Follow your guided file path now."
+    },
+
+    journey: {
+      tag: "Next step",
+      pickService: "Choose your service below to start your guided journey.",
+      continue: "Continue my path",
+      openProcedure: "Open my file path"
     },
 
     faqPortal: {
@@ -1199,7 +1214,8 @@ export const i18n = {
       chatPlaceholder: "Type your message…",
       onlineNow: "Online · replying live",
       typingPrefix: "is typing",
-      chatError: "Brief technical issue — try again or email us."
+      chatError: "Brief technical issue — try again or email us.",
+      welcomeMessage: "Hi! I'm {name}, your ComptaFlow contact. How can I help you today?"
     },
 
     procedure: {
@@ -1800,13 +1816,46 @@ export const i18n = {
     },
 
     onboarding: {
+      stepProfile: "الملف",
+      stepCoords: "البيانات",
+      stepDocs: "المستندات",
+      stepConfirm: "التأكيد",
       welcomeTitle: "مرحباً بكم في",
       welcomeDesc: "أنشئ حسابك في دقائق. ستختار خدمتك بعد الاتصال ببوابتك.",
-      accessPortal: "الوصول إلى بوابتي",
+      langLabel: "لغة التواصل",
+      personalDesc: "موظف، طالب، متقاعد",
+      businessDesc: "مستقل، شركة صغيرة، مؤسسة",
       coordsTitle: "بيانات",
       coordsAccent: "الاتصال.",
+      coordsDesc: "هذه المعلومات تنشئ حسابك الآمن. اختيار الخدمة يتم لاحقاً من البوابة.",
+      fullName: "الاسم الكامل",
+      province: "المقاطعة",
+      companyName: "اسم الشركة",
+      neq: "رقم المؤسسة (NEQ)",
+      nas: "رقم الضمان (اختياري)",
+      vaultTag: "الخزنة",
+      vaultTitle: "أول",
+      vaultAccent: "رفع",
+      vaultOptional: "(اختياري)",
+      vaultDesc: "يمكنك رفع المستندات في أي وقت من البوابة.",
+      vaultDrop: "أسقط مستنداتك هنا",
+      vaultBrowse: "أو انقر للتصفح — PDF، صور، Excel",
+      vaultEncrypted: "تشفير AES-256 نشط",
       readyTitle: "حسابك",
-      readyAccent: "جاهز."
+      readyAccent: "جاهز.",
+      readyDesc: "ادخل إلى بوابتك واختر خدمتك. لا دفع مطلوب في هذه المرحلة.",
+      accessPortal: "الوصول إلى بوابتي",
+      nameRequired: "الاسم مطلوب.",
+      businessRequired: "معلومات الشركة ناقصة.",
+      accountError: "خطأ عند إنشاء الحساب.",
+      skip: "تخطي"
+    },
+
+    journey: {
+      tag: "الخطوة التالية",
+      pickService: "اختر خدمتك أدناه لبدء مسارك الموجَّه.",
+      continue: "متابعة مساري",
+      openProcedure: "فتح مسار ملفي"
     },
 
     serviceSelector: {
@@ -1820,7 +1869,7 @@ export const i18n = {
       placeholder: "— اختر خدمة —",
       confirm: "تأكيد اختيار الخدمة",
       selectWarning: "يرجى اختيار خدمة من القائمة.",
-      saved: "تم حفظ خدمتك. سيتواصل معك فريقنا قريباً."
+      saved: "تم حفظ خدمتك. تابع الآن مسار ملفك."
     },
 
     support: {
@@ -1854,7 +1903,8 @@ export const i18n = {
       chatPlaceholder: "اكتب رسالتك…",
       onlineNow: "متصل · يرد مباشرة",
       typingPrefix: "يكتب",
-      chatError: "عطل تقني بسيط — أعد المحاولة أو راسلنا بالبريد."
+      chatError: "عطل تقني بسيط — أعد المحاولة أو راسلنا بالبريد.",
+      welcomeMessage: "مرحباً! أنا {name}، مسؤولتك في ComptaFlow. كيف يمكنني مساعدتك؟"
     },
 
     procedure: {
