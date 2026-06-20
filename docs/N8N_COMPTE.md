@@ -24,10 +24,17 @@ cp .env.n8n.example .env.n8n
 npm run n8n:up
 ```
 
-Attendez ~30 secondes, puis créez le compte propriétaire :
+Attendez ~30 secondes, puis bootstrap complet (compte + workflows) :
 
 ```bash
-npm run n8n:setup
+npm run n8n:bootstrap
+```
+
+Ou étape par étape :
+
+```bash
+npm run n8n:setup    # crée le compte propriétaire
+npm run n8n:import   # importe les workflows JSON
 ```
 
 Le script affiche l'URL, le courriel et le mot de passe. Ils sont aussi sauvegardés dans `.n8n-credentials.local` (fichier ignoré par git).
@@ -38,17 +45,33 @@ Ouvrez **http://localhost:5678** et connectez-vous avec les identifiants affich�
 
 ### 5. Importer les workflows (optionnel)
 
+Si vous avez utilisé `npm run n8n:bootstrap`, les workflows sont déjà importés (inactifs).
+
+Sinon, dans n8n : **Workflows → Import from File** :
+
 | Fichier | Usage |
 |---------|--------|
 | `n8n-interac-reconciliation.json` | Réconciliation automatique Interac (IMAP) |
 | `n8n-onboarding-automation.json` | Webhook post-inscription |
 
-Dans n8n : **Workflows → Import from File**.
+### 6. Variables d'environnement
 
-Configurez dans n8n les variables :
+Sur l'édition communautaire self-hosted, définissez les variables dans **`.env.n8n`** (lue par Docker) — pas dans l'UI n8n :
 
 - `COMPTAFLOW_ADMIN_SECRET` = même valeur que `ADMIN_SECRET` sur Vercel
 - `COMPTAFLOW_API_URL` = `https://compta-flow.net`
+- `COMPTAFLOW_ALERT_EMAIL` = courriel pour les alertes
+
+Redémarrez n8n après modification : `docker compose restart n8n`
+
+### 7. Credentials à configurer dans l'UI
+
+| Workflow | Credential |
+|----------|------------|
+| Réconciliation Interac | IMAP (boîte banque) + SMTP (Resend) |
+| Onboarding | Google Drive (optionnel) |
+
+Puis **activer** chaque workflow dans l'éditeur n8n.
 
 Voir aussi `AUTOMATED_RECONCILIATION.md`.
 

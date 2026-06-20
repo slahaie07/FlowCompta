@@ -24,12 +24,14 @@ ComptaFlow n'accepte **que le virement Interac e-Transfer**. Aucune carte de cr�
 
 ---
 
-### 🤖 3. Activation de l'IA & Onboarding (n8n)
+### 🤖 3. Activation de l'IA & Onboarding (n8n — optionnel)
 - [x] **Automatisation d'Onboarding prête** : Le fichier d'importation `n8n-onboarding-automation.json` a été généré et validé.
-- [ ] **Importation n8n onboarding** : `n8n-onboarding-automation.json` (webhook post-inscription, sans paiement)
-- [ ] **Importation n8n Interac** : `n8n-interac-reconciliation.json`
-- [ ] **Connexions API** : Relier vos comptes Google Drive et Resend (SMTP).
-- [ ] **Webhook Interac n8n** : Relier la détection de virements entrants à `/api/invoices/reconcile`.
+- [x] **Scripts bootstrap** : `npm run n8n:up` puis `npm run n8n:bootstrap` — voir `docs/N8N_COMPTE.md`
+- [ ] **Compte n8n local** : `npm run n8n:setup` (ou bootstrap complet)
+- [ ] **Import workflows** : `npm run n8n:import` (inclus dans bootstrap)
+- [ ] **COMPTAFLOW_ADMIN_SECRET** dans `.env.n8n` (= `ADMIN_SECRET` Vercel)
+- [ ] **Connexions API** : IMAP banque + Resend SMTP dans l'UI n8n
+- [ ] **Activer les workflows** après configuration des credentials
 
 ---
 

@@ -17,6 +17,10 @@ services:
       - GENERIC_TIMEZONE=America/Toronto
       - TZ=America/Toronto
       - N8N_RUNNERS_ENABLED=true
+      # Variables lues par les workflows ($env.*)
+      - COMPTAFLOW_ADMIN_SECRET=${COMPTAFLOW_ADMIN_SECRET:-}
+      - COMPTAFLOW_API_URL=${COMPTAFLOW_API_URL:-https://compta-flow.net}
+      - COMPTAFLOW_ALERT_EMAIL=${COMPTAFLOW_ALERT_EMAIL:-support@compta-flow.net}
     volumes:
       - n8n_data:/home/node/.n8n
 

@@ -9,8 +9,7 @@
 import { randomBytes } from 'node:crypto';
 import { writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-
-const baseUrl = (process.env.N8N_BASE_URL ?? 'http://localhost:5678').replace(/\/$/, '');
+import { baseUrl, waitForN8n } from './n8n-lib';
 const email = process.env.N8N_OWNER_EMAIL ?? 'comptaflow@compta-flow.local';
 const firstName = process.env.N8N_OWNER_FIRST_NAME ?? 'ComptaFlow';
 const lastName = process.env.N8N_OWNER_LAST_NAME ?? 'Admin';
@@ -18,17 +17,8 @@ const password =
   process.env.N8N_OWNER_PASSWORD ??
   randomBytes(15).toString('base64url').slice(0, 20);
 
-async function waitForN8n(maxAttempts = 30): Promise<void> {
-  for (let i = 0; i < maxAttempts; i++) {
-    try {
-      const res = await fetch(`${baseUrl}/rest/settings`);
-      if (res.ok) return;
-    } catch {
-      // n8n pas encore prêt
-    }
-    await new Promise((r) => setTimeout(r, 2000));
-  }
-  throw new Error(`n8n inaccessible sur ${baseUrl} — lancez : docker compose up -d n8n`);
+async function waitForN8nLocal(): Promise<void> {
+  return waitForN8n();
 }
 
 async function isOwnerSetup(): Promise<boolean> {
@@ -68,7 +58,7 @@ function saveCredentials(): void {
 
 async function main(): Promise<void> {
   console.log(`Attente de n8n sur ${baseUrl}…`);
-  await waitForN8n();
+  await waitForN8nLocal();
 
   if (await isOwnerSetup()) {
     console.log('Un compte propriétaire existe déjà. Rien à faire.');

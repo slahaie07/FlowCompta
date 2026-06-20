@@ -25,7 +25,9 @@
     "agents:ask": "tsx scripts/agents-cli.ts",
     "n8n:up": "docker compose up -d n8n",
     "n8n:down": "docker compose down",
-    "n8n:setup": "tsx scripts/n8n-create-account.ts"
+    "n8n:setup": "tsx scripts/n8n-create-account.ts",
+    "n8n:import": "tsx scripts/n8n-import-workflows.ts",
+    "n8n:bootstrap": "tsx scripts/n8n-bootstrap.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
