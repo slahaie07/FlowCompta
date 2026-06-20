@@ -2,8 +2,9 @@
  * Provision ComptaFlow production admin accounts in Supabase Auth + profiles.
  *
  * Passwords are NEVER stored in this repo — pass via env or CLI:
- *   SEED_ADMIN_PASSWORD=*** npm run seed:admins
- *   npm run seed:admins -- --password=***
+ *   PowerShell: $env:SEED_ADMIN_PASSWORD="***"; npm run seed:admins
+ *   Cross-platform: npm run seed:admins -- --password=***
+ *   Bash: SEED_ADMIN_PASSWORD=*** npm run seed:admins
  *
  * Requires SUPABASE_SERVICE_ROLE_KEY (and SUPABASE_URL or VITE_SUPABASE_URL).
  */
@@ -31,10 +32,13 @@ function parseArgs(argv: string[]): { password?: string; dryRun: boolean } {
     else if (arg.startsWith('--password=')) password = arg.slice('--password='.length);
     else if (arg === '--help' || arg === '-h') {
       console.log(`
-Usage: npm run seed:admins [-- --password=SECRET] [--dry-run]
+Usage:
+  npm run seed:admins:dry-run
+  npm run seed:admins [-- --password=SECRET] [--dry-run]
+  PowerShell: $env:SEED_ADMIN_PASSWORD="SECRET"; npm run seed:admins
 
 Environment:
-  SEED_ADMIN_PASSWORD          Runtime password for all seeded accounts (never commit)
+  SEED_ADMIN_PASSWORD          Runtime password (never commit); or use --password=
   SUPABASE_SERVICE_ROLE_KEY    Required — service role (never commit)
   SUPABASE_URL or VITE_SUPABASE_URL
 
@@ -73,7 +77,7 @@ async function main() {
 
   const supabaseUrl =
     sanitizeEnv(process.env.SUPABASE_URL) || sanitizeEnv(process.env.VITE_SUPABASE_URL);
-  const serviceRoleKey = sanitizeEnv(process.env.SUPABASE_SERVICE_ROLE_KEY);
+  const serviceRoleKey = sanitizeEnv(process.env.SUPABASE_SERVICE_ROLE_KEY) || sanitizeEnv(process.env.SUPABASE_SECRET_KEY);
 
   if (!dryRun && (!supabaseUrl || !serviceRoleKey)) {
     console.error('❌ SUPABASE_URL (or VITE_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY are required.');

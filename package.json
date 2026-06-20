@@ -11,7 +11,10 @@
     "test": "vitest run",
     "promotion:check": "tsx scripts/promotion-check.ts",
     "seed:admins": "tsx scripts/seed-admin-users.ts",
+    "seed:admins:dry-run": "tsx scripts/seed-admin-users.ts --dry-run",
     "seed:admin-users": "tsx scripts/seed-admin-users.ts",
+    "setup:print-sql": "tsx scripts/print-setup-sql.ts",
+    "setup:windows": "powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1",
     "agents:list": "tsx scripts/agents-cli.ts --list",
     "agents:ask": "tsx scripts/agents-cli.ts"
   },
@@ -51,6 +54,7 @@
     "@types/express": "^4.17.25",
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",
+    "cross-env": "^10.1.0",
     "esbuild": "^0.25.0",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4.1.14",

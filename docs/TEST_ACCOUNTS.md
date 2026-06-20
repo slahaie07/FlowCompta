@@ -24,17 +24,37 @@ Les `sub_admin` n'ont pas de `sub_admin_id` sur leur propre profil — leur `pro
 
 ### Script recommandé (local ou prod Supabase)
 
+**PowerShell (Windows) :**
+
+```powershell
+# .env.local : SUPABASE_SERVICE_ROLE_KEY + VITE_SUPABASE_URL
+npm run seed:admins:dry-run
+
+$env:SEED_ADMIN_PASSWORD = "***"
+npm run seed:admins
+
+# ou mot de passe en argument (toutes plateformes)
+npm run seed:admins -- --password=***
+```
+
+**Bash (macOS / Linux) :**
+
 ```bash
-# .env.local : SUPABASE_SERVICE_ROLE_KEY + URL
 SEED_ADMIN_PASSWORD='***' npm run seed:admins
 ```
 
+**Sans service role localement :** voir **`docs/SETUP_WITHOUT_CLI.md`**
+
+- `npm run setup:print-sql` — SQL copy-paste bundle
+- `scripts/combined-migrations.sql` + `scripts/seed-admins-manual.sql` — dashboard only
+- `POST /api/bootstrap-admins` — après déploiement Vercel (ADMIN_SECRET + service role)
+
 Options :
 
-- `--password=...` — surcharge `SEED_ADMIN_PASSWORD`
-- `--dry-run` — affiche le plan sans écrire
+- `--password=...` — surcharge `SEED_ADMIN_PASSWORD` (préféré sur Windows)
+- `--dry-run` — affiche le plan sans écrire (`npm run seed:admins:dry-run`)
 
-Voir `.env.example` (`SEED_ADMIN_PASSWORD`).
+Voir `docs/DEV_COMMANDS.md` et `.env.example`.
 
 ### Prérequis Supabase
 

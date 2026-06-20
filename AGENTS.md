@@ -121,6 +121,21 @@ Passer dans `POST /api/support/ai-chat` :
 
 ## CLI
 
+**PowerShell (Windows) :**
+
+```powershell
+npm run agents:list
+npm run agents:list -- --all
+npm run agents:ask -- "Comment déclarer ma TVH?"
+npm run agents:ask -- --agent payroll "Préparer T4"
+npm run agents:ask -- --agent procedure-guide "Documents pour T4?"
+npm run promotion:check
+npm run seed:admins:dry-run
+npm run seed:admins -- --password=SECRET
+```
+
+**Bash :**
+
 ```bash
 npm run agents:list
 npm run agents:list -- --all
@@ -128,6 +143,8 @@ npm run agents:ask -- "Comment déclarer ma TVH?"
 npm run agents:ask -- --agent payroll "Préparer T4"
 npm run agents:ask -- --agent procedure-guide "Documents pour T4?"
 ```
+
+Voir `docs/DEV_COMMANDS.md` pour seed admins et promotion check.
 
 ## Variables d'environnement
 

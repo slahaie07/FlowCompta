@@ -13,11 +13,26 @@ description: Déploiement et CI ComptaFlow (Vercel, Supabase migrations, n8n). U
 
 ## Commandes
 
+**PowerShell (Windows) :**
+
+```powershell
+npm run lint
+npm test
+npm run build
+npm run promotion:check
+npm run seed:admins:dry-run
+npm run setup:windows
+```
+
+**Bash :**
+
 ```bash
 npm run lint
 npm test
 npm run build
 ```
+
+Voir `docs/DEV_COMMANDS.md`.
 
 ## Variables critiques
 

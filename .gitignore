@@ -1,7 +1,6 @@
 node_modules/
 build/
 dist/
-api/index.js
 api/index.js.map
 api/index.cjs
 api/index.cjs.map
@@ -13,6 +12,15 @@ coverage/
 .env*
 !.env.example
 .vercel
+.secrets.local.txt
+
+# Local command outputs (debug)
+*-out.txt
+*-out2.txt
+esbuild-out.txt
+go-live-report.txt
+deploy-meta.json
+test-run.log
 
 # Artefacts locaux / binaires — ne pas versionner
 backups/

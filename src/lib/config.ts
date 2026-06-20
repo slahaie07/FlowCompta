@@ -3,6 +3,8 @@
  * Ce fichier est la source unique de vérité pour tous les paramètres de l'application.
  */
 
+import { resolveSupabaseAnonKey, resolveSupabaseUrl } from './envResolve';
+
 const sanitizeVar = (val: string | undefined): string => {
   if (!val) return '';
   return val.replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
@@ -19,9 +21,9 @@ const getEnvVar = (key: string): string | undefined => {
 };
 
 export const CONFIG = {
-  // Supabase
-  SUPABASE_URL: sanitizeVar(getEnvVar('VITE_SUPABASE_URL') || 'https://hnxdlzdgiascuawgydir.supabase.co'),
-  SUPABASE_ANON_KEY: sanitizeVar(getEnvVar('VITE_SUPABASE_ANON_KEY') || 'sb_publishable_BHVkYelBLz9x0HJn_EWDyQ_EyJxaAWF'),
+  // Supabase (VITE_*, NEXT_PUBLIC_*, or Vercel integration SUPABASE_*)
+  SUPABASE_URL: resolveSupabaseUrl(),
+  SUPABASE_ANON_KEY: resolveSupabaseAnonKey() || sanitizeVar(getEnvVar('VITE_SUPABASE_ANON_KEY') || 'sb_publishable_BHVkYelBLz9x0HJn_EWDyQ_EyJxaAWF'),
 
   // Automations (n8n)
   WEBHOOKS: {

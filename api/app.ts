@@ -13,6 +13,8 @@ import pg from 'pg';
 import { createClient } from '@supabase/supabase-js';
 import { runAgentOrchestrator, listAgents, AGENT_REGISTRY, toPublicSupportReply } from '../src/agents/index';
 import { runInternalCronJob, INTERNAL_CRON_JOBS } from './internal-jobs';
+import { SEED_ADMIN_ACCOUNTS, PORTAL_HOME_BY_ROLE } from '../src/lib/seedAdminAccounts';
+import type { User } from '@supabase/supabase-js';
 const { Client } = pg;
 
 dotenv.config();
@@ -49,9 +51,14 @@ const supabaseUrl =
   'https://hnxdlzdgiascuawgydir.supabase.co';
 const supabaseAnonKey =
   sanitizeEnvVar(process.env.SUPABASE_ANON_KEY) ||
+  sanitizeEnvVar(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) ||
+  sanitizeEnvVar(process.env.SUPABASE_PUBLISHABLE_KEY) ||
   sanitizeEnvVar(process.env.VITE_SUPABASE_ANON_KEY) ||
   '';
-const serviceRoleKey = sanitizeEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY) || '';
+const serviceRoleKey =
+  sanitizeEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY) ||
+  sanitizeEnvVar(process.env.SUPABASE_SECRET_KEY) ||
+  '';
 
 // createClient throws on empty key — must not crash cold start (health/status routes)
 const supabaseClientKey =
@@ -60,6 +67,94 @@ const supabaseClientKey =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIn0.placeholder';
 
 const supabase = createClient(supabaseUrl, supabaseClientKey);
+
+function isInternalAgentRequest(req: express.Request): boolean {
+  const headerSecret = req.headers['x-comptaflow-internal'];
+  if (headerSecret && String(headerSecret) === ADMIN_SECRET) return true;
+  const bearer = req.headers.authorization?.split(' ')[1];
+  if (bearer && bearer === ADMIN_SECRET) return true;
+  const bodySecret = (req.body as { secret?: string } | undefined)?.secret;
+  if (bodySecret && bodySecret === ADMIN_SECRET) return true;
+  return false;
+}
+
+async function findAuthUserByEmail(
+  listUsers: (page: number) => Promise<{ users: User[] }>,
+  email: string
+): Promise<User | null> {
+  const target = email.toLowerCase();
+  for (let page = 1; page <= 20; page += 1) {
+    const { users } = await listUsers(page);
+    const match = users.find((u) => u.email?.toLowerCase() === target);
+    if (match) return match;
+    if (users.length < 200) break;
+  }
+  return null;
+}
+
+async function bootstrapAdminAccounts(password: string) {
+  if (!serviceRoleKey) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY not configured on server');
+  }
+
+  const admin = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  const listUsers = async (page: number) => {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
+    if (error) throw new Error(`listUsers: ${error.message}`);
+    return data;
+  };
+
+  const results: Array<{ email: string; role: string; userId: string; portal: string; action: string }> = [];
+
+  for (const account of SEED_ADMIN_ACCOUNTS) {
+    const portal = PORTAL_HOME_BY_ROLE[account.role];
+    let userId = '';
+    const existing = await findAuthUserByEmail(listUsers, account.email);
+
+    if (existing) {
+      userId = existing.id;
+      const { error: updateError } = await admin.auth.admin.updateUserById(userId, {
+        password,
+        email_confirm: true,
+        user_metadata: { full_name: account.fullName, display_name: account.fullName },
+      });
+      if (updateError) throw new Error(`updateUser ${account.email}: ${updateError.message}`);
+      results.push({ email: account.email, role: account.role, userId, portal, action: 'updated auth' });
+    } else {
+      const { data: created, error: createError } = await admin.auth.admin.createUser({
+        email: account.email,
+        password,
+        email_confirm: true,
+        user_metadata: { full_name: account.fullName, display_name: account.fullName },
+      });
+      if (createError) throw new Error(`createUser ${account.email}: ${createError.message}`);
+      userId = created.user.id;
+      results.push({ email: account.email, role: account.role, userId, portal, action: 'created auth' });
+    }
+
+    const { error: profileError } = await admin.from('profiles').upsert(
+      {
+        id: userId,
+        email: account.email,
+        full_name: account.fullName,
+        display_name: account.fullName,
+        role: account.role,
+        sub_admin_id: null,
+        status: 'active',
+      },
+      { onConflict: 'id' }
+    );
+
+    if (profileError) {
+      throw new Error(`profiles upsert ${account.email}: ${profileError.message}`);
+    }
+  }
+
+  return results;
+}
 
 // --- DATABASE PERSISTENCE ---
 const DB_PATH = path.join(process.cwd(), 'local_db.json');
@@ -143,203 +238,81 @@ const sendSupremeEmail = async (to: string, subject: string, html: string) => {
 // 🏛️ ENDPOINTS
 // ============================================================
 
-app.post('/api/setup-admin', async (req, res) => {
-  const { secret } = req.body;
-  if (secret !== 'Maison-139') {
+app.post('/api/bootstrap-admins', async (req, res) => {
+  if (!isInternalAgentRequest(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const projectRef = 'hnxdlzdgiascuawgydir';
-  const targetEmail = 's.lahaie07@gmail.com';
-  const targetPassword = 'Maison-139';
-
-  let errors = [];
-
-  // 1. First, attempt to use the Supabase Service Role SDK (HTTP REST)
-  const supabaseUrl = sanitizeEnvVar(process.env.VITE_SUPABASE_URL) || `https://${projectRef}.supabase.co`;
-  const serviceRoleKey = sanitizeEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY);
-
-  if (serviceRoleKey) {
-    console.log("[setup-admin] Service role key detected. Running HTTP Admin SDK flow...");
-    try {
-      const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      });
-
-      // A. Check if the auth user exists
-      const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-      if (listError) throw new Error(`List users error: ${listError.message}`);
-
-      let user = users.find((u: any) => u.email?.toLowerCase() === targetEmail.toLowerCase());
-      let userId = '';
-
-      if (!user) {
-        console.log(`[setup-admin] Creating new admin auth user...`);
-        const { data: authUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-          email: targetEmail,
-          password: targetPassword,
-          email_confirm: true,
-          user_metadata: { display_name: 'Samuel L. (Architecte)' }
-        });
-        if (createError) throw new Error(`Create user error: ${createError.message}`);
-        userId = authUser.user.id;
-      } else {
-        userId = user.id;
-        console.log(`[setup-admin] Admin auth user exists. Confirming email...`);
-        const { error: confirmError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-          email_confirm: true
-        });
-        if (confirmError) throw new Error(`Confirm email error: ${confirmError.message}`);
-      }
-
-      // B. Upsert admin profile
-      console.log(`[setup-admin] Upserting admin profile...`);
-      const { error: profileError } = await supabaseAdmin
-        .from('profiles')
-        .upsert({
-          id: userId,
-          email: targetEmail,
-          display_name: 'Samuel L. (Architecte)',
-          role: 'admin',
-          status: 'active',
-          active_mode: 'business'
-        });
-      if (profileError) throw new Error(`Profile upsert error: ${profileError.message}`);
-
-      // C. Clean mock data
-      console.log(`[setup-admin] Cleaning mock data tables...`);
-      const tablesToClean = [
-        'document_hashes',
-        'documents',
-        'transactions',
-        'invoices',
-        'social_content',
-        'messages',
-        'audit_logs',
-        'bot_logs',
-        'marketing_leads'
-      ];
-      for (const table of tablesToClean) {
-        try {
-          const { error: delError } = await supabaseAdmin
-            .from(table)
-            .delete()
-            .neq('id', '00000000-0000-0000-0000-000000000000');
-          if (delError) console.error(`[setup-admin] Error cleaning table ${table}:`, delError.message);
-        } catch (tblErr: any) {
-          console.error(`[setup-admin] Table deletion crash on ${table}:`, tblErr.message);
-        }
-      }
-
-      // Clean other profiles (except admin)
-      console.log(`[setup-admin] Cleaning other profiles...`);
-      const { error: cleanProfilesErr } = await supabaseAdmin
-        .from('profiles')
-        .delete()
-        .neq('id', userId);
-      if (cleanProfilesErr) console.error(`[setup-admin] Error cleaning profiles:`, cleanProfilesErr.message);
-
-      return res.json({
-        success: true,
-        method: 'Supabase JS Admin SDK',
-        message: 'Admin account confirmed, promoted, and simulation data successfully cleared!'
-      });
-    } catch (sdkErr: any) {
-      console.error("[setup-admin] SDK Admin flow failed:", sdkErr.message);
-      errors.push({ method: 'Supabase JS Admin SDK', error: sdkErr.message });
-    }
-  } else {
-    console.log("[setup-admin] No service role key found. Skipping HTTP Admin SDK flow.");
-    errors.push({ method: 'Supabase JS Admin SDK', error: 'No SUPABASE_SERVICE_ROLE_KEY found in process.env' });
-  }
-
-  // 2. Fallback to SQL direct connection if password or PG works
-  console.log("[setup-admin] Attempting SQL direct connection fallback...");
-  const configs = [
-    { host: `db.${projectRef}.supabase.co`, port: 5432, user: 'postgres' },
-    { host: `aws-1-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` },
-    { host: `aws-0-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` }
-  ];
-
-  for (const conf of configs) {
-    const client = new Client({
-      host: conf.host,
-      port: conf.port,
-      user: conf.user,
-      password: targetPassword,
-      database: 'postgres',
-      ssl: { rejectUnauthorized: false },
-      connectionTimeoutMillis: 5000
+  const password = String(req.body?.password || '');
+  if (password.length < 8) {
+    return res.status(400).json({
+      error: 'password requis (min. 8 caractères) dans le body JSON',
+      hint: 'docs/SETUP_WITHOUT_CLI.md — alternative: scripts/seed-admins-manual.sql',
     });
-
-    try {
-      await client.connect();
-      console.log(`[setup-admin] Successfully connected to direct host ${conf.host}`);
-
-      const sql = `
-        -- 1. Confirmer l'email
-        UPDATE auth.users 
-        SET email_confirmed_at = NOW(), 
-            confirmed_at = NOW(),
-            last_sign_in_at = NOW() 
-        WHERE LOWER(email) = LOWER('s.lahaie07@gmail.com');
-
-        -- 2. Créer ou promouvoir le profil au rôle d'admin
-        INSERT INTO public.profiles (id, email, display_name, role, status, active_mode)
-        SELECT id, email, COALESCE(raw_user_meta_data->>'display_name', 'Samuel L. (Architecte)'), 'admin', 'active', 'business'
-        FROM auth.users
-        WHERE LOWER(email) = LOWER('s.lahaie07@gmail.com')
-        ON CONFLICT (id) DO UPDATE 
-        SET role = 'admin', status = 'active';
-
-        -- 3. Diagnostic Hook
-        UPDATE public.profiles
-        SET metadata = (
-          SELECT json_build_object(
-            'email_confirmed_at', email_confirmed_at,
-            'confirmed_at', confirmed_at,
-            'last_sign_in_at', last_sign_in_at
-          )
-          FROM auth.users 
-          WHERE LOWER(email) = LOWER('s.lahaie07@gmail.com')
-        )
-        WHERE LOWER(email) = LOWER('s.lahaie07@gmail.com');
-
-        -- 4. Nettoyer les fausses données
-        DELETE FROM public.profiles WHERE LOWER(email) != LOWER('s.lahaie07@gmail.com');
-        TRUNCATE TABLE public.transactions CASCADE;
-        TRUNCATE TABLE public.invoices CASCADE;
-        TRUNCATE TABLE public.documents CASCADE;
-        TRUNCATE TABLE public.messages CASCADE;
-        TRUNCATE TABLE public.audit_logs CASCADE;
-        TRUNCATE TABLE public.bot_logs CASCADE;
-        TRUNCATE TABLE public.document_hashes CASCADE;
-        TRUNCATE TABLE public.marketing_leads CASCADE;
-        TRUNCATE TABLE public.social_content CASCADE;
-      `;
-
-      await client.query(sql);
-      await client.end();
-      return res.json({
-        success: true,
-        method: 'Direct PG Client',
-        message: 'Admin account confirmed, promoted, and simulation data successfully cleared via PG Client!'
-      });
-    } catch (e: any) {
-      errors.push({ method: 'Direct PG Client fallback', host: conf.host, error: e.message, code: e.code });
-      try { await client.end(); } catch (err) {}
-    }
   }
 
-  res.status(500).json({ error: 'Failed to configure admin using both SDK and pg fallback', errors });
+  if (!serviceRoleKey) {
+    return res.status(503).json({
+      error: 'SUPABASE_SERVICE_ROLE_KEY not configured on server',
+      hint: 'Vercel → connect Supabase integration or add env manually, then redeploy',
+      manualAlternative: 'scripts/seed-admins-manual.sql',
+    });
+  }
+
+  try {
+    const results = await bootstrapAdminAccounts(password);
+    return res.json({
+      success: true,
+      accounts: results,
+      loginUrl: 'https://compta-flow.net/login',
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    return res.status(500).json({ error: message });
+  }
+});
+
+/** @deprecated Prefer POST /api/bootstrap-admins — same ADMIN_SECRET, no hardcoded credentials */
+app.post('/api/setup-admin', async (req, res) => {
+  if (!isInternalAgentRequest(req)) {
+    return res.status(401).json({
+      error: 'Unauthorized',
+      hint: 'Use X-ComptaFlow-Internal, Authorization: Bearer ADMIN_SECRET, or body.secret',
+      preferred: 'POST /api/bootstrap-admins with {"password":"..."}',
+    });
+  }
+
+  const password = String(req.body?.password || '');
+  if (password.length < 8) {
+    return res.status(400).json({
+      error: 'password requis (min. 8 caractères)',
+      preferred: 'POST /api/bootstrap-admins',
+    });
+  }
+
+  if (!serviceRoleKey) {
+    return res.status(503).json({
+      error: 'SUPABASE_SERVICE_ROLE_KEY not configured',
+      manualAlternative: 'scripts/seed-admins-manual.sql + docs/SETUP_WITHOUT_CLI.md',
+    });
+  }
+
+  try {
+    const results = await bootstrapAdminAccounts(password);
+    return res.json({
+      success: true,
+      deprecated: true,
+      message: 'Use /api/bootstrap-admins instead',
+      accounts: results,
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    return res.status(500).json({ error: message });
+  }
 });
 
 app.post('/api/diagnostics', (req, res) => {
-  const { secret } = req.body;
-  if (secret !== 'Maison-139') {
+  if (!isInternalAgentRequest(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   const matchingEnv: Record<string, string> = {};
@@ -621,13 +594,7 @@ Industrie: ${mockLead.industry}`;
 });
 
 // --- AGENTIC MIND (interne — non exposé aux clients) ---
-function isInternalAgentRequest(req: express.Request): boolean {
-  const secret = req.headers['x-comptaflow-internal'];
-  if (secret && String(secret) === ADMIN_SECRET) return true;
-  const bearer = req.headers.authorization?.split(' ')[1];
-  if (bearer && bearer === ADMIN_SECRET) return true;
-  return false;
-}
+// isInternalAgentRequest defined near supabase client setup
 
 // --- INTERNAL CRON (ADMIN_SECRET / X-ComptaFlow-Internal) ---
 app.get('/api/cron/agent-health', async (req, res) => {
@@ -757,7 +724,7 @@ app.get('/api/internal/agents', async (req, res) => {
   if (!isInternalAgentRequest(req)) {
     const ctx = await getSuperAdminFromRequest(req);
     if (!ctx) {
-      return res.status(404).json({ error: 'Not found' });
+      return res.status(401).json({ error: 'Unauthorized' });
     }
   }
 
