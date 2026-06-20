@@ -369,12 +369,47 @@ export const i18n = {
         oneTime: " (forfait unique)",
         perDeclaration: "/ déclaration"
       },
+      serviceSelect: "Sélectionnez un service",
+      serviceSelectHint: "Tous les services offerts sont regroupés par catégorie.",
+      breakdown: {
+        base: "Tarif de base",
+        hours: "Heures estimées",
+        hoursValue: "{count} h",
+        profile: "Facteur profil",
+        volume: "Facteur volume",
+        employees: "Facteur employés",
+        t4Employees: "Nombre d'employés (T4)",
+        employeesValue: "{count} employé(s)",
+        urgency: "Majoration urgence",
+        multiplier: "× {value}"
+      },
       result: {
         title: "Votre estimation",
         range: "Fourchette indicative",
         typical: "Montant médian",
         taxesHint: "Taxes applicables (sur le montant médian)",
-        totalWithTax: "Total estimé avec taxes"
+        totalWithTax: "Total estimé avec taxes",
+        table: {
+          parameters: "Paramètres du mandat",
+          breakdown: "Détail du calcul",
+          pricing: "Synthèse tarifaire",
+          service: "Service",
+          province: "Province",
+          profile: "Profil",
+          volume: "Volume d'activité",
+          employees: "Employés",
+          addons: "Services complémentaires",
+          urgency: "Délai",
+          columnLabel: "Élément",
+          columnValue: "Valeur",
+          amount: "Montant"
+        }
+      },
+      pdf: {
+        brandSub: "Plateforme comptable certifiée · Canada",
+        footer: "Taxes conformes ARC et administrations provinciales",
+        download: "Télécharger le PDF",
+        popupBlocked: "Veuillez autoriser les fenêtres contextuelles pour télécharger le PDF."
       },
       cta: {
         continue: "Continuer vers mon espace",
@@ -1279,12 +1314,47 @@ export const i18n = {
         oneTime: " (one-time fee)",
         perDeclaration: "/ filing"
       },
+      serviceSelect: "Select a service",
+      serviceSelectHint: "All offered services are grouped by category.",
+      breakdown: {
+        base: "Base fee",
+        hours: "Estimated hours",
+        hoursValue: "{count} h",
+        profile: "Profile factor",
+        volume: "Volume factor",
+        employees: "Employee factor",
+        t4Employees: "Employee count (T4)",
+        employeesValue: "{count} employee(s)",
+        urgency: "Urgency surcharge",
+        multiplier: "× {value}"
+      },
       result: {
         title: "Your estimate",
         range: "Indicative range",
         typical: "Midpoint amount",
         taxesHint: "Applicable taxes (on midpoint amount)",
-        totalWithTax: "Estimated total with taxes"
+        totalWithTax: "Estimated total with taxes",
+        table: {
+          parameters: "Mandate parameters",
+          breakdown: "Calculation detail",
+          pricing: "Pricing summary",
+          service: "Service",
+          province: "Province",
+          profile: "Profile",
+          volume: "Activity volume",
+          employees: "Employees",
+          addons: "Add-on services",
+          urgency: "Timeline",
+          columnLabel: "Item",
+          columnValue: "Value",
+          amount: "Amount"
+        }
+      },
+      pdf: {
+        brandSub: "Certified accounting platform · Canada",
+        footer: "Taxes compliant with CRA and provincial authorities",
+        download: "Download PDF",
+        popupBlocked: "Please allow pop-ups to download the PDF."
       },
       cta: {
         continue: "Continue to my portal",

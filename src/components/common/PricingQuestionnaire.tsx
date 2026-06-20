@@ -1,6 +1,7 @@
 import { useMemo, type FC, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, ArrowRight, Calculator, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Calculator, CheckCircle2, Download } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Card } from '../ui/Card';
@@ -9,11 +10,17 @@ import { usePricingEstimate } from '../../hooks/usePricingEstimate';
 import {
   SERVICE_CATEGORIES,
   getServiceLabel,
+  getServicePriceDisplay,
   getServicesByCategory,
   type ServiceId,
 } from '../../lib/servicesCatalog';
 import { formatCAD, getTaxDisplayLines, calculateCanadianTaxes, type ProvinceCode } from '../../lib/financeUtils';
 import type { BillingUnit } from '../../lib/pricingEstimator';
+import {
+  buildBreakdownRows,
+  buildParameterRows,
+  printPricingQuotePdf,
+} from '../../lib/pricingQuoteSummary';
 
 const PROVINCES: ProvinceCode[] = ['QC', 'ON', 'BC', 'AB', 'MB', 'NB', 'NL', 'NS', 'PE', 'SK'];
 
@@ -137,6 +144,33 @@ export function PricingQuestionnaire({
 
   const taxLang = lang === 'ar' ? 'fr' : lang;
 
+  const parameterRows = useMemo(() => {
+    if (!result) return [];
+    return buildParameterRows(answers, t, {
+      showVolume: showVolumeStep,
+      showEmployees: showEmployeeStep,
+    });
+  }, [answers, result, t, showVolumeStep, showEmployeeStep]);
+
+  const breakdownRows = useMemo(() => {
+    if (!result) return [];
+    return buildBreakdownRows(result, t);
+  }, [result, t]);
+
+  const handleDownloadPdf = () => {
+    if (!result) return;
+    const opened = printPricingQuotePdf(answers, result, t, taxLang, {
+      showVolume: showVolumeStep,
+      showEmployees: showEmployeeStep,
+      variant,
+    });
+    if (!opened) {
+      toast.error(t('pricingQuestionnaire.pdf.popupBlocked'));
+    }
+  };
+
+  const selectedServicePrice = getServicePriceDisplay(answers.serviceId, t);
+
   return (
     <div className={`space-y-8 ${compact ? '' : 'max-w-2xl mx-auto'}`}>
       <div className="space-y-3">
@@ -178,24 +212,30 @@ export function PricingQuestionnaire({
           {step === 0 && (
             <motion.div key="q-service" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-4">
               <h3 className="font-serif text-xl text-ivoire">{t('pricingQuestionnaire.q.service')}</h3>
-              <div className="space-y-4 max-h-[360px] overflow-y-auto pr-1">
-                {SERVICE_CATEGORIES.map((category) => (
-                  <div key={category} className="space-y-2">
-                    <p className="text-xs font-bold uppercase tracking-widest text-gold/80">
-                      {t(`services.categories.${category}.title`)}
-                    </p>
-                    {getServicesByCategory(category).map((s) => (
-                      <OptionButton
-                        key={s.id}
-                        selected={answers.serviceId === s.id}
-                        onClick={() => setServiceId(s.id)}
-                      >
-                        <span className="font-medium">{getServiceLabel(s.id, t)}</span>
-                        <span className="block text-xs mt-1 opacity-70">{t(`services.items.${s.id}.price`)}</span>
-                      </OptionButton>
-                    ))}
-                  </div>
-                ))}
+              <p className="text-sm text-slate-500">{t('pricingQuestionnaire.serviceSelectHint')}</p>
+              <div className="space-y-2">
+                <label htmlFor="pricing-service-select" className="sr-only">
+                  {t('pricingQuestionnaire.q.service')}
+                </label>
+                <select
+                  id="pricing-service-select"
+                  value={answers.serviceId}
+                  onChange={(e) => setServiceId(e.target.value as ServiceId)}
+                  className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3.5 text-ivoire focus:border-gold/40 focus:outline-none focus:ring-2 focus:ring-gold/20 appearance-none cursor-pointer"
+                >
+                  {SERVICE_CATEGORIES.map((category) => (
+                    <optgroup key={category} label={t(`services.categories.${category}.title`)}>
+                      {getServicesByCategory(category).map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {getServiceLabel(s.id, t)} — {getServicePriceDisplay(s.id, t)}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+                {answers.serviceId && (
+                  <p className="text-xs text-slate-500 px-1">{selectedServicePrice}</p>
+                )}
               </div>
             </motion.div>
           )}
@@ -301,6 +341,64 @@ export function PricingQuestionnaire({
                 </p>
               </div>
 
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">
+                    {t('pricingQuestionnaire.result.table.parameters')}
+                  </p>
+                  <div className="overflow-x-auto rounded-xl border border-white/10">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-white/10 bg-white/[0.02]">
+                          <th className="px-4 py-3 text-left text-xs uppercase tracking-wider text-slate-500 font-bold">
+                            {t('pricingQuestionnaire.result.table.columnLabel')}
+                          </th>
+                          <th className="px-4 py-3 text-right text-xs uppercase tracking-wider text-slate-500 font-bold">
+                            {t('pricingQuestionnaire.result.table.columnValue')}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {parameterRows.map((row) => (
+                          <tr key={row.label} className="border-b border-white/5 last:border-0">
+                            <td className="px-4 py-3 text-slate-400">{row.label}</td>
+                            <td className="px-4 py-3 text-right text-ivoire font-medium">{row.value}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">
+                    {t('pricingQuestionnaire.result.table.breakdown')}
+                  </p>
+                  <div className="overflow-x-auto rounded-xl border border-white/10">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-white/10 bg-white/[0.02]">
+                          <th className="px-4 py-3 text-left text-xs uppercase tracking-wider text-slate-500 font-bold">
+                            {t('pricingQuestionnaire.result.table.columnLabel')}
+                          </th>
+                          <th className="px-4 py-3 text-right text-xs uppercase tracking-wider text-slate-500 font-bold">
+                            {t('pricingQuestionnaire.result.table.amount')}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {breakdownRows.map((row) => (
+                          <tr key={row.label} className="border-b border-white/5 last:border-0">
+                            <td className="px-4 py-3 text-slate-400">{row.label}</td>
+                            <td className="px-4 py-3 text-right text-ivoire font-medium">{row.value}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
               {taxPreview && (
                 <div className="space-y-2 text-sm">
                   <p className="text-xs uppercase tracking-widest text-slate-500 font-bold">
@@ -324,6 +422,10 @@ export function PricingQuestionnaire({
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3">
+                <Button variant="secondary" className="flex-1 h-12" onClick={handleDownloadPdf}>
+                  <Download size={16} className="mr-2" />
+                  {t('pricingQuestionnaire.pdf.download')}
+                </Button>
                 {onContinue && (
                   <Button variant="gold" className="flex-1 h-12" onClick={() => onContinue(result.serviceId)}>
                     {variant === 'staff'
