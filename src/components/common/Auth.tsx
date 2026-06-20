@@ -8,7 +8,8 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { toast } from 'sonner';
 import { useLanguage } from '../../hooks/useLanguage';
-import { signInWithGoogle } from '../../lib/authOAuth';
+import { getAuthRedirectUrl, signInWithGoogle } from '../../lib/authOAuth';
+import { mapSupabaseAuthError } from '../../lib/authErrors';
 import { GoogleAuthButton } from './GoogleAuthButton';
 
 interface AuthProps {
@@ -21,11 +22,17 @@ type AuthView = 'choice' | 'login' | 'register';
 export function Auth({ onAuthentication, mockLogin }: AuthProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const nextPath = searchParams.get('next') || '/portal';
   const [view, setView] = useState<AuthView>(() =>
     searchParams.get('register') === '1' ? 'register' : 'choice'
   );
+
+  useEffect(() => {
+    if (searchParams.get('register') === '1') {
+      setView('register');
+    }
+  }, [searchParams]);
   const [emailInput, setEmailInput] = useState('');
   const [password, setPassword] = useState('');
   const [fullNameInput, setFullNameInput] = useState('');
@@ -90,11 +97,19 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
         type: 'signup',
         email: cleanEmail
       });
-      if (error) throw error;
-      toast.success("Le courriel de confirmation a été renvoyé !");
+      if (error) {
+        const mapped = mapSupabaseAuthError(error, lang);
+        throw new Error(mapped.message);
+      }
+      toast.success(
+        lang === 'en'
+          ? 'Confirmation email sent!'
+          : 'Le courriel de confirmation a été renvoyé !'
+      );
       setEmailNotConfirmed(false);
-    } catch (err: any) {
-      toast.error(err.message || "Erreur de renvoi.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erreur de renvoi.';
+      toast.error(message);
     } finally {
       setResending(false);
     }
@@ -137,19 +152,36 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
           email: cleanEmail,
           password,
           options: {
-            emailRedirectTo: window.location.origin + '/portal',
+            emailRedirectTo: getAuthRedirectUrl(nextPath),
             data: {
               full_name: fullNameInput,
               role: 'client',
-              sub_admin_id: subAdminIdInput
-            }
-          }
+              sub_admin_id: subAdminIdInput,
+            },
+          },
         });
 
-        if (signUpError) throw signUpError;
-        
+        if (signUpError) {
+          const mapped = mapSupabaseAuthError(signUpError, lang);
+          if (mapped.emailNotConfirmed) setEmailNotConfirmed(true);
+          throw new Error(mapped.message);
+        }
+
+        if (data.session) {
+          onAuthentication(cleanEmail);
+          toast.success(
+            lang === 'en' ? 'Account created! Welcome.' : 'Compte créé ! Bienvenue.'
+          );
+          navigate(nextPath.startsWith('/') ? nextPath : `/${nextPath}`);
+          return;
+        }
+
         if (data.user) {
-          toast.success("Compte initié avec succès ! Confirmez votre courriel pour activer l'accès.");
+          toast.success(
+            lang === 'en'
+              ? 'Account created! Confirm your email to activate access.'
+              : "Compte initié avec succès ! Confirmez votre courriel pour activer l'accès."
+          );
           setView('login');
         }
       } else {
@@ -160,21 +192,29 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
         });
 
         if (signInError) {
-          if (signInError.message?.includes("Email not confirmed") || signInError.status === 400 && signInError.message?.includes("confirm")) {
-            setEmailNotConfirmed(true);
-            throw new Error("Votre adresse courriel n'a pas encore été confirmée. Veuillez vérifier votre boîte de réception.");
-          }
-          throw signInError;
+          const mapped = mapSupabaseAuthError(signInError, lang);
+          if (mapped.emailNotConfirmed) setEmailNotConfirmed(true);
+          throw new Error(mapped.message);
         }
 
         if (data.user) {
           onAuthentication(data.user.email!);
-          toast.success("Session authentifiée.");
-          navigate(nextPath);
+          toast.success(lang === 'en' ? 'Signed in successfully.' : 'Session authentifiée.');
+          navigate(nextPath.startsWith('/') ? nextPath : `/${nextPath}`);
         }
       }
-    } catch (err: any) {
-      setError(err.message || "Échec de l'authentification.");
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message) {
+        setError(err.message);
+      } else {
+        const mapped = mapSupabaseAuthError(
+          err && typeof err === 'object' && 'message' in err
+            ? (err as { message?: string; status?: number })
+            : undefined,
+          lang
+        );
+        setError(mapped.message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -378,6 +418,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                       variant="gold"
                       className="w-full h-16 gap-3 font-bold uppercase tracking-[0.2em] shadow-gold/20 mt-4"
                       isLoading={isLoading}
+                      disabled={view === 'register' && subAdminsList.length === 0}
                     >
                       {view === 'login' ? t('auth.submitLogin') : t('auth.submitRegister')} <ArrowRight size={20}/>
                     </Button>

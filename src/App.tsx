@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { UserData } from './types';
 
 import { Auth } from './components/common/Auth';
@@ -34,10 +34,18 @@ function PortalHomeRedirect({ userData }: { userData: UserData }) {
   return <Navigate to={getPortalHomePath(role)} replace />;
 }
 
+function isClientProfileComplete(userData: UserData | null | undefined): boolean {
+  return Boolean(
+    userData &&
+      (userData.role !== 'client' || (Boolean(userData.fullName?.trim()) && Boolean(userData.province)))
+  );
+}
+
 function AppContent() {
   const { user, userData, loading, logout, isAuthenticated, refreshProfile } = useAuth();
   const { mode, toggleMode } = useAppMode();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const portalHome = userData ? getPortalHomePath((userData.role ?? 'client') as PortalRole) : '/portal/client/overview';
 
@@ -67,9 +75,16 @@ function AppContent() {
 
   useEffect(() => {
     if (isAuthenticated && userData && window.location.pathname === '/login') {
-      navigate(portalHome);
+      const next = searchParams.get('next');
+      const target =
+        next && next.startsWith('/')
+          ? next
+          : !isClientProfileComplete(userData) && (userData.role ?? 'client') === 'client'
+            ? '/onboarding'
+            : portalHome;
+      navigate(target);
     }
-  }, [isAuthenticated, userData, navigate, portalHome]);
+  }, [isAuthenticated, userData, navigate, portalHome, searchParams]);
 
   const handleOnboardingComplete = async (data: UserData) => {
     if (!user?.id) return;
@@ -133,9 +148,7 @@ function AppContent() {
     );
   }
 
-  const isProfileComplete =
-    userData &&
-    (userData.role !== 'client' || (Boolean(userData.fullName?.trim()) && Boolean(userData.province)));
+  const isProfileComplete = isClientProfileComplete(userData);
 
   const portalElement =
     isAuthenticated && isProfileComplete && userData ? (
@@ -170,7 +183,7 @@ function AppContent() {
         path="/login"
         element={
           !isAuthenticated ? (
-            <Auth onAuthentication={() => navigate(portalHome)} />
+            <Auth onAuthentication={() => { /* Auth navigates via ?next=; profile gate handles onboarding */ }} />
           ) : (
             <Navigate to={portalHome} replace />
           )
