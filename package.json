@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build && esbuild api/app.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=api/index.cjs && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "build": "vite build && esbuild api/app.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=api/serverless.cjs && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "lint": "tsc --noEmit",
     "test": "vitest run",
+    "promotion:check": "tsx scripts/promotion-check.ts",
     "agents:list": "tsx scripts/agents-cli.ts --list",
     "agents:ask": "tsx scripts/agents-cli.ts"
   },
