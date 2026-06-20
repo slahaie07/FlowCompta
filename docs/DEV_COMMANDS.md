@@ -6,16 +6,11 @@ Tous les scripts npm utilisent `tsx` ou `node` directement — **aucun Git Bash 
 
 **Ne double-cliquez pas** sur `Comptaflow_HUB.html` ou d'autres fichiers `.html` du dépôt : si Windows a associé `.html` à Git Bash, un terminal s'ouvre au lieu du navigateur.
 
-### Méthodes recommandées
+### Méthode recommandée
 
-| Action | Commande / fichier |
-|--------|-------------------|
-| Site production | Double-clic `Ouvrir-ComptaFlow.cmd` ou `npm run open:site` |
-| Dev local + navigateur | Double-clic `Ouvrir-ComptaFlow-Local.cmd` |
-| Dev manuel | PowerShell : `npm run dev` puis ouvrir `http://localhost:3000` |
-| Raccourci Bureau | `powershell -File create_shortcut.ps1` (ouvre l'URL, pas un `.html`) |
-
-Les lanceurs `.ps1` / `.cmd` à la racine du projet utilisent `Start-Process` pour ouvrir **https://compta-flow.net** ou **http://localhost:3000** dans le navigateur par défaut.
+1. PowerShell : `npm run dev`
+2. Ouvrez manuellement **http://localhost:3000** dans Edge ou Chrome
+3. Production : **https://compta-flow.net** (coller l'URL dans le navigateur)
 
 ### Réinitialiser « Ouvrir avec » (Windows)
 
@@ -38,8 +33,7 @@ cd C:\Users\user\CODE_WORKSPACE\Projects\flowcompta
 
 # Dev local
 npm run dev
-npm run open:local    # ouvre http://localhost:3000 dans le navigateur
-npm run open:site     # ouvre https://compta-flow.net
+# puis ouvrir http://localhost:3000 dans le navigateur
 
 # Tests, lint, build
 npm run lint

@@ -51,11 +51,8 @@ Aucun Git Bash requis — tous les scripts npm utilisent `tsx` directement.
 
 ```powershell
 npm install
-npm run dev                    # serveur + navigateur sur http://localhost:3000
-
-# Ouvrir le site sans Git Bash
-npm run open:site              # production
-.\Ouvrir-ComptaFlow.cmd        # double-clic (Windows)
+npm run dev
+# Ouvrir http://localhost:3000 dans le navigateur (Edge ou Chrome)
 
 # Qualité
 npm run lint

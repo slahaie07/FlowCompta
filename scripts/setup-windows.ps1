@@ -1,6 +1,5 @@
-# ComptaFlow — Windows setup helper
+# ComptaFlow — Windows setup helper (instructions only, no auto-launch)
 # Usage: npm run setup:windows
-# Or:    powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
@@ -11,14 +10,12 @@ Write-Host "ComptaFlow — Windows setup" -ForegroundColor Cyan
 Write-Host "==========================" -ForegroundColor Cyan
 Write-Host ""
 
-# Node check
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
   Write-Host "Node.js not found. Install from https://nodejs.org/" -ForegroundColor Red
   exit 1
 }
 Write-Host ("Node: " + (node -v)) -ForegroundColor Green
 
-# .env.local from example
 $envExample = Join-Path $root ".env.example"
 $envLocal = Join-Path $root ".env.local"
 if (-not (Test-Path $envLocal) -and (Test-Path $envExample)) {
@@ -30,31 +27,24 @@ if (-not (Test-Path $envLocal) -and (Test-Path $envExample)) {
   Write-Host "Warning: .env.example missing." -ForegroundColor Yellow
 }
 
-# Install deps if needed
 if (-not (Test-Path (Join-Path $root "node_modules"))) {
-  Write-Host "Running npm install..." -ForegroundColor Yellow
-  npm install
+  Write-Host "Run: npm install" -ForegroundColor Yellow
 }
 
 Write-Host ""
-Write-Host "Next steps (no service role key required locally):" -ForegroundColor Cyan
-Write-Host "  1. Supabase Dashboard -> SQL Editor -> paste scripts/combined-migrations.sql"
-Write-Host "  2. Auth -> Users -> create 3 admin accounts (see docs/SETUP_WITHOUT_CLI.md)"
-Write-Host "  3. SQL Editor -> paste scripts/seed-admins-manual.sql"
-Write-Host "  4. npm run setup:print-sql   (full copy-paste bundle)"
+Write-Host "Next steps:" -ForegroundColor Cyan
+Write-Host "  1. npm install"
+Write-Host "  2. Supabase Dashboard -> SQL Editor -> paste scripts/combined-migrations.sql"
+Write-Host "  3. Auth -> Users -> create admin accounts (see docs/SETUP_WITHOUT_CLI.md)"
+Write-Host "  4. SQL Editor -> paste scripts/seed-admins-manual.sql"
+Write-Host "  5. npm run setup:print-sql   (full copy-paste bundle)"
 Write-Host ""
-Write-Host "Dev server: npm run dev  (http://localhost:3000)" -ForegroundColor Green
-Write-Host "Ouvrir le site: npm run open:site  ou double-clic Ouvrir-ComptaFlow.cmd" -ForegroundColor Green
-Write-Host "Dev + navigateur: double-clic Ouvrir-ComptaFlow-Local.cmd" -ForegroundColor Green
-Write-Host "Promotion check: npm run promotion:check" -ForegroundColor Green
-Write-Host "Seed dry-run: npm run seed:admins:dry-run" -ForegroundColor Green
-Write-Host "Seed live: npm run seed:admins -- --password=YOUR_PASSWORD" -ForegroundColor Green
-Write-Host "Docs: docs/DEV_COMMANDS.md" -ForegroundColor Green
+Write-Host "Dev server:" -ForegroundColor Green
+Write-Host "  npm run dev"
+Write-Host "  Then open http://localhost:3000 in your browser manually."
 Write-Host ""
-Write-Host "Astuce: PowerShell ou double-clic .cmd — pas les fichiers .sh (Git Bash)." -ForegroundColor Yellow
+Write-Host "Production site: https://compta-flow.net" -ForegroundColor Green
+Write-Host "Promotion check: npm run promotion:check"
+Write-Host "Seed dry-run: npm run seed:admins:dry-run"
+Write-Host "Docs: docs/DEV_COMMANDS.md"
 Write-Host ""
-
-$openProd = Read-Host "Ouvrir https://compta-flow.net/login dans le navigateur ? (O/n)"
-if ($openProd -eq '' -or $openProd -eq 'O' -or $openProd -eq 'o') {
-  Start-Process "https://compta-flow.net/login"
-}
