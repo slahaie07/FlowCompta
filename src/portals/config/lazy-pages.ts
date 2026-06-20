@@ -11,6 +11,9 @@ export const LazyFAQ = lazy(() => import('../client/pages/FAQ').then((m) => ({ d
 export const LazySupport = lazy(() =>
   import('../client/pages/Support').then((m) => ({ default: m.Support }))
 );
+export const LazyServiceProcedure = lazy(() =>
+  import('../client/pages/ServiceProcedure').then((m) => ({ default: m.ServiceProcedure }))
+);
 
 // ——— Sub-admin portal ———
 export const LazyAdminOverview = lazy(() =>

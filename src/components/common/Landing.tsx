@@ -32,7 +32,7 @@ export function Landing() {
       ? [
           'Hourly bookkeeping $45–75/hr',
           'Monthly packages from $150/mo',
-          'GST/QST filings',
+          'GST/HST/PST filings',
           'Payroll 1–5 employees',
           'QuickBooks & Sage setup',
           'Encrypted vault',
@@ -40,7 +40,7 @@ export function Landing() {
       : [
           'Tenue de livres 45–75 $/h',
           'Forfaits dès 150 $/mois',
-          'Déclarations TPS/TVQ',
+          'Déclarations taxes (TPS/TVH/TVP)',
           'Paie 1 à 5 employés',
           'Config. QuickBooks & Sage',
           'Coffre-fort chiffré',

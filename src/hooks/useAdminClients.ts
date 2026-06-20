@@ -29,7 +29,7 @@ export function useAdminClients(isAdmin: boolean) {
       // 1. Load client PROFILES (auth users with role='client' assigned to this CPA)
       let profileQuery = supabase
         .from('profiles')
-        .select('id, full_name, display_name, company_name, company, email, status, needs, role')
+        .select('id, full_name, display_name, company_name, company, email, status, needs, role, metadata')
         .eq('role', 'client');
 
       if (userRole === 'sub_admin') {
@@ -49,6 +49,7 @@ export function useAdminClients(isAdmin: boolean) {
           documents: 0,
           lastActive: 'Récemment',
           email: p.email,
+          province: typeof p.metadata?.province === 'string' ? p.metadata.province : undefined,
           needs: Array.isArray(p.needs) ? p.needs : [],
         });
       });

@@ -15,10 +15,10 @@
     },
     {
       "parameters": {
-        "fromEmail": "Comptaflow <support@comptaflow.ca>",
+        "fromEmail": "Comptaflow <support@compta-flow.net>",
         "toEmail": "={{$json.body.customer_details.email}}",
         "subject": "Bienvenue chez ComptaFlow - Votre Onboarding commence ici 🚀",
-        "html": "=<h1>Bienvenue {{$json.body.customer_details.name}} !</h1><p>Nous sommes ravis de vous accompagner dans la gestion de votre entreprise.</p><p>Votre compte est désormais actif. Vous pouvez accéder à votre dashboard ici : <a href='https://comptaflow-platform.vercel.app'>Dashboard ComptaFlow</a></p><p>Prochaine étape : Téléchargez vos premiers documents dans votre <strong>Vault</strong> sécurisé.</p><p>À très vite,<br>L'équipe Comptaflow</p>",
+        "html": "=<h1>Bienvenue {{$json.body.customer_details.name}} !</h1><p>Nous sommes ravis de vous accompagner dans la gestion de votre entreprise.</p><p>Votre compte est désormais actif. Vous pouvez accéder à votre dashboard ici : <a href='https://compta-flow.net/dashboard'>Dashboard ComptaFlow</a></p><p>Prochaine étape : Téléchargez vos premiers documents dans votre <strong>Vault</strong> sécurisé.</p><p>À très vite,<br>L'équipe Comptaflow</p>",
         "options": {}
       },
       "name": "Send Welcome Email",

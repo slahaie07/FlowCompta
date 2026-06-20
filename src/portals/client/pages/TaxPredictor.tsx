@@ -36,7 +36,7 @@ export function TaxPredictor({ userId }: { userId: string }) {
         estimatedRevenue: mockRevenue,
         tpsToRemit: mockRevenue * 0.05,
         tvqToRemit: mockRevenue * 0.09975,
-        corporateTax: mockRevenue * 0.122, // Taux PME Québec approximatif
+        corporateTax: mockRevenue * 0.122, // Taux PME fédéral/provincial approximatif
         safeHarborAmount: 15000
       });
       toast.success("Analyse fiscale prédictive générée avec succès.");
@@ -56,7 +56,7 @@ export function TaxPredictor({ userId }: { userId: string }) {
             Radar Fiscal Prédictif (Q2 2026)
           </h3>
           <p className="text-xs text-slate-500 mt-1">
-            Propulsé par l'Intelligence Artificielle et conforme aux normes de l'ARC / Revenu Québec.
+            Propulsé par l'Intelligence Artificielle et conforme aux normes de l'ARC et des administrations fiscales provinciales.
           </p>
         </div>
         <Badge variant="gold">IA Activa</Badge>
@@ -66,7 +66,7 @@ export function TaxPredictor({ userId }: { userId: string }) {
         <div className="flex flex-col items-center justify-center p-8 bg-black/20 rounded-2xl border border-white/5">
           <AlertCircle size={32} className="text-slate-500 mb-4" />
           <p className="text-sm text-silver text-center mb-4">
-            Lancez l'audit pour calculer vos provisions de taxes (TPS/TVQ) et acomptes provisionnels.
+            Lancez l'audit pour calculer vos provisions de taxes (TPS/TVH/TVP selon province) et acomptes provisionnels.
           </p>
           <Button variant="gold" onClick={calculateTaxes} disabled={loading} className="w-full md:w-auto">
             {loading ? "Calcul en cours (Analyse OCR & DB)..." : "Générer la prédiction fiscale"}
@@ -76,13 +76,13 @@ export function TaxPredictor({ userId }: { userId: string }) {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">TPS à remettre</p>
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">TPS / TVH à remettre</p>
               <p className="text-2xl font-serif text-ivoire mt-1">
                 {estimation.tpsToRemit.toLocaleString('fr-CA', { style: 'currency', currency: 'CAD' })}
               </p>
             </div>
             <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">TVQ à remettre</p>
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Taxes provinciales à remettre</p>
               <p className="text-2xl font-serif text-ivoire mt-1">
                 {estimation.tvqToRemit.toLocaleString('fr-CA', { style: 'currency', currency: 'CAD' })}
               </p>

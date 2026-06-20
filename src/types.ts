@@ -30,10 +30,11 @@ export interface Invoice {
   userId: string;
   subAdminId?: string;
   items: { description: string; quantity: number; price: number }[];
-  // Champs Québec
+  // Taxes Canada (TPS / TVH / TVQ / TVP)
   montantHt?: number;
   tps?: number;
   tvq?: number;
+  tvh?: number;
   montantTotal?: number;
   // Flux Interac
   clientADeclarePaye?: boolean;
@@ -111,6 +112,7 @@ export interface ClientRecord {
   documents: number;
   lastActive: string;
   email?: string;
+  province?: string;
   needs?: any;
 }
 

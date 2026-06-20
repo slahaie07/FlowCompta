@@ -114,7 +114,7 @@ export function SalesLedger() {
           <div className="flex items-center gap-3 mt-3">
             <span className="w-8 h-[1px] bg-gold/50"></span>
             <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em]">
-              Capture automatique · Moteur TPS/TVQ · Admin exclusif
+              Capture automatique · Taxes Canada (TPS/TVH/TVP) · Admin exclusif
             </p>
           </div>
         </div>
@@ -133,8 +133,8 @@ export function SalesLedger() {
         {[
           { label: 'Ventes totales', value: totals.countVentes.toString(), unit: '', color: 'text-ivoire', icon: Receipt },
           { label: 'Chiffre d\'affaires HT', value: fmt(totals.totalBrut), unit: '$', color: 'text-ivoire', icon: TrendingUp },
-          { label: 'TPS collectée', value: fmt(totals.totalTps), unit: '$', color: 'text-amber-400', icon: AlertCircle },
-          { label: 'TVQ collectée', value: fmt(totals.totalTvq), unit: '$', color: 'text-amber-400', icon: AlertCircle },
+          { label: 'TPS / TVH', value: fmt(totals.totalTps), unit: '$', color: 'text-amber-400', icon: AlertCircle },
+          { label: 'Taxes provinciales', value: fmt(totals.totalTvq), unit: '$', color: 'text-amber-400', icon: AlertCircle },
           { label: 'Frais traitement', value: fmt(totals.totalFrais), unit: '$', color: 'text-red-400', icon: Receipt },
           { label: 'Revenu net réel', value: fmt(totals.totalNet), unit: '$', color: 'text-gold', icon: TrendingUp },
         ].map((kpi, i) => (
@@ -172,8 +172,8 @@ export function SalesLedger() {
           <div>
             <p className="text-amber-400 font-black text-sm">Rappel fiscal — Taxes à remettre</p>
             <p className="text-slate-400 text-xs mt-1 leading-relaxed">
-              TPS à remettre à l'ARC : <strong className="text-ivoire">{fmt(totals.totalTps)} $</strong>
-              &nbsp;·&nbsp; TVQ à remettre à Revenu Québec : <strong className="text-ivoire">{fmt(totals.totalTvq)} $</strong>
+              TPS/TVH à remettre à l'ARC : <strong className="text-ivoire">{fmt(totals.totalTps)} $</strong>
+              &nbsp;·&nbsp; Taxes provinciales à remettre : <strong className="text-ivoire">{fmt(totals.totalTvq)} $</strong>
               &nbsp;·&nbsp; Total obligations fiscales : <strong className="text-amber-400">{fmt(totals.totalTps + totals.totalTvq)} $</strong>
             </p>
           </div>
@@ -205,8 +205,8 @@ export function SalesLedger() {
                       <p className="text-lg font-serif font-bold text-ivoire">{fmt(q.totalTtc)} $</p>
                     </div>
                     <div className="space-y-1 text-[10px]">
-                      <div className="flex justify-between"><span className="text-slate-500">TPS → ARC :</span><span className="text-amber-400 font-bold">{fmt(q.taxesARemettreARC)} $</span></div>
-                      <div className="flex justify-between"><span className="text-slate-500">TVQ → RQ :</span><span className="text-amber-400 font-bold">{fmt(q.taxesARemettreRQ)} $</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">TPS/TVH → ARC :</span><span className="text-amber-400 font-bold">{fmt(q.taxesARemettreARC)} $</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Provincial :</span><span className="text-amber-400 font-bold">{fmt(q.taxesARemettreRQ)} $</span></div>
                       <div className="flex justify-between border-t border-white/5 pt-1"><span className="text-slate-400 font-bold">Net :</span><span className="text-gold font-bold">{fmt(q.revenuNet)} $</span></div>
                     </div>
                     <p className="text-[9px] text-slate-600 font-bold">{q.count} vente{q.count !== 1 ? 's' : ''}</p>
@@ -297,8 +297,8 @@ export function SalesLedger() {
                 { label: '# Facture · Service', field: null },
                 { label: 'Mode paiement', field: null },
                 { label: 'Montant HT', field: null },
-                { label: 'TPS (5%)', field: null },
-                { label: 'TVQ (9.975%)', field: null },
+                { label: 'TPS / TVH', field: null },
+                { label: 'Provincial', field: null },
                 { label: 'Total TTC', field: 'montantTtc' },
                 { label: 'Frais réseau', field: null },
                 { label: 'Ref. Interac', field: null },
@@ -407,7 +407,7 @@ export function SalesLedger() {
               {[
                 { label: 'HT', value: fmt(sale.montantHt), color: 'text-silver' },
                 { label: 'TPS', value: fmt(sale.tps), color: 'text-amber-400' },
-                { label: 'TVQ', value: fmt(sale.tvq), color: 'text-amber-400' },
+                { label: 'Provincial', value: fmt(sale.tvq), color: 'text-amber-400' },
               ].map(({ label, value, color }) => (
                 <div key={label} className="bg-white/5 rounded-xl p-2">
                   <p className={`text-sm font-bold font-mono ${color}`}>{value}$</p>
@@ -432,7 +432,7 @@ export function SalesLedger() {
             {[
               { label: 'CA Brut HT', value: totals.totalBrut, color: 'text-silver' },
               { label: 'TPS → ARC', value: totals.totalTps, color: 'text-amber-400' },
-              { label: 'TVQ → RQ', value: totals.totalTvq, color: 'text-amber-400' },
+              { label: 'Provincial', value: totals.totalTvq, color: 'text-amber-400' },
               { label: 'Total TTC', value: totals.totalTtc, color: 'text-ivoire' },
               { label: 'Frais', value: totals.totalFrais, color: 'text-red-400' },
               { label: 'Revenu Net', value: totals.totalNet, color: 'text-gold' },

@@ -222,13 +222,18 @@ export function Onboarding({ initialEmail, onComplete }: OnboardingProps) {
                       onChange={(e) => setData({ ...data, province: e.target.value })}
                     >
                       <option value="QC">Québec (TPS + TVQ)</option>
-                      <option value="ON">Ontario (TVH 13%)</option>
-                      <option value="BC">Colombie-Britannique (TPS)</option>
-                      <option value="AB">Alberta (TPS)</option>
-                      <option value="MB">Manitoba (TPS)</option>
-                      <option value="NB">Nouveau-Brunswick (TVH 15%)</option>
-                      <option value="NS">Nouvelle-Écosse (TVH 15%)</option>
-                      <option value="SK">Saskatchewan (TPS)</option>
+                      <option value="ON">Ontario (TVH 13 %)</option>
+                      <option value="BC">Colombie-Britannique (TPS + TVP 7 %)</option>
+                      <option value="AB">Alberta (TPS 5 %)</option>
+                      <option value="MB">Manitoba (TPS + TVP 7 %)</option>
+                      <option value="NB">Nouveau-Brunswick (TVH 15 %)</option>
+                      <option value="NL">Terre-Neuve-et-Labrador (TVH 15 %)</option>
+                      <option value="NS">Nouvelle-Écosse (TVH 15 %)</option>
+                      <option value="PE">Île-du-Prince-Édouard (TVH 15 %)</option>
+                      <option value="SK">Saskatchewan (TPS + TVP 6 %)</option>
+                      <option value="YT">Yukon (TPS 5 %)</option>
+                      <option value="NT">Territoires du Nord-Ouest (TPS 5 %)</option>
+                      <option value="NU">Nunavut (TPS 5 %)</option>
                     </select>
                   </div>
                   {profileType === 'business' && (

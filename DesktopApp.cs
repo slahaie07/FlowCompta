@@ -25,7 +25,7 @@ namespace ComptaFlowDesktop
             WebBrowser webBrowser = new WebBrowser
             {
                 Dock = DockStyle.Fill,
-                Url = new Uri("https://comptaflow-platform.vercel.app")
+                Url = new Uri("https://compta-flow.net")
             };
 
             form.Controls.Add(webBrowser);

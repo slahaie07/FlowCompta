@@ -22,6 +22,13 @@ describe('financeUtils', () => {
       const result = calculateCanadianTaxes(0, 'QC');
       expect(result.total).toBe(0);
     });
+
+    it('calculates BC taxes correctly', () => {
+      const result = calculateCanadianTaxes(100, 'BC');
+      expect(result.tps).toBe(5);
+      expect(result.tvq).toBe(7);
+      expect(result.total).toBe(112);
+    });
   });
 
   describe('formatCAD', () => {

@@ -24,7 +24,7 @@ Ce rapport récapitule l'avancement suite à l'analyse et à la mise à jour des
 ### 🟡 Actions requises de votre côté
 1.  **Clés API Stripe LIVE** : Remplacer les clés de test par vos clés de production Stripe (`sk_live_...` et `pk_live_...`) dans Vercel.
 2.  **Webhook de Production** : Configurer le webhook Stripe pour envoyer l'événement `checkout.session.completed` à votre domaine.
-3.  **Lier le Domaine .ca** : Enregistrer votre nom de domaine personnel dans Vercel (ex: `comptaflow.ca`) et pointer les DNS (A & CNAME).
+3.  **Lier le Domaine** : Le domaine `compta-flow.net` est associé au projet Vercel (A & CNAME).
 4.  **Import n8n** : Charger les fichiers JSON d'automatisation d'onboarding dans votre instance n8n et y lier votre compte Google Drive / Resend (SMTP).
 
 ---

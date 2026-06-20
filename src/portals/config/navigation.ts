@@ -12,6 +12,7 @@ import {
   Shield,
   BookOpen,
   BarChart3,
+  ClipboardList,
 } from 'lucide-react';
 import type { PortalNavSection, PortalRole } from '../types';
 
@@ -21,6 +22,7 @@ export const CLIENT_PORTAL_NAV: PortalNavSection[] = [
     items: [
       { path: 'overview', labelKey: 'overview', icon: LayoutDashboard },
       { path: 'services', labelKey: 'services', icon: Tags },
+      { path: 'procedure', labelKey: 'procedure', icon: ClipboardList },
     ],
   },
   {

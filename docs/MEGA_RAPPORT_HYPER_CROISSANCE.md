@@ -28,7 +28,7 @@ Le fichier `server.ts` a été réécrit pour utiliser le modèle rapide et surp
 ---
 
 ## 🌐 STATUT DU DÉPLOIEMENT
-*   **Web (Production)** : 🟢 EN LIGNE (https://agy-platform.vercel.app)
+*   **Web (Production)** : 🟢 EN LIGNE (https://compta-flow.net)
 *   **Desktop (App Native)** : 🟢 COMPILÉ (ComptaFlow_Elite.exe sur le bureau)
 *   **Base de Données** : 🟢 SÉCURISÉE (Toutes les données de test ont été purgées)
 

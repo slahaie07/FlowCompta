@@ -7,7 +7,9 @@ import { Badge } from '../../../components/ui/Badge';
 import { toast } from 'sonner';
 import { useLanguage } from '../../../hooks/useLanguage';
 import { usePortalNavigate } from '../../../hooks/usePortalNavigate';
+import { useAuth } from '../../../hooks/useAuth';
 import { CONFIG } from '../../../lib/config';
+import { SupportLiveChat } from '../../features/components/SupportLiveChat';
 
 export function Support() {
   const [subject, setSubject] = useState('');
@@ -15,7 +17,9 @@ export function Support() {
   const [sent, setSent] = useState(false);
   const portalNavigate = usePortalNavigate();
   const { t } = useLanguage();
+  const { user, userData } = useAuth();
   const supportEmail = CONFIG.APP.SUPPORT_EMAIL;
+  const province = userData?.province;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +44,14 @@ export function Support() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-6">
+          <Card className="p-6" glow="gold">
+            <div className="mb-4">
+              <h3 className="text-xl font-serif text-ivoire">{t('support.liveChatTitle')}</h3>
+              <p className="text-xs text-slate-500 mt-1">{t('support.liveChatDesc')}</p>
+            </div>
+            <SupportLiveChat province={province} userId={user?.id} />
+          </Card>
+
           <Card className="p-8" glow="gold">
             <h3 className="text-xl font-serif text-ivoire mb-6">{t('support.formTitle')}</h3>
             {sent ? (

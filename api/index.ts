@@ -5,12 +5,13 @@ import fs from 'fs';
 import Stripe from 'stripe';
 import * as paypal from '@paypal/checkout-server-sdk';
 import { Resend } from 'resend';
-import { GoogleGenerativeAI, Schema, SchemaType } from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 import twilio from 'twilio';
 import pg from 'pg';
 import { createClient } from '@supabase/supabase-js';
+import { runAgentOrchestrator, listAgents, AGENT_REGISTRY, toPublicSupportReply } from '../src/agents/index';
 const { Client } = pg;
 
 dotenv.config();
@@ -566,17 +567,13 @@ app.get('/api/cron/elite-hunter', async (req, res) => {
        industry: industries[Math.floor(Math.random() * industries.length)]
     };
 
-    const prompt = `Génère un message d'approche ultra-personnalisé (approche 'Sniper' B2B) pour ce profil LinkedIn :
-    Nom: ${mockLead.name}
-    Titre: ${mockLead.title}
-    Entreprise: ${mockLead.company}
-    Industrie: ${mockLead.industry}
-    
-    Directives OBLIGATOIRES :
-    1. Ton : Conseiller de confiance, direct, très professionnel.
-    2. Personnalisation : Mentionne spécifiquement son entreprise et un défi typique de son industrie.
-    3. L'Offre : Propose une brève consultation sur l'optimisation fiscale et le runway.
-    4. Longueur : Maximum 4 phrases.`;
+    const prompt = `${AGENT_REGISTRY['marketing-hunter'].systemPrompt}
+
+Profil LinkedIn:
+Nom: ${mockLead.name}
+Titre: ${mockLead.title}
+Entreprise: ${mockLead.company}
+Industrie: ${mockLead.industry}`;
 
     const result = await agenticModel.generateContent(prompt);
     const sniperMessage = await result.response.text();
@@ -604,60 +601,76 @@ app.get('/api/cron/elite-hunter', async (req, res) => {
   }
 });
 
-// --- AGENTIC MIND ---
-const intentSchema = {
-    type: SchemaType.OBJECT,
-    properties: {
-        intent: {
-            type: SchemaType.STRING,
-            description: "Catégoriser l'intention de l'utilisateur: 'TAX', 'TECHNICAL', 'SALES', ou 'GENERAL'",
-        },
-    },
-    required: ["intent"],
-};
+// --- AGENTIC MIND (interne — non exposé aux clients) ---
+function isInternalAgentRequest(req: express.Request): boolean {
+  const secret = req.headers['x-comptaflow-internal'];
+  if (secret && String(secret) === ADMIN_SECRET) return true;
+  return false;
+}
+
+app.get('/api/internal/agents', async (req, res) => {
+  if (!isInternalAgentRequest(req)) {
+    const ctx = await getSuperAdminFromRequest(req);
+    if (!ctx) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+  }
+
+  const includeInternal = req.query.all === '1' || req.query.all === 'true';
+  res.json({
+    agents: listAgents({ internal: includeInternal }).map((a) => ({
+      id: a.id,
+      name: a.name,
+      intent: a.intent,
+      visibility: a.visibility,
+      description: a.description,
+    })),
+  });
+});
 
 app.post('/api/support/ai-chat', async (req, res) => {
-    const { message } = req.body;
+  const { message, context, history } = req.body;
 
-    try {
-        const routerResponse = await agenticModel.generateContent({
-            contents: [{ role: "user", parts: [{ text: `Analyse le message et donne l'intention: "${message}"` }] }],
-            generationConfig: {
-                responseMimeType: "application/json",
-                responseSchema: intentSchema,
-            }
-        });
-        
-        const intentData = JSON.parse(routerResponse.response.text());
-        const intent = intentData.intent;
-        botLog('AGENTIC_ROUTING', 'User', `Intent détecté: ${intent}`);
+  if (!message || typeof message !== 'string') {
+    return res.status(400).json({ error: 'message requis' });
+  }
 
-        let systemPrompt = "";
-        switch (intent) {
-            case 'TAX':
-                systemPrompt = "Tu es l'expert fiscal Comptaflow (Québec). Parle de T4, TPS/TVQ, et optimisations fiscales avec précision et sérieux.";
-                break;
-            case 'TECHNICAL':
-                systemPrompt = "Tu es l'ingénieur support Comptaflow. Aide le client avec la plateforme (coffre-fort, erreur, connexion) de manière concise.";
-                break;
-            case 'SALES':
-                systemPrompt = "Tu es le directeur commercial Comptaflow. Propose poliment nos services (Tenue de livres, T2, CFO) et invite à ouvrir un mandat via le portail.";
-                break;
-            default:
-                systemPrompt = "Tu es le concierge virtuel Comptaflow. Accueille chaleureusement et réponds de manière générale.";
-        }
+  try {
+    const result = await runAgentOrchestrator(
+      {
+        message,
+        context: { ...context, channel: 'support-chat' },
+        history: Array.isArray(history) ? history : undefined,
+      },
+      {
+        onRoute: (intent, agentId) => botLog('AGENTIC_ROUTING', 'User', `${intent} → ${agentId}`),
+      }
+    );
 
-        const specialistResponse = await agenticModel.generateContent({
-             contents: [
-                 { role: "user", parts: [{ text: `Système: ${systemPrompt}\nClient: ${message}` }] }
-             ]
-        });
+    const lang =
+      context?.language === 'en' || context?.language === 'ar' ? context.language : 'fr';
 
-        res.json({ answer: specialistResponse.response.text(), intent });
-    } catch (e: any) {
-        botLog('AGENTIC_CRASH', 'Support', e.message);
-        res.json({ answer: "L'intelligence de la plateforme effectue une maintenance. Votre CPA prendra le relais sous 24h." });
-    }
+    botLog('AGENTIC_REPLY', result.agentId, `${result.intent} ${result.latencyMs}ms`);
+    res.json(toPublicSupportReply(result, lang));
+  } catch (e: any) {
+    botLog('AGENTIC_CRASH', 'Support', e.message);
+    const lang =
+      context?.language === 'en' || context?.language === 'ar' ? context.language : 'fr';
+    res.json(
+      toPublicSupportReply(
+        {
+          answer:
+            lang === 'en'
+              ? "I'm briefly unavailable — your bookkeeper will follow up within 24 business hours."
+              : lang === 'ar'
+                ? 'أنا غير متاحة مؤقتاً — سيتابع محاسبك خلال 24 ساعة عمل.'
+                : 'Je suis momentanément indisponible — votre comptable reprendra le fil sous 24 h ouvrables.',
+          agentId: 'general',
+        },
+        lang
+      )
+    );
+  }
 });
 
 // --- AUTOMATED INTERAC E-TRANSFER RECONCILIATION VIA n8n ---
