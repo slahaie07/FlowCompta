@@ -13,6 +13,7 @@ import pg from 'pg';
 import { createClient } from '@supabase/supabase-js';
 import { runAgentOrchestrator, listAgents, AGENT_REGISTRY, toPublicSupportReply } from '../src/agents/index';
 import { runInternalCronJob, INTERNAL_CRON_JOBS } from './internal-jobs';
+import { applySupabaseMigrations } from './lib/supabaseMigrations';
 const { Client } = pg;
 
 dotenv.config();
@@ -1441,6 +1442,14 @@ app.post('/api/admin/create-sub-admin', async (req, res) => {
   }
 });
 
+app.post('/api/internal/apply-migrations', async (req, res) => {
+  if (!isInternalAgentRequest(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const result = await applySupabaseMigrations({ allFiles: true });
+  res.status(result.success ? 200 : 500).json(result);
+});
+
 // --- HEALTH CHECK (monitoring / stress tests) ---
 app.get('/api/health', (_req, res) => {
   const geminiLive = !!(geminiKey && geminiKey !== 'mock_gemini_api_key' && !geminiKey.startsWith('mock_'));
@@ -1456,6 +1465,7 @@ app.get('/api/health', (_req, res) => {
       resend: process.env.RESEND_API_KEY ? 'configured' : 'missing',
       adminSecret: process.env.ADMIN_SECRET ? 'configured' : 'default-fallback',
       cronSecret: process.env.CRON_SECRET ? 'configured' : 'missing',
+      dbPassword: process.env.SUPABASE_DB_PASSWORD ? 'configured' : 'missing',
     },
     agents: listAgents({ internal: false }).length,
   });
@@ -1559,4 +1569,18 @@ const setupStatic = async () => {
 };
 
 setupStatic();
+
+// Auto-apply DB migrations on cold start (Vercel production)
+if (process.env.VERCEL && process.env.AUTO_APPLY_DB_MIGRATIONS !== 'false') {
+  void applySupabaseMigrations()
+    .then((result) => {
+      if (result.success) {
+        console.log('[migrations] OK', result.host, result.message);
+      } else {
+        console.warn('[migrations] Skipped or failed:', result.message);
+      }
+    })
+    .catch((err: Error) => console.warn('[migrations] Error:', err.message));
+}
+
 export default app;
