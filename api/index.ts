@@ -1293,6 +1293,82 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+// --- RÉSEAU CANADA : détection région, légal, status ---
+const CANADA_REGIONS: Record<string, { code: string; nameFr: string; nameEn: string; privacyLaw: string; edgeRegion: string; seoSlug: string }> = {
+  QC: { code: 'QC', nameFr: 'Québec', nameEn: 'Quebec', privacyLaw: 'loi25', edgeRegion: 'yul1', seoSlug: 'quebec' },
+  ON: { code: 'ON', nameFr: 'Ontario', nameEn: 'Ontario', privacyLaw: 'pipeda', edgeRegion: 'yyz1', seoSlug: 'ontario' },
+  BC: { code: 'BC', nameFr: 'Colombie-Britannique', nameEn: 'British Columbia', privacyLaw: 'pipeda_bc', edgeRegion: 'yvr1', seoSlug: 'colombie-britannique' },
+  AB: { code: 'AB', nameFr: 'Alberta', nameEn: 'Alberta', privacyLaw: 'pipa_ab', edgeRegion: 'yyc1', seoSlug: 'alberta' },
+  MB: { code: 'MB', nameFr: 'Manitoba', nameEn: 'Manitoba', privacyLaw: 'pipeda', edgeRegion: 'ywg1', seoSlug: 'manitoba' },
+  SK: { code: 'SK', nameFr: 'Saskatchewan', nameEn: 'Saskatchewan', privacyLaw: 'pipeda', edgeRegion: 'yxe1', seoSlug: 'saskatchewan' },
+  NB: { code: 'NB', nameFr: 'Nouveau-Brunswick', nameEn: 'New Brunswick', privacyLaw: 'pipeda', edgeRegion: 'yfc1', seoSlug: 'nouveau-brunswick' },
+  NS: { code: 'NS', nameFr: 'Nouvelle-Écosse', nameEn: 'Nova Scotia', privacyLaw: 'pipeda', edgeRegion: 'yhz1', seoSlug: 'nouvelle-ecosse' },
+  PE: { code: 'PE', nameFr: 'Île-du-Prince-Édouard', nameEn: 'Prince Edward Island', privacyLaw: 'pipeda', edgeRegion: 'yhz1', seoSlug: 'ipe' },
+  NL: { code: 'NL', nameFr: 'Terre-Neuve-et-Labrador', nameEn: 'Newfoundland and Labrador', privacyLaw: 'pipeda', edgeRegion: 'yyt1', seoSlug: 'terre-neuve' },
+  YT: { code: 'YT', nameFr: 'Yukon', nameEn: 'Yukon', privacyLaw: 'pipeda', edgeRegion: 'yxy1', seoSlug: 'yukon' },
+  NT: { code: 'NT', nameFr: 'Territoires du Nord-Ouest', nameEn: 'Northwest Territories', privacyLaw: 'pipeda', edgeRegion: 'yxy1', seoSlug: 'tno' },
+  NU: { code: 'NU', nameFr: 'Nunavut', nameEn: 'Nunavut', privacyLaw: 'pipeda', edgeRegion: 'yxy1', seoSlug: 'nunavut' },
+};
+
+const detectProvince = (req: express.Request): string => {
+  const regionHeader = String(req.headers['x-vercel-ip-country-region'] ?? req.headers['cf-region-code'] ?? '');
+  if (regionHeader && CANADA_REGIONS[regionHeader.toUpperCase()]) return regionHeader.toUpperCase();
+  const country = String(req.headers['x-vercel-ip-country'] ?? req.headers['cf-ipcountry'] ?? 'CA');
+  if (country !== 'CA') return 'QC';
+  return 'QC';
+};
+
+app.get('/api/network/region', (req, res) => {
+  const province = detectProvince(req);
+  const region = CANADA_REGIONS[province] ?? CANADA_REGIONS.QC;
+  res.json({
+    province,
+    region,
+    country: 'CA',
+    dataRegion: 'ca-central-1',
+    site: 'https://compta-flow.net',
+  });
+});
+
+app.get('/api/network/legal', (req, res) => {
+  const province = detectProvince(req);
+  const region = CANADA_REGIONS[province] ?? CANADA_REGIONS.QC;
+  res.json({
+    province,
+    privacyLaw: region.privacyLaw,
+    patterns: [
+      { id: 'cookie_consent', route: '/cookies', required: true },
+      { id: 'privacy_policy', route: '/privacy', required: true },
+      { id: 'terms_of_service', route: '/terms', required: true },
+      { id: 'legal_notice', route: '/legal', required: true },
+      { id: 'data_residency', required: true, dataRegion: 'ca-central-1' },
+      { id: 'cpa_disclaimer', required: true },
+    ],
+    version: '2026.06',
+  });
+});
+
+app.get('/api/network/status', (_req, res) => {
+  res.json({
+    domain: 'compta-flow.net',
+    dataRegion: 'ca-central-1',
+    activeRegions: Object.keys(CANADA_REGIONS).length,
+    edgeNodes: [...new Set(Object.values(CANADA_REGIONS).map((r) => r.edgeRegion))],
+    compliance: { pipeda: true, loi25: true, dataInCanada: true },
+    legalPatternVersion: '2026.06',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.get('/sitemap.xml', (_req, res) => {
+  const base = 'https://compta-flow.net';
+  const paths = ['/', '/privacy', '/terms', '/legal', '/cookies', '/login', '/showcase',
+    ...Object.values(CANADA_REGIONS).map((r) => `/ca/${r.seoSlug}`)];
+  const urls = paths.map((p) => `<url><loc>${base}${p}</loc><changefreq>weekly</changefreq><priority>${p === '/' ? '1.0' : '0.8'}</priority></url>`).join('');
+  res.setHeader('Content-Type', 'application/xml');
+  res.send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`);
+});
+
 // ============================================================
 // 🏛 ...
 // ============================================================

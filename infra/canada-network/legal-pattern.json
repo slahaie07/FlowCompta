@@ -1,0 +1,15 @@
+{
+  "domain": "compta-flow.net",
+  "dataRegion": "ca-central-1",
+  "primaryEdge": "yul1",
+  "legalPatternVersion": "2026.06",
+  "patterns": [
+    { "id": "cookie_consent", "route": "/cookies", "laws": ["loi25", "pipeda"] },
+    { "id": "privacy_policy", "route": "/privacy", "laws": ["loi25", "pipeda"] },
+    { "id": "terms_of_service", "route": "/terms", "laws": ["all"] },
+    { "id": "legal_notice", "route": "/legal", "laws": ["all"] },
+    { "id": "data_residency", "dataRegion": "ca-central-1", "laws": ["all"] },
+    { "id": "cpa_disclaimer", "laws": ["all"] },
+    { "id": "loi25_officer", "laws": ["loi25"], "contact": "privacy@compta-flow.net" }
+  ]
+}

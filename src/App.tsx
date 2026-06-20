@@ -11,7 +11,11 @@ import { Privacy } from './components/common/Privacy';
 import { Showcase } from './components/common/Showcase';
 import { Terms } from './components/common/Terms';
 import { Legal } from './components/common/Legal';
+import { Cookies } from './components/common/Cookies';
+import { RegionalLanding } from './components/common/RegionalLanding';
+import { LegalCookieBanner } from './components/common/LegalCookieBanner';
 import { OrganicLoader } from './components/ui/OrganicLoader';
+import { CanadaNetworkProvider } from './context/CanadaNetworkProvider';
 
 import { useAuth } from './hooks/useAuth';
 import { useAppMode } from './hooks/useAppMode';
@@ -119,11 +123,14 @@ function AppContent() {
     );
 
   return (
+    <>
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/legal" element={<Legal />} />
+      <Route path="/cookies" element={<Cookies />} />
+      <Route path="/ca/:slug" element={<RegionalLanding />} />
       <Route path="/showcase" element={<Showcase />} />
 
       <Route
@@ -194,6 +201,8 @@ function AppContent() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    <LegalCookieBanner />
+    </>
   );
 }
 
@@ -202,9 +211,11 @@ export default function App() {
   return (
     <div className="w-full min-h-screen font-sans text-ivoire selection:bg-gold/30 selection:text-noir bg-noir overflow-x-hidden">
       <ErrorBoundary>
-        <Router>
-          <AppContent />
-        </Router>
+        <CanadaNetworkProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </CanadaNetworkProvider>
       </ErrorBoundary>
     </div>
   );

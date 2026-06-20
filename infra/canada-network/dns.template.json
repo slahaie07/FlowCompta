@@ -1,0 +1,15 @@
+{
+  "dns": {
+    "A": { "host": "compta-flow.net", "value": "76.76.21.21", "ttl": 3600 },
+    "CNAME": { "host": "www.compta-flow.net", "value": "cname.vercel-dns.com", "ttl": 3600 }
+  },
+  "vercel": {
+    "primaryRegion": "yul1",
+    "framework": "vite",
+    "domain": ["compta-flow.net", "www.compta-flow.net"]
+  },
+  "supabase": {
+    "region": "ca-central-1",
+    "provider": "aws"
+  }
+}

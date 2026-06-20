@@ -17,7 +17,6 @@ export function Landing() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [showCookieBanner, setShowCookieBanner] = useState(false);
   const { lang, toggleLanguage, t } = useLanguage();
 
   const goToSignup = () => navigate('/login?next=/onboarding&register=1');
@@ -25,13 +24,6 @@ export function Landing() {
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', handleScroll);
-    
-    // Check cookie consent for Law 25
-    const accepted = localStorage.getItem('comptaflow_cookies_accepted');
-    if (!accepted) {
-      setShowCookieBanner(true);
-    }
-    
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -336,47 +328,11 @@ export function Landing() {
             <button onClick={() => navigate('/privacy')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">{t('footer.privacy')}</button>
             <button onClick={() => navigate('/terms')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">{t('footer.terms')}</button>
             <button onClick={() => navigate('/legal')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">{t('footer.legal')}</button>
+            <button onClick={() => navigate('/cookies')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">Cookies</button>
             <a href="/admin" className="hover:text-gold transition-colors">{t('footer.admin')}</a>
           </div>
         </div>
       </footer>
-
-      {showCookieBanner && (
-        <motion.div 
-          initial={{ opacity: 0, y: 100 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="fixed bottom-6 inset-x-6 z-[200] max-w-4xl mx-auto p-6 bg-noir/95 border border-gold/30 rounded-2xl shadow-2xl backdrop-blur-lg flex flex-col md:flex-row items-center justify-between gap-6"
-        >
-          <div className="space-y-1 text-left">
-            <h4 className="text-gold font-serif text-lg font-bold flex items-center gap-2">
-              {t('cookies.title')}
-            </h4>
-            <p className="text-silver text-xs font-light max-w-2xl leading-relaxed">
-              {t('cookies.desc')}
-            </p>
-          </div>
-          <div className="flex gap-3 shrink-0">
-            <button 
-              onClick={() => {
-                localStorage.setItem('comptaflow_cookies_accepted', 'false');
-                setShowCookieBanner(false);
-              }}
-              className="px-5 py-2 text-xs font-bold uppercase tracking-widest text-silver hover:text-ivoire border border-white/10 rounded-lg hover:bg-white/5 transition-all"
-            >
-              {t('cookies.decline')}
-            </button>
-            <button 
-              onClick={() => {
-                localStorage.setItem('comptaflow_cookies_accepted', 'true');
-                setShowCookieBanner(false);
-              }}
-              className="px-5 py-2 text-xs font-bold uppercase tracking-widest text-noir bg-gold hover:bg-gold-light rounded-lg transition-all shadow-md shadow-gold/20"
-            >
-              {t('cookies.accept')}
-            </button>
-          </div>
-        </motion.div>
-      )}
     </div>
   );
 }
