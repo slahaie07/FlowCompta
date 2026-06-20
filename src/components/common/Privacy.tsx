@@ -45,7 +45,7 @@ export function Privacy() {
               <li><strong>Informations d'identité et de contact</strong> : Nom, courriel, téléphone, adresse résidentielle.</li>
               <li><strong>Informations d'entreprise</strong> : Nom commercial, numéro d'entreprise provincial (NEQ, BN, etc.).</li>
               <li><strong>Renseignements fiscaux</strong> : NAS (Numéro d'Assurance Sociale) uniquement pour les déclarations d'impôts de particuliers (T1), revenus d'entreprise, factures, pièces justificatives.</li>
-              <li><strong>Données financières</strong> : Relevés de transactions, informations de paiement chiffrées via Stripe.</li>
+              <li><strong>Données financières</strong> : Relevés de transactions, références de virement Interac e-Transfer (aucune carte de crédit traitée sur la plateforme).</li>
             </ul>
           </section>
 

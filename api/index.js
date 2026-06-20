@@ -3,7 +3,6 @@ import express from "express";
 import path2 from "path";
 import cors from "cors";
 import fs2 from "fs";
-import Stripe from "stripe";
 import { Resend } from "resend";
 import { GoogleGenerativeAI as GoogleGenerativeAI2 } from "@google/generative-ai";
 import crypto from "crypto";
@@ -166,7 +165,7 @@ Cat\xE9gories:
 
 - PAYROLL: paie, T4, Relev\xE9 1, d\xE9ductions \xE0 la source, CNESST, RRQ/RPC
 
-- BILLING: factures, paiements, Interac, Stripe, PayPal, PDF, relances
+- BILLING: factures, paiements Interac e-Transfer, PDF, relances
 
 - BOOKKEEPING: transactions, cat\xE9gorisation, rapprochement bancaire, grand livre
 
@@ -206,9 +205,9 @@ Cat\xE9gories:
     id: "billing",
     intent: "BILLING",
     name: "Facturation & paiements",
-    description: "Factures, Interac, Stripe, relances.",
+    description: "Factures, Interac e-Transfer, relances.",
     visibility: "routed",
-    systemPrompt: `${BASE_TONE} ${CLIENT_STEALTH} Tu aides avec les factures ComptaFlow: cr\xE9ation, envoi PDF, paiement Interac e-Transfer, Stripe/PayPal, statuts (brouillon, envoy\xE9e, pay\xE9e), relances. \xC9tapes concr\xE8tes dans le portail client (/portal/client/invoices).`
+    systemPrompt: `${BASE_TONE} ${CLIENT_STEALTH} Tu aides avec les factures ComptaFlow: cr\xE9ation, envoi PDF, paiement par virement Interac e-Transfer uniquement (aucune carte), statuts (brouillon, envoy\xE9e, pay\xE9e), relances. \xC9tapes concr\xE8tes dans le portail client (/portal/client/invoices).`
   },
   bookkeeping: {
     id: "bookkeeping",
@@ -1472,7 +1471,6 @@ var sanitizeEnvVar = (val) => {
   if (!val) return "";
   return val.replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
 };
-var stripeKey = sanitizeEnvVar(process.env.STRIPE_SECRET_KEY) || "sk_test_mock_stripe_key_51P";
 var resendKey = sanitizeEnvVar(process.env.RESEND_API_KEY) || "re_mock_resend_key_123";
 var twilioSid = sanitizeEnvVar(process.env.TWILIO_ACCOUNT_SID) || "AC_mock_twilio_sid";
 var twilioToken = sanitizeEnvVar(process.env.TWILIO_AUTH_TOKEN) || "mock_twilio_token";
@@ -1482,7 +1480,6 @@ var genAI = new GoogleGenerativeAI2(geminiKey);
 var visionModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 var agenticModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 var resend = new Resend(resendKey);
-var stripe = new Stripe(stripeKey, { apiVersion: "2025-02-24.acacia" });
 var twilioClient = twilio(twilioSid, twilioToken);
 var ADMIN_PHONE = "+18192158545";
 var supabaseUrl = resolveSupabaseUrl();
@@ -1587,7 +1584,7 @@ app.use((req, res, next) => {
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.paypal.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.supabase.co https://images.unsplash.com; connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com; frame-src 'self' https://js.stripe.com https://www.paypal.com; font-src 'self' https://fonts.gstatic.com;");
+  res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.supabase.co https://images.unsplash.com; connect-src 'self' https://*.supabase.co; font-src 'self' https://fonts.gstatic.com;");
   next();
 });
 var rateLimitStore = {};
@@ -1785,85 +1782,29 @@ app.post("/api/ai/analyze-document", async (req, res) => {
   }
 });
 app.post("/api/payment/create-checkout", async (req, res) => {
-  const { items, method, customerEmail, reference } = req.body;
-  if (!items || !method || !customerEmail || !reference) {
+  const { items, customerEmail, reference, method } = req.body;
+  if (!items || !customerEmail || !reference) {
     return res.status(400).json({ error: "Param\xE8tres de facturation manquants." });
   }
-  if (method === "interac") {
-    botLog("PAYMENT_PENDING", reference, `Instructions Interac envoy\xE9es \xE0 ${customerEmail}`);
-    await sendSupremeEmail(customerEmail, `Action : Virement Comptaflow ${reference}`, `
+  if (method && method !== "interac") {
+    return res.status(400).json({
+      error: "Seul le virement Interac e-Transfer est accept\xE9.",
+      supportedMethods: ["interac"]
+    });
+  }
+  botLog("PAYMENT_PENDING", reference, `Instructions Interac envoy\xE9es \xE0 ${customerEmail}`);
+  await sendSupremeEmail(customerEmail, `Action : Virement Comptaflow ${reference}`, `
             <h2>Validation de votre mandat</h2>
             <p>Veuillez effectuer le virement de <strong>${items.reduce((a, b) => a + b.price, 0) + 60}$</strong>.</p>
             <p>Destinataire: <strong>s.lahaie07@gmail.com</strong><br>R\xE9f\xE9rence: <strong>${reference}</strong></p>
         `);
-    return res.json({ success: true, manual: true, reference });
-  }
-  if (method === "card") {
-    try {
-      const lineItems = items.map((item) => ({
-        price_data: {
-          currency: "cad",
-          product_data: {
-            name: item.name || item.code,
-            description: item.desc || item.code
-          },
-          unit_amount: Math.round(Number(item.price) * 100)
-        },
-        quantity: 1
-      }));
-      lineItems.push({
-        price_data: {
-          currency: "cad",
-          product_data: {
-            name: "Frais d'ouverture de dossier (Comptaflow)",
-            description: "Frais administratifs et configuration initiale du coffre-fort s\xE9curis\xE9"
-          },
-          unit_amount: 6e3
-        },
-        quantity: 1
-      });
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        line_items: lineItems,
-        mode: "payment",
-        customer_email: customerEmail,
-        client_reference_id: reference,
-        success_url: `${req.headers.origin || "https://compta-flow.net"}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${req.headers.origin || "https://compta-flow.net"}/portal/client/services`
-      });
-      botLog("PAYMENT_CHECKOUT_CREATED", reference, `Session Stripe cr\xE9\xE9e: ${session.id}`);
-      return res.json({ success: true, url: session.url });
-    } catch (error) {
-      botLog("PAYMENT_CHECKOUT_ERROR", reference, error.message);
-      return res.status(500).json({ error: error.message });
-    }
-  }
-  return res.status(400).json({ error: `Mode de paiement non support\xE9 : ${method}` });
+  return res.json({ success: true, manual: true, method: "interac", reference });
 });
-app.post("/api/payment/setup-direct-debit", async (req, res) => {
-  const { userId, email } = req.body;
-  try {
-    const customer = await stripe.customers.create({ email, metadata: { userId } });
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["acss_debit"],
-      mode: "setup",
-      customer: customer.id,
-      success_url: `${req.headers.origin}/success?setup_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin}/portal/client/services`,
-      payment_method_options: {
-        acss_debit: {
-          mandate_options: {
-            payment_schedule: "interval",
-            interval_description: "Monthly service fees for ComptaFlow Elite."
-          }
-        }
-      }
-    });
-    res.json({ url: session.url });
-  } catch (error) {
-    botLog("STRIPE_ERROR", "System", error.message);
-    res.status(500).json({ error: error.message });
-  }
+app.post("/api/payment/setup-direct-debit", (_req, res) => {
+  res.status(410).json({
+    error: "Seul le virement Interac e-Transfer est accept\xE9. Le pr\xE9l\xE8vement automatique n'est pas disponible.",
+    supportedMethods: ["interac"]
+  });
 });
 app.post("/api/intelligence/analyze", async (req, res) => {
   const { transactions, query, profile } = req.body;

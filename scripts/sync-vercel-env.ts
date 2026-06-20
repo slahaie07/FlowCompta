@@ -21,9 +21,6 @@ const PROD_VARS = [
   'ADMIN_SECRET',
   'CRON_SECRET',
   'RESEND_API_KEY',
-  'STRIPE_SECRET_KEY',
-  'STRIPE_WEBHOOK_SECRET',
-  'VITE_STRIPE_PUBLIC_KEY',
 ] as const;
 
 function loadDotEnvLocal() {

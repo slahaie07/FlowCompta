@@ -31,9 +31,8 @@ export const CONFIG = {
     SUBSCRIPTION: sanitizeVar(getEnvVar('VITE_N8N_SUBSCRIPTION_WEBHOOK_URL')),
   },
 
-  // Paiements
-  STRIPE_PUBLIC_KEY: sanitizeVar(getEnvVar('VITE_STRIPE_PUBLIC_KEY') || 'pk_test_...'),
-  PAYPAL_CLIENT_ID: sanitizeVar(getEnvVar('VITE_PAYPAL_CLIENT_ID') || 'test'),
+  // Paiements — Interac e-Transfer uniquement (aucune carte / PayPal)
+  PAYMENT_METHOD: 'interac' as const,
 
   // Paramètres Métier
   FEES: {

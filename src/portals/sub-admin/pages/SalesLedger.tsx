@@ -11,9 +11,7 @@ import { OrganicLoader } from '../../../components/ui/OrganicLoader';
 const fmt = (n: number) => n.toLocaleString('fr-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 const FEE_LABELS: Record<string, string> = {
-  interac: 'Interac (0%)',
-  stripe: 'Stripe (2.9%+0.30$)',
-  paypal: 'PayPal (3.49%+0.49$)',
+  interac: 'Interac e-Transfer (0%)',
   custom: 'Personnalisé',
 };
 

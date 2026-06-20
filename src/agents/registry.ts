@@ -40,7 +40,7 @@ Catégories:
 
 - PAYROLL: paie, T4, Relevé 1, déductions à la source, CNESST, RRQ/RPC
 
-- BILLING: factures, paiements, Interac, Stripe, PayPal, PDF, relances
+- BILLING: factures, paiements Interac e-Transfer, PDF, relances
 
 - BOOKKEEPING: transactions, catégorisation, rapprochement bancaire, grand livre
 
@@ -108,11 +108,11 @@ Catégories:
 
     name: 'Facturation & paiements',
 
-    description: 'Factures, Interac, Stripe, relances.',
+    description: 'Factures, Interac e-Transfer, relances.',
 
     visibility: 'routed',
 
-    systemPrompt: `${BASE_TONE} ${CLIENT_STEALTH} Tu aides avec les factures ComptaFlow: création, envoi PDF, paiement Interac e-Transfer, Stripe/PayPal, statuts (brouillon, envoyée, payée), relances. Étapes concrètes dans le portail client (/portal/client/invoices).`,
+    systemPrompt: `${BASE_TONE} ${CLIENT_STEALTH} Tu aides avec les factures ComptaFlow: création, envoi PDF, paiement par virement Interac e-Transfer uniquement (aucune carte), statuts (brouillon, envoyée, payée), relances. Étapes concrètes dans le portail client (/portal/client/invoices).`,
 
   },
 
