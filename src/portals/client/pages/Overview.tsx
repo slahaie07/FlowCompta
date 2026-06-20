@@ -90,6 +90,7 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
   return (
     <div className="space-y-10">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative">
+        <div className="absolute -top-16 -left-8 w-64 h-64 bg-gold/[0.04] rounded-full blur-[100px] pointer-events-none" />
         <div className="relative z-10">
           <motion.h1 
             initial={{ opacity: 0, x: -20 }}

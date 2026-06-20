@@ -17,7 +17,7 @@ export function Pricing() {
           {t('pricing.badge')}
         </Badge>
         <h2 className="text-4xl md:text-5xl font-serif font-bold text-ivoire">
-          {t('services.title')}
+          <span className="animated-gradient-text">{t('services.title')}</span>
         </h2>
         <p className="text-slate-500 max-w-2xl mx-auto font-medium">{t('services.subtitle')}</p>
       </div>
@@ -26,7 +26,7 @@ export function Pricing() {
         <ServicesCatalogSection t={t} compact />
       </div>
 
-      <div className="max-w-4xl mx-auto p-12 glass-card rounded-[2.5rem] border border-white/5 relative overflow-hidden">
+      <div className="max-w-4xl mx-auto p-12 glass-card premium-border-gold rounded-[2.5rem] relative overflow-hidden">
         <div className="absolute inset-0 bg-gold/[0.01]" />
         <div className="relative z-10 space-y-10">
           <div className="text-center space-y-2">

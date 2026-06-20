@@ -51,7 +51,7 @@ export function ServicesCatalogSection({ t, compact = false }: ServicesCatalogSe
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.05 }}
-                  className="group py-6 md:py-8 border-b border-white/10 flex flex-col md:flex-row md:items-center gap-6 cursor-pointer hover:bg-gold/[0.03] transition-colors px-4 -mx-4 rounded-lg"
+                  className="group py-6 md:py-8 border-b border-white/10 flex flex-col md:flex-row md:items-center gap-6 cursor-pointer hover:bg-gold/[0.03] transition-colors px-4 -mx-4 rounded-xl hover:shadow-[0_0_24px_rgba(212,175,55,0.06)]"
                   onClick={() => navigate('/login?next=/onboarding&register=1')}
                 >
                   <span className="text-slate-500 font-serif text-sm tracking-widest shrink-0">

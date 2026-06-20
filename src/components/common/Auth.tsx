@@ -215,10 +215,11 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
   };
 
   return (
-    <div className="relative min-h-screen bg-noir text-ivoire flex items-center justify-center py-20 px-6 overflow-hidden">
+    <div className="relative min-h-screen bg-noir text-ivoire flex items-center justify-center py-20 px-6 overflow-hidden brand-hero-glow">
       {/* Background Glows */}
+      <div className="aurora-bg opacity-40" />
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-gold/5 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-sapphire/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-gold/[0.03] rounded-full blur-[150px] pointer-events-none" />
 
       <AnimatePresence mode="wait">
         {view === 'choice' ? (
@@ -230,9 +231,9 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
             className="w-full max-w-2xl text-center space-y-12 relative z-10"
           >
              <div className="space-y-4">
-                <span className="text-xs uppercase tracking-[0.4em] font-black text-gold">{t('auth.tagline')}</span>
+                <span className="premium-badge inline-block">{t('auth.tagline')}</span>
                 <h1 className="text-5xl md:text-7xl font-serif font-bold text-ivoire tracking-tight italic leading-tight">
-                  Portail <span className="animated-gradient-text">ComptaFlow.</span>
+                  Portail <span className="animated-gradient-text not-italic">ComptaFlow.</span>
                 </h1>
                 <p className="text-slate-400 font-light text-base max-w-lg mx-auto leading-relaxed">
                   {t('auth.subtitle')}
@@ -243,7 +244,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                 <button
                   type="button"
                   onClick={() => setView('login')}
-                  className="group relative p-8 md:p-12 rounded-[2.5rem] bg-surface border border-white/5 hover:border-gold/30 transition-all duration-500 text-center space-y-6 z-30 cursor-pointer overflow-hidden shadow-xl"
+                  className="group relative p-8 md:p-12 rounded-[2.5rem] glass-card premium-border-gold text-center space-y-6 z-30 cursor-pointer overflow-hidden"
                 >
                    <div className="absolute inset-0 bg-gold/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
                    <div className="w-16 h-16 rounded-2xl bg-gold/5 border border-gold/10 flex items-center justify-center text-gold mx-auto group-hover:bg-gold group-hover:text-noir transition-all duration-500 relative z-10">
@@ -258,7 +259,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                 <button
                   type="button"
                   onClick={() => setView('register')}
-                  className="group relative p-8 md:p-12 rounded-[2.5rem] bg-surface border border-white/5 hover:border-gold/30 transition-all duration-500 text-center space-y-6 z-30 cursor-pointer overflow-hidden shadow-xl"
+                  className="group relative p-8 md:p-12 rounded-[2.5rem] glass-card premium-border-gold text-center space-y-6 z-30 cursor-pointer overflow-hidden"
                 >
                    <div className="absolute inset-0 bg-gold/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
                    <div className="w-16 h-16 rounded-2xl bg-gold/5 border border-gold/10 flex items-center justify-center text-gold mx-auto group-hover:bg-gold group-hover:text-noir transition-all duration-500 relative z-10">
@@ -279,7 +280,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
             exit={{ opacity: 0, scale: 1.05 }}
             className="relative z-10 w-full max-w-md"
           >
-            <Card className="p-10 relative bg-surface border-gold/20 shadow-2xl" glow="gold">
+            <Card className="p-10 relative glass-card premium-border-gold shadow-2xl" glow="gold">
               <button
                 type="button"
                 onClick={() => { setView('choice'); setError(''); setEmailNotConfirmed(false); }}
