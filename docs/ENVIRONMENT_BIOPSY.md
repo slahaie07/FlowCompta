@@ -42,15 +42,15 @@ Rapport généré le **20 juin 2026** après audit complet du workspace, des dé
 
 > **Correction appliquée :** le build Vite fusionne désormais `process.env` (intégration Vercel Supabase) avec les fichiers `.env`, et injecte `VITE_SUPABASE_ANON_KEY` dans le bundle client. L’ancienne clé fallback hardcodée (projet obsolète) a été retirée.
 
-### CI/CD — GitHub Actions
+### CI/CD — Vercel (gratuit, remplace GitHub Actions)
 
 | Workflow | Déclencheur | Statut |
 |----------|-------------|--------|
-| Canada Network Deploy | push `main` / `cursor/**` | **Bloqué** — compte GitHub Actions verrouillé (facturation) |
+| Canada Network Deploy | `workflow_dispatch` uniquement | Optionnel — compte Actions peut être verrouillé (facturation) |
 | Deploy to GitHub Pages | ~~push main~~ → `workflow_dispatch` | Désactivé sur push (conflit avec Vercel) |
 | Cloudflare Pages | `workflow_dispatch` | Inactif (legacy) |
 
-Le déploiement production repose sur **l’intégration Git Vercel** (indépendante des Actions). Les pushes sur `main` déclenchent le build Vercel si le projet est lié au dépôt.
+Le déploiement production repose sur **l’intégration Git Vercel** (indépendante des Actions). **CI active :** chaque push sur `main` déclenche **Vercel** avec `buildCommand: npm run ci` (lint + 61 tests + vérif Canada + build). Si une étape échoue, le déploiement est annulé — sans payer GitHub. En local : `npm run ci`
 
 ### Alternatifs configurés mais non utilisés
 
