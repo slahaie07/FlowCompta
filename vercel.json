@@ -3,10 +3,13 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "regions": ["yul1"],
+  "regions": [
+    "yul1"
+  ],
   "functions": {
     "api/index.js": {
-      "maxDuration": 60
+      "maxDuration": 60,
+      "includeFiles": "api/serverless.cjs"
     }
   },
   "headers": [
