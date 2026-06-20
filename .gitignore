@@ -11,9 +11,13 @@ coverage/
 *.log
 .env*
 !.env.example
+!.env.n8n.example
 .vercel
 vercel_env*.txt
 .secrets.local.txt
+.n8n-data/
+.n8n-credentials.local
+.env.n8n
 
 # Local command outputs (debug)
 *-out.txt

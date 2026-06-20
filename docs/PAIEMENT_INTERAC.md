@@ -76,4 +76,6 @@ Temps habituel côté comptable : **1 à 2 minutes par facture**.
 Si un jour vous disposez d'une instance n8n + boîte IMAP, vous pouvez importer `n8n-interac-reconciliation.json` pour automatiser l'étape 5.  
 **Sans n8n, rien ne manque** — la production est complète en mode manuel.
 
+Pour créer un compte n8n local : `docs/N8N_COMPTE.md` (`npm run n8n:up` puis `npm run n8n:setup`).
+
 Voir aussi : `docs/AUTOMATED_RECONCILIATION.md` (section automatisation avancée).

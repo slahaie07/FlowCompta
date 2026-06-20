@@ -22,7 +22,10 @@
     "setup:print-sql": "tsx scripts/print-setup-sql.ts",
     "setup:windows": "powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1",
     "agents:list": "tsx scripts/agents-cli.ts --list",
-    "agents:ask": "tsx scripts/agents-cli.ts"
+    "agents:ask": "tsx scripts/agents-cli.ts",
+    "n8n:up": "docker compose up -d n8n",
+    "n8n:down": "docker compose down",
+    "n8n:setup": "tsx scripts/n8n-create-account.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
