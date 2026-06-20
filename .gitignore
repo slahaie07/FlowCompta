@@ -11,4 +11,10 @@ coverage/
 *.log
 .env*
 !.env.example
-.vercel 
+.vercel
+
+# Artefacts locaux / binaires — ne pas versionner
+backups/
+src/_archive/
+*.exe
+*.dll 

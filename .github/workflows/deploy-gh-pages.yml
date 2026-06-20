@@ -3,10 +3,10 @@
 
 name: Deploy to GitHub Pages
 
+# Désactivé sur push — production hébergée sur Vercel (compta-flow.net).
+# Réactiver uniquement si vous migrez hors Vercel.
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 # Définir les permissions minimales requises pour le déploiement sécurisé sur GitHub Pages
 permissions:
