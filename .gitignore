@@ -1,1 +1,13 @@
-node_modules/ build/ dist/ api/index.cjs api/index.cjs.map coverage/ .DS_Store *.log .env* !.env.example  .vercel .env* 
+node_modules/
+build/
+dist/
+api/serverless.cjs
+api/serverless.cjs.map
+api/index.cjs
+api/index.cjs.map
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+.vercel 
