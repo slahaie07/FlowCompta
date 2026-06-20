@@ -75,10 +75,12 @@ npm run setup:windows
 
 Référence complète : **`docs/DEV_COMMANDS.md`**
 
-## 📚 Documentation pour l'Architecte
-- `PROJECT_BLUEPRINT.md` : Guide suprême de l'architecture.
-- `database.sql` : Schéma de base de données complet et sécurisé.
-- `Comptaflow_HUB.html` : Cockpit local reliant tous les services.
+## 📚 Documentation
+- `docs/ENVIRONMENT_BIOPSY.md` : État prod et environnements
+- `docs/FINAL_PRODUCTION_CHECKLIST.md` : Checklist lancement
+- `docs/DEV_COMMANDS.md` : Toutes les commandes npm
+- `PROJECT_BLUEPRINT.md` : Architecture détaillée
+- `comptaflow_migration.sql` : Schéma Supabase de base
 
 ---
 © 2026 Comptaflow — Québec, Canada.

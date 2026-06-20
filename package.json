@@ -19,7 +19,6 @@
     "setup:all": "npm run ci && npm run finish:setup && npm run verify:network",
     "seed:admins": "tsx scripts/seed-admin-users.ts",
     "seed:admins:dry-run": "tsx scripts/seed-admin-users.ts --dry-run",
-    "seed:admin-users": "tsx scripts/seed-admin-users.ts",
     "setup:print-sql": "tsx scripts/print-setup-sql.ts",
     "setup:windows": "powershell -ExecutionPolicy Bypass -File scripts/setup-windows.ps1",
     "agents:list": "tsx scripts/agents-cli.ts --list",

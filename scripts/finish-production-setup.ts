@@ -83,7 +83,7 @@ async function main() {
   console.log(`  SQL manuel : https://supabase.com/dashboard/project/${PROJECT_REF}/sql/new`);
   console.log('  npm run db:migrate          # si SUPABASE_DB_PASSWORD défini');
   console.log('  npm run vercel:sync-env     # si VERCEL_TOKEN + .env.local');
-  console.log('  ./scripts/verify-canada-network.sh');
+  console.log('  npm run verify:network     # vérif prod réseau Canada (Windows OK)');
 
   if (pending === 0) {
     console.log('\n✅ Production complète.\n');

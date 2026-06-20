@@ -4,7 +4,7 @@ Tous les scripts npm utilisent `tsx` ou `node` directement — **aucun Git Bash 
 
 ## Ouvrir ComptaFlow (Windows)
 
-**Ne double-cliquez pas** sur `Comptaflow_HUB.html` ou d'autres fichiers `.html` du dépôt : si Windows a associé `.html` à Git Bash, un terminal s'ouvre au lieu du navigateur.
+**Ne double-cliquez pas** sur des fichiers `.html` ou `.sh` du dépôt : si Windows les a associés à Git Bash, un terminal s'ouvre au lieu du navigateur.
 
 ### Méthode recommandée
 
