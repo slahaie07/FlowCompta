@@ -46,7 +46,7 @@ jobs:
 
   deploy-vercel:
     needs: build-and-verify
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/cursor/'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -71,11 +71,11 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
+          vercel-args: ${{ github.ref == 'refs/heads/main' && '--prod' || '' }}
           working-directory: ./
 
       - name: Vérifier réseau production
-        if: env.VERCEL_TOKEN != ''
+        if: env.VERCEL_TOKEN != '' && github.ref == 'refs/heads/main'
         run: chmod +x scripts/verify-canada-network.sh && ./scripts/verify-canada-network.sh
         env:
           COMPTAFLOW_URL: https://compta-flow.net

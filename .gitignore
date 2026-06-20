@@ -1,6 +1,7 @@
 node_modules/
 build/
 dist/
+api/index.js
 api/index.js.map
 api/index.cjs
 api/index.cjs.map
@@ -11,4 +12,6 @@ coverage/
 *.log
 .env*
 !.env.example
-.vercel 
+.vercel
+backups/
+local_db.json

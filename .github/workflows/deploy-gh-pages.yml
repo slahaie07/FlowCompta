@@ -3,10 +3,10 @@
 
 name: Deploy to GitHub Pages
 
+# Désactivé sur push — production sur Vercel (compta-flow.net).
+# GitHub Pages utilisait base /flowcompta/ et entrait en conflit avec Vercel.
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 # Définir les permissions minimales requises pour le déploiement sécurisé sur GitHub Pages
 permissions:
