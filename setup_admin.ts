@@ -4,7 +4,7 @@
  * Alternatives (no local service role):
  *   1. docs/SETUP_WITHOUT_CLI.md
  *   2. scripts/seed-admins-manual.sql (Supabase SQL Editor)
- *   3. POST /api/bootstrap-admins (Vercel + ADMIN_SECRET + SUPABASE_SERVICE_ROLE_KEY)
+ *   3. POST /api/bootstrap-admins (Vercel + ADMIN_SECRET + SUPABASE_SECRET_KEY)
  *   4. SEED_ADMIN_PASSWORD=*** npm run seed:admins (when service role available locally)
  */
 console.error(`

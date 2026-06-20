@@ -102,11 +102,17 @@ Mise à jour :
 
 ## 5. Actions restantes (côté propriétaire)
 
-1. **Vercel** — ajouter `SUPABASE_SERVICE_ROLE_KEY` en production
-2. **GitHub** — résoudre le verrouillage facturation Actions (ou s’appuyer uniquement sur Vercel Git)
-3. **Stripe** — passer aux clés `sk_live_` / `pk_live_` si la facturation live est souhaitée
-4. **Supabase** — exécuter `supabase/migrations/20260619_rls_hardening.sql` si pas déjà fait
-5. **n8n** — importer `n8n-onboarding-automation.json` (optionnel)
+1. **Vercel** — ajouter `SUPABASE_SERVICE_ROLE_KEY` en production  
+   - Supabase → [Settings → API](https://supabase.com/dashboard/project/hnxdlzdgiascuawgydir/settings/api) → `service_role`  
+   - Puis `npm run vercel:sync-env` (avec `VERCEL_TOKEN` + `.env.local`) ou collage manuel dans Vercel
+2. **Supabase RLS** — erreur `42P17` (récursion) sur le sélecteur de partenaires :
+   ```bash
+   npm run db:migrate   # avec SUPABASE_DB_PASSWORD
+   ```
+   Ou coller `supabase/migrations/20260620_fix_profiles_rls_recursion.sql` dans le SQL Editor.
+3. **GitHub** — résoudre le verrouillage facturation Actions (optionnel)
+4. **Stripe** — clés `live` si facturation réelle souhaitée
+5. **Vérification** — `npm run finish:setup`
 
 ---
 
