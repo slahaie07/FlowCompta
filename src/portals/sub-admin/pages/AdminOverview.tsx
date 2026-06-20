@@ -1,4 +1,4 @@
-import { BarChart3, Users, Clock, TrendingUp, ArrowUpRight, Activity, Send, AlertTriangle } from 'lucide-react';
+import { BarChart3, Users, Clock, TrendingUp, ArrowUpRight, Activity, Send, AlertTriangle, Calculator } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { UserData, ClientRecord } from '../../../types';
 import { Card } from '../../../components/ui/Card';
@@ -55,6 +55,24 @@ export function AdminOverview() {
           <span className="text-xs font-black uppercase tracking-widest text-amber-400">Voir →</span>
         </Link>
       )}
+
+      <Link
+        to={getPortalPath('sub_admin', 'quote')}
+        className="flex items-center justify-between gap-4 rounded-2xl border border-gold/30 bg-gold/5 px-6 py-5 transition hover:bg-gold/10 group"
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold group-hover:scale-105 transition-transform">
+            <Calculator size={22} />
+          </div>
+          <div>
+            <p className="font-bold text-ivoire">{t('adminHub.calculatorTitle')}</p>
+            <p className="text-xs text-slate-400 mt-1 leading-relaxed max-w-xl">{t('adminHub.calculatorDesc')}</p>
+          </div>
+        </div>
+        <span className="text-xs font-black uppercase tracking-widest text-gold shrink-0">
+          {t('adminHub.openCalculator')} →
+        </span>
+      </Link>
 
       {/* Admin Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">

@@ -59,6 +59,7 @@ export const SUB_ADMIN_PORTAL_NAV: PortalNavSection[] = [
   {
     sectionKey: 'production',
     items: [
+      { path: 'quote', labelKey: 'quote_calculator', icon: Calculator },
       { path: 'transactions', labelKey: 'transactions', icon: Receipt },
       { path: 'invoices', labelKey: 'invoices', icon: FileText },
       { path: 'sales_ledger', labelKey: 'sales_ledger', icon: BookOpen },
@@ -84,6 +85,7 @@ export const SUPER_ADMIN_PORTAL_NAV: PortalNavSection[] = [
       { path: 'super_subadmins', labelKey: 'super_subadmins', icon: Shield },
       { path: 'super_clients', labelKey: 'super_clients', icon: Users },
       { path: 'super_invoices', labelKey: 'super_invoices', icon: FileText },
+      { path: 'quote', labelKey: 'quote_calculator', icon: Calculator },
       { path: 'sales_ledger', labelKey: 'sales_ledger_global', icon: BookOpen },
     ],
   },

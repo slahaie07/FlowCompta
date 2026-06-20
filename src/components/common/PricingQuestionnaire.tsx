@@ -22,6 +22,16 @@ interface PricingQuestionnaireProps {
   onContinue?: (serviceId: ServiceId) => void;
   showSignupCta?: boolean;
   compact?: boolean;
+  /** client = parcours client ; staff = comptables / super admin */
+  variant?: 'client' | 'staff';
+}
+
+function pricingKey(t: (key: string) => string, variant: 'client' | 'staff', key: string): string {
+  if (variant === 'staff') {
+    const staff = t(`pricingQuestionnaire.staff.${key}`);
+    if (staff !== `pricingQuestionnaire.staff.${key}`) return staff;
+  }
+  return t(`pricingQuestionnaire.${key}`);
 }
 
 const OptionButton: FC<{
@@ -71,6 +81,7 @@ export function PricingQuestionnaire({
   onContinue,
   showSignupCta = false,
   compact = false,
+  variant = 'client',
 }: PricingQuestionnaireProps) {
   const { t, lang } = useLanguage();
   const {
@@ -135,12 +146,12 @@ export function PricingQuestionnaire({
           </div>
           <div>
             <Badge variant="gold" className="text-[10px] uppercase tracking-[0.25em] mb-1">
-              {t('pricingQuestionnaire.badge')}
+              {pricingKey(t, variant, 'badge')}
             </Badge>
-            <h2 className="text-2xl md:text-3xl font-serif text-ivoire">{t('pricingQuestionnaire.title')}</h2>
+            <h2 className="text-2xl md:text-3xl font-serif text-ivoire">{pricingKey(t, variant, 'title')}</h2>
           </div>
         </div>
-        <p className="text-sm text-slate-500 leading-relaxed">{t('pricingQuestionnaire.subtitle')}</p>
+        <p className="text-sm text-slate-500 leading-relaxed">{pricingKey(t, variant, 'subtitle')}</p>
         {step !== 'result' && (
           <div className="space-y-2">
             <div className="flex justify-between text-xs text-slate-500">
@@ -271,7 +282,11 @@ export function PricingQuestionnaire({
             <motion.div key="result" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
               <div className="text-center space-y-2">
                 <CheckCircle2 className="mx-auto text-gold" size={36} />
-                <h3 className="font-serif text-2xl text-ivoire">{t('pricingQuestionnaire.result.title')}</h3>
+                <h3 className="font-serif text-2xl text-ivoire">
+                  {variant === 'staff'
+                    ? pricingKey(t, variant, 'result.title')
+                    : t('pricingQuestionnaire.result.title')}
+                </h3>
                 <p className="text-sm text-slate-500">{getServiceLabel(result.serviceId, t)}</p>
               </div>
 
@@ -305,16 +320,19 @@ export function PricingQuestionnaire({
               )}
 
               <p className="text-xs text-slate-500 italic leading-relaxed border-l-2 border-gold/30 pl-3">
-                {t('pricingQuestionnaire.disclaimer')}
+                {pricingKey(t, variant, 'disclaimer')}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3">
                 {onContinue && (
                   <Button variant="gold" className="flex-1 h-12" onClick={() => onContinue(result.serviceId)}>
-                    {t('pricingQuestionnaire.cta.continue')} <ArrowRight size={16} className="ml-2" />
+                    {variant === 'staff'
+                      ? pricingKey(t, variant, 'cta.invoices')
+                      : t('pricingQuestionnaire.cta.continue')}{' '}
+                    <ArrowRight size={16} className="ml-2" />
                   </Button>
                 )}
-                {showSignupCta && (
+                {showSignupCta && variant === 'client' && (
                   <Button variant="gold" className="flex-1 h-12" asChild>
                     <a href="/login?next=/onboarding&register=1">
                       {t('pricingQuestionnaire.cta.signup')} <ArrowRight size={16} className="ml-2" />
@@ -322,7 +340,9 @@ export function PricingQuestionnaire({
                   </Button>
                 )}
                 <Button variant="secondary" className="flex-1 h-12" onClick={reset}>
-                  {t('pricingQuestionnaire.cta.restart')}
+                  {variant === 'staff'
+                    ? pricingKey(t, variant, 'cta.restart')
+                    : t('pricingQuestionnaire.cta.restart')}
                 </Button>
               </div>
             </motion.div>

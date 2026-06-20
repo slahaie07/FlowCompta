@@ -275,6 +275,7 @@ export const i18n = {
         client_messaging: "Contacter mon comptable",
         services: "Services & Tarifs",
         quote: "Estimation tarifaire",
+        quote_calculator: "Calculateur de devis",
         procedure: "Mon parcours dossier"
       },
       overview: {
@@ -379,6 +380,20 @@ export const i18n = {
         continue: "Continuer vers mon espace",
         signup: "Créer mon compte",
         restart: "Recommencer"
+      },
+      staff: {
+        badge: "Outil cabinet",
+        title: "Calculateur de devis client",
+        subtitle: "Répondez à quelques questions pour estimer une fourchette avant d'envoyer une proposition ou une facture.",
+        disclaimer: "Estimation indicative — ajustez selon la complexité réelle du dossier avant facturation.",
+        toastReady: "Estimation prête — créez ou ajustez la facture avec ces montants.",
+        result: {
+          title: "Estimation pour le client"
+        },
+        cta: {
+          invoices: "Créer une facture",
+          restart: "Nouvelle estimation"
+        }
       }
     },
 
@@ -774,7 +789,10 @@ export const i18n = {
       pendingInvoices: "Factures en attente",
       byProvince: "Clients par province",
       byService: "Mandats par service",
-      noBreakdown: "Aucune donnée disponible pour le moment."
+      noBreakdown: "Aucune donnée disponible pour le moment.",
+      calculatorTitle: "Calculateur de devis réseau",
+      calculatorDesc: "Estimez un mandat pour n'importe quel cabinet avant validation ou facturation globale.",
+      openCalculator: "Ouvrir le calculateur"
     },
 
     superAdminClients: {
@@ -872,7 +890,10 @@ export const i18n = {
       reportsGenerated: "Intelligence en marche : les bilans ont été formatés.",
       statusActive: "Actif",
       statusOnline: "En ligne",
-      statusStandby: "Standby"
+      statusStandby: "Standby",
+      calculatorTitle: "Calculateur de devis",
+      calculatorDesc: "Estimez une fourchette tarifaire avec taxes provinciales avant d'envoyer une proposition.",
+      openCalculator: "Ouvrir le calculateur"
     },
 
     adminClients: {
@@ -1164,6 +1185,7 @@ export const i18n = {
         client_messaging: "Contact my bookkeeper",
         services: "Services & Pricing",
         quote: "Price estimate",
+        quote_calculator: "Quote calculator",
         procedure: "My file path"
       },
       overview: {
@@ -1268,6 +1290,20 @@ export const i18n = {
         continue: "Continue to my portal",
         signup: "Create my account",
         restart: "Start over"
+      },
+      staff: {
+        badge: "Firm tool",
+        title: "Client quote calculator",
+        subtitle: "Answer a few questions to estimate a range before sending a proposal or invoice.",
+        disclaimer: "Indicative estimate only — adjust for actual file complexity before billing.",
+        toastReady: "Estimate ready — create or adjust the invoice with these amounts.",
+        result: {
+          title: "Estimate for client"
+        },
+        cta: {
+          invoices: "Create invoice",
+          restart: "New estimate"
+        }
       }
     },
 
@@ -1659,7 +1695,10 @@ export const i18n = {
       pendingInvoices: "Pending invoices",
       byProvince: "Clients by province",
       byService: "Mandates by service",
-      noBreakdown: "No data available yet."
+      noBreakdown: "No data available yet.",
+      calculatorTitle: "Network quote calculator",
+      calculatorDesc: "Estimate a mandate for any firm before proposal or global billing.",
+      openCalculator: "Open calculator"
     },
 
     superAdminClients: {
@@ -1757,7 +1796,10 @@ export const i18n = {
       reportsGenerated: "Intelligence running: statements formatted.",
       statusActive: "Active",
       statusOnline: "Online",
-      statusStandby: "Standby"
+      statusStandby: "Standby",
+      calculatorTitle: "Quote calculator",
+      calculatorDesc: "Estimate a price range with provincial taxes before sending a proposal.",
+      openCalculator: "Open calculator"
     },
 
     adminClients: {
