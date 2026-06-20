@@ -1792,7 +1792,8 @@ export const i18n = {
         vault: "الخزنة",
         client_messaging: "مراسلة المحاسب",
         faq: "الأمان والأسئلة",
-        support: "مركز المساعدة"
+        support: "مركز المساعدة",
+        procedure: "مسار ملفي"
       },
       roles: { client: "بوابة العميل", sub_admin: "محاسب شريك", super_admin: "المالك الأعلى" },
       loading: "جاري تحميل الصفحة…"
@@ -1806,6 +1807,20 @@ export const i18n = {
       coordsAccent: "الاتصال.",
       readyTitle: "حسابك",
       readyAccent: "جاهز."
+    },
+
+    serviceSelector: {
+      activeLabel: "الخدمة النشطة",
+      confirmed: "مؤكَّد",
+      changeHint: "لتغيير الخدمة، تواصل مع محاسبك عبر المراسلة.",
+      viewProcedure: "عرض مسار ملفي",
+      chooseLabel: "اختر خدمتك",
+      chooseTitle: "أي تفويض تريد فتحه؟",
+      chooseDesc: "اختر الخدمة التي تناسب احتياجاتك. سيُرسل عرض سعر مخصص بعد التحقق.",
+      placeholder: "— اختر خدمة —",
+      confirm: "تأكيد اختيار الخدمة",
+      selectWarning: "يرجى اختيار خدمة من القائمة.",
+      saved: "تم حفظ خدمتك. سيتواصل معك فريقنا قريباً."
     },
 
     support: {
@@ -1840,6 +1855,147 @@ export const i18n = {
       onlineNow: "متصل · يرد مباشرة",
       typingPrefix: "يكتب",
       chatError: "عطل تقني بسيط — أعد المحاولة أو راسلنا بالبريد."
+    },
+
+    procedure: {
+      tag: "مسار موجَّه",
+      title: "ملفك",
+      titleAccent: "الشخصي",
+      subtitle: "المستندات المطلوبة والمعلومات والخطوات حتى الإغلاق — بإرشاد فريق ComptaFlow.",
+      noService: "اختر خدمة لعرض المسار الكامل (مستندات، معلومات، خطوات).",
+      selectService: "— اختر خدمة —",
+      viewPath: "عرض المسار",
+      browseServices: "تصفح الخدمات",
+      step: "خطوة",
+      done: "مكتمل",
+      progress: "التقدم",
+      nextStep: "الخطوة التالية",
+      allComplete: "المسار مكتمل — محاسبك يُنهي التسليم.",
+      requiredDocs: "المستندات",
+      requiredInfo: "المعلومات",
+      optional: "اختياري",
+      markComplete: "وضع علامة مكتمل",
+      markIncomplete: "وضع علامة غير مكتمل",
+      goToStep: "الانتقال إلى هذه الخطوة",
+      estimatedDays: "المدة التقديرية: {days} أيام عمل",
+      cpaNote: "كل خطوة يتحقق منها CPA في شبكة ComptaFlow. تُراجع الحسابات والضرائب قبل أي تسليم.",
+      common: {
+        steps: {
+          mandate: { title: "التفويض والملف", desc: "وقِّع تفويضك وأكمل ملفك (المقاطعة، الشركة)." },
+          documents: { title: "رفع المستندات", desc: "حمِّل الملفات المطلوبة إلى خزنتك الآمنة." },
+          cpaReview: { title: "مراجعة CPA", desc: "يتحقق محاسبك من المعلومات ويجيب على أسئلتك." },
+          delivery: { title: "الإغلاق والفوترة", desc: "استلام التسليمات وتسوية الأتعاب." }
+        },
+        docs: { signedMandate: "تفويض موقَّع" },
+        fields: {
+          profileComplete: "الملف مكتمل",
+          province: "المقاطعة الضريبية مؤكَّدة",
+          questionsAnswered: "أسئلة CPA مُجابة",
+          invoiceSettled: "الأتعاب مسدَّدة"
+        }
+      },
+      docs: {
+        bankStatements: "كشوف بنكية (آخر 3 أشهر)",
+        receipts: "إيصالات ومستندات داعمة",
+        priorLedger: "دفتر أستاذ سابق (إن وُجد)",
+        salesInvoices: "فواتير المبيعات",
+        expenseReceipts: "إيصالات المصروفات",
+        creditCard: "كشوف بطاقة الائتمان",
+        payrollRegister: "سجل الرواتب",
+        employeeRoster: "قائمة الموظفين (رقم التأمين، العنوان، المنصب)",
+        voidCheque: "شيك باطل / إيداع مباشر",
+        priorPayStubs: "قسائم رواتب سابقة",
+        salesSummary: "ملخص المبيعات للفترة",
+        purchaseSummary: "ملخص المشتريات",
+        priorFilings: "إقرارات سابقة",
+        yearPayrollSummary: "ملخص رواتب سنوي",
+        rl1DataQc: "بيانات Relevé 1 (كيبيك)",
+        t4Slips: "نماذج T4 / Relevé 1 النهائية",
+        allBankStatements: "جميع الكشوف البنكية (الفترة المشمولة)",
+        allReceipts: "جميع المستندات الداعمة",
+        priorReturns: "إقرارات سابقة",
+        openingBalances: "أرصدة افتتاحية",
+        vendorList: "قائمة الموردين / العملاء",
+        t2125Support: "إيرادات ومصروفات الأعمال (T2125)",
+        incomeSlips: "نماذج T4/Relevé 1 المستلمة",
+        expenseSummary: "ملخص المصروفات",
+        organizedPackage: "حزمة منظَّمة لمحاسبك CPA"
+      },
+      fields: {
+        periodRange: "الفترة المشمولة",
+        volumeEstimate: "الحجم التقديري (معاملات/شهر)",
+        bankAccounts: "الحسابات البنكية للمطابقة",
+        fiscalYearEnd: "تاريخ نهاية السنة المالية",
+        employeeCount: "عدد الموظفين",
+        businessNumber: "رقم الأعمال (BN/NEQ)",
+        gstAccount: "حساب TPS/TVH",
+        provincialTaxAccount: "حساب الضريبة الإقليمية (TVQ/TVP)",
+        reportingPeriod: "فترة الإقرار",
+        payFrequency: "تكرار الرواتب",
+        paySchedule: "جدول الرواتب",
+        provinceWork: "مقاطعة عمل الموظفين",
+        taxYear: "السنة الضريبية",
+        monthsBehind: "عدد الأشهر المتأخرة",
+        lastFiledPeriod: "آخر فترة مُقدَّمة",
+        softwareName: "برنامج المحاسبة",
+        chartOfAccounts: "دليل الحسابات",
+        selfEmploymentType: "نوع النشاط المستقل"
+      },
+      hourlyBookkeeping: {
+        steps: {
+          scope: { title: "تحديد نطاق التفويض", desc: "حدِّد الفترة والحجم مع محاسبك." },
+          work: { title: "مسك الدفاتر", desc: "الإدخال والتصنيف والمطابقة جارية." }
+        }
+      },
+      monthly: {
+        steps: {
+          bankAccess: { title: "الوصول والإعدادات", desc: "أدخل حساباتك ونهاية السنة المالية." }
+        }
+      },
+      monthlyMicro: { steps: { cycle: { title: "الدورة الشهرية", desc: "مسك دفاتر خفيف ومتابعة ضريبية أساسية." } } },
+      monthlySmall: { steps: { cycle: { title: "الدورة الشهرية", desc: "المطابقة والتقارير الشهرية." } } },
+      monthlySme: {
+        steps: {
+          payroll: { title: "إعداد الرواتب", desc: "اضبط الرواتب لفريقك." },
+          cycle: { title: "دورة PME كاملة", desc: "مسك دفاتر + رواتب + تقارير." }
+        }
+      },
+      gstQst: {
+        steps: {
+          taxNumbers: { title: "الأرقام الضريبية", desc: "أكِّد أرقام TPS/TVH والإقليمية." },
+          filing: { title: "إعداد الإقرار", desc: "التجميع والتحقق قبل الإرسال." }
+        }
+      },
+      payroll: {
+        steps: {
+          info: { title: "معلومات الرواتب", desc: "التكرار والمقاطعة وعدد الموظفين." },
+          run: { title: "معالجة الرواتب", desc: "حساب الرواتب والخصومات." }
+        }
+      },
+      t4Releve1: {
+        steps: {
+          prep: { title: "إعداد النماذج", desc: "تجميع بيانات الرواتب السنوية." },
+          delivery: { title: "تسليم النماذج", desc: "T4 و Relevé 1 متاحان في الخزنة." }
+        }
+      },
+      catchUp: {
+        steps: {
+          scope: { title: "تقييم التأخير", desc: "حدِّد نطاق التحديث." },
+          work: { title: "عمل التحديث", desc: "تحديث المحاسبة المتأخرة." }
+        }
+      },
+      softwareSetup: {
+        steps: {
+          choice: { title: "اختيار البرنامج", desc: "QuickBooks أو Sage أو غيره — الإعداد الأولي." },
+          session: { title: "جلسة الإعداد", desc: "التثبيت والتدريب مع الدعم." }
+        }
+      },
+      taxHelpAutonomous: {
+        steps: {
+          organize: { title: "التنظيم الضريبي", desc: "نظِّم إيرادات ومصروفات العمل المستقل." },
+          handoff: { title: "التسليم لـ CPA", desc: "الملف جاهز لإقرارك الضريبي." }
+        }
+      }
     },
 
     messaging: {
