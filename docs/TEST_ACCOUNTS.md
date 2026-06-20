@@ -61,7 +61,9 @@ Voir `docs/DEV_COMMANDS.md` et `.env.example`.
 ### Prérequis Supabase
 
 1. Migration `comptaflow_migration.sql` appliquée
-2. Migration RLS `supabase/migrations/20260619_rls_hardening.sql` appliquée (inscriptions publiques = `client` uniquement ; rôles admin via service role)
+2. Migrations RLS appliquées (`npm run db:migrate` ou `scripts/combined-migrations.sql` dans SQL Editor) :
+   - `20260620_fix_profiles_rls_recursion.sql` — **requis** pour le sélecteur partenaire à l'inscription
+   - `20260619_rls_hardening.sql` — inscriptions publiques = `client` uniquement
 
 ### Vérification manuelle (SQL Editor)
 
