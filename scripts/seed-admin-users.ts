@@ -66,7 +66,7 @@ async function findAuthUserByEmail(
 async function main() {
   const { password, dryRun } = parseArgs(process.argv.slice(2));
 
-  if (!password) {
+  if (!password && !dryRun) {
     console.error('❌ Missing password. Set SEED_ADMIN_PASSWORD or pass --password=...');
     process.exit(1);
   }
@@ -75,20 +75,30 @@ async function main() {
     sanitizeEnv(process.env.SUPABASE_URL) || sanitizeEnv(process.env.VITE_SUPABASE_URL);
   const serviceRoleKey = sanitizeEnv(process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-  if (!supabaseUrl || !serviceRoleKey) {
+  if (!dryRun && (!supabaseUrl || !serviceRoleKey)) {
     console.error('❌ SUPABASE_URL (or VITE_SUPABASE_URL) and SUPABASE_SERVICE_ROLE_KEY are required.');
     process.exit(1);
   }
 
-  const admin = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-
   console.log(`\n🌱 ComptaFlow admin seed (${dryRun ? 'DRY RUN' : 'LIVE'})`);
-  console.log(`   Project: ${supabaseUrl}`);
+  console.log(`   Project: ${supabaseUrl || '(dry run — env not required)'}`);
   console.log(`   Accounts: ${SEED_ADMIN_ACCOUNTS.length}\n`);
 
   const results: Array<{ email: string; role: AdminRole; userId: string; portal: string; action: string }> = [];
+
+  if (dryRun) {
+    for (const account of SEED_ADMIN_ACCOUNTS) {
+      const portal = PORTAL_HOME_BY_ROLE[account.role];
+      console.log(`→ ${account.label} (${account.email}) → ${account.role} → ${portal}`);
+      results.push({ email: account.email, role: account.role, userId: '(dry-run)', portal, action: 'skipped' });
+    }
+    console.log('\n✅ Dry run complete (no writes).\n');
+    return;
+  }
+
+  const admin = createClient(supabaseUrl!, serviceRoleKey!, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 
   const listUsers = async (page: number) => {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
@@ -99,11 +109,6 @@ async function main() {
   for (const account of SEED_ADMIN_ACCOUNTS) {
     const portal = PORTAL_HOME_BY_ROLE[account.role];
     console.log(`→ ${account.label} (${account.email}) → ${account.role} → ${portal}`);
-
-    if (dryRun) {
-      results.push({ email: account.email, role: account.role, userId: '(dry-run)', portal, action: 'skipped' });
-      continue;
-    }
 
     let userId = '';
     const existing = await findAuthUserByEmail(listUsers, account.email);
