@@ -7,26 +7,22 @@ import { SUPABASE_PROJECT_REF } from '../src/lib/envResolve';
 
 const BASE = process.env.COMPTAFLOW_URL || 'https://compta-flow.net';
 const PROJECT_REF = SUPABASE_PROJECT_REF;
-const ANON = process.env.VITE_SUPABASE_ANON_KEY || '';
 
-async function checkHealth() {
+type HealthEnv = {
+  gemini?: string;
+  supabase?: string;
+  serviceRole?: string;
+  anonKey?: string;
+  partnerRls?: string;
+  resend?: string;
+  adminSecret?: string;
+  cronSecret?: string;
+};
+
+async function checkHealth(): Promise<HealthEnv> {
   const res = await fetch(`${BASE}/api/health`);
-  const data = (await res.json()) as {
-    env: Record<string, string>;
-  };
+  const data = (await res.json()) as { env: HealthEnv };
   return data.env ?? {};
-}
-
-async function checkPartnerRls() {
-  if (!ANON) return { ok: false, detail: 'VITE_SUPABASE_ANON_KEY non défini localement' };
-  const url = `https://${PROJECT_REF}.supabase.co/rest/v1/profiles?select=id,role,display_name&role=eq.sub_admin&limit=1`;
-  const res = await fetch(url, {
-    headers: { apikey: ANON, Authorization: `Bearer ${ANON}` },
-  });
-  const body = await res.text();
-  if (res.ok) return { ok: true, detail: 'Partner picker OK' };
-  if (body.includes('42P17')) return { ok: false, detail: 'RLS récursion — exécuter npm run db:migrate' };
-  return { ok: false, detail: body.slice(0, 120) };
 }
 
 async function main() {
@@ -38,6 +34,11 @@ async function main() {
       name: 'SUPABASE_SERVICE_ROLE_KEY (Vercel)',
       ok: env.serviceRole === 'configured',
       action: 'Dashboard Supabase → Settings → API → service_role → Vercel env',
+    },
+    {
+      name: 'Clé anon Supabase (serveur)',
+      ok: env.anonKey === 'configured',
+      action: 'Vercel → SUPABASE_ANON_KEY ou SUPABASE_PUBLISHABLE_KEY (intégration Supabase)',
     },
     {
       name: 'Gemini',
@@ -56,14 +57,17 @@ async function main() {
       ok: env.adminSecret === 'configured',
       action: 'Vercel → ADMIN_SECRET personnalisé',
     },
+    {
+      name: 'RLS partenaires (inscription)',
+      ok: env.partnerRls === 'ok',
+      action:
+        env.partnerRls === 'recursion'
+          ? 'Exécuter npm run db:migrate ou coller supabase/migrations/20260620_fix_profiles_rls_recursion.sql'
+          : env.partnerRls === 'missing_key'
+            ? 'Configurer SUPABASE_ANON_KEY sur Vercel'
+            : `État RLS: ${env.partnerRls ?? 'inconnu'}`,
+    },
   ];
-
-  const partner = await checkPartnerRls();
-  checks.push({
-    name: 'RLS partenaires (inscription)',
-    ok: partner.ok,
-    action: partner.ok ? undefined : partner.detail,
-  });
 
   let pending = 0;
   for (const c of checks) {

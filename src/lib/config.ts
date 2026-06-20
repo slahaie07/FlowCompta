@@ -23,7 +23,7 @@ const getEnvVar = (key: string): string | undefined => {
 export const CONFIG = {
   // Supabase (VITE_*, NEXT_PUBLIC_*, or Vercel integration SUPABASE_*)
   SUPABASE_URL: resolveSupabaseUrl(),
-  SUPABASE_ANON_KEY: resolveSupabaseAnonKey() || sanitizeVar(getEnvVar('VITE_SUPABASE_ANON_KEY') || 'sb_publishable_BHVkYelBLz9x0HJn_EWDyQ_EyJxaAWF'),
+  SUPABASE_ANON_KEY: resolveSupabaseAnonKey() || sanitizeVar(getEnvVar('VITE_SUPABASE_ANON_KEY') || ''),
 
   // Automations (n8n)
   WEBHOOKS: {

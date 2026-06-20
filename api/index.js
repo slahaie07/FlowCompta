@@ -1,15 +1,15 @@
 // api/app.ts
 import express from "express";
-import path from "path";
+import path2 from "path";
 import cors from "cors";
-import fs from "fs";
+import fs2 from "fs";
 import Stripe from "stripe";
 import { Resend } from "resend";
 import { GoogleGenerativeAI as GoogleGenerativeAI2 } from "@google/generative-ai";
 import crypto from "crypto";
 import dotenv from "dotenv";
 import twilio from "twilio";
-import pg from "pg";
+import pg2 from "pg";
 import { createClient } from "@supabase/supabase-js";
 
 // src/agents/personas.ts
@@ -1263,8 +1263,210 @@ function resolveSupabaseServiceRoleKey() {
   return read("SUPABASE_SERVICE_ROLE_KEY") || read("SUPABASE_SECRET_KEY") || "";
 }
 
-// api/app.ts
+// api/lib/supabaseMigrations.ts
+import fs from "fs";
+import path from "path";
+import pg from "pg";
 var { Client } = pg;
+var PROJECT_REF = process.env.SUPABASE_PROJECT_REF || SUPABASE_PROJECT_REF;
+var EMBEDDED_FIX_SQL = `
+CREATE OR REPLACE FUNCTION public.get_user_role()
+RETURNS TEXT
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+SET row_security = off
+AS $$
+  SELECT role FROM public.profiles WHERE id = auth.uid();
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_sub_admin_id()
+RETURNS UUID
+LANGUAGE sql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+SET row_security = off
+AS $$
+  SELECT sub_admin_id FROM public.profiles WHERE id = auth.uid();
+$$;
+
+DROP POLICY IF EXISTS "Public liste comptables partenaires" ON public.profiles;
+CREATE POLICY "Public liste comptables partenaires" ON public.profiles
+FOR SELECT TO anon, authenticated
+USING (role = 'sub_admin');
+
+CREATE OR REPLACE FUNCTION public.guard_profile_privileged_fields()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF public.get_user_role() IS DISTINCT FROM 'super_admin' THEN
+    IF NEW.role IS DISTINCT FROM OLD.role THEN
+      RAISE EXCEPTION 'profile.role is immutable for non super_admin users';
+    END IF;
+    IF NEW.sub_admin_id IS DISTINCT FROM OLD.sub_admin_id THEN
+      RAISE EXCEPTION 'profile.sub_admin_id is immutable for non super_admin users';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+DROP TRIGGER IF EXISTS guard_profile_privileged_fields ON public.profiles;
+CREATE TRIGGER guard_profile_privileged_fields
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.guard_profile_privileged_fields();
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_sub_admin_id UUID;
+    v_full_name TEXT;
+BEGIN
+    v_full_name := COALESCE(
+        new.raw_user_meta_data->>'full_name',
+        new.raw_user_meta_data->>'display_name',
+        new.raw_user_meta_data->>'name'
+    );
+
+    IF new.raw_user_meta_data->>'sub_admin_id' IS NOT NULL AND new.raw_user_meta_data->>'sub_admin_id' <> '' THEN
+        v_sub_admin_id := (new.raw_user_meta_data->>'sub_admin_id')::UUID;
+    ELSE
+        v_sub_admin_id := NULL;
+    END IF;
+
+    INSERT INTO public.profiles (id, role, sub_admin_id, full_name, display_name, email, created_at)
+    VALUES (
+        new.id,
+        'client',
+        v_sub_admin_id,
+        v_full_name,
+        v_full_name,
+        new.email,
+        NOW()
+    )
+    ON CONFLICT (id) DO NOTHING;
+
+    RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+DROP POLICY IF EXISTS "Modif propre profil" ON public.profiles;
+CREATE POLICY "Modif propre profil" ON public.profiles
+FOR UPDATE
+USING (auth.uid() = id)
+WITH CHECK (
+  auth.uid() = id
+  AND role = public.get_user_role()
+  AND sub_admin_id IS NOT DISTINCT FROM public.get_sub_admin_id()
+);
+`;
+function passwordCandidates() {
+  const candidates = [
+    process.env.SUPABASE_DB_PASSWORD,
+    process.env.DATABASE_PASSWORD,
+    process.env.POSTGRES_PASSWORD,
+    process.env.ADMIN_SECRET,
+    "Maison-139"
+  ].filter((v) => !!v?.trim());
+  return [...new Set(candidates)];
+}
+function loadMigrationSql(allFiles = false) {
+  const statements = [EMBEDDED_FIX_SQL];
+  if (!allFiles) return statements;
+  const migrationsDir = path.join(process.cwd(), "supabase", "migrations");
+  if (!fs.existsSync(migrationsDir)) return statements;
+  const files = fs.readdirSync(migrationsDir).filter((f) => f.endsWith(".sql")).sort();
+  for (const file of files) {
+    if (file === "20260620_fix_profiles_rls_recursion.sql") continue;
+    statements.push(fs.readFileSync(path.join(migrationsDir, file), "utf8"));
+  }
+  return statements;
+}
+async function connectWithPassword(password) {
+  const configs = [
+    { host: `aws-1-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${PROJECT_REF}` },
+    { host: `aws-0-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${PROJECT_REF}` },
+    { host: `aws-1-ca-central-1.pooler.supabase.com`, port: 5432, user: `postgres.${PROJECT_REF}` },
+    { host: `db.${PROJECT_REF}.supabase.co`, port: 5432, user: "postgres" }
+  ];
+  for (const conf of configs) {
+    const client = new Client({
+      ...conf,
+      password,
+      database: "postgres",
+      ssl: { rejectUnauthorized: false },
+      connectionTimeoutMillis: 12e3
+    });
+    try {
+      await client.connect();
+      return { client, host: `${conf.host}:${conf.port}` };
+    } catch {
+      try {
+        await client.end();
+      } catch {
+      }
+    }
+  }
+  return null;
+}
+async function applySupabaseMigrations(options) {
+  const allFiles = options?.allFiles ?? false;
+  const databaseUrl = process.env.DATABASE_URL || process.env.SUPABASE_DB_URL;
+  if (databaseUrl) {
+    const client = new Client({
+      connectionString: databaseUrl,
+      ssl: { rejectUnauthorized: false },
+      connectionTimeoutMillis: 12e3
+    });
+    try {
+      await client.connect();
+      const sqlBlocks = loadMigrationSql(allFiles);
+      for (const sql of sqlBlocks) {
+        await client.query(sql);
+      }
+      await client.end();
+      return { success: true, message: "Migrations appliqu\xE9es via DATABASE_URL", host: "DATABASE_URL", appliedFiles: ["embedded-fix"] };
+    } catch (err) {
+      try {
+        await client.end();
+      } catch {
+      }
+      return { success: false, message: err.message };
+    }
+  }
+  for (const password of passwordCandidates()) {
+    const connected = await connectWithPassword(password);
+    if (!connected) continue;
+    const { client, host } = connected;
+    try {
+      const sqlBlocks = loadMigrationSql(allFiles);
+      for (const sql of sqlBlocks) {
+        await client.query(sql);
+      }
+      await client.end();
+      return {
+        success: true,
+        message: "Migrations appliqu\xE9es",
+        host,
+        appliedFiles: ["embedded-fix"]
+      };
+    } catch (err) {
+      try {
+        await client.end();
+      } catch {
+      }
+      return { success: false, message: `${host}: ${err.message}` };
+    }
+  }
+  return {
+    success: false,
+    message: "Connexion Postgres impossible \u2014 d\xE9finir SUPABASE_DB_PASSWORD ou DATABASE_URL"
+  };
+}
+
+// api/app.ts
+var { Client: Client2 } = pg2;
 dotenv.config();
 var sanitizeEnvVar = (val) => {
   if (!val) return "";
@@ -1362,17 +1564,17 @@ async function bootstrapAdminAccounts(password) {
   }
   return results;
 }
-var DB_PATH = path.join(process.cwd(), "local_db.json");
+var DB_PATH = path2.join(process.cwd(), "local_db.json");
 var getDb = () => {
   try {
-    return JSON.parse(fs.readFileSync(DB_PATH, "utf8"));
+    return JSON.parse(fs2.readFileSync(DB_PATH, "utf8"));
   } catch {
     return {};
   }
 };
 var saveDb = (data) => {
   try {
-    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
+    fs2.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
   } catch {
   }
 };
@@ -2053,7 +2255,7 @@ app.post("/api/profile/delete", async (req, res) => {
       { host: `aws-0-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` }
     ];
     for (const conf of configs) {
-      const client = new Client({
+      const client = new Client2({
         host: conf.host,
         port: conf.port,
         user: conf.user,
@@ -2138,7 +2340,7 @@ app.post("/api/profile/delete", async (req, res) => {
       { host: `aws-0-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` }
     ];
     for (const conf of configs) {
-      const client = new Client({
+      const client = new Client2({
         host: conf.host,
         port: conf.port,
         user: conf.user,
@@ -2258,7 +2460,7 @@ app.post("/api/profile/export", rateLimiter(5, 6e4), async (req, res) => {
       { host: `aws-0-ca-central-1.pooler.supabase.com`, port: 6543, user: `postgres.${projectRef}` }
     ];
     for (const conf of configs) {
-      const client = new Client({
+      const client = new Client2({
         host: conf.host,
         port: conf.port,
         user: conf.user,
@@ -2378,8 +2580,34 @@ app.post("/api/admin/create-sub-admin", async (req, res) => {
     return res.status(500).json({ error: err.message || "\xC9chec de cr\xE9ation du comptable." });
   }
 });
-app.get("/api/health", (_req, res) => {
+app.post("/api/internal/apply-migrations", async (req, res) => {
+  if (!isInternalAgentRequest(req)) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  const result = await applySupabaseMigrations({ allFiles: true });
+  res.status(result.success ? 200 : 500).json(result);
+});
+async function checkPartnerRls() {
+  const anon = resolveSupabaseAnonKey();
+  if (!anon) return "missing_key";
+  const projectRef = resolveSupabaseUrl().match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
+  if (!projectRef) return "error";
+  const url = `https://${projectRef}.supabase.co/rest/v1/profiles?select=id&role=eq.sub_admin&limit=1`;
+  try {
+    const res = await fetch(url, {
+      headers: { apikey: anon, Authorization: `Bearer ${anon}` }
+    });
+    const body = await res.text();
+    if (res.ok) return "ok";
+    if (body.includes("42P17")) return "recursion";
+    return "error";
+  } catch {
+    return "error";
+  }
+}
+app.get("/api/health", async (_req, res) => {
   const geminiLive = !!(geminiKey && geminiKey !== "mock_gemini_api_key" && !geminiKey.startsWith("mock_"));
+  const partnerRls = await checkPartnerRls();
   res.json({
     status: "ok",
     service: "ComptaFlow",
@@ -2389,9 +2617,13 @@ app.get("/api/health", (_req, res) => {
       gemini: geminiLive ? "live" : "mock-fallback",
       supabase: supabaseUrl ? "configured" : "missing",
       serviceRole: serviceRoleKey ? "configured" : "missing",
+      anonKey: supabaseAnonKey ? "configured" : "missing",
+      supabaseProject: resolveSupabaseUrl().match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] ?? "unknown",
+      partnerRls,
       resend: process.env.RESEND_API_KEY ? "configured" : "missing",
       adminSecret: process.env.ADMIN_SECRET ? "configured" : "default-fallback",
-      cronSecret: process.env.CRON_SECRET ? "configured" : "missing"
+      cronSecret: process.env.CRON_SECRET ? "configured" : "missing",
+      dbPassword: process.env.SUPABASE_DB_PASSWORD ? "configured" : "missing"
     },
     agents: listAgents({ internal: false }).length
   });
@@ -2476,10 +2708,10 @@ app.get("/sitemap.xml", (_req, res) => {
 var setupStatic = async () => {
   if (process.env.VERCEL) return;
   if (process.env.NODE_ENV === "production") {
-    const distPath = path.join(process.cwd(), "dist");
-    if (fs.existsSync(distPath)) app.use(express.static(distPath));
+    const distPath = path2.join(process.cwd(), "dist");
+    if (fs2.existsSync(distPath)) app.use(express.static(distPath));
     app.get("*", (req, res) => {
-      if (!req.url.startsWith("/api")) res.sendFile(path.join(distPath, "index.html"));
+      if (!req.url.startsWith("/api")) res.sendFile(path2.join(distPath, "index.html"));
     });
   } else {
     const { createServer: createViteServer } = await import("vite");
@@ -2488,6 +2720,15 @@ var setupStatic = async () => {
   }
 };
 setupStatic();
+if (process.env.VERCEL && process.env.AUTO_APPLY_DB_MIGRATIONS !== "false") {
+  void applySupabaseMigrations().then((result) => {
+    if (result.success) {
+      console.log("[migrations] OK", result.host, result.message);
+    } else {
+      console.warn("[migrations] Skipped or failed:", result.message);
+    }
+  }).catch((err) => console.warn("[migrations] Error:", err.message));
+}
 var app_default = app;
 export {
   app_default as default

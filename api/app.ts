@@ -1407,9 +1407,29 @@ app.post('/api/internal/apply-migrations', async (req, res) => {
   res.status(result.success ? 200 : 500).json(result);
 });
 
+async function checkPartnerRls(): Promise<'ok' | 'recursion' | 'missing_key' | 'error'> {
+  const anon = resolveSupabaseAnonKey();
+  if (!anon) return 'missing_key';
+  const projectRef = resolveSupabaseUrl().match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
+  if (!projectRef) return 'error';
+  const url = `https://${projectRef}.supabase.co/rest/v1/profiles?select=id&role=eq.sub_admin&limit=1`;
+  try {
+    const res = await fetch(url, {
+      headers: { apikey: anon, Authorization: `Bearer ${anon}` },
+    });
+    const body = await res.text();
+    if (res.ok) return 'ok';
+    if (body.includes('42P17')) return 'recursion';
+    return 'error';
+  } catch {
+    return 'error';
+  }
+}
+
 // --- HEALTH CHECK (monitoring / stress tests) ---
-app.get('/api/health', (_req, res) => {
+app.get('/api/health', async (_req, res) => {
   const geminiLive = !!(geminiKey && geminiKey !== 'mock_gemini_api_key' && !geminiKey.startsWith('mock_'));
+  const partnerRls = await checkPartnerRls();
   res.json({
     status: 'ok',
     service: 'ComptaFlow',
@@ -1419,7 +1439,9 @@ app.get('/api/health', (_req, res) => {
       gemini: geminiLive ? 'live' : 'mock-fallback',
       supabase: supabaseUrl ? 'configured' : 'missing',
       serviceRole: serviceRoleKey ? 'configured' : 'missing',
+      anonKey: supabaseAnonKey ? 'configured' : 'missing',
       supabaseProject: resolveSupabaseUrl().match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] ?? 'unknown',
+      partnerRls,
       resend: process.env.RESEND_API_KEY ? 'configured' : 'missing',
       adminSecret: process.env.ADMIN_SECRET ? 'configured' : 'default-fallback',
       cronSecret: process.env.CRON_SECRET ? 'configured' : 'missing',

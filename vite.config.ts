@@ -19,12 +19,17 @@ function mapSupabaseEnv(env: Record<string, string>) {
 }
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
+  // loadEnv reads .env files only; Vercel injects SUPABASE_* into process.env at build time
+  const env = { ...loadEnv(mode, process.cwd(), ''), ...process.env } as Record<string, string>;
   mapSupabaseEnv(env);
   process.env.VITE_SUPABASE_URL = env.VITE_SUPABASE_URL;
   process.env.VITE_SUPABASE_ANON_KEY = env.VITE_SUPABASE_ANON_KEY;
 
   return {
+    define: {
+      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL || ''),
+      'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(env.VITE_SUPABASE_ANON_KEY || ''),
+    },
     base: process.env.GITHUB_REPOSITORY ? '/flowcompta/' : '/',
     plugins: [react(), tailwindcss()],
     resolve: {

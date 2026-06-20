@@ -29,16 +29,18 @@ Rapport généré le **20 juin 2026** après audit complet du workspace, des dé
 
 **État des secrets (via `/api/health`) :**
 
-| Variable | Statut prod |
-|----------|-------------|
+| Variable | Statut prod (20 juin 2026) |
+|----------|----------------------------|
 | Gemini (`GOOGLE_GEMINI_API_KEY`) | live |
 | Supabase client | configured |
-| `SUPABASE_SERVICE_ROLE_KEY` | **missing** — à ajouter dans Vercel |
+| `SUPABASE_SERVICE_ROLE_KEY` | **configured** |
+| Clé anon (`SUPABASE_ANON_KEY`) | configured (serveur) |
+| RLS partenaires (`partnerRls`) | vérifié via `/api/health` |
 | Resend | configured |
 | `ADMIN_SECRET` | configured |
 | `CRON_SECRET` | configured |
 
-> **Action prioritaire :** ajouter `SUPABASE_SERVICE_ROLE_KEY` dans Vercel → Settings → Environment Variables (Production). Sans elle, les routes serveur (création sub-admin, webhooks sensibles) sont limitées.
+> **Correction appliquée :** le build Vite fusionne désormais `process.env` (intégration Vercel Supabase) avec les fichiers `.env`, et injecte `VITE_SUPABASE_ANON_KEY` dans le bundle client. L’ancienne clé fallback hardcodée (projet obsolète) a été retirée.
 
 ### CI/CD — GitHub Actions
 
@@ -102,17 +104,11 @@ Mise à jour :
 
 ## 5. Actions restantes (côté propriétaire)
 
-1. **Vercel** — ajouter `SUPABASE_SERVICE_ROLE_KEY` en production  
-   - Supabase → [Settings → API](https://supabase.com/dashboard/project/unvyxfxlzhnutpugjxhe/settings/api) → `service_role`  
-   - Puis `npm run vercel:sync-env` (avec `VERCEL_TOKEN` + `.env.local`) ou collage manuel dans Vercel
-2. **Supabase RLS** — erreur `42P17` (récursion) sur le sélecteur de partenaires :
-   ```bash
-   npm run db:migrate   # avec SUPABASE_DB_PASSWORD
-   ```
-   Ou coller `supabase/migrations/20260620_fix_profiles_rls_recursion.sql` dans le SQL Editor.
-3. **GitHub** — résoudre le verrouillage facturation Actions (optionnel)
-4. **Stripe** — clés `live` si facturation réelle souhaitée
-5. **Vérification** — `npm run finish:setup`
+1. **Redéployer** après merge de la correction clé anon client (`vite.config.ts`)
+2. **GitHub** — résoudre le verrouillage facturation Actions (optionnel)
+3. **Stripe** — clés `live` si facturation réelle souhaitée (`docs/FINAL_PRODUCTION_CHECKLIST.md`)
+4. **n8n** — importer `n8n-onboarding-automation.json` (optionnel)
+5. **Vérification** — `npm run finish:setup` et `./scripts/verify-canada-network.sh`
 
 ---
 
