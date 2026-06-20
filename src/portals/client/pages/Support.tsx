@@ -49,7 +49,11 @@ export function Support() {
               <h3 className="text-xl font-serif text-ivoire">{t('support.liveChatTitle')}</h3>
               <p className="text-xs text-slate-500 mt-1">{t('support.liveChatDesc')}</p>
             </div>
-            <SupportLiveChat province={province} userId={user?.id} />
+            <SupportLiveChat
+              province={province}
+              userId={user?.id}
+              selectedServiceId={userData?.selectedServiceId}
+            />
           </Card>
 
           <Card className="p-8" glow="gold">

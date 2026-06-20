@@ -18,6 +18,7 @@ interface ChatMessage {
 interface SupportLiveChatProps {
   province?: string;
   userId?: string;
+  selectedServiceId?: string;
 }
 
 function TypingIndicator({ name }: { name: string }) {
@@ -38,7 +39,7 @@ function TypingIndicator({ name }: { name: string }) {
   );
 }
 
-export function SupportLiveChat({ province, userId }: SupportLiveChatProps) {
+export function SupportLiveChat({ province, userId, selectedServiceId }: SupportLiveChatProps) {
   const { t, lang } = useLanguage();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -113,6 +114,7 @@ export function SupportLiveChat({ province, userId }: SupportLiveChatProps) {
             province,
             userId,
             role: 'client',
+            metadata: selectedServiceId ? { serviceId: selectedServiceId } : undefined,
           },
           history: historyRef.current.slice(-8),
         }),
