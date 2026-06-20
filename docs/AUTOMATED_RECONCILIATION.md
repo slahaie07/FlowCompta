@@ -1,6 +1,9 @@
-# 🤖 Réconciliation Automatique des Virements Interac via n8n
+# Paiement par virement Interac — mode manuel (sans n8n)
 
-Ce document décrit comment connecter et configurer un workflow **n8n** pour analyser automatiquement les courriels de confirmation de dépôt Interac et valider instantanément les factures des clients dans la plateforme ComptaFlow.
+> **Vous n'avez pas besoin de n8n.** Le portail ComptaFlow gère tout le cycle Interac manuellement.  
+> Guide complet : **[docs/PAIEMENT_INTERAC.md](./PAIEMENT_INTERAC.md)**
+
+Ce document décrit une **automatisation optionnelle** via n8n pour les cabinets qui disposent d'une instance n8n et d'un accès IMAP.
 
 ---
 

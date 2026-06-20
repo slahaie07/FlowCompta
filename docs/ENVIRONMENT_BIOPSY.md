@@ -106,7 +106,7 @@ Mise à jour :
 
 1. **Redéployer** après merge de la correction clé anon client (`vite.config.ts`)
 2. **GitHub** — résoudre le verrouillage facturation Actions (optionnel)
-3. **n8n Interac** — réconciliation automatique (`docs/AUTOMATED_RECONCILIATION.md`)
+3. **n8n Interac** — optionnel seulement (`docs/PAIEMENT_INTERAC.md` = mode manuel par défaut)
 4. **Vérification** — `npm run finish:setup` et `./scripts/verify-canada-network.sh`
 
 ---

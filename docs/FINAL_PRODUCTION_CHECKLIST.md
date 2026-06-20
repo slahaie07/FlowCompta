@@ -9,7 +9,8 @@ ComptaFlow n'accepte **que le virement Interac e-Transfer**. Aucune carte de cr�
 
 - [x] **Flux client** : instructions Interac sur chaque facture (courriel du `sub_admin` configuré dans le portail)
 - [x] **Confirmation manuelle** : le comptable confirme la réception avec la référence bancaire
-- [ ] **Réconciliation automatique (n8n)** : importer **`n8n-interac-reconciliation.json`**
+- [x] **Flux manuel dans le portail** — voir `docs/PAIEMENT_INTERAC.md` (aucun n8n requis)
+- [ ] **Réconciliation automatique (optionnel)** : `n8n-interac-reconciliation.json` — seulement si vous avez n8n + IMAP
   - Cible : `POST https://compta-flow.net/api/invoices/reconcile`
   - Corps : `{ "invoiceNumber", "amount", "interacRef" }`
   - Auth : `Authorization: Bearer <ADMIN_SECRET>`
@@ -41,5 +42,5 @@ ComptaFlow n'accepte **que le virement Interac e-Transfer**. Aucune carte de cr�
 **STATUT ACTUEL :**
 * **Moteur (Frontend & Backend)** : 🟢 **100% OPÉRATIONNEL** (Tous les tests passent, compilation vérifiée).
 * **Base de données** : 🟢 **PRÊTE** (Schéma Supabase et RLS optimisés).
-* **Paiements** : 🟢 **Interac e-Transfer** — flux manuel opérationnel ; importer `n8n-interac-reconciliation.json` pour l'auto-réconciliation.
+* **Paiements** : 🟢 **Interac manuel opérationnel** — n8n optionnel uniquement.
 * **Intégration externe** : 🟡 **n8n onboarding + marketing** à importer.

@@ -5,6 +5,7 @@ export function useAdminHub() {
   const [stats, setState] = useState({
     totalRevenue: 0,
     pendingTasks: 0,
+    pendingInteracValidations: 0,
     activeClients: 0,
     globalTransactions: [] as any[],
     monthlyRevenue: [] as { month: string; revenue: number }[],
@@ -25,6 +26,7 @@ export function useAdminHub() {
         setState({
           totalRevenue: 5750,
           pendingTasks: 2,
+          pendingInteracValidations: 0,
           activeClients: 5,
           monthlyRevenue: [
             { month: 'jan. 26', revenue: 3200 },
@@ -83,6 +85,17 @@ export function useAdminHub() {
       }
       const { count: pendingCount } = await pendingQuery;
 
+      // 3b. Client declared Interac — awaiting CPA confirmation
+      let interacPendingQuery = supabase
+        .from('invoices')
+        .select('*', { count: 'exact', head: true })
+        .eq('statut', 'envoyee')
+        .eq('client_a_declare_paye', true);
+      if (userRole === 'sub_admin') {
+        interacPendingQuery = interacPendingQuery.eq('sub_admin_id', uid);
+      }
+      const { count: interacPendingCount } = await interacPendingQuery;
+
       // 5. Monthly revenue from paid invoices (last 6 months)
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
@@ -130,6 +143,7 @@ export function useAdminHub() {
           setState({
             totalRevenue: total,
             pendingTasks: pendingCount || 0,
+            pendingInteracValidations: interacPendingCount || 0,
             activeClients: clientCount || 0,
             globalTransactions: [],
             monthlyRevenue,
@@ -163,6 +177,7 @@ export function useAdminHub() {
       setState({
         totalRevenue: total,
         pendingTasks: pendingCount || 0,
+        pendingInteracValidations: interacPendingCount || 0,
         activeClients: clientCount || 0,
         globalTransactions: enrichedTx,
         monthlyRevenue,

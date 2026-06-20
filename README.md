@@ -16,7 +16,7 @@ Le projet est structuré autour de quatre piliers fondamentaux :
 - **Backend** : Node.js (Express) on Vercel Functions.
 - **Base de données** : Supabase (PostgreSQL), Realtime engine.
 - **Email** : Resend API integration.
-- **Paiements** : Virement Interac e-Transfer uniquement (réconciliation manuelle ou via n8n).
+- **Paiements** : Virement Interac e-Transfer uniquement — [guide manuel](docs/PAIEMENT_INTERAC.md) (pas de n8n requis)
 
 ## 🚀 Déploiement
 La plateforme est déployée en production sur **Vercel** :

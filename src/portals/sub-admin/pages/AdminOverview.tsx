@@ -1,4 +1,5 @@
-import { BarChart3, Users, Clock, TrendingUp, ArrowUpRight, Activity, Send } from 'lucide-react';
+import { BarChart3, Users, Clock, TrendingUp, ArrowUpRight, Activity, Send, AlertTriangle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { UserData, ClientRecord } from '../../../types';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
@@ -7,6 +8,7 @@ import { useAdminHub } from '../../../hooks/useAdminHub';
 import { toast } from 'sonner';
 import { OrganicLoader } from '../../../components/ui/OrganicLoader';
 import { useLanguage } from '../../../hooks/useLanguage';
+import { getPortalPath } from '../../config/paths';
 
 export function AdminOverview() {
   const { t } = useLanguage();
@@ -33,6 +35,26 @@ export function AdminOverview() {
         </div>
         <Badge variant="gold" className="bg-gold/10 text-gold border-gold/20 py-2 px-6 text-xs font-black uppercase tracking-[0.3em] mb-2">{t('adminHub.badge')}</Badge>
       </header>
+
+      {stats.pendingInteracValidations > 0 && (
+        <Link
+          to={getPortalPath('sub_admin', 'invoices')}
+          className="flex items-center justify-between gap-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-6 py-4 text-amber-200 transition hover:bg-amber-500/15"
+        >
+          <div className="flex items-center gap-3">
+            <AlertTriangle size={20} className="text-amber-400 shrink-0" />
+            <div>
+              <p className="font-bold text-sm">
+                {stats.pendingInteracValidations} virement{stats.pendingInteracValidations > 1 ? 's' : ''} Interac à confirmer
+              </p>
+              <p className="text-xs text-amber-200/80 mt-0.5">
+                Ouvrez Factures, vérifiez votre banque et saisissez la référence — aucun n8n requis.
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-black uppercase tracking-widest text-amber-400">Voir →</span>
+        </Link>
+      )}
 
       {/* Admin Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
