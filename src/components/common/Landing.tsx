@@ -12,6 +12,7 @@ import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { useLanguage } from '../../hooks/useLanguage';
 import { ServicesCatalogSection } from './ServicesCatalogSection';
+import { CONFIG } from '../../lib/config';
 
 export function Landing() {
   const navigate = useNavigate();
@@ -336,6 +337,13 @@ export function Landing() {
           <div className="flex flex-col md:flex-row items-center gap-8 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
             <span>{t('footer.copyright')}</span>
             <span>{t('footer.taxDisclaimer')}</span>
+            <a
+              href={`mailto:${CONFIG.APP.SUPPORT_EMAIL}`}
+              className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em] text-gold/80 hover:text-gold"
+              title={t('footer.contactHint')}
+            >
+              {t('footer.contact')} · {CONFIG.APP.SUPPORT_EMAIL}
+            </a>
             <button onClick={() => navigate('/privacy')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">{t('footer.privacy')}</button>
             <button onClick={() => navigate('/terms')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">{t('footer.terms')}</button>
             <button onClick={() => navigate('/legal')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">{t('footer.legal')}</button>

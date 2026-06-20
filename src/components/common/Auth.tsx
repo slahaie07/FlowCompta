@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { useLanguage } from '../../hooks/useLanguage';
 import { getAuthRedirectUrl } from '../../lib/authOAuth';
 import { mapSupabaseAuthError } from '../../lib/authErrors';
+import { CONFIG } from '../../lib/config';
 
 interface AuthProps {
   onAuthentication: (email: string) => void;
@@ -363,10 +364,10 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                               <p>⚠️ {partnersLoadError ? t('auth.partnersLoadError') : t('auth.noPartner')}</p>
                               <p className="text-slate-400">{t('auth.contactSupportHint')}</p>
                               <a
-                                href="mailto:support@compta-flow.net?subject=Inscription%20ComptaFlow"
+                                href={`mailto:${CONFIG.APP.SUPPORT_EMAIL}?subject=Inscription%20ComptaFlow`}
                                 className="inline-flex text-gold hover:underline font-bold uppercase tracking-wider text-[10px]"
                               >
-                                {t('auth.contactSupport')}
+                                {t('auth.contactSupport')} · {CONFIG.APP.SUPPORT_EMAIL}
                               </a>
                             </div>
                           )}
@@ -430,8 +431,14 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
         )}
       </AnimatePresence>
 
-      <div className="absolute bottom-8 text-center w-full z-10 px-6">
+      <div className="absolute bottom-8 text-center w-full z-10 px-6 space-y-2">
          <p className="text-xs text-slate-600 uppercase tracking-[0.4em] font-bold">{t('auth.footer')}</p>
+         <a
+           href={`mailto:${CONFIG.APP.SUPPORT_EMAIL}`}
+           className="inline-block text-[10px] text-gold/70 hover:text-gold uppercase tracking-widest font-bold transition-colors"
+         >
+           {t('footer.contact')} · {CONFIG.APP.SUPPORT_EMAIL}
+         </a>
       </div>
     </div>
   );

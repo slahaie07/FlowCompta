@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Scale, Info, Mail, Phone, MapPin } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { CONFIG } from '../../lib/config';
 
 export function Legal() {
   const navigate = useNavigate();
@@ -84,7 +85,7 @@ export function Legal() {
               Pour toute demande réglementaire ou support, vous pouvez nous joindre :
             </p>
             <ul className="space-y-2 text-sm text-silver font-light pl-4">
-              <li className="flex items-center gap-2">• <Mail size={14} className="text-gold"/> Courriel : <a href="mailto:support@compta-flow.net" className="text-gold hover:underline">support@compta-flow.net</a></li>
+              <li className="flex items-center gap-2">• <Mail size={14} className="text-gold"/> Courriel : <a href={`mailto:${CONFIG.APP.SUPPORT_EMAIL}`} className="text-gold hover:underline">{CONFIG.APP.SUPPORT_EMAIL}</a></li>
               <li className="flex items-center gap-2">• <Phone size={14} className="text-gold"/> Téléphone : +1 (800) 555-0199 (Support Prioritaire)</li>
               <li className="flex items-center gap-2">• <MapPin size={14} className="text-gold"/> Pays : Canada</li>
             </ul>

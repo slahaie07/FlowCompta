@@ -55,7 +55,7 @@ export const CONFIG = {
     VERSION: '1.0.0-PROD',
     SUPER_ADMIN_EMAILS: ['admin@compta-flow.net', 's.lahaie07@gmail.com'],
     SUB_ADMIN_EMAILS: ['comptable@compta-flow.net', 'partenaire@compta-flow.net'],
-    SUPPORT_EMAIL: 'support@compta-flow.net',
+    SUPPORT_EMAIL: 'comptaflow.officiel@gmail.com',
     SITE_URL: 'https://compta-flow.net',
     INTERAC_EMAIL: 's.lahaie07@gmail.com',
   }

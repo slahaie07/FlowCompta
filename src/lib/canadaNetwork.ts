@@ -32,7 +32,7 @@ export interface LegalPattern {
 export const SITE = {
   domain: 'compta-flow.net',
   url: 'https://compta-flow.net',
-  supportEmail: 'support@compta-flow.net',
+  supportEmail: 'comptaflow.officiel@gmail.com',
   privacyEmail: 'privacy@compta-flow.net',
   dataRegion: 'ca-central-1',
   publisher: 'ComptaFlow',

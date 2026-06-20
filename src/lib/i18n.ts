@@ -194,7 +194,9 @@ export const i18n = {
       terms: "Conditions de service",
       legal: "Mentions légales",
       admin: "Administration",
-      copyright: "© 2026 Comptaflow — Canada"
+      copyright: "© 2026 Comptaflow — Canada",
+      contact: "Nous contacter",
+      contactHint: "Une question ? Écrivez-nous."
     },
 
     auth: {
@@ -1104,7 +1106,9 @@ export const i18n = {
       terms: "Terms of Service",
       legal: "Legal Notice",
       admin: "Administration",
-      copyright: "© 2026 Comptaflow — Canada"
+      copyright: "© 2026 Comptaflow — Canada",
+      contact: "Contact us",
+      contactHint: "Questions? Email us."
     },
 
     auth: {
@@ -1964,7 +1968,9 @@ export const i18n = {
       terms: "شروط الخدمة",
       legal: "الإشعارات القانونية",
       admin: "الإدارة",
-      copyright: "© 2026 كومبتا فلو — كندا"
+      copyright: "© 2026 كومبتا فلو — كندا",
+      contact: "اتصل بنا",
+      contactHint: "أسئلة؟ راسلنا."
     },
 
     landing: {
