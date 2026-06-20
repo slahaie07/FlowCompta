@@ -5,7 +5,7 @@
   "outputDirectory": "dist",
   "regions": ["yul1"],
   "functions": {
-    "api/index.cjs": {
+    "api/index.js": {
       "maxDuration": 60
     }
   },
@@ -57,16 +57,20 @@
     {
       "path": "/api/cron/elite-hunter",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/agent-health",
+      "schedule": "0 6 * * *"
     }
   ],
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.cjs"
+      "destination": "/api/index.js"
     },
     {
       "source": "/sitemap.xml",
-      "destination": "/api/index.cjs"
+      "destination": "/api/index.js"
     },
     {
       "source": "/(.*)",
