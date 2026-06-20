@@ -1,14 +1,12 @@
 # 🏛️ Cabinet Comptaflow — Workflow GitHub Pages
-# Déploie automatiquement l'application sur GitHub Pages sans avoir besoin de clés API externes.
+# Désactivé sur push — production sur Vercel (compta-flow.net).
+# GitHub Pages utilisait base /flowcompta/ et entrait en conflit avec Vercel.
 
 name: Deploy to GitHub Pages
 
-# Désactivé sur push — production hébergée sur Vercel (compta-flow.net).
-# Réactiver uniquement si vous migrez hors Vercel.
 on:
   workflow_dispatch:
 
-# Définir les permissions minimales requises pour le déploiement sécurisé sur GitHub Pages
 permissions:
   contents: read
   pages: write

@@ -1,6 +1,7 @@
 node_modules/
 build/
 dist/
+api/index.js
 api/index.js.map
 api/index.cjs
 api/index.cjs.map
@@ -16,5 +17,6 @@ coverage/
 # Artefacts locaux / binaires — ne pas versionner
 backups/
 src/_archive/
+local_db.json
 *.exe
-*.dll 
+*.dll
