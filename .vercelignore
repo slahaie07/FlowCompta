@@ -1,0 +1,8 @@
+api/index.cjs
+api/index.cjs.map
+api/serverless.cjs
+api/serverless.cjs.map
+api/index.js.map
+local_db.json
+*.log
+debug-*.log
