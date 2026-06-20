@@ -40,6 +40,9 @@ npm run lint
 npm test
 npm run build
 
+# CI complet (identique à Vercel avant chaque déploiement prod)
+npm run ci
+
 # Vérification pré-promotion (lint + test + build)
 npm run promotion:check
 

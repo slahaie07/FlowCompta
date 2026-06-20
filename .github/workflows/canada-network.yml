@@ -1,14 +1,14 @@
+# CI/CD déplacé sur Vercel (gratuit avec le déploiement) — voir vercel.json buildCommand: npm run ci
+# GitHub Actions nécessite un compte payant si la facturation est bloquée.
+# Ce workflow reste disponible en manuel uniquement (workflow_dispatch).
+
 name: Canada Network Deploy
 
 on:
-  push:
-    branches: [main, 'cursor/**']
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:
-  group: canada-network-${{ github.ref }}
+  group: canada-network-manual
   cancel-in-progress: true
 
 jobs:
@@ -25,57 +25,11 @@ jobs:
       - name: Installer les dépendances
         run: npm ci
 
-      - name: Vérification TypeScript
-        run: npm run lint
+      - name: CI complet (lint + tests + build)
+        run: npm run ci
 
-      - name: Tests unitaires
-        run: npm test
-
-      - name: Build production
-        run: npm run build
-
-      - name: Vérifier module réseau Canada
-        run: |
-          node --input-type=module -e "
-          import { getActiveRegions, getNetworkStatus, buildSitemapUrls } from './src/lib/canadaNetwork.ts';
-          const status = getNetworkStatus();
-          if (status.activeRegions !== 13) throw new Error('Expected 13 regions');
-          if (buildSitemapUrls().length < 18) throw new Error('Sitemap too short');
-          console.log('✅ Réseau Canada:', status.activeRegions, 'régions,', status.edgeNodes.length, 'edge nodes');
-          "
-
-  deploy-vercel:
-    needs: build-and-verify
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/cursor/'))
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - run: npm ci
-      - run: npm run build
+      - name: Vérifier réseau production (optionnel)
+        if: vars.COMPTAFLOW_URL != ''
+        run: npm run verify:network
         env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-
-      - name: Déployer sur Vercel
-        if: env.VERCEL_TOKEN != ''
-        uses: amondnet/vercel-action@v25
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: ${{ github.ref == 'refs/heads/main' && '--prod' || '' }}
-          working-directory: ./
-
-      - name: Vérifier réseau production
-        if: env.VERCEL_TOKEN != '' && github.ref == 'refs/heads/main'
-        run: chmod +x scripts/verify-canada-network.sh && ./scripts/verify-canada-network.sh
-        env:
-          COMPTAFLOW_URL: https://compta-flow.net
+          COMPTAFLOW_URL: ${{ vars.COMPTAFLOW_URL }}
