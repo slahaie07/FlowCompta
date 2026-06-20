@@ -1,0 +1,66 @@
+# ComptaFlow — comptes de test (interne)
+
+> **Confidentiel** — courriels et rôles uniquement. Les mots de passe ne sont **jamais** versionnés dans git.
+
+## Comptes admin de démonstration
+
+| Courriel | Rôle | Portail après connexion |
+|----------|------|-------------------------|
+| `s.lahaie07@gmail.com` | `super_admin` | `/portal/owner/super_overview` |
+| `sadmin1@comptaflow.com` | `sub_admin` | `/portal/admin/admin_overview` |
+| `sadmin2@comptaflow.com` | `sub_admin` | `/portal/admin/admin_overview` |
+
+### Slugs portail par rôle
+
+| Rôle | Base URL | Vue d'accueil |
+|------|----------|---------------|
+| `super_admin` | `/portal/owner` | `super_overview` |
+| `sub_admin` | `/portal/admin` | `admin_overview` |
+| `client` | `/portal/client` | `overview` |
+
+Les `sub_admin` n'ont pas de `sub_admin_id` sur leur propre profil — leur `profiles.id` sert d'identifiant cabinet pour rattacher les clients.
+
+## Provisionnement
+
+### Script recommandé (local ou prod Supabase)
+
+```bash
+# .env.local : SUPABASE_SERVICE_ROLE_KEY + URL
+SEED_ADMIN_PASSWORD='your-dev-password-only' npm run seed:admin-users
+```
+
+Options :
+
+- `--password=...` — surcharge `SEED_ADMIN_PASSWORD`
+- `--dry-run` — affiche le plan sans écrire
+
+Voir `.env.example` (`SEED_ADMIN_PASSWORD`).
+
+### Prérequis Supabase
+
+1. Migration `comptaflow_migration.sql` appliquée
+2. Migration RLS `supabase/migrations/20260619_rls_hardening.sql` appliquée (inscriptions publiques = `client` uniquement ; rôles admin via service role)
+
+### Vérification manuelle (SQL Editor)
+
+```sql
+SELECT id, email, role, sub_admin_id
+FROM public.profiles
+WHERE email IN (
+  's.lahaie07@gmail.com',
+  'sadmin1@comptaflow.com',
+  'sadmin2@comptaflow.com'
+);
+```
+
+## Sécurité
+
+- Ne jamais committer de mots de passe dans le dépôt
+- Changer les mots de passe avant promotion réelle
+- `SUPABASE_SERVICE_ROLE_KEY` : local / CI uniquement, jamais côté client
+
+## Auth applicative
+
+- Connexion : Supabase Auth (`signInWithPassword`) via `/login`
+- Rôle effectif : colonne `profiles.role` (pas les listes `CONFIG.APP.SUPER_ADMIN_EMAILS`)
+- `local_db.json` : fallback API legacy ; **non utilisé** pour ces comptes Supabase

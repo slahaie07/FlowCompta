@@ -10,6 +10,8 @@
     "lint": "tsc --noEmit",
     "test": "vitest run",
     "promotion:check": "tsx scripts/promotion-check.ts",
+    "seed:admins": "tsx scripts/seed-admin-users.ts",
+    "seed:admin-users": "tsx scripts/seed-admin-users.ts",
     "agents:list": "tsx scripts/agents-cli.ts --list",
     "agents:ask": "tsx scripts/agents-cli.ts"
   },
