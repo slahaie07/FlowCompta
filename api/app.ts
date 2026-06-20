@@ -26,12 +26,19 @@ const sanitizeEnvVar = (val: string | undefined): string => {
     return val.replace(/[\u200B-\u200D\uFEFF]/g, '').trim();
 };
 
+const isTestEnv = process.env.NODE_ENV === 'test' || process.env.VITEST === 'true';
 const stripeKey = sanitizeEnvVar(process.env.STRIPE_SECRET_KEY) || 'sk_test_mock_stripe_key_51P';
 const resendKey = sanitizeEnvVar(process.env.RESEND_API_KEY) || 're_mock_resend_key_123';
 const twilioSid = sanitizeEnvVar(process.env.TWILIO_ACCOUNT_SID) || 'AC_mock_twilio_sid';
 const twilioToken = sanitizeEnvVar(process.env.TWILIO_AUTH_TOKEN) || 'mock_twilio_token';
 const geminiKey = sanitizeEnvVar(process.env.GOOGLE_GEMINI_API_KEY) || 'mock_gemini_api_key';
-const ADMIN_SECRET = sanitizeEnvVar(process.env.SUPABASE_DB_PASSWORD || process.env.ADMIN_SECRET) || 'Maison-139';
+const ADMIN_SECRET =
+  sanitizeEnvVar(process.env.ADMIN_SECRET) ||
+  sanitizeEnvVar(process.env.SUPABASE_DB_PASSWORD) ||
+  (isTestEnv ? 'test_admin_secret' : '');
+const INITIAL_ADMIN_EMAIL = sanitizeEnvVar(process.env.INITIAL_ADMIN_EMAIL) || 's.lahaie07@gmail.com';
+const INITIAL_ADMIN_PASSWORD =
+  sanitizeEnvVar(process.env.INITIAL_ADMIN_PASSWORD) || sanitizeEnvVar(process.env.ADMIN_SECRET);
 
 const genAI = new GoogleGenerativeAI(geminiKey);
 const visionModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -63,7 +70,16 @@ const supabase = createClient(supabaseUrl, supabaseClientKey);
 
 // --- DATABASE PERSISTENCE ---
 const DB_PATH = path.join(process.cwd(), 'local_db.json');
-const getDb = () => { try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf8')); } catch { return {}; } };
+const createEmptyDb = (): any => ({
+  users: [],
+  profiles: [],
+  transactions: [],
+  invoices: [],
+  bot_logs: [],
+  orders: [],
+  messages: [],
+});
+const getDb = () => { try { return { ...createEmptyDb(), ...JSON.parse(fs.readFileSync(DB_PATH, 'utf8')) }; } catch { return createEmptyDb(); } };
 const saveDb = (data: any) => { try { fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2)); } catch { /* Read-only Vercel Fallback */ } };
 
 const app = express();
@@ -77,7 +93,7 @@ app.use((req, res, next) => {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://www.paypal.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.supabase.co https://images.unsplash.com; connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com; frame-src 'self' https://js.stripe.com https://www.paypal.com; font-src 'self' https://fonts.gstatic.com;");
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://www.paypal.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.supabase.co https://images.unsplash.com; connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com; frame-src 'self' https://js.stripe.com https://www.paypal.com; font-src 'self' https://fonts.gstatic.com;");
     next();
 });
 
@@ -145,13 +161,19 @@ const sendSupremeEmail = async (to: string, subject: string, html: string) => {
 
 app.post('/api/setup-admin', async (req, res) => {
   const { secret } = req.body;
-  if (secret !== 'Maison-139') {
+  if (!ADMIN_SECRET || secret !== ADMIN_SECRET) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
   const projectRef = 'hnxdlzdgiascuawgydir';
-  const targetEmail = 's.lahaie07@gmail.com';
-  const targetPassword = 'Maison-139';
+  const targetEmail = INITIAL_ADMIN_EMAIL;
+  const targetPassword = INITIAL_ADMIN_PASSWORD;
+
+  if (!targetPassword) {
+    return res.status(500).json({
+      error: 'INITIAL_ADMIN_PASSWORD or ADMIN_SECRET must be configured before provisioning admin access.',
+    });
+  }
 
   let errors = [];
 
@@ -339,7 +361,7 @@ app.post('/api/setup-admin', async (req, res) => {
 
 app.post('/api/diagnostics', (req, res) => {
   const { secret } = req.body;
-  if (secret !== 'Maison-139') {
+  if (!ADMIN_SECRET || secret !== ADMIN_SECRET) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   const matchingEnv: Record<string, string> = {};
@@ -355,7 +377,7 @@ app.post('/api/diagnostics', (req, res) => {
       keyLower.includes('postgres') ||
       keyLower.includes('service')
     ) {
-      matchingEnv[key] = process.env[key] || '';
+      matchingEnv[key] = process.env[key] ? '[configured]' : '[empty]';
     }
   }
   res.json({
@@ -622,6 +644,7 @@ Industrie: ${mockLead.industry}`;
 
 // --- AGENTIC MIND (interne — non exposé aux clients) ---
 function isInternalAgentRequest(req: express.Request): boolean {
+  if (!ADMIN_SECRET) return false;
   const secret = req.headers['x-comptaflow-internal'];
   if (secret && String(secret) === ADMIN_SECRET) return true;
   const bearer = req.headers.authorization?.split(' ')[1];
@@ -823,7 +846,7 @@ app.post('/api/invoices/reconcile', async (req, res) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
   
-  if (!token || token !== ADMIN_SECRET) {
+  if (!ADMIN_SECRET || !token || token !== ADMIN_SECRET) {
     return res.status(401).json({ error: "Non autorisé. Jeton secret invalide." });
   }
 
@@ -1454,7 +1477,7 @@ app.get('/api/health', (_req, res) => {
       supabase: supabaseUrl ? 'configured' : 'missing',
       serviceRole: serviceRoleKey ? 'configured' : 'missing',
       resend: process.env.RESEND_API_KEY ? 'configured' : 'missing',
-      adminSecret: process.env.ADMIN_SECRET ? 'configured' : 'default-fallback',
+      adminSecret: ADMIN_SECRET ? 'configured' : 'missing',
       cronSecret: process.env.CRON_SECRET ? 'configured' : 'missing',
     },
     agents: listAgents({ internal: false }).length,

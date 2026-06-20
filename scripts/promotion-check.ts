@@ -48,8 +48,9 @@ if (missing.length === 0) {
   check('env-vars', false, `Manquantes localement: ${missing.join(', ')} (OK en dev si .env.example utilisé)`);
 }
 
-if (process.env.ADMIN_SECRET === 'Maison-139' || !process.env.ADMIN_SECRET) {
-  check('admin-secret-strength', false, 'ADMIN_SECRET absent ou valeur par défaut — changer en production');
+const weakAdminSecrets = new Set(['', 'admin', 'password', 'changeme', 'test_admin_secret']);
+if (weakAdminSecrets.has(process.env.ADMIN_SECRET ?? '')) {
+  check('admin-secret-strength', false, 'ADMIN_SECRET absent ou trop faible — définir une valeur unique en production');
 } else {
   check('admin-secret-strength', true, 'ADMIN_SECRET personnalisé');
 }

@@ -23,13 +23,13 @@ Ce document identifie chaque composant du système, sa fonction technique et son
 
 ## 📁 Logique Métier (`src/hooks/`)
 *   **useAdminClients.ts** : Récupération temps réel des dossiers clients pour l'admin. [OPÉRATIONNEL]
-*   **useAuth.ts** : Gestionnaire d'état de session et synchronisation profil Firestore. [OPÉRATIONNEL]
-*   **useDocuments.ts** : Logique de téléversement vers Firebase Storage et indexation Firestore. [OPÉRATIONNEL]
+*   **useAuth.ts** : Gestionnaire d'état de session Supabase Auth et synchronisation profil. [OPÉRATIONNEL]
+*   **useDocuments.ts** : Logique de téléversement vers le coffre-fort Supabase Storage. [OPÉRATIONNEL]
 *   **useTransactions.ts** : CRUD complet pour les flux financiers achats/ventes. [OPÉRATIONNEL]
 
 ## ⚙️ Configuration & Sécurité
-*   **firestore.rules** : Règles de sécurité granulaires (RLS) protégeant les données par UID.
-*   **firebase-blueprint.json** : Schéma de données JSON-Schema pour la validation.
+*   **supabase/migrations/** : Migrations SQL et politiques RLS protégeant les données par profil.
+*   **.env.example** : Modèle des variables client/serveur requises pour Vercel.
 *   **database.sql** : Script d'initialisation pour la couche de redondance Supabase/PostgreSQL.
 
 ---

@@ -31,8 +31,11 @@ Copiez `.env.example` et renseignez au minimum :
 | `SUPABASE_SERVICE_ROLE_KEY` | API serveur (sub-admins, webhooks) — **secret** |
 | `GOOGLE_GEMINI_API_KEY` | Assistant support multi-agents (Gemini) |
 | `ADMIN_SECRET` | `Authorization: Bearer` ou header `X-ComptaFlow-Internal` sur `/api/internal/*` |
+| `CRON_SECRET` | Protection des crons Vercel (`/api/cron/*`) |
+| `INITIAL_ADMIN_EMAIL` / `INITIAL_ADMIN_PASSWORD` | Provisionnement initial via `/api/setup-admin` |
+| `VITE_BASE_PATH` | Chemin public Vite; conserver `/` pour Vercel |
 
-Sans `GOOGLE_GEMINI_API_KEY`, le chat support fonctionne en mode mock. Sans `ADMIN_SECRET`, les endpoints internes agents sont refusés.
+Sans `GOOGLE_GEMINI_API_KEY`, le chat support fonctionne en mode mock. Sans `ADMIN_SECRET`, les endpoints internes agents, diagnostics et réconciliation sont refusés.
 
 ### Connexion Google (OAuth)
 

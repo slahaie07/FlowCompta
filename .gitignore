@@ -11,4 +11,6 @@ coverage/
 *.log
 .env*
 !.env.example
-.vercel 
+.vercel
+local_db.json
+local_db.*.json
