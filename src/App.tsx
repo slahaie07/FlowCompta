@@ -5,6 +5,8 @@ import { UserData } from './types';
 import { Auth } from './components/common/Auth';
 import { Landing } from './components/common/Landing';
 import { Onboarding } from './components/auth/Onboarding';
+import { AuthCallback } from './components/auth/AuthCallback';
+import { getOAuthDisplayName } from './lib/authOAuth';
 import { SuccessScreen } from './components/SuccessScreen';
 import { PortalDashboard, getPortalHomePath, LegacyDashboardRedirect } from './portals';
 import { LegacyPortalSlugRedirect } from './portals/shared/LegacyPortalSlugRedirect';
@@ -131,7 +133,9 @@ function AppContent() {
     );
   }
 
-  const isProfileComplete = userData && (userData.role !== 'client' || userData.fullName);
+  const isProfileComplete =
+    userData &&
+    (userData.role !== 'client' || (Boolean(userData.fullName?.trim()) && Boolean(userData.province)));
 
   const portalElement =
     isAuthenticated && isProfileComplete && userData ? (
@@ -160,6 +164,8 @@ function AppContent() {
       <Route path="/estimate" element={<EstimatePage />} />
       <Route path="/showcase" element={<Showcase />} />
 
+      <Route path="/auth/callback" element={<AuthCallback />} />
+
       <Route
         path="/login"
         element={
@@ -178,7 +184,11 @@ function AppContent() {
             isProfileComplete ? (
               <Navigate to={portalHome} replace />
             ) : (
-              <Onboarding initialEmail={user?.email || ''} onComplete={handleOnboardingComplete} />
+              <Onboarding
+                initialEmail={user?.email || ''}
+                initialDisplayName={getOAuthDisplayName(user?.user_metadata)}
+                onComplete={handleOnboardingComplete}
+              />
             )
           ) : (
             <Navigate to="/login" replace />

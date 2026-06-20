@@ -11,10 +11,11 @@ import { useLanguage } from '../../hooks/useLanguage';
 
 interface OnboardingProps {
   initialEmail: string;
+  initialDisplayName?: string;
   onComplete: (data: UserData) => Promise<void> | void;
 }
 
-export function Onboarding({ initialEmail, onComplete }: OnboardingProps) {
+export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }: OnboardingProps) {
   const [step, setStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [profileType, setProfileType] = useState<'personal' | 'business' | null>(null);
@@ -26,7 +27,7 @@ export function Onboarding({ initialEmail, onComplete }: OnboardingProps) {
   const tr = (key: string) => t(selectedLang, key);
 
   const [data, setData] = useState<UserData>({
-    displayName: '',
+    displayName: initialDisplayName || '',
     companyName: '',
     email: initialEmail || '',
     neq: '',

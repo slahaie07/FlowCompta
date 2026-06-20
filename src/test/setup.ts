@@ -18,6 +18,8 @@ vi.mock('../lib/supabase', () => ({
       getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
       getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
       signInWithPassword: vi.fn(),
+      signInWithOAuth: vi.fn().mockResolvedValue({ data: { provider: 'google', url: 'https://example.com' }, error: null }),
+      exchangeCodeForSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
       signOut: vi.fn(),
       onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
     },

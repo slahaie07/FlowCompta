@@ -221,6 +221,9 @@ export const i18n = {
       submitRegister: "Créer le compte",
       switchToRegister: "Pas encore inscrit ? Créer un dossier",
       switchToLogin: "Déjà inscrit ? S'identifier",
+      continueWithGoogle: "Continuer avec Google",
+      orDivider: "ou",
+      googleNotEnabled: "La connexion Google n'est pas activée dans Supabase. Activez le fournisseur Google dans Authentication > Providers.",
       footer: "Portail ComptaFlow • Canada • MMXXVI"
     },
 
@@ -1106,6 +1109,9 @@ export const i18n = {
       submitRegister: "Create account",
       switchToRegister: "Not registered yet? Open a file",
       switchToLogin: "Already registered? Sign in",
+      continueWithGoogle: "Continue with Google",
+      orDivider: "or",
+      googleNotEnabled: "Google sign-in is not enabled in Supabase. Enable the Google provider under Authentication > Providers.",
       footer: "ComptaFlow Portal • Canada • MMXXVI"
     },
 
@@ -1933,6 +1939,9 @@ export const i18n = {
       registerTitle: "ملف جديد.",
       submitLogin: "تسجيل الدخول",
       submitRegister: "إنشاء الحساب",
+      continueWithGoogle: "المتابعة مع Google",
+      orDivider: "أو",
+      googleNotEnabled: "تسجيل الدخول عبر Google غير مفعّل في Supabase.",
       footer: "بوابة ComptaFlow · كندا · MMXXVI"
     },
 

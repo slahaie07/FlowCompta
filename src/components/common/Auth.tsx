@@ -8,6 +8,8 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { toast } from 'sonner';
 import { useLanguage } from '../../hooks/useLanguage';
+import { signInWithGoogle } from '../../lib/authOAuth';
+import { GoogleAuthButton } from './GoogleAuthButton';
 
 interface AuthProps {
   onAuthentication: (email: string) => void;
@@ -33,6 +35,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
   const [error, setError] = useState('');
   const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
   const [resending, setResending] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   // Charger la liste des comptables partenaires (sub_admins) pour les nouveaux clients
   useEffect(() => {
@@ -63,6 +66,22 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
   };
 
   // Resend confirmation email
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    setError('');
+    try {
+      await signInWithGoogle(nextPath);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Échec de la connexion Google.";
+      if (message.includes('provider is not enabled') || message.includes('Unsupported provider')) {
+        setError(t('auth.googleNotEnabled'));
+      } else {
+        setError(message);
+      }
+      setGoogleLoading(false);
+    }
+  };
+
   const handleResendConfirmation = async () => {
     setResending(true);
     try {
@@ -217,6 +236,15 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                    </div>
                 </button>
              </div>
+
+             <div className="max-w-xl mx-auto space-y-4 pt-2">
+               <p className="text-[10px] uppercase tracking-[0.35em] font-black text-slate-600">{t('auth.orDivider')}</p>
+               <GoogleAuthButton
+                 label={t('auth.continueWithGoogle')}
+                 onClick={handleGoogleSignIn}
+                 isLoading={googleLoading}
+               />
+             </div>
           </motion.div>
         ) : (
           <motion.div
@@ -270,6 +298,17 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                       )}
                     </div>
                   )}
+
+                  <GoogleAuthButton
+                    label={t('auth.continueWithGoogle')}
+                    onClick={handleGoogleSignIn}
+                    isLoading={googleLoading}
+                    className="mb-2"
+                  />
+
+                  <p className="text-center text-[10px] uppercase tracking-[0.35em] font-black text-slate-600">
+                    {t('auth.orDivider')}
+                  </p>
 
                   <form onSubmit={handleAuthSubmit} className="space-y-5 text-left">
                     {view === 'register' && (

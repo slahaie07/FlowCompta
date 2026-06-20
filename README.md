@@ -34,6 +34,31 @@ Copiez `.env.example` et renseignez au minimum :
 
 Sans `GOOGLE_GEMINI_API_KEY`, le chat support fonctionne en mode mock. Sans `ADMIN_SECRET`, les endpoints internes agents sont refusés.
 
+### Connexion Google (OAuth)
+
+La connexion « Continuer avec Google » utilise **Supabase Auth** (PKCE). Aucune clé Google n'est requise dans `.env` — tout se configure dans les consoles Supabase et Google Cloud.
+
+1. **Google Cloud Console** ([console.cloud.google.com](https://console.cloud.google.com))
+   - Créer un projet (ou réutiliser un existant).
+   - **APIs & Services → OAuth consent screen** : type External, domaines autorisés `compta-flow.net`.
+   - **Credentials → Create OAuth client ID** : type **Web application**.
+   - **Authorized redirect URIs** :
+     - `https://<VOTRE_PROJECT_REF>.supabase.co/auth/v1/callback`
+   - Copier **Client ID** et **Client Secret**.
+
+2. **Supabase Dashboard** → **Authentication → Providers → Google**
+   - Activer Google, coller Client ID et Client Secret.
+
+3. **Supabase** → **Authentication → URL Configuration**
+   - **Site URL** : `https://compta-flow.net` (prod) ou `http://localhost:5173` (dev).
+   - **Redirect URLs** (allow list) :
+     - `http://localhost:5173/auth/callback`
+     - `https://compta-flow.net/auth/callback`
+
+4. Appliquer la migration SQL `supabase/migrations/20260619_google_oauth_profile.sql` (profil `client` + nom Google).
+
+Flux applicatif : `/login` → Google → `/auth/callback` → onboarding si profil incomplet (province) → portail selon le rôle.
+
 ## 📚 Documentation pour l'Architecte
 - `PROJECT_BLUEPRINT.md` : Guide suprême de l'architecture.
 - `database.sql` : Schéma de base de données complet et sécurisé.
