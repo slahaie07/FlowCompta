@@ -1,3 +1,6 @@
-'use strict';
-// Vercel serverless entry. Bundled app is built to serverless.cjs during npm run build.
-module.exports = require('./serverless.cjs');
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const bundled = require('./serverless.cjs');
+
+export default bundled.default ?? bundled;
