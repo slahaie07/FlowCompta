@@ -16,6 +16,7 @@
     "db:migrate": "tsx scripts/apply-supabase-migrations.ts",
     "vercel:sync-env": "tsx scripts/sync-vercel-env.ts",
     "finish:setup": "tsx scripts/finish-production-setup.ts",
+    "setup:all": "npm run ci && npm run finish:setup && npm run verify:network",
     "seed:admins": "tsx scripts/seed-admin-users.ts",
     "seed:admins:dry-run": "tsx scripts/seed-admin-users.ts --dry-run",
     "seed:admin-users": "tsx scripts/seed-admin-users.ts",

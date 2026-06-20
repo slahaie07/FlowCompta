@@ -43,6 +43,9 @@ npm run build
 # CI complet (identique à Vercel avant chaque déploiement prod)
 npm run ci
 
+# Tout vérifier d'un coup (code + prod + réseau Canada)
+npm run setup:all
+
 # Vérification pré-promotion (lint + test + build)
 npm run promotion:check
 
