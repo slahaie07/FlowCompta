@@ -43,9 +43,18 @@ Write-Host "  2. Auth -> Users -> create 3 admin accounts (see docs/SETUP_WITHOU
 Write-Host "  3. SQL Editor -> paste scripts/seed-admins-manual.sql"
 Write-Host "  4. npm run setup:print-sql   (full copy-paste bundle)"
 Write-Host ""
-Write-Host "Dev server: npm run dev" -ForegroundColor Green
+Write-Host "Dev server: npm run dev  (http://localhost:3000)" -ForegroundColor Green
+Write-Host "Ouvrir le site: npm run open:site  ou double-clic Ouvrir-ComptaFlow.cmd" -ForegroundColor Green
+Write-Host "Dev + navigateur: double-clic Ouvrir-ComptaFlow-Local.cmd" -ForegroundColor Green
 Write-Host "Promotion check: npm run promotion:check" -ForegroundColor Green
 Write-Host "Seed dry-run: npm run seed:admins:dry-run" -ForegroundColor Green
 Write-Host "Seed live: npm run seed:admins -- --password=YOUR_PASSWORD" -ForegroundColor Green
 Write-Host "Docs: docs/DEV_COMMANDS.md" -ForegroundColor Green
 Write-Host ""
+Write-Host "Astuce: PowerShell ou double-clic .cmd — pas les fichiers .sh (Git Bash)." -ForegroundColor Yellow
+Write-Host ""
+
+$openProd = Read-Host "Ouvrir https://compta-flow.net/login dans le navigateur ? (O/n)"
+if ($openProd -eq '' -or $openProd -eq 'O' -or $openProd -eq 'o') {
+  Start-Process "https://compta-flow.net/login"
+}

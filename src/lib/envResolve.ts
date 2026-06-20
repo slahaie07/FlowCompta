@@ -14,21 +14,22 @@ function read(key: string): string | undefined {
 }
 
 export function resolveSupabaseUrl(): string {
+  // Vercel Supabase integration (SUPABASE_*) first on server; VITE_* for client bundle
   return (
+    read('SUPABASE_URL') ||
     read('VITE_SUPABASE_URL') ||
     read('NEXT_PUBLIC_SUPABASE_URL') ||
-    read('SUPABASE_URL') ||
     'https://hnxdlzdgiascuawgydir.supabase.co'
   );
 }
 
 export function resolveSupabaseAnonKey(): string {
   return (
-    read('VITE_SUPABASE_ANON_KEY') ||
-    read('NEXT_PUBLIC_SUPABASE_ANON_KEY') ||
     read('SUPABASE_ANON_KEY') ||
+    read('NEXT_PUBLIC_SUPABASE_ANON_KEY') ||
     read('SUPABASE_PUBLISHABLE_KEY') ||
     read('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY') ||
+    read('VITE_SUPABASE_ANON_KEY') ||
     ''
   );
 }

@@ -2,6 +2,35 @@
 
 Tous les scripts npm utilisent `tsx` ou `node` directement — **aucun Git Bash requis** sur Windows.
 
+## Ouvrir ComptaFlow (Windows)
+
+**Ne double-cliquez pas** sur `Comptaflow_HUB.html` ou d'autres fichiers `.html` du dépôt : si Windows a associé `.html` à Git Bash, un terminal s'ouvre au lieu du navigateur.
+
+### Méthodes recommandées
+
+| Action | Commande / fichier |
+|--------|-------------------|
+| Site production | Double-clic `Ouvrir-ComptaFlow.cmd` ou `npm run open:site` |
+| Dev local + navigateur | Double-clic `Ouvrir-ComptaFlow-Local.cmd` |
+| Dev manuel | PowerShell : `npm run dev` puis ouvrir `http://localhost:3000` |
+| Raccourci Bureau | `powershell -File create_shortcut.ps1` (ouvre l'URL, pas un `.html`) |
+
+Les lanceurs `.ps1` / `.cmd` à la racine du projet utilisent `Start-Process` pour ouvrir **https://compta-flow.net** ou **http://localhost:3000** dans le navigateur par défaut.
+
+### Réinitialiser « Ouvrir avec » (Windows)
+
+Si un fichier `.html` ou `.sh` ouvre encore Git Bash :
+
+1. **Paramètres** → **Applications** → **Applications par défaut** → **Choisir les types de fichiers par défaut**
+2. **`.html`** / **`.htm`** → Microsoft Edge ou Google Chrome (pas Git Bash)
+3. **`.sh`** → laisser vide ou « Choisir une application » ; ne pas l'utiliser pour ouvrir des pages web
+
+Alternative : clic droit sur un lien → **Copier l'adresse du lien** → coller dans la barre d'adresse du navigateur.
+
+### Terminal : PowerShell, pas Git Bash
+
+Pour `npm run dev`, `npm run seed:admins`, etc., utilisez **PowerShell** ou **Invite de commandes**. Git Bash peut perturber les chemins Windows et les variables d'environnement.
+
 ## PowerShell (Windows) — recommandé
 
 ```powershell
@@ -9,6 +38,8 @@ cd C:\Users\user\CODE_WORKSPACE\Projects\flowcompta
 
 # Dev local
 npm run dev
+npm run open:local    # ouvre http://localhost:3000 dans le navigateur
+npm run open:site     # ouvre https://compta-flow.net
 
 # Tests, lint, build
 npm run lint
@@ -57,9 +88,17 @@ npm run seed:admins -- --password=admin1234
 npx cross-env SEED_ADMIN_PASSWORD=admin1234 npm run seed:admins
 ```
 
-## Scripts shell bash (infra Canada uniquement)
+## Scripts shell bash (CI / infra Canada uniquement)
 
-Les scripts `scripts/provision-canada-network.sh` et `scripts/verify-canada-network.sh` sont **optionnels** (provisionnement infra réseau). Ils nécessitent bash — pas requis pour le dev quotidien ni pour `seed:admins` / `promotion:check`.
+Les scripts `scripts/provision-canada-network.sh` et `scripts/verify-canada-network.sh` sont **optionnels** et réservés à **GitHub Actions / Linux**. Sur Windows, **ne double-cliquez pas** les fichiers `.sh` (Windows les ouvre dans Git Bash).
+
+**Alternative Windows :**
+
+```powershell
+npm run verify:network
+```
+
+Les scripts `seed:admins` / `promotion:check` utilisent `tsx` — aucun bash requis.
 
 ## Prérequis seed admins
 

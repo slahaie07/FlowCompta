@@ -38,9 +38,9 @@ Sans `GOOGLE_GEMINI_API_KEY`, le chat support fonctionne en mode mock. Sans `ADM
 
 L'inscription et la confirmation par courriel utilisent **Supabase Auth** (PKCE). Configurez dans **Supabase Dashboard** → **Authentication → URL Configuration** :
 
-- **Site URL** : `https://compta-flow.net` (prod) ou `http://localhost:5173` (dev).
+- **Site URL** : `https://compta-flow.net` (prod) ou `http://localhost:3000` (dev).
 - **Redirect URLs** (allow list) :
-  - `http://localhost:5173/auth/callback`
+  - `http://localhost:3000/auth/callback`
   - `https://compta-flow.net/auth/callback`
 
 Flux applicatif : `/login` → inscription/connexion courriel → lien de confirmation → `/auth/callback` → onboarding si profil incomplet (province) → portail selon le rôle.
@@ -51,7 +51,11 @@ Aucun Git Bash requis — tous les scripts npm utilisent `tsx` directement.
 
 ```powershell
 npm install
-npm run dev
+npm run dev                    # serveur + navigateur sur http://localhost:3000
+
+# Ouvrir le site sans Git Bash
+npm run open:site              # production
+.\Ouvrir-ComptaFlow.cmd        # double-clic (Windows)
 
 # Qualité
 npm run lint

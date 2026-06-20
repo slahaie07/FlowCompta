@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
+    "open:site": "powershell -NoProfile -Command \"Start-Process 'https://compta-flow.net'\"",
+    "open:local": "powershell -NoProfile -Command \"Start-Process 'http://localhost:3000'\"",
+    "verify:network": "tsx scripts/verify-canada-network.ts",
     "build": "vite build && esbuild api/app.ts --bundle --platform=node --format=esm --packages=external --sourcemap --outfile=api/index.js && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "lint": "tsc --noEmit",

@@ -14,6 +14,11 @@ import { createClient } from '@supabase/supabase-js';
 import { runAgentOrchestrator, listAgents, AGENT_REGISTRY, toPublicSupportReply } from '../src/agents/index';
 import { runInternalCronJob, INTERNAL_CRON_JOBS } from './internal-jobs';
 import { SEED_ADMIN_ACCOUNTS, PORTAL_HOME_BY_ROLE } from '../src/lib/seedAdminAccounts';
+import {
+  resolveSupabaseAnonKey,
+  resolveSupabaseServiceRoleKey,
+  resolveSupabaseUrl,
+} from '../src/lib/envResolve';
 import type { User } from '@supabase/supabase-js';
 const { Client } = pg;
 
@@ -44,21 +49,10 @@ const twilioClient = twilio(twilioSid, twilioToken);
 const ADMIN_PHONE = '+18192158545';
 
 // --- SUPABASE CLIENT SETUP ---
-// Server-side env names first — VITE_* may be build-time only on Vercel functions
-const supabaseUrl =
-  sanitizeEnvVar(process.env.SUPABASE_URL) ||
-  sanitizeEnvVar(process.env.VITE_SUPABASE_URL) ||
-  'https://hnxdlzdgiascuawgydir.supabase.co';
-const supabaseAnonKey =
-  sanitizeEnvVar(process.env.SUPABASE_ANON_KEY) ||
-  sanitizeEnvVar(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) ||
-  sanitizeEnvVar(process.env.SUPABASE_PUBLISHABLE_KEY) ||
-  sanitizeEnvVar(process.env.VITE_SUPABASE_ANON_KEY) ||
-  '';
-const serviceRoleKey =
-  sanitizeEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY) ||
-  sanitizeEnvVar(process.env.SUPABASE_SECRET_KEY) ||
-  '';
+// envResolve: Vercel integration SUPABASE_* + legacy VITE_* / SUPABASE_SERVICE_ROLE_KEY
+const supabaseUrl = resolveSupabaseUrl();
+const supabaseAnonKey = resolveSupabaseAnonKey();
+const serviceRoleKey = resolveSupabaseServiceRoleKey();
 
 // createClient throws on empty key — must not crash cold start (health/status routes)
 const supabaseClientKey =
@@ -570,7 +564,7 @@ Industrie: ${mockLead.industry}`;
       sniperMessage = await result.response.text();
     }
 
-    const sAdmin = createClient(sanitizeEnvVar(process.env.VITE_SUPABASE_URL || ''), sanitizeEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY) || sanitizeEnvVar(process.env.VITE_SUPABASE_ANON_KEY || ''));
+    const sAdmin = createClient(supabaseUrl, serviceRoleKey || supabaseAnonKey);
     
     const { error } = await sAdmin.from('marketing_leads').insert([{
       source: 'NATIVE_CRON_HUNTER',
@@ -923,9 +917,7 @@ app.post('/api/profile/delete', async (req, res) => {
 
   // 2. Resolve from Supabase if needed and available
   const projectRef = 'hnxdlzdgiascuawgydir';
-  const supabaseUrl = sanitizeEnvVar(process.env.VITE_SUPABASE_URL) || `https://${projectRef}.supabase.co`;
-  const serviceRoleKey = sanitizeEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY);
-  
+
   if (serviceRoleKey && (!targetUserId || !targetEmail)) {
     try {
       const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
@@ -1191,9 +1183,7 @@ app.post('/api/profile/export', rateLimiter(5, 60000), async (req, res) => {
 
   // 2. Resolve from Supabase / Postgres if needed
   const projectRef = 'hnxdlzdgiascuawgydir';
-  const supabaseUrl = sanitizeEnvVar(process.env.VITE_SUPABASE_URL) || `https://${projectRef}.supabase.co`;
-  const serviceRoleKey = sanitizeEnvVar(process.env.SUPABASE_SERVICE_ROLE_KEY);
-  
+
   let dbData: any = {};
   let foundInDb = false;
 
