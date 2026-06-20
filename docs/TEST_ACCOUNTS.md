@@ -26,7 +26,7 @@ Les `sub_admin` n'ont pas de `sub_admin_id` sur leur propre profil — leur `pro
 
 ```bash
 # .env.local : SUPABASE_SERVICE_ROLE_KEY + URL
-SEED_ADMIN_PASSWORD='your-dev-password-only' npm run seed:admin-users
+SEED_ADMIN_PASSWORD='***' npm run seed:admins
 ```
 
 Options :
