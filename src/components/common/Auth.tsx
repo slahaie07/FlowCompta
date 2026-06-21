@@ -35,50 +35,11 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
   const [emailInput, setEmailInput] = useState('');
   const [password, setPassword] = useState('');
   const [fullNameInput, setFullNameInput] = useState('');
-  const [subAdminIdInput, setSubAdminIdInput] = useState('');
-  const [subAdminsList, setSubAdminsList] = useState<any[]>([]);
-  const [partnersLoading, setPartnersLoading] = useState(false);
-  const [partnersLoadError, setPartnersLoadError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
   const [resending, setResending] = useState(false);
 
-  // Charger la liste des comptables partenaires (sub_admins) pour les nouveaux clients
-  useEffect(() => {
-    async function loadSubAdmins() {
-      setPartnersLoading(true);
-      setPartnersLoadError(false);
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, full_name, email')
-          .eq('role', 'sub_admin');
-        if (error) {
-          setPartnersLoadError(true);
-          setSubAdminsList([]);
-          return;
-        }
-        if (data) {
-          setSubAdminsList(data);
-          if (data.length > 0) {
-            setSubAdminIdInput(data[0].id);
-          }
-        }
-      } catch (err) {
-        console.error("Impossible de charger les sub-admins :", err);
-        setPartnersLoadError(true);
-        setSubAdminsList([]);
-      } finally {
-        setPartnersLoading(false);
-      }
-    }
-    if (view === 'register') {
-      loadSubAdmins();
-    }
-  }, [view]);
-
-  // Mode de détection démo/local
   const checkIsMock = (email: string) => {
     return email.toLowerCase().includes('mock') || !window.navigator.onLine;
   };
@@ -109,7 +70,6 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
     }
   };
 
-  // Soumission du formulaire (Connexion / Inscription)
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -135,11 +95,8 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
 
     try {
       if (view === 'register') {
-        if (!fullNameInput) {
-          throw new Error("Veuillez saisir votre nom complet.");
-        }
-        if (!subAdminIdInput && subAdminsList.length > 0) {
-          throw new Error("Veuillez sélectionner votre comptable partenaire.");
+        if (!fullNameInput.trim()) {
+          throw new Error(lang === 'en' ? 'Please enter your full name.' : 'Veuillez saisir votre nom complet.');
         }
 
         const { data, error: signUpError } = await supabase.auth.signUp({
@@ -148,9 +105,8 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
           options: {
             emailRedirectTo: getAuthRedirectUrl(nextPath),
             data: {
-              full_name: fullNameInput,
+              full_name: fullNameInput.trim(),
               role: 'client',
-              sub_admin_id: subAdminIdInput,
             },
           },
         });
@@ -179,7 +135,6 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
           setView('login');
         }
       } else {
-        // Connexion
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email: cleanEmail,
           password
@@ -216,7 +171,6 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
 
   return (
     <div className="relative min-h-screen bg-noir text-ivoire flex items-center justify-center py-20 px-6 overflow-hidden">
-      {/* Background Glows */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-gold/5 rounded-full blur-[150px] pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-sapphire/5 rounded-full blur-[150px] pointer-events-none" />
 
@@ -337,39 +291,9 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                           required
                           className="bg-noir border-white/5 focus:border-gold/50"
                         />
-
-                        <div className="space-y-2">
-                          <label htmlFor="auth-partner" className="text-xs uppercase tracking-widest font-black text-slate-500 block">{t('auth.partnerLabel')}</label>
-                          {partnersLoading ? (
-                            <div className="text-xs text-slate-500 italic p-4 bg-white/5 border border-white/10 rounded-xl">
-                              {t('auth.partnersLoading')}
-                            </div>
-                          ) : subAdminsList.length > 0 ? (
-                            <select
-                              id="auth-partner"
-                              value={subAdminIdInput}
-                              onChange={e => setSubAdminIdInput(e.target.value)}
-                              className="w-full h-14 bg-noir border border-white/10 rounded-xl px-5 text-sm font-semibold text-ivoire outline-none focus-visible:border-gold/50 focus-visible:ring-2 focus-visible:ring-gold/30 transition-all cursor-pointer"
-                            >
-                              {subAdminsList.map(sa => (
-                                <option key={sa.id} value={sa.id}>
-                                  {sa.full_name} ({sa.email})
-                                </option>
-                              ))}
-                            </select>
-                          ) : (
-                            <div className="text-xs text-amber-500 p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl leading-relaxed space-y-3">
-                              <p>⚠️ {partnersLoadError ? t('auth.partnersLoadError') : t('auth.noPartner')}</p>
-                              <p className="text-slate-400">{t('auth.contactSupportHint')}</p>
-                              <a
-                                href="mailto:support@compta-flow.net?subject=Inscription%20ComptaFlow"
-                                className="inline-flex text-gold hover:underline font-bold uppercase tracking-wider text-[10px]"
-                              >
-                                {t('auth.contactSupport')}
-                              </a>
-                            </div>
-                          )}
-                        </div>
+                        <p className="text-xs text-slate-500 leading-relaxed border-l-2 border-gold/30 pl-3">
+                          {t('auth.registerClientNote')}
+                        </p>
                       </>
                     )}
 
@@ -403,7 +327,6 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                       variant="gold"
                       className="w-full h-16 gap-3 font-bold uppercase tracking-[0.2em] shadow-gold/20 mt-4"
                       isLoading={isLoading}
-                      disabled={view === 'register' && (partnersLoading || subAdminsList.length === 0)}
                     >
                       {view === 'login' ? t('auth.submitLogin') : t('auth.submitRegister')} <ArrowRight size={20}/>
                     </Button>
