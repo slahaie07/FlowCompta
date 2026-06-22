@@ -1,8 +1,8 @@
-import { motion, HTMLMotionProps } from 'motion/react';
+import { motion } from 'motion/react';
 import React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 
-interface ButtonProps extends HTMLMotionProps<'button'> {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'gold';
   size?: 'sm' | 'md' | 'lg' | 'icon';
   isLoading?: boolean;
@@ -11,8 +11,6 @@ interface ButtonProps extends HTMLMotionProps<'button'> {
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className = '', variant = 'primary', size = 'md', isLoading, asChild, children, ...props }, ref) => {
-    const Component = asChild ? Slot : motion.button;
-    
     const baseStyles = "inline-flex items-center justify-center rounded-2xl font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/50 focus-visible:ring-offset-2 focus-visible:ring-offset-noir active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none";
     
     const variants = {
@@ -30,24 +28,38 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       icon: "p-3",
     };
 
-    const combinedProps = asChild ? props : {
-      whileHover: { y: -1 },
-      whileTap: { scale: 0.98 },
-      ...props
-    };
-
-    return (
-      <Component
-        ref={ref as any}
-        className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
-        disabled={isLoading}
-        {...combinedProps}
-      >
+    const content = (
+      <>
         {isLoading ? (
           <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
         ) : null}
-        {children}
-      </Component>
+        {children as React.ReactNode}
+      </>
+    );
+
+    if (asChild) {
+      return (
+        <Slot
+          ref={ref as React.Ref<HTMLButtonElement>}
+          className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+          {...props}
+        >
+          {content}
+        </Slot>
+      );
+    }
+
+    return (
+      <motion.button
+        ref={ref}
+        className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+        disabled={isLoading}
+        whileHover={{ y: -1 }}
+        whileTap={{ scale: 0.98 }}
+        {...(props as React.ComponentProps<typeof motion.button>)}
+      >
+        {content}
+      </motion.button>
     );
   }
 );

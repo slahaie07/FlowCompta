@@ -14,6 +14,7 @@ import {
 } from '../../lib/servicesCatalog';
 import { formatCAD, getTaxDisplayLines, calculateCanadianTaxes, type ProvinceCode } from '../../lib/financeUtils';
 import type { BillingUnit } from '../../lib/pricingEstimator';
+import type { PricingStep } from '../../hooks/usePricingEstimate';
 import { CONFIG } from '../../lib/config';
 
 const PROVINCES: ProvinceCode[] = ['QC', 'ON', 'BC', 'AB', 'MB', 'NB', 'NL', 'NS', 'PE', 'SK'];
@@ -148,16 +149,17 @@ export function PricingQuestionnaire({
       return;
     }
     const next = questionSteps[stepIndex + 1];
-    if (next !== undefined) setStep(next as typeof step);
+    if (next !== undefined) setStep(next as PricingStep);
   };
 
   const handlePrev = () => {
     if (step === 'result') {
-      setStep(questionSteps[questionSteps.length - 1] as typeof step);
+      const lastQuestion = questionSteps[questionSteps.length - 1];
+      if (lastQuestion !== undefined) setStep(lastQuestion as PricingStep);
       return;
     }
     const prev = questionSteps[stepIndex - 1];
-    if (prev !== undefined) setStep(prev as typeof step);
+    if (prev !== undefined) setStep(prev as PricingStep);
   };
 
   const canProceed = () => {

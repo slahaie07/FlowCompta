@@ -13,7 +13,7 @@ type HealthEnv = {
   supabase?: string;
   serviceRole?: string;
   anonKey?: string;
-  partnerRls?: string;
+  partnerDirectory?: string;
   resend?: string;
   adminSecret?: string;
   cronSecret?: string;
@@ -58,14 +58,14 @@ async function main() {
       action: 'Vercel → ADMIN_SECRET personnalisé',
     },
     {
-      name: 'RLS partenaires (inscription)',
-      ok: env.partnerRls === 'ok',
+      name: 'Annuaire partenaires (non exposé en anon)',
+      ok: env.partnerDirectory === 'restricted',
       action:
-        env.partnerRls === 'recursion'
-          ? 'Exécuter npm run db:migrate ou coller supabase/migrations/20260620_fix_profiles_rls_recursion.sql'
-          : env.partnerRls === 'missing_key'
+        env.partnerDirectory === 'exposed'
+          ? 'Exécuter supabase/migrations/20260621_revoke_public_partner_directory.sql'
+          : env.partnerDirectory === 'missing_key'
             ? 'Configurer SUPABASE_ANON_KEY sur Vercel'
-            : `État RLS: ${env.partnerRls ?? 'inconnu'}`,
+            : `État annuaire: ${env.partnerDirectory ?? 'inconnu'}`,
     },
   ];
 

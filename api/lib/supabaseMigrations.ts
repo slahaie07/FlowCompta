@@ -112,8 +112,6 @@ function passwordCandidates(): string[] {
     process.env.SUPABASE_DB_PASSWORD,
     process.env.DATABASE_PASSWORD,
     process.env.POSTGRES_PASSWORD,
-    process.env.ADMIN_SECRET,
-    'Maison-139',
   ].filter((v): v is string => !!v?.trim());
 
   return [...new Set(candidates)];

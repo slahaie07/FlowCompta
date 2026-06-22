@@ -37,7 +37,13 @@ const resendKey = sanitizeEnvVar(process.env.RESEND_API_KEY) || 're_mock_resend_
 const twilioSid = sanitizeEnvVar(process.env.TWILIO_ACCOUNT_SID) || 'AC_mock_twilio_sid';
 const twilioToken = sanitizeEnvVar(process.env.TWILIO_AUTH_TOKEN) || 'mock_twilio_token';
 const geminiKey = sanitizeEnvVar(process.env.GOOGLE_GEMINI_API_KEY) || 'mock_gemini_api_key';
-const ADMIN_SECRET = sanitizeEnvVar(process.env.SUPABASE_DB_PASSWORD || process.env.ADMIN_SECRET) || 'Maison-139';
+const ADMIN_SECRET = sanitizeEnvVar(process.env.ADMIN_SECRET);
+const SUPABASE_DB_PASSWORD = sanitizeEnvVar(process.env.SUPABASE_DB_PASSWORD);
+
+if (process.env.NODE_ENV === 'production' && !ADMIN_SECRET) {
+  console.error('[ComptaFlow] FATAL: ADMIN_SECRET must be set in production.');
+  process.exit(1);
+}
 
 const genAI = new GoogleGenerativeAI(geminiKey);
 const visionModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -63,6 +69,7 @@ const supabaseClientKey =
 const supabase = createClient(supabaseUrl, supabaseClientKey);
 
 function isInternalAgentRequest(req: express.Request): boolean {
+  if (!ADMIN_SECRET) return false;
   const headerSecret = req.headers['x-comptaflow-internal'];
   if (headerSecret && String(headerSecret) === ADMIN_SECRET) return true;
   const bearer = req.headers.authorization?.split(' ')[1];
@@ -387,7 +394,12 @@ app.post('/api/webhook/transaction-alert', async (req, res) => {
   }
 });
 
-app.post('/api/ai/analyze-document', async (req, res) => {
+app.post('/api/ai/analyze-document', rateLimiter(30, 60000), async (req, res) => {
+  const authCtx = await getAuthenticatedUserFromRequest(req);
+  if (!authCtx) {
+    return res.status(401).json({ error: 'Authentification requise (Bearer token Supabase).' });
+  }
+
   const { fileData, fileName, mimeType } = req.body;
   
   if (!fileData || !fileName || !mimeType) {
@@ -443,7 +455,12 @@ app.post('/api/payment/setup-direct-debit', (_req, res) => {
 });
 
 // --- ELITE FINANCIAL INTELLIGENCE ---
-app.post('/api/intelligence/analyze', async (req, res) => {
+app.post('/api/intelligence/analyze', rateLimiter(30, 60000), async (req, res) => {
+  const authCtx = await getAuthenticatedUserFromRequest(req);
+  if (!authCtx) {
+    return res.status(401).json({ error: 'Authentification requise (Bearer token Supabase).' });
+  }
+
   const { transactions, query, profile } = req.body;
   
   try {
@@ -781,6 +798,10 @@ app.post('/api/invoices/reconcile', async (req, res) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
   
+  if (!ADMIN_SECRET) {
+    return res.status(503).json({ error: 'ADMIN_SECRET non configuré sur le serveur.' });
+  }
+
   if (!token || token !== ADMIN_SECRET) {
     return res.status(401).json({ error: "Non autorisé. Jeton secret invalide." });
   }
@@ -1007,7 +1028,7 @@ app.post('/api/profile/delete', async (req, res) => {
         host: conf.host,
         port: conf.port,
         user: conf.user,
-        password: ADMIN_SECRET,
+        password: SUPABASE_DB_PASSWORD,
         database: 'postgres',
         ssl: { rejectUnauthorized: false },
         connectionTimeoutMillis: 5000
@@ -1114,7 +1135,7 @@ app.post('/api/profile/delete', async (req, res) => {
         host: conf.host,
         port: conf.port,
         user: conf.user,
-        password: ADMIN_SECRET,
+        password: SUPABASE_DB_PASSWORD,
         database: 'postgres',
         ssl: { rejectUnauthorized: false },
         connectionTimeoutMillis: 5000
@@ -1257,7 +1278,7 @@ app.post('/api/profile/export', rateLimiter(5, 60000), async (req, res) => {
         host: conf.host,
         port: conf.port,
         user: conf.user,
-        password: ADMIN_SECRET,
+        password: SUPABASE_DB_PASSWORD,
         database: 'postgres',
         ssl: { rejectUnauthorized: false },
         connectionTimeoutMillis: 5000
@@ -1385,7 +1406,7 @@ app.post('/api/internal/apply-migrations', async (req, res) => {
   res.status(result.success ? 200 : 500).json(result);
 });
 
-async function checkPartnerRls(): Promise<'ok' | 'recursion' | 'missing_key' | 'error'> {
+async function checkPartnerDirectoryExposure(): Promise<'restricted' | 'exposed' | 'missing_key' | 'error'> {
   const anon = resolveSupabaseAnonKey();
   if (!anon) return 'missing_key';
   const projectRef = resolveSupabaseUrl().match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
@@ -1396,9 +1417,17 @@ async function checkPartnerRls(): Promise<'ok' | 'recursion' | 'missing_key' | '
       headers: { apikey: anon, Authorization: `Bearer ${anon}` },
     });
     const body = await res.text();
-    if (res.ok) return 'ok';
-    if (body.includes('42P17')) return 'recursion';
-    return 'error';
+    if (!res.ok) {
+      if (body.includes('42P17')) return 'error';
+      return 'restricted';
+    }
+    try {
+      const data = JSON.parse(body) as unknown[];
+      if (Array.isArray(data) && data.length > 0) return 'exposed';
+      return 'restricted';
+    } catch {
+      return 'error';
+    }
   } catch {
     return 'error';
   }
@@ -1407,7 +1436,7 @@ async function checkPartnerRls(): Promise<'ok' | 'recursion' | 'missing_key' | '
 // --- HEALTH CHECK (monitoring / stress tests) ---
 app.get('/api/health', async (_req, res) => {
   const geminiLive = !!(geminiKey && geminiKey !== 'mock_gemini_api_key' && !geminiKey.startsWith('mock_'));
-  const partnerRls = await checkPartnerRls();
+  const partnerDirectory = await checkPartnerDirectoryExposure();
   res.json({
     status: 'ok',
     service: 'ComptaFlow',
@@ -1419,11 +1448,11 @@ app.get('/api/health', async (_req, res) => {
       serviceRole: serviceRoleKey ? 'configured' : 'missing',
       anonKey: supabaseAnonKey ? 'configured' : 'missing',
       supabaseProject: resolveSupabaseUrl().match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] ?? 'unknown',
-      partnerRls,
+      partnerDirectory,
       resend: process.env.RESEND_API_KEY ? 'configured' : 'missing',
-      adminSecret: process.env.ADMIN_SECRET ? 'configured' : 'default-fallback',
+      adminSecret: ADMIN_SECRET ? 'configured' : 'missing',
       cronSecret: process.env.CRON_SECRET ? 'configured' : 'missing',
-      dbPassword: process.env.SUPABASE_DB_PASSWORD ? 'configured' : 'missing',
+      dbPassword: SUPABASE_DB_PASSWORD ? 'configured' : 'missing',
     },
     agents: listAgents({ internal: false }).length,
   });

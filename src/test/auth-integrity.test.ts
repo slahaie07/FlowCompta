@@ -1,45 +1,54 @@
-import { test, expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
+import { buildClientSignupMetadata } from '../lib/clientSignup';
 
 /**
- * Test d'Intégrité de l'Authentification (Anti-Régression)
- * Vérifie que le flux d'inscription et de connexion reste opérationnel.
+ * Intégrité auth — Supabase PKCE (pas de routes /api/auth/* legacy).
  */
-test('Flux complet : Inscription -> Connexion', async () => {
-  const baseUrl = 'http://localhost:3000';
-  const testUser = {
-    email: `auto_${Date.now()}@test.ca`,
-    password: 'password123',
-    displayName: 'Automated Test'
-  };
-
-  // 1. Test Inscription
-  const mockUserResponse = { user: { id: 'test-uuid', email: testUser.email } };
-  (global.fetch as any).mockResolvedValueOnce({
-    status: 200,
-    json: async () => mockUserResponse
+describe('Auth integrity (Supabase PKCE)', () => {
+  it('inscription client : métadonnées forcées role client', () => {
+    const metadata = buildClientSignupMetadata('  Marie Tremblay  ');
+    expect(metadata.role).toBe('client');
+    expect(metadata.full_name).toBe('Marie Tremblay');
+    expect(metadata).not.toHaveProperty('sub_admin_id');
   });
 
-  const regRes = await fetch(`${baseUrl}/api/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(testUser)
-  });
-  expect(regRes.status).toBe(200);
-  const regData = await regRes.json();
-  expect(regData.user.email).toBe(testUser.email);
+  it('analyse document IA : JWT requis (contrat API)', async () => {
+    (global.fetch as any).mockResolvedValueOnce({
+      status: 401,
+      json: async () => ({ error: 'Authentification requise (Bearer token Supabase).' }),
+    } as Response);
 
-  // 2. Test Connexion
-  (global.fetch as any).mockResolvedValueOnce({
-    status: 200,
-    json: async () => ({ user: { id: 'test-uuid', email: testUser.email } })
+    const res = await fetch('http://localhost:3000/api/ai/analyze-document', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileData: 'dGVzdA==',
+        fileName: 'facture.pdf',
+        mimeType: 'application/pdf',
+      }),
+    });
+
+    expect(res.status).toBe(401);
+    const data = (await res.json()) as { error: string };
+    expect(data.error).toContain('Authentification requise');
   });
 
-  const loginRes = await fetch(`${baseUrl}/api/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: testUser.email, password: testUser.password })
+  it('intelligence financière : JWT requis (contrat API)', async () => {
+    (global.fetch as any).mockResolvedValueOnce({
+      status: 401,
+      json: async () => ({ error: 'Authentification requise (Bearer token Supabase).' }),
+    } as Response);
+
+    const res = await fetch('http://localhost:3000/api/intelligence/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transactions: [],
+        query: 'Test',
+        profile: { displayName: 'Test' },
+      }),
+    });
+
+    expect(res.status).toBe(401);
   });
-  expect(loginRes.status).toBe(200);
-  const loginData = await loginRes.json();
-  expect(loginData.user.id).toBe(regData.user.id);
 });

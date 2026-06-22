@@ -40,7 +40,7 @@ export const Card = ({
     >
       {withAurora && <div className="aurora-bg opacity-30" />}
       <div className="relative z-10">
-        {children}
+        {children as React.ReactNode}
       </div>
     </motion.div>
   );

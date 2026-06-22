@@ -45,7 +45,7 @@ test('Reconciliation : Succès avec jeton correct et facture valide', async () =
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer Maison-139'
+      'Authorization': 'Bearer test-admin-secret'
     },
     body: JSON.stringify({ invoiceNumber, interacRef })
   });

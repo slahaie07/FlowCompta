@@ -62,10 +62,9 @@ if (missingGroups.length === 0) {
   check('env-vars', false, `Manquantes localement: ${missingLabels} (OK en dev si .env.example utilisé)`);
 }
 
-const adminFromEnv =
-  process.env.ADMIN_SECRET?.trim() || process.env.SUPABASE_DB_PASSWORD?.trim() || '';
-if (adminFromEnv === 'Maison-139' || !adminFromEnv) {
-  check('admin-secret-strength', false, 'ADMIN_SECRET absent ou valeur par défaut — changer en production');
+const adminFromEnv = process.env.ADMIN_SECRET?.trim() || '';
+if (!adminFromEnv || adminFromEnv.length < 16) {
+  check('admin-secret-strength', false, 'ADMIN_SECRET absent ou trop court — définir un secret fort en production');
 } else {
   check('admin-secret-strength', true, 'ADMIN_SECRET personnalisé');
 }

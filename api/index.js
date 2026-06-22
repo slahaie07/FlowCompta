@@ -1417,9 +1417,7 @@ function passwordCandidates() {
   const candidates = [
     process.env.SUPABASE_DB_PASSWORD,
     process.env.DATABASE_PASSWORD,
-    process.env.POSTGRES_PASSWORD,
-    process.env.ADMIN_SECRET,
-    "Maison-139"
+    process.env.POSTGRES_PASSWORD
   ].filter((v) => !!v?.trim());
   return [...new Set(candidates)];
 }
@@ -1528,7 +1526,12 @@ var resendKey = sanitizeEnvVar(process.env.RESEND_API_KEY) || "re_mock_resend_ke
 var twilioSid = sanitizeEnvVar(process.env.TWILIO_ACCOUNT_SID) || "AC_mock_twilio_sid";
 var twilioToken = sanitizeEnvVar(process.env.TWILIO_AUTH_TOKEN) || "mock_twilio_token";
 var geminiKey = sanitizeEnvVar(process.env.GOOGLE_GEMINI_API_KEY) || "mock_gemini_api_key";
-var ADMIN_SECRET = sanitizeEnvVar(process.env.SUPABASE_DB_PASSWORD || process.env.ADMIN_SECRET) || "Maison-139";
+var ADMIN_SECRET = sanitizeEnvVar(process.env.ADMIN_SECRET);
+var SUPABASE_DB_PASSWORD = sanitizeEnvVar(process.env.SUPABASE_DB_PASSWORD);
+if (process.env.NODE_ENV === "production" && !ADMIN_SECRET) {
+  console.error("[ComptaFlow] FATAL: ADMIN_SECRET must be set in production.");
+  process.exit(1);
+}
 var genAI = new GoogleGenerativeAI2(geminiKey);
 var visionModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 var agenticModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -1543,6 +1546,7 @@ var serviceRoleKey = resolveSupabaseServiceRoleKey();
 var supabaseClientKey = serviceRoleKey || supabaseAnonKey || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIn0.placeholder";
 var supabase = createClient(supabaseUrl, supabaseClientKey);
 function isInternalAgentRequest(req) {
+  if (!ADMIN_SECRET) return false;
   const headerSecret = req.headers["x-comptaflow-internal"];
   if (headerSecret && String(headerSecret) === ADMIN_SECRET) return true;
   const bearer = req.headers.authorization?.split(" ")[1];
@@ -1817,7 +1821,11 @@ ${summaryMsg}`);
     res.status(500).json({ error: "Erreur lors de l'envoi de l'alerte." });
   }
 });
-app.post("/api/ai/analyze-document", async (req, res) => {
+app.post("/api/ai/analyze-document", rateLimiter(30, 6e4), async (req, res) => {
+  const authCtx = await getAuthenticatedUserFromRequest(req);
+  if (!authCtx) {
+    return res.status(401).json({ error: "Authentification requise (Bearer token Supabase)." });
+  }
   const { fileData, fileName, mimeType } = req.body;
   if (!fileData || !fileName || !mimeType) {
     botLog("IA_ANALYZE_ERROR", fileName || "unknown", "Param\xE8tres requis manquants.");
@@ -1861,7 +1869,11 @@ app.post("/api/payment/setup-direct-debit", (_req, res) => {
     supportedMethods: ["interac"]
   });
 });
-app.post("/api/intelligence/analyze", async (req, res) => {
+app.post("/api/intelligence/analyze", rateLimiter(30, 6e4), async (req, res) => {
+  const authCtx = await getAuthenticatedUserFromRequest(req);
+  if (!authCtx) {
+    return res.status(401).json({ error: "Authentification requise (Bearer token Supabase)." });
+  }
   const { transactions, query, profile } = req.body;
   try {
     const prompt = `Tu es l'Analyste Financier Senior de ComptaFlow. 
@@ -2125,6 +2137,9 @@ async function getSuperAdminFromRequest(req) {
 app.post("/api/invoices/reconcile", async (req, res) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
+  if (!ADMIN_SECRET) {
+    return res.status(503).json({ error: "ADMIN_SECRET non configur\xE9 sur le serveur." });
+  }
   if (!token || token !== ADMIN_SECRET) {
     return res.status(401).json({ error: "Non autoris\xE9. Jeton secret invalide." });
   }
@@ -2299,7 +2314,7 @@ app.post("/api/profile/delete", async (req, res) => {
         host: conf.host,
         port: conf.port,
         user: conf.user,
-        password: ADMIN_SECRET,
+        password: SUPABASE_DB_PASSWORD,
         database: "postgres",
         ssl: { rejectUnauthorized: false },
         connectionTimeoutMillis: 5e3
@@ -2384,7 +2399,7 @@ app.post("/api/profile/delete", async (req, res) => {
         host: conf.host,
         port: conf.port,
         user: conf.user,
-        password: ADMIN_SECRET,
+        password: SUPABASE_DB_PASSWORD,
         database: "postgres",
         ssl: { rejectUnauthorized: false },
         connectionTimeoutMillis: 5e3
@@ -2507,7 +2522,7 @@ app.post("/api/profile/export", rateLimiter(5, 6e4), async (req, res) => {
         host: conf.host,
         port: conf.port,
         user: conf.user,
-        password: ADMIN_SECRET,
+        password: SUPABASE_DB_PASSWORD,
         database: "postgres",
         ssl: { rejectUnauthorized: false },
         connectionTimeoutMillis: 5e3
@@ -2616,7 +2631,7 @@ app.post("/api/internal/apply-migrations", async (req, res) => {
   const result = await applySupabaseMigrations({ allFiles: true });
   res.status(result.success ? 200 : 500).json(result);
 });
-async function checkPartnerRls() {
+async function checkPartnerDirectoryExposure() {
   const anon = resolveSupabaseAnonKey();
   if (!anon) return "missing_key";
   const projectRef = resolveSupabaseUrl().match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
@@ -2627,16 +2642,24 @@ async function checkPartnerRls() {
       headers: { apikey: anon, Authorization: `Bearer ${anon}` }
     });
     const body = await res.text();
-    if (res.ok) return "ok";
-    if (body.includes("42P17")) return "recursion";
-    return "error";
+    if (!res.ok) {
+      if (body.includes("42P17")) return "error";
+      return "restricted";
+    }
+    try {
+      const data = JSON.parse(body);
+      if (Array.isArray(data) && data.length > 0) return "exposed";
+      return "restricted";
+    } catch {
+      return "error";
+    }
   } catch {
     return "error";
   }
 }
 app.get("/api/health", async (_req, res) => {
   const geminiLive = !!(geminiKey && geminiKey !== "mock_gemini_api_key" && !geminiKey.startsWith("mock_"));
-  const partnerRls = await checkPartnerRls();
+  const partnerDirectory = await checkPartnerDirectoryExposure();
   res.json({
     status: "ok",
     service: "ComptaFlow",
@@ -2648,11 +2671,11 @@ app.get("/api/health", async (_req, res) => {
       serviceRole: serviceRoleKey ? "configured" : "missing",
       anonKey: supabaseAnonKey ? "configured" : "missing",
       supabaseProject: resolveSupabaseUrl().match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] ?? "unknown",
-      partnerRls,
+      partnerDirectory,
       resend: process.env.RESEND_API_KEY ? "configured" : "missing",
-      adminSecret: process.env.ADMIN_SECRET ? "configured" : "default-fallback",
+      adminSecret: ADMIN_SECRET ? "configured" : "missing",
       cronSecret: process.env.CRON_SECRET ? "configured" : "missing",
-      dbPassword: process.env.SUPABASE_DB_PASSWORD ? "configured" : "missing"
+      dbPassword: SUPABASE_DB_PASSWORD ? "configured" : "missing"
     },
     agents: listAgents({ internal: false }).length
   });

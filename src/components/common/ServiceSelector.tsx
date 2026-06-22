@@ -25,7 +25,11 @@ interface ServiceSelectorProps {
 export function ServiceSelector({ userData, onSaved }: ServiceSelectorProps) {
   const { t: translate } = useLanguage();
   const portalNavigate = usePortalNavigate();
-  const currentId = userData.selectedServiceId || '';
+  const currentId: ServiceId | '' =
+    userData.selectedServiceId &&
+    SERVICE_CATALOG.some((s) => s.id === userData.selectedServiceId)
+      ? (userData.selectedServiceId as ServiceId)
+      : '';
   const [selected, setSelected] = useState<ServiceId | ''>(currentId);
   const [saving, setSaving] = useState(false);
 

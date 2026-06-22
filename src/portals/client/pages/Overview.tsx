@@ -156,7 +156,7 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
         {/* Colonne Gauche: Dépôt et Mandat */}
         <div className="lg:col-span-7 space-y-8">
           {/* Radar Fiscal Prédictif (AI/Tax Integration) */}
-          <TaxPredictor userId={userData.id} />
+          {userData.id ? <TaxPredictor userId={userData.id} /> : null}
 
           {/* Dépôt Direct */}
           <Card className="p-8 space-y-6 premium-border-gold" glow="gold">
