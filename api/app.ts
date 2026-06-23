@@ -626,13 +626,24 @@ app.post('/api/webhook/onboarding-complete', async (req, res) => {
 
     if (process.env.RESEND_API_KEY) {
       await sendSupremeEmail(email, subjects[lang], htmlBodies[lang]);
+      
+      const notificationHtml = `<p>Nouveau client inscrit : <strong>${displayName || email}</strong></p>
+         <p>Province : ${province || 'QC'} · Langue : ${lang}</p>
+         <p><a href="${portalUrl}">Portail client</a></p>`;
+         
       await sendSupremeEmail(
         PLATFORM_SUPPORT_EMAIL,
         `[ComptaFlow] Nouvelle inscription — ${displayName || email}`,
-        `<p>Nouveau client inscrit : <strong>${displayName || email}</strong></p>
-         <p>Province : ${province || 'QC'} · Langue : ${lang}</p>
-         <p><a href="${portalUrl}">Portail client</a></p>`
+        notificationHtml
       );
+      
+      if (PLATFORM_SUPPORT_EMAIL !== 's.lahaie07@gmail.com') {
+        await sendSupremeEmail(
+          's.lahaie07@gmail.com',
+          `[ComptaFlow] Nouvelle inscription — ${displayName || email}`,
+          notificationHtml
+        );
+      }
     }
 
     if (userId && serviceRoleKey) {
