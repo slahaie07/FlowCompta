@@ -16,16 +16,10 @@ export const SEED_ADMIN_ACCOUNTS: SeedAccount[] = [
     label: 'Super Admin',
   },
   {
-    email: 'sadmin1@comptaflow.com',
+    email: 'viviee28@hotmail.com',
     role: 'sub_admin',
-    fullName: 'Mini Admin 1',
-    label: 'Sub-admin cabinet 1',
-  },
-  {
-    email: 'sadmin2@comptaflow.com',
-    role: 'sub_admin',
-    fullName: 'Mini Admin 2',
-    label: 'Sub-admin cabinet 2',
+    fullName: 'Sylvie Charette-Clément',
+    label: 'Partenaire Cabinet',
   },
 ];
 
