@@ -199,6 +199,105 @@ export function AdminOverview() {
            </div>
         </Card>
       </div>
+
+      {/* 🏛️ PROTOCOLE DE COLLABORATION CABINET */}
+      <section className="space-y-6 mt-12">
+        <h2 className="text-xl font-serif font-bold text-ivoire flex items-center gap-2">
+          <span>🏛️</span> PROTOCOLE DE COLLABORATION CABINET (MMXXVI)
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <Card className="p-6 space-y-4 glass-card relative overflow-hidden group">
+            <div className="flex items-center justify-between">
+              <span className="text-gold font-bold text-xs uppercase tracking-widest">Étape 1</span>
+              <span className="text-slate-500 text-xs font-mono">Accueil</span>
+            </div>
+            <h3 className="font-serif font-bold text-lg text-ivoire">1. L'Accueil (Intake)</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Dès qu'un client dit « Je veux vos services ». Ouvrez le dossier informatique, ajoutez le client dans Excel, envoyez le contrat et la liste des documents requis.
+            </p>
+            <div className="text-[11px] bg-white/5 p-3 rounded-lg text-slate-400 border border-white/5">
+              <strong>Action d'équipe :</strong> Inscrivez votre nom sous « Pris en charge par » et passez le statut à <span className="text-amber-400 font-bold">En attente de documents</span>.
+            </div>
+          </Card>
+
+          <Card className="p-6 space-y-4 glass-card relative overflow-hidden group">
+            <div className="flex items-center justify-between">
+              <span className="text-gold font-bold text-xs uppercase tracking-widest">Étape 2</span>
+              <span className="text-slate-500 text-xs font-mono">Attente</span>
+            </div>
+            <h3 className="font-serif font-bold text-lg text-ivoire">2. La Récolte (Documents)</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              En attente des documents. Si des fichiers sont téléversés, mettez Excel à jour. Après une semaine sans nouvelles, envoyez un rappel amical par courriel.
+            </p>
+            <div className="text-[11px] bg-white/5 p-3 rounded-lg text-slate-400 border border-white/5">
+              <strong>Action d'équipe :</strong> Dès que tous les documents sont reçus, passez le statut à <span className="text-sky-400 font-bold">Prêt à traiter</span> (lancement de la production).
+            </div>
+          </Card>
+
+          <Card className="p-6 space-y-4 glass-card relative overflow-hidden group">
+            <div className="flex items-center justify-between">
+              <span className="text-gold font-bold text-xs uppercase tracking-widest">Étape 3</span>
+              <span className="text-slate-500 text-xs font-mono">Production</span>
+            </div>
+            <h3 className="font-serif font-bold text-lg text-ivoire">3. L'Action (Chiffres)</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Toi ou Sylvie débutez la production dans le logiciel comptable (Sage/Quickbooks/Impôt). Regroupez toutes vos questions en un seul envoi pour limiter le dérangement.
+            </p>
+            <div className="text-[11px] bg-white/5 p-3 rounded-lg text-slate-400 border border-white/5">
+              <strong>Action d'équipe :</strong> Inscrivez votre nom sous « Pris en charge par » et passez le statut à <span className="text-sky-400 font-bold">En cours de production</span>.
+            </div>
+          </Card>
+
+          <Card className="p-6 space-y-4 glass-card relative overflow-hidden group">
+            <div className="flex items-center justify-between">
+              <span className="text-gold font-bold text-xs uppercase tracking-widest">Étape 4</span>
+              <span className="text-slate-500 text-xs font-mono">Clôture</span>
+            </div>
+            <h3 className="font-serif font-bold text-lg text-ivoire">4. La Finale (Facture & Envoi)</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Production complétée. Envoyez le brouillon pour signature électronique (DocuSign) et la facture de services (Interac). Ne transmettez rien avant approbation et paiement.
+            </p>
+            <div className="text-[11px] bg-white/5 p-3 rounded-lg text-slate-400 border border-white/5">
+              <strong>Action d'équipe :</strong> Statut <span className="text-amber-400 font-bold">En attente de paiement/signature</span>. Une fois payé et transmis : <span className="text-green-400 font-bold">Terminé</span>.
+            </div>
+          </Card>
+        </div>
+
+        {/* Code de couleurs visuel */}
+        <Card className="p-8 premium-border-gold relative overflow-hidden" glow="gold">
+          <h3 className="font-serif font-bold text-lg text-ivoire mb-4">🎨 Code Couleur de Suivi des Statuts (Excel)</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            <div className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+              <span className="w-3.5 h-3.5 rounded-full bg-amber-500 shrink-0" />
+              <div>
+                <p className="font-bold text-amber-200">Jaune : En Attente</p>
+                <p className="text-slate-500 text-[11px] mt-0.5">Le ballon est dans le camp du client (documents manquants, signatures, paiement).</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 bg-sky-500/10 border border-sky-500/20 rounded-xl">
+              <span className="w-3.5 h-3.5 rounded-full bg-sky-500 shrink-0" />
+              <div>
+                <p className="font-bold text-sky-200">Bleu : Prêt / En Cours</p>
+                <p className="text-slate-500 text-[11px] mt-0.5">Le ballon est chez ComptaFlow (traitement, saisie et révision comptable).</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
+              <span className="w-3.5 h-3.5 rounded-full bg-green-500 shrink-0" />
+              <div>
+                <p className="font-bold text-green-200">Vert : Terminé</p>
+                <p className="text-slate-500 text-[11px] mt-0.5">Dossier officiellement fermé, déclarations transmises aux gouvernements.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+              <span className="w-3.5 h-3.5 rounded-full bg-red-500 shrink-0" />
+              <div>
+                <p className="font-bold text-red-200">Rouge : Bloqué</p>
+                <p className="text-slate-500 text-[11px] mt-0.5">Problème urgent (ex: document manquant critique ou erreur système).</p>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </section>
     </div>
   );
 }
