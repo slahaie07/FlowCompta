@@ -2533,6 +2533,34 @@ app.get("/api/internal/bot-logs", async (req, res) => {
   const logs = (db.bot_logs || []).slice(-limit).reverse();
   res.json({ logs, count: logs.length });
 });
+app.get("/api/internal/check-admins-db", async (req, res) => {
+  if (!isInternalAgentRequest(req)) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  if (!serviceRoleKey) {
+    return res.status(503).json({ error: "SUPABASE_SERVICE_ROLE_KEY not configured" });
+  }
+  try {
+    const admin = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false }
+    });
+    const emails = [
+      "s.lahaie07@gmail.com",
+      "viviee28@hotmail.com",
+      "eya-cpa@outlook.com",
+      "stephanie@comptaflow.com"
+    ];
+    const { data: profiles, error } = await admin.from("profiles").select("id, email, full_name, role, status, created_at").in("email", emails);
+    if (error) throw error;
+    return res.json({
+      success: true,
+      profiles: profiles || [],
+      count: profiles?.length || 0
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
 app.get("/api/internal/agents", async (req, res) => {
   if (!isInternalAgentRequest(req)) {
     const ctx = await getSuperAdminFromRequest(req);
