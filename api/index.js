@@ -1294,7 +1294,7 @@ var SEED_ADMIN_ACCOUNTS = [
   {
     email: "s.lahaie07@gmail.com",
     role: "super_admin",
-    fullName: "Samuel L. (Super Admin)",
+    fullName: "Samuel Lahaie",
     label: "Super Admin"
   },
   {
@@ -1306,8 +1306,14 @@ var SEED_ADMIN_ACCOUNTS = [
   {
     email: "eya-cpa@outlook.com",
     role: "sub_admin",
-    fullName: "Eya (Sous-Admin)",
+    fullName: "Eya",
     label: "Partenaire Cabinet (Support Arabe)"
+  },
+  {
+    email: "Queen.eth1@outlook.com",
+    role: "sub_admin",
+    fullName: "St\xE9phanie Laplante",
+    label: "Partenaire Cabinet"
   }
 ];
 var PORTAL_HOME_BY_ROLE = {
@@ -3424,6 +3430,89 @@ app.post("/api/webhook/account-confirmed", async (req, res) => {
   } catch (error) {
     botLog("ACCOUNT_CONFIRMED_CRASH", email, error.message);
     return res.status(500).json({ error: "Une erreur interne est survenue : " + error.message });
+  }
+});
+app.get("/api/facebook/webhook", (req, res) => {
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+  const VERIFY_TOKEN = sanitizeEnvVar(process.env.FACEBOOK_VERIFY_TOKEN) || "comptaflow_facebook_verify_token_123";
+  if (mode === "subscribe" && token === VERIFY_TOKEN) {
+    console.log("[Facebook Webhook] Verification successful.");
+    return res.status(200).send(challenge);
+  } else {
+    console.warn("[Facebook Webhook] Verification failed.");
+    return res.status(403).send("Forbidden");
+  }
+});
+async function generateFacebookBotReply(userMessage) {
+  try {
+    const prompt = `Tu es l'assistant de clavardage intelligent de la page Facebook de ComptaFlow (compta-flow.net).
+ComptaFlow est une plateforme cloud qu\xE9b\xE9coise d'automatisation de la facturation, de tenue de livres, de gestion de taxes canadiennes (TPS/TVQ) et de conciliation bancaire assist\xE9e par IA pour les PME et travailleurs autonomes.
+
+Consignes:
+- Sois courtois, professionnel, accueillant et efficace.
+- \xC9cris des phrases courtes, adapt\xE9es au format clavardage (Messenger).
+- R\xE9ponds toujours en fran\xE7ais.
+- Sugg\xE8re de visiter https://compta-flow.net pour en savoir plus ou de se connecter au portail.
+- N'invente pas d'informations techniques non v\xE9rifi\xE9es.
+
+Message de l'utilisateur: "${userMessage}"
+R\xE9ponse de l'assistant de clavardage:`;
+    const result = await agenticModel.generateContent(prompt);
+    const response = await result.response;
+    return response.text().trim();
+  } catch (error) {
+    console.error("[Facebook Webhook] Gemini generation error:", error.message);
+    return "Bonjour ! Je suis le robot d'assistance ComptaFlow. D\xE9sol\xE9, je rencontre une petite difficult\xE9 technique pour formuler ma r\xE9ponse. N'h\xE9sitez pas \xE0 visiter notre site https://compta-flow.net ou \xE0 nous laisser vos coordonn\xE9es afin qu'un conseiller humain vous recontacte !";
+  }
+}
+async function sendFacebookMessage(senderId, text) {
+  const pageAccessToken = sanitizeEnvVar(process.env.FACEBOOK_PAGE_ACCESS_TOKEN);
+  if (!pageAccessToken || pageAccessToken.startsWith("mock")) {
+    console.warn("[Facebook Webhook] Warning: FACEBOOK_PAGE_ACCESS_TOKEN is not configured or in mock mode. Reply:", text);
+    return;
+  }
+  const url = `https://graph.facebook.com/v19.0/me/messages?access_token=${pageAccessToken}`;
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        recipient: { id: senderId },
+        message: { text }
+      })
+    });
+    const data = await response.json();
+    if (data.error) {
+      console.error("[Facebook Webhook] Error calling Graph Send API:", data.error);
+    } else {
+      console.log(`[Facebook Webhook] Message sent back to client ${senderId}`);
+    }
+  } catch (err) {
+    console.error("[Facebook Webhook] Error sending Messenger request:", err.message);
+  }
+}
+app.post("/api/facebook/webhook", async (req, res) => {
+  const body = req.body;
+  if (body.object === "page") {
+    res.status(200).send("EVENT_RECEIVED");
+    for (const entry of body.entry || []) {
+      for (const webhookEvent of entry.messaging || []) {
+        const senderId = webhookEvent.sender?.id;
+        const messageText = webhookEvent.message?.text;
+        if (senderId && messageText) {
+          botLog("FACEBOOK_BOT_MESSAGE_RECEIVED", senderId, `Message: ${messageText.substring(0, 100)}`);
+          const reply = await generateFacebookBotReply(messageText);
+          await sendFacebookMessage(senderId, reply);
+          botLog("FACEBOOK_BOT_REPLY_SENT", senderId, `Reply: ${reply.substring(0, 100)}`);
+        }
+      }
+    }
+  } else {
+    return res.sendStatus(404);
   }
 });
 var setupStatic = async () => {

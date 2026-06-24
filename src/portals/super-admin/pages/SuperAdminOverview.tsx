@@ -5,8 +5,13 @@ import { OrganicLoader } from '../../../components/ui/OrganicLoader';
 import { useLanguage } from '../../../hooks/useLanguage';
 import { useSuperAdminLiveStats } from '../../../hooks/useSuperAdminLiveStats';
 import { getPortalPath } from '../../config/paths';
+import { UserData } from '../../../types';
 
-export function SuperAdminOverview() {
+interface SuperAdminOverviewProps {
+  userData?: UserData;
+}
+
+export function SuperAdminOverview({ userData }: SuperAdminOverviewProps) {
   const { t } = useLanguage();
   const { stats, loading } = useSuperAdminLiveStats(true);
 
@@ -31,7 +36,7 @@ export function SuperAdminOverview() {
       <header className="flex justify-between items-end">
         <div>
           <h1 className="text-5xl font-serif font-bold text-ivoire tracking-tight leading-tight">
-            {t('superAdmin.title')} <span className="animated-gradient-text italic">{t('superAdmin.titleAccent')}</span>
+            Bienvenue <span className="animated-gradient-text italic">{userData?.displayName || userData?.fullName || 'Super Admin'}</span>
           </h1>
           <div className="flex items-center gap-3 mt-3">
             <span className="w-8 h-[1px] bg-gold/50"></span>

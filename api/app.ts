@@ -1829,8 +1829,113 @@ app.post('/api/webhook/account-confirmed', async (req, res) => {
 });
 
 // ============================================================
-// 🏛 ...
+// 🏛️ FACEBOOK MESSENGER BOT WEBHOOK (Items 29 & 30)
 // ============================================================
+
+// 1. GET: Verification Webhook (Facebook validation)
+app.get('/api/facebook/webhook', (req, res) => {
+  const mode = req.query['hub.mode'];
+  const token = req.query['hub.verify_token'];
+  const challenge = req.query['hub.challenge'];
+
+  const VERIFY_TOKEN = sanitizeEnvVar(process.env.FACEBOOK_VERIFY_TOKEN) || 'comptaflow_facebook_verify_token_123';
+
+  if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+    console.log('[Facebook Webhook] Verification successful.');
+    return res.status(200).send(challenge);
+  } else {
+    console.warn('[Facebook Webhook] Verification failed.');
+    return res.status(403).send('Forbidden');
+  }
+});
+
+// Helper for Gemini AI response generation
+async function generateFacebookBotReply(userMessage: string): Promise<string> {
+  try {
+    const prompt = `Tu es l'assistant de clavardage intelligent de la page Facebook de ComptaFlow (compta-flow.net).
+ComptaFlow est une plateforme cloud québécoise d'automatisation de la facturation, de tenue de livres, de gestion de taxes canadiennes (TPS/TVQ) et de conciliation bancaire assistée par IA pour les PME et travailleurs autonomes.
+
+Consignes:
+- Sois courtois, professionnel, accueillant et efficace.
+- Écris des phrases courtes, adaptées au format clavardage (Messenger).
+- Réponds toujours en français.
+- Suggère de visiter https://compta-flow.net pour en savoir plus ou de se connecter au portail.
+- N'invente pas d'informations techniques non vérifiées.
+
+Message de l'utilisateur: "${userMessage}"
+Réponse de l'assistant de clavardage:`;
+
+    const result = await agenticModel.generateContent(prompt);
+    const response = await result.response;
+    return response.text().trim();
+  } catch (error: any) {
+    console.error('[Facebook Webhook] Gemini generation error:', error.message);
+    return "Bonjour ! Je suis le robot d'assistance ComptaFlow. Désolé, je rencontre une petite difficulté technique pour formuler ma réponse. N'hésitez pas à visiter notre site https://compta-flow.net ou à nous laisser vos coordonnées afin qu'un conseiller humain vous recontacte !";
+  }
+}
+
+// Helper to send messages using Graph API
+async function sendFacebookMessage(senderId: string, text: string) {
+  const pageAccessToken = sanitizeEnvVar(process.env.FACEBOOK_PAGE_ACCESS_TOKEN);
+  if (!pageAccessToken || pageAccessToken.startsWith('mock')) {
+    console.warn('[Facebook Webhook] Warning: FACEBOOK_PAGE_ACCESS_TOKEN is not configured or in mock mode. Reply:', text);
+    return;
+  }
+
+  const url = `https://graph.facebook.com/v19.0/me/messages?access_token=${pageAccessToken}`;
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        recipient: { id: senderId },
+        message: { text: text }
+      })
+    });
+    
+    const data = await response.json() as any;
+    if (data.error) {
+      console.error('[Facebook Webhook] Error calling Graph Send API:', data.error);
+    } else {
+      console.log(`[Facebook Webhook] Message sent back to client ${senderId}`);
+    }
+  } catch (err: any) {
+    console.error('[Facebook Webhook] Error sending Messenger request:', err.message);
+  }
+}
+
+// 2. POST: Event handler (Incoming messages)
+app.post('/api/facebook/webhook', async (req, res) => {
+  const body = req.body;
+
+  if (body.object === 'page') {
+    // Return a 200 OK to Facebook as fast as possible to prevent timeouts
+    res.status(200).send('EVENT_RECEIVED');
+
+    for (const entry of body.entry || []) {
+      for (const webhookEvent of entry.messaging || []) {
+        const senderId = webhookEvent.sender?.id;
+        const messageText = webhookEvent.message?.text;
+
+        if (senderId && messageText) {
+          botLog('FACEBOOK_BOT_MESSAGE_RECEIVED', senderId, `Message: ${messageText.substring(0, 100)}`);
+          
+          // Generate answer asynchronously using Gemini
+          const reply = await generateFacebookBotReply(messageText);
+          
+          // Send back the message
+          await sendFacebookMessage(senderId, reply);
+          botLog('FACEBOOK_BOT_REPLY_SENT', senderId, `Reply: ${reply.substring(0, 100)}`);
+        }
+      }
+    }
+  } else {
+    // Not a page event
+    return res.sendStatus(404);
+  }
+});
 
 const setupStatic = async () => {
   // Vercel serves the SPA via vercel.json rewrites — this function is API-only

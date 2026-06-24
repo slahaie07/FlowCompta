@@ -12,7 +12,7 @@ export const SEED_ADMIN_ACCOUNTS: SeedAccount[] = [
   {
     email: 's.lahaie07@gmail.com',
     role: 'super_admin',
-    fullName: 'Samuel L. (Super Admin)',
+    fullName: 'Samuel Lahaie',
     label: 'Super Admin',
   },
   {
@@ -24,8 +24,14 @@ export const SEED_ADMIN_ACCOUNTS: SeedAccount[] = [
   {
     email: 'eya-cpa@outlook.com',
     role: 'sub_admin',
-    fullName: 'Eya (Sous-Admin)',
+    fullName: 'Eya',
     label: 'Partenaire Cabinet (Support Arabe)',
+  },
+  {
+    email: 'queen.eth1@outlook.com',
+    role: 'sub_admin',
+    fullName: 'Stéphanie Laplante',
+    label: 'Partenaire Cabinet',
   },
 ];
 

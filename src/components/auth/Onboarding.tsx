@@ -264,7 +264,7 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto pt-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto pt-6">
                   {[
                     {
                       id: 'samuel',
@@ -292,6 +292,15 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
                       roleEn: 'CPA Partner / Bookkeeping',
                       desc: 'Sylvie apporte une rigueur absolue à la tenue de livres et aux systèmes de paie. Spécialisée dans les entreprises locales, elle assure une comptabilité quotidienne impeccable.',
                       descEn: 'Sylvie brings rigorous attention to detail to bookkeeping and payroll systems. She specializes in local businesses, ensuring flawless day-to-day accounts.'
+                    },
+                    {
+                      id: 'stephanie',
+                      email: 'queen.eth1@outlook.com',
+                      name: 'Stéphanie Laplante',
+                      role: 'Partenaire CPA / Fiscalité PME',
+                      roleEn: 'CPA Partner / SME Tax Strategy',
+                      desc: 'Stéphanie se spécialise dans l\'optimisation fiscale et l\'accompagnement des startups québécoises. Elle aide à structurer la croissance des PME en maximisant les crédits d\'impôt.',
+                      descEn: 'Stephanie specializes in tax optimization and support for Quebec startups. She helps structure SME growth by maximizing tax credits.'
                     }
                   ].map((expert) => {
                     const isSelected = data.selectedExpertEmail === expert.email;

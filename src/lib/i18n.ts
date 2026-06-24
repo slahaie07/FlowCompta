@@ -282,7 +282,7 @@ export const i18n = {
         procedure: "Mon parcours dossier"
       },
       overview: {
-        greeting: "Bonjour,",
+        greeting: "Bienvenue",
         subtitle: "Tableau de bord",
         contactCpa: "Contacter mon comptable",
         help: "Centre d'aide",
@@ -1196,7 +1196,7 @@ export const i18n = {
         procedure: "My file path"
       },
       overview: {
-        greeting: "Hello,",
+        greeting: "Welcome",
         subtitle: "Dashboard",
         contactCpa: "Contact my bookkeeper",
         help: "Help center",

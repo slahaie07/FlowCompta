@@ -103,7 +103,7 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
       <header className="flex justify-between items-end">
         <div>
           <h1 className="text-5xl font-serif font-bold text-ivoire tracking-tight leading-tight">
-            {t('adminHub.title')} <span className="animated-gradient-text italic">{t('adminHub.titleAccent')}</span>
+            Bienvenue <span className="animated-gradient-text italic">{userData?.displayName || userData?.fullName || 'Admin'}</span>
           </h1>
           <div className="flex items-center gap-3 mt-3">
             <span className="w-8 h-[1px] bg-gold/50"></span>
