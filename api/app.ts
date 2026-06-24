@@ -593,9 +593,19 @@ app.post('/api/internal/cron/:job', async (req, res) => {
   res.status(result.success ? 200 : 400).json(result);
 });
 
-// --- ONBOARDING WEBHOOK (n8n / parcours client) ---
 app.post('/api/webhook/onboarding-complete', async (req, res) => {
-  const { userId, email, displayName, province, language } = req.body || {};
+  const { 
+    userId, 
+    email, 
+    displayName, 
+    province, 
+    language,
+    companyName,
+    neq,
+    nas,
+    initialProfileType,
+    selectedExpertEmail
+  } = req.body || {};
 
   if (!email || typeof email !== 'string') {
     return res.status(400).json({ error: 'email requis' });
@@ -622,28 +632,53 @@ app.post('/api/webhook/onboarding-complete', async (req, res) => {
         <p>Your account is active. <strong>Next step:</strong> pick your service in Overview, then follow your <a href="${procedureUrl}">guided file path</a>.</p>
         <p><a href="${portalUrl}">Open my portal</a></p>`,
       ar: `<p>مرحباً ${displayName || ''},</p>
-        <p>حسابك نشط. <strong>الخطوة التالية:</strong> اختر خدمتك ثم اتبع <a href="${procedureUrl}">مسار ملفك</a>.</p>
+        <p>حسابك نشط. <strong>الخطوة التالية:</strong> اختر خدمتك et اتبع <a href="${procedureUrl}">مسار ملفك</a>.</p>
         <p><a href="${portalUrl}">فتح بوابتي</a></p>`,
     };
 
     if (process.env.RESEND_API_KEY) {
       await sendSupremeEmail(email, subjects[lang], htmlBodies[lang]);
       
-      const notificationHtml = `<p>Nouveau client inscrit : <strong>${displayName || email}</strong></p>
-         <p>Province : ${province || 'QC'} · Langue : ${lang}</p>
-         <p><a href="${portalUrl}">Portail client</a></p>`;
-         
+      const detailedNotificationHtml = `
+        <div style="font-family:sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;border:1px solid #eee;padding:20px;border-radius:8px;background-color:#fff;">
+          <h2 style="color:#D4AF37;border-bottom:2px solid #D4AF37;padding-bottom:8px;margin-top:0;">🏛️ Nouvelle Inscription Client</h2>
+          <p>Un nouveau client a complété son inscription avec les informations suivantes :</p>
+          <table style="width:100%;border-collapse:collapse;margin:20px 0;text-align:left;">
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;width:40%;border:1px solid #ddd;">Nom complet :</td><td style="padding:8px;border:1px solid #ddd;">${displayName || 'Non fourni'}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Adresse courriel :</td><td style="padding:8px;border:1px solid #ddd;">${email}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Province :</td><td style="padding:8px;border:1px solid #ddd;">${province || 'QC'}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Langue :</td><td style="padding:8px;border:1px solid #ddd;">${lang.toUpperCase()}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Type de profil :</td><td style="padding:8px;border:1px solid #ddd;">${initialProfileType || 'Individuel'}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Nom entreprise :</td><td style="padding:8px;border:1px solid #ddd;">${companyName || 'N/A'}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Numéro NEQ :</td><td style="padding:8px;border:1px solid #ddd;">${neq || 'N/A'}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Numéro NAS :</td><td style="padding:8px;border:1px solid #ddd;">${nas ? 'Fourni (Sécurisé)' : 'N/A'}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Comptable référé :</td><td style="padding:8px;border:1px solid #ddd;">${selectedExpertEmail || 'Aucun'}</td></tr>
+          </table>
+          <p style="margin-top:20px;"><a href="${portalUrl}" style="display:inline-block;background:#D4AF37;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;font-weight:bold;">Accéder au portail client</a></p>
+        </div>
+      `;
+
+      // Envoyer à compta-flow@outlook.com
       await sendSupremeEmail(
-        PLATFORM_SUPPORT_EMAIL,
+        'compta-flow@outlook.com',
         `[ComptaFlow] Nouvelle inscription — ${displayName || email}`,
-        notificationHtml
+        detailedNotificationHtml
       );
       
-      if (PLATFORM_SUPPORT_EMAIL !== 's.lahaie07@gmail.com') {
+      // Envoyer également aux autres emails de support configurés
+      if (PLATFORM_SUPPORT_EMAIL !== 'compta-flow@outlook.com') {
+        await sendSupremeEmail(
+          PLATFORM_SUPPORT_EMAIL,
+          `[ComptaFlow] Nouvelle inscription — ${displayName || email}`,
+          detailedNotificationHtml
+        );
+      }
+      
+      if (PLATFORM_SUPPORT_EMAIL !== 's.lahaie07@gmail.com' && 's.lahaie07@gmail.com' !== 'compta-flow@outlook.com') {
         await sendSupremeEmail(
           's.lahaie07@gmail.com',
           `[ComptaFlow] Nouvelle inscription — ${displayName || email}`,
-          notificationHtml
+          detailedNotificationHtml
         );
       }
     }

@@ -142,6 +142,10 @@ function AppContent() {
           province: data.province,
           language: data.language || 'fr',
           selectedExpertEmail: selectedExpertEmail,
+          companyName: data.companyName || null,
+          neq: data.neq || null,
+          nas: data.nas || null,
+          initialProfileType: data.initialProfileType || 'personal',
         }),
       });
     } catch {

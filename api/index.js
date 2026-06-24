@@ -1310,7 +1310,7 @@ var SEED_ADMIN_ACCOUNTS = [
     label: "Partenaire Cabinet (Support Arabe)"
   },
   {
-    email: "Queen.eth1@outlook.com",
+    email: "queen.eth1@outlook.com",
     role: "sub_admin",
     fullName: "St\xE9phanie Laplante",
     label: "Partenaire Cabinet"
@@ -2431,7 +2431,18 @@ app.post("/api/internal/cron/:job", async (req, res) => {
   res.status(result.success ? 200 : 400).json(result);
 });
 app.post("/api/webhook/onboarding-complete", async (req, res) => {
-  const { userId, email, displayName, province, language } = req.body || {};
+  const {
+    userId,
+    email,
+    displayName,
+    province,
+    language,
+    companyName,
+    neq,
+    nas,
+    initialProfileType,
+    selectedExpertEmail
+  } = req.body || {};
   if (!email || typeof email !== "string") {
     return res.status(400).json({ error: "email requis" });
   }
@@ -2453,24 +2464,46 @@ app.post("/api/webhook/onboarding-complete", async (req, res) => {
         <p>Your account is active. <strong>Next step:</strong> pick your service in Overview, then follow your <a href="${procedureUrl}">guided file path</a>.</p>
         <p><a href="${portalUrl}">Open my portal</a></p>`,
       ar: `<p>\u0645\u0631\u062D\u0628\u0627\u064B ${displayName || ""},</p>
-        <p>\u062D\u0633\u0627\u0628\u0643 \u0646\u0634\u0637. <strong>\u0627\u0644\u062E\u0637\u0648\u0629 \u0627\u0644\u062A\u0627\u0644\u064A\u0629:</strong> \u0627\u062E\u062A\u0631 \u062E\u062F\u0645\u062A\u0643 \u062B\u0645 \u0627\u062A\u0628\u0639 <a href="${procedureUrl}">\u0645\u0633\u0627\u0631 \u0645\u0644\u0641\u0643</a>.</p>
+        <p>\u062D\u0633\u0627\u0628\u0643 \u0646\u0634\u0637. <strong>\u0627\u0644\u062E\u0637\u0648\u0629 \u0627\u0644\u062A\u0627\u0644\u064A\u0629:</strong> \u0627\u062E\u062A\u0631 \u062E\u062F\u0645\u062A\u0643 et \u0627\u062A\u0628\u0639 <a href="${procedureUrl}">\u0645\u0633\u0627\u0631 \u0645\u0644\u0641\u0643</a>.</p>
         <p><a href="${portalUrl}">\u0641\u062A\u062D \u0628\u0648\u0627\u0628\u062A\u064A</a></p>`
     };
     if (process.env.RESEND_API_KEY) {
       await sendSupremeEmail(email, subjects[lang], htmlBodies[lang]);
-      const notificationHtml = `<p>Nouveau client inscrit : <strong>${displayName || email}</strong></p>
-         <p>Province : ${province || "QC"} \xB7 Langue : ${lang}</p>
-         <p><a href="${portalUrl}">Portail client</a></p>`;
+      const detailedNotificationHtml = `
+        <div style="font-family:sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;border:1px solid #eee;padding:20px;border-radius:8px;background-color:#fff;">
+          <h2 style="color:#D4AF37;border-bottom:2px solid #D4AF37;padding-bottom:8px;margin-top:0;">\u{1F3DB}\uFE0F Nouvelle Inscription Client</h2>
+          <p>Un nouveau client a compl\xE9t\xE9 son inscription avec les informations suivantes :</p>
+          <table style="width:100%;border-collapse:collapse;margin:20px 0;text-align:left;">
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;width:40%;border:1px solid #ddd;">Nom complet :</td><td style="padding:8px;border:1px solid #ddd;">${displayName || "Non fourni"}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Adresse courriel :</td><td style="padding:8px;border:1px solid #ddd;">${email}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Province :</td><td style="padding:8px;border:1px solid #ddd;">${province || "QC"}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Langue :</td><td style="padding:8px;border:1px solid #ddd;">${lang.toUpperCase()}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Type de profil :</td><td style="padding:8px;border:1px solid #ddd;">${initialProfileType || "Individuel"}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Nom entreprise :</td><td style="padding:8px;border:1px solid #ddd;">${companyName || "N/A"}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Num\xE9ro NEQ :</td><td style="padding:8px;border:1px solid #ddd;">${neq || "N/A"}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Num\xE9ro NAS :</td><td style="padding:8px;border:1px solid #ddd;">${nas ? "Fourni (S\xE9curis\xE9)" : "N/A"}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Comptable r\xE9f\xE9r\xE9 :</td><td style="padding:8px;border:1px solid #ddd;">${selectedExpertEmail || "Aucun"}</td></tr>
+          </table>
+          <p style="margin-top:20px;"><a href="${portalUrl}" style="display:inline-block;background:#D4AF37;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;font-weight:bold;">Acc\xE9der au portail client</a></p>
+        </div>
+      `;
       await sendSupremeEmail(
-        PLATFORM_SUPPORT_EMAIL,
+        "compta-flow@outlook.com",
         `[ComptaFlow] Nouvelle inscription \u2014 ${displayName || email}`,
-        notificationHtml
+        detailedNotificationHtml
       );
-      if (PLATFORM_SUPPORT_EMAIL !== "s.lahaie07@gmail.com") {
+      if (PLATFORM_SUPPORT_EMAIL !== "compta-flow@outlook.com") {
+        await sendSupremeEmail(
+          PLATFORM_SUPPORT_EMAIL,
+          `[ComptaFlow] Nouvelle inscription \u2014 ${displayName || email}`,
+          detailedNotificationHtml
+        );
+      }
+      if (PLATFORM_SUPPORT_EMAIL !== "s.lahaie07@gmail.com" && true) {
         await sendSupremeEmail(
           "s.lahaie07@gmail.com",
           `[ComptaFlow] Nouvelle inscription \u2014 ${displayName || email}`,
-          notificationHtml
+          detailedNotificationHtml
         );
       }
     }
