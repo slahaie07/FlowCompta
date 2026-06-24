@@ -2173,46 +2173,6 @@ app.post("/api/bootstrap-admins", async (req, res) => {
     return res.status(500).json({ error: message });
   }
 });
-app.post("/api/cleanup-admins", async (req, res) => {
-  if (!isInternalAgentRequest(req)) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  if (!serviceRoleKey) {
-    return res.status(503).json({ error: "SUPABASE_SERVICE_ROLE_KEY not configured" });
-  }
-  try {
-    const admin = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    });
-    const emailsToDelete = ["sadmin1@comptaflow.com", "sadmin2@comptaflow.com"];
-    const results = [];
-    const listUsers = async (page) => {
-      const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
-      if (error) throw new Error(`listUsers: ${error.message}`);
-      return data;
-    };
-    for (const email of emailsToDelete) {
-      const existing = await findAuthUserByEmail(listUsers, email);
-      if (existing) {
-        const { error: profileError } = await admin.from("profiles").delete().eq("id", existing.id);
-        const { error: deleteError } = await admin.auth.admin.deleteUser(existing.id);
-        results.push({
-          email,
-          userId: existing.id,
-          profileDeleted: !profileError,
-          authDeleted: !deleteError,
-          error: deleteError?.message || profileError?.message || null
-        });
-      } else {
-        results.push({ email, found: false });
-      }
-    }
-    return res.json({ success: true, results });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return res.status(500).json({ error: message });
-  }
-});
 app.post("/api/setup-admin", async (req, res) => {
   if (!isInternalAgentRequest(req)) {
     return res.status(401).json({
