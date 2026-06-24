@@ -14,6 +14,7 @@ $$;
 DROP POLICY IF EXISTS "Admin view profiles" ON public.profiles;
 DROP POLICY IF EXISTS "p1" ON public.profiles;
 
+DROP POLICY IF EXISTS "Super admin view all profiles" ON public.profiles;
 CREATE POLICY "Super admin view all profiles" ON public.profiles
 FOR SELECT TO authenticated
 USING (public.get_user_role() = 'super_admin');
