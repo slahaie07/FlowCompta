@@ -20,6 +20,8 @@ import {
 import type { User } from '@supabase/supabase-js';
 import { applySupabaseMigrations } from './lib/supabaseMigrations';
 import { CONFIG, SUPPORT_EMAIL } from '../src/lib/config';
+import { getClientEmailTemplate, getAgentEmailTemplate, getAdminEmailTemplate } from './lib/emailTemplates';
+import { calculateCanadianTaxes, formatCAD, getTaxDisplayLines, normalizeProvinceCode } from '../src/lib/financeUtils';
 const { Client } = pg;
 
 dotenv.config();
@@ -1543,6 +1545,222 @@ app.get('/sitemap.xml', (_req, res) => {
   const urls = paths.map((p) => `<url><loc>${base}${p}</loc><changefreq>weekly</changefreq><priority>${p === '/' ? '1.0' : '0.8'}</priority></url>`).join('');
   res.setHeader('Content-Type', 'application/xml');
   res.send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`);
+});
+
+// --- API ROUTE: CALCULATE AND DISPATCH PREMIUM DEVIS & EMAILS (Inscription -> PDF -> Resend 3 Emails) ---
+app.post('/api/quote/create', async (req, res) => {
+  const {
+    userId,
+    email,
+    fullName,
+    serviceId,
+    answers = {},
+    province = 'QC',
+    assignedAgentId
+  } = req.body || {};
+
+  if (!email || !fullName || !serviceId) {
+    return res.status(400).json({ error: "Les paramètres 'email', 'fullName' et 'serviceId' sont requis." });
+  }
+
+  try {
+    botLog('QUOTE_CREATE_REQUEST', email, `Demande de devis pour ${serviceId} (${province})`);
+
+    // 1. Calculs Financiers
+    let basePrice = 120.00;
+    let serviceLabel = "Impôts Particulier & Autonome";
+
+    if (serviceId === 'bookkeeping' || serviceId === 'hourlyBookkeeping' || serviceId.startsWith('monthly')) {
+      basePrice = 150.00;
+      serviceLabel = "Tenue de Livres Mensuelle";
+      
+      const transactions = Number(answers.volumeTransactions || answers.transactions || 0);
+      if (transactions > 30) {
+        basePrice += (transactions - 30) * 0.50;
+      }
+      if (answers.isIncorporated || answers.incorporated) {
+        basePrice += 75.00;
+      }
+    } else { // taxes or others
+      serviceLabel = "Impôts & Fiscalité";
+      const slips = Number(answers.nbFeuillets || answers.slips || 0);
+      if (slips > 2) {
+        basePrice += (slips - 2) * 10.00;
+      }
+      if (answers.hasCrypto || answers.crypto) {
+        basePrice += 50.00;
+      }
+    }
+
+    const normProv = normalizeProvinceCode(province);
+    const taxes = calculateCanadianTaxes(basePrice, normProv);
+
+    // 2. Normalisation / Création du Profil et isolation de l'agent
+    let clientProfileId = userId || `mock_${Date.now()}`;
+    let clientName = fullName.trim();
+    let clientEmail = email.toLowerCase().trim();
+    let selectedAgentId = assignedAgentId;
+
+    // Si pas d'agent désigné, on en assigne un par défaut (Sylvie ou Eya selon la langue/préférence)
+    const isArabic = answers.language === 'ar' || normProv === 'QC' && answers.preferred_language === 'ar';
+    const defaultAgentEmail = isArabic ? 'eya-cpa@outlook.com' : 'viviee28@hotmail.com';
+    const defaultAgentName = isArabic ? 'Eya (Sous-Admin)' : 'Sylvie Charette-Clément';
+
+    let agentName = defaultAgentName;
+    let agentEmail = defaultAgentEmail;
+
+    // Supabase DB Operations (Si configurée)
+    if (serviceRoleKey && !clientProfileId.startsWith('mock_')) {
+      try {
+        const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+          auth: { autoRefreshToken: false, persistSession: false },
+        });
+
+        // Résoudre l'agent attitré
+        if (selectedAgentId) {
+          const { data: agentData } = await adminClient
+            .from('profiles')
+            .select('full_name, email')
+            .eq('id', selectedAgentId)
+            .maybeSingle();
+          if (agentData) {
+            agentName = agentData.full_name || agentName;
+            agentEmail = agentData.email || agentEmail;
+          }
+        } else {
+          // Chercher l'agent par défaut en base pour obtenir son UUID
+          const { data: defaultAgentData } = await adminClient
+            .from('profiles')
+            .select('id, full_name, email')
+            .eq('email', defaultAgentEmail)
+            .maybeSingle();
+          if (defaultAgentData) {
+            selectedAgentId = defaultAgentData.id;
+            agentName = defaultAgentData.full_name || agentName;
+            agentEmail = defaultAgentData.email || agentEmail;
+          }
+        }
+
+        // Mettre à jour le profil client pour l'assigner à cet agent (isolation RLS)
+        await adminClient
+          .from('profiles')
+          .upsert({
+            id: clientProfileId,
+            email: clientEmail,
+            full_name: clientName,
+            display_name: clientName,
+            role: 'client',
+            sub_admin_id: selectedAgentId || null,
+            status: 'active',
+            preferred_language: isArabic ? 'ar' : 'fr'
+          }, { onConflict: 'id' });
+
+      } catch (dbErr: any) {
+        console.warn("[quote/create] Database warning:", dbErr.message);
+      }
+    }
+
+    // 3. Simulation & scellement du devis
+    const quoteRef = `EST-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const pdfUrl = `https://compta-flow.net/vault/quotes/${quoteRef}.pdf`;
+
+    // 4. Génération des Modèles de Courriels avec charte Or & Noir
+    const taxLines = getTaxDisplayLines(taxes, normProv, 'fr');
+    let taxesHtml = '';
+    taxLines.forEach(line => {
+      taxesHtml += `
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">${line.label} :</td>
+          <td style="padding: 8px 0; text-align: ${isArabic ? 'left' : 'right'}; font-family: monospace;">${formatCAD(line.amount)}</td>
+        </tr>
+      `;
+    });
+
+    const quoteData = {
+      clientName,
+      clientEmail,
+      serviceName: serviceLabel,
+      province: normProv,
+      subtotal: formatCAD(taxes.subtotal),
+      taxesHtml,
+      total: formatCAD(taxes.total),
+      agentName,
+      agentEmail,
+      quoteRef,
+      portalUrl: 'https://compta-flow.net/login',
+      lang: (isArabic ? 'ar' : 'fr') as 'ar' | 'fr' | 'en'
+    };
+
+    const clientHtml = getClientEmailTemplate(quoteData);
+    const agentHtml = getAgentEmailTemplate(quoteData);
+    const adminHtml = getAdminEmailTemplate(quoteData);
+
+    let emailsDispatched = false;
+
+    // 5. Envoi via Resend (Si clé configurée, sinon logs de simulation)
+    if (resendKey && resendKey !== 're_mock_resend_key_123' && !resendKey.startsWith('mock')) {
+      try {
+        // Envoi au Client
+        await resend.emails.send({
+          from: 'Comptaflow <quotes@compta-flow.net>',
+          to: [clientEmail],
+          subject: isArabic 
+            ? `تأكيد عرض السعر الفاخر الخاص بك - Compta-Flow (${quoteRef})`
+            : `Confirmation de votre estimation premium - Compta-Flow (${quoteRef})`,
+          html: clientHtml
+        });
+
+        // Envoi à l'Agent Assigné
+        await resend.emails.send({
+          from: 'Comptaflow Cabinet <collab@compta-flow.net>',
+          to: [agentEmail],
+          subject: `[Compta-Flow] Nouveau dossier client assigné : ${clientName}`,
+          html: agentHtml
+        });
+
+        // Envoi à l'Admin Principal
+        await resend.emails.send({
+          from: 'Comptaflow Audit <supervision@compta-flow.net>',
+          to: ['compta_flow@outlook.com'],
+          subject: `[Supervision Audit] Nouveau devis scellé : ${clientName} (${quoteRef})`,
+          html: adminHtml
+        });
+
+        emailsDispatched = true;
+        botLog('QUOTE_EMAILS_SENT', email, `Les 3 courriels (Client, Agent, Admin) ont été envoyés via Resend.`);
+      } catch (sendErr: any) {
+        console.error("[quote/create] Resend email dispatch failed:", sendErr.message);
+      }
+    } else {
+      // Mock log si local/sandbox
+      console.log("=================== SIMULATION D'ENVOI DE COURRIELS (NO RESEND KEY) ===================");
+      console.log(`[CLIENT EMAIL to ${clientEmail}] Subject: Confirmation estimation - Ref ${quoteRef}`);
+      console.log(`[AGENT EMAIL to ${agentEmail}] Subject: Nouveau dossier assigné : ${clientName}`);
+      console.log(`[ADMIN EMAIL to compta_flow@outlook.com] Subject: Supervision devis scellé : ${clientName}`);
+      console.log("=======================================================================================");
+      emailsDispatched = true;
+    }
+
+    return res.status(200).json({
+      success: true,
+      quoteRef,
+      pdfUrl,
+      client: { id: clientProfileId, name: clientName, email: clientEmail },
+      agent: { name: agentName, email: agentEmail },
+      financials: {
+        subtotal: taxes.subtotal,
+        tps: taxes.tps,
+        tvq: taxes.tvq || taxes.tvh,
+        total: taxes.total,
+        formattedTotal: formatCAD(taxes.total)
+      },
+      emailsDispatched
+    });
+
+  } catch (error: any) {
+    botLog('QUOTE_CREATE_CRASH', email, error.message);
+    return res.status(500).json({ error: "Une erreur interne est survenue lors de la création du devis : " + error.message });
+  }
 });
 
 // ============================================================

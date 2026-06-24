@@ -4,13 +4,14 @@ import { getPortalHomePath } from '../portals/config/paths';
 
 describe('seed admin accounts', () => {
   it('defines the required admin accounts with expected roles', () => {
-    expect(SEED_ADMIN_ACCOUNTS).toHaveLength(2);
+    expect(SEED_ADMIN_ACCOUNTS).toHaveLength(3);
     expect(SEED_ADMIN_ACCOUNTS.map((a) => a.email)).toEqual([
       's.lahaie07@gmail.com',
       'viviee28@hotmail.com',
+      'eya-cpa@outlook.com',
     ]);
     expect(SEED_ADMIN_ACCOUNTS.filter((a) => a.role === 'super_admin')).toHaveLength(1);
-    expect(SEED_ADMIN_ACCOUNTS.filter((a) => a.role === 'sub_admin')).toHaveLength(1);
+    expect(SEED_ADMIN_ACCOUNTS.filter((a) => a.role === 'sub_admin')).toHaveLength(2);
   });
 
   it('maps seeded roles to portal home paths', () => {
