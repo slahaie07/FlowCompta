@@ -355,3 +355,52 @@ export function getAdminEmailTemplate(data: QuoteData): string {
     </html>
   `;
 }
+
+/**
+ * 4. Courriel de confirmation d'activation de compte
+ */
+export function getAccountConfirmedEmailTemplate(data: { clientName: string; clientEmail: string; portalUrl: string }): string {
+  return `
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+      <meta charset="UTF-8">
+      <title>Votre compte Compta-Flow est activé !</title>
+      <style>
+        body { ${COMMON_CSS} }
+      </style>
+    </head>
+    <body>
+      <div style="${CONTAINER_STYLE}">
+        <div style="${HEADER_STYLE}">
+          <div style="font-size: 32px; font-family: serif; color: #D4AF37; font-style: italic; font-weight: bold; letter-spacing: 1px;">Compta-Flow</div>
+          <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 3px; color: #88888F; margin-top: 6px;">Compte Activé avec Succès</div>
+        </div>
+        
+        <div style="${CONTENT_STYLE}; text-align: center;">
+          <div style="display: inline-block; background-color: rgba(46, 213, 115, 0.08); border: 1px solid rgba(46, 213, 115, 0.3); padding: 6px 20px; border-radius: 50px; font-size: 10px; font-weight: bold; color: #2ed573; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 25px;">
+            ✦ Courriel Confirmé ✦
+          </div>
+
+          <h2 style="font-family: serif; font-size: 24px; color: #FDFBF7; font-style: italic; margin-bottom: 20px;">Bonjour ${data.clientName},</h2>
+          <p style="color: #CCCCCC; font-size: 14px; max-width: 480px; margin: 0 auto 20px auto; font-weight: 300;">
+            Félicitations ! Votre adresse courriel (<strong>${data.clientEmail}</strong>) a été validée avec succès. Votre espace sécurisé Compta-Flow est maintenant pleinement actif et prêt pour la prise en charge de vos besoins comptables.
+          </p>
+
+          <p style="color: #88888F; font-size: 13px; max-width: 450px; margin: 0 auto 30px auto;">
+            Vous pouvez à tout moment vous connecter pour configurer vos besoins de tenue de livres, impôts ou états financiers.
+          </p>
+
+          <div style="text-align: center;">
+            <a href="${data.portalUrl}" style="${BUTTON_STYLE}">Accéder à mon Portail</a>
+          </div>
+        </div>
+        
+        <div style="${FOOTER_STYLE}">
+          Souveraineté Numérique · Données hébergées au Canada (YUL)
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+}

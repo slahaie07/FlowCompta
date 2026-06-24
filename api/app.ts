@@ -20,7 +20,7 @@ import {
 import type { User } from '@supabase/supabase-js';
 import { applySupabaseMigrations } from './lib/supabaseMigrations';
 import { CONFIG, SUPPORT_EMAIL } from '../src/lib/config';
-import { getClientEmailTemplate, getAgentEmailTemplate, getAdminEmailTemplate } from './lib/emailTemplates';
+import { getClientEmailTemplate, getAgentEmailTemplate, getAdminEmailTemplate, getAccountConfirmedEmailTemplate } from './lib/emailTemplates';
 import { calculateCanadianTaxes, formatCAD, getTaxDisplayLines, normalizeProvinceCode } from '../src/lib/financeUtils';
 const { Client } = pg;
 
@@ -1760,6 +1760,71 @@ app.post('/api/quote/create', async (req, res) => {
   } catch (error: any) {
     botLog('QUOTE_CREATE_CRASH', email, error.message);
     return res.status(500).json({ error: "Une erreur interne est survenue lors de la création du devis : " + error.message });
+  }
+});
+
+// --- API ROUTE: AUTOMATED EMAIL DISPATCH ON ACCOUNT CONFIRMATION ---
+app.post('/api/webhook/account-confirmed', async (req, res) => {
+  const { userId, email, fullName } = req.body || {};
+
+  if (!email || !fullName) {
+    return res.status(400).json({ error: "Les paramètres 'email' et 'fullName' sont requis." });
+  }
+
+  try {
+    botLog('ACCOUNT_CONFIRMED_WEBHOOK', email, `Compte activé et courriel vérifié pour ${fullName}`);
+
+    // Optionnel: mettre à jour le statut du profil en base si nécessaire
+    if (serviceRoleKey && userId && !userId.startsWith('mock_')) {
+      try {
+        const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+          auth: { autoRefreshToken: false, persistSession: false }
+        });
+        await adminClient
+          .from('profiles')
+          .update({ status: 'active' })
+          .eq('id', userId);
+      } catch (dbErr: any) {
+        console.warn("[account-confirmed] Database update warning:", dbErr.message);
+      }
+    }
+
+    const emailHtml = getAccountConfirmedEmailTemplate({
+      clientName: fullName,
+      clientEmail: email.toLowerCase().trim(),
+      portalUrl: 'https://compta-flow.net/login'
+    });
+
+    let emailSent = false;
+    if (resendKey && resendKey !== 're_mock_resend_key_123' && !resendKey.startsWith('mock')) {
+      try {
+        await resend.emails.send({
+          from: 'Comptaflow <welcome@compta-flow.net>',
+          to: [email],
+          subject: 'Votre compte Compta-Flow est activé ! ✦',
+          html: emailHtml
+        });
+        emailSent = true;
+        botLog('ACCOUNT_CONFIRMED_EMAIL_SENT', email, `Courriel d'activation envoyé.`);
+      } catch (sendErr: any) {
+        console.error("[account-confirmed] Resend dispatch failed:", sendErr.message);
+      }
+    } else {
+      console.log("=================== SIMULATION D'ENVOI DE COURRIELS (NO RESEND KEY) ===================");
+      console.log(`[WELCOME EMAIL to ${email}] Subject: Votre compte Compta-Flow est activé ! ✦`);
+      console.log("=======================================================================================");
+      emailSent = true;
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Notification d'activation de compte envoyée.",
+      emailSent
+    });
+
+  } catch (error: any) {
+    botLog('ACCOUNT_CONFIRMED_CRASH', email, error.message);
+    return res.status(500).json({ error: "Une erreur interne est survenue : " + error.message });
   }
 });
 

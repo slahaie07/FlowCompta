@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { calculateCanadianTaxes } from '../lib/financeUtils';
-import { getClientEmailTemplate, getAgentEmailTemplate, getAdminEmailTemplate } from '../../api/lib/emailTemplates';
+import { getClientEmailTemplate, getAgentEmailTemplate, getAdminEmailTemplate, getAccountConfirmedEmailTemplate } from '../../api/lib/emailTemplates';
 
 describe('Premium Quote Builder & Emails (Canva Style)', () => {
   it('calcule correctement les tarifs de la tenue de livres avec volume et incorporation', () => {
@@ -84,5 +84,18 @@ describe('Premium Quote Builder & Emails (Canva Style)', () => {
     expect(clientMail).toContain('dir="rtl"');
     expect(clientMail).toContain('ياسمين بن علي');
     expect(clientMail).toContain('إيليا (Eya)');
+  });
+
+  it('produit le template HTML Or & Noir de confirmation de compte', () => {
+    const html = getAccountConfirmedEmailTemplate({
+      clientName: 'Marc-André Tremblay',
+      clientEmail: 'marc.andre@tremblay.ca',
+      portalUrl: 'https://compta-flow.net/login',
+    });
+
+    expect(html).toContain('Marc-André Tremblay');
+    expect(html).toContain('marc.andre@tremblay.ca');
+    expect(html).toContain('Courriel Confirmé');
+    expect(html).toContain('#D4AF37'); // Or
   });
 });

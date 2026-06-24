@@ -23,11 +23,12 @@ export function AuthCallback() {
         if (!cancelled) navigate('/login', { replace: true });
         return;
       }
-
       try {
+        let currentSession = null;
         if (code) {
-          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
           if (error) throw error;
+          currentSession = data.session;
         } else {
           const {
             data: { session },
@@ -35,6 +36,27 @@ export function AuthCallback() {
           } = await supabase.auth.getSession();
           if (error) throw error;
           if (!session) throw new Error('Session introuvable après la confirmation du courriel.');
+          currentSession = session;
+        }
+
+        if (currentSession && currentSession.user) {
+          const user = currentSession.user;
+          const email = user.email;
+          const fullName = user.user_metadata?.full_name || user.user_metadata?.display_name || 'Client ComptaFlow';
+          
+          try {
+            fetch('/api/webhook/account-confirmed', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId: user.id,
+                email,
+                fullName,
+              }),
+            });
+          } catch (e) {
+            console.warn("Échec d'envoi de la notification d'activation :", e);
+          }
         }
 
         if (!cancelled) {
