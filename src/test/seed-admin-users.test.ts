@@ -9,7 +9,7 @@ describe('seed admin accounts', () => {
       's.lahaie07@gmail.com',
       'viviee28@hotmail.com',
       'eya-cpa@outlook.com',
-      'queen.eth1@outlook.com',
+      'stephanie@comptaflow.com',
     ]);
     expect(SEED_ADMIN_ACCOUNTS.filter((a) => a.role === 'super_admin')).toHaveLength(1);
     expect(SEED_ADMIN_ACCOUNTS.filter((a) => a.role === 'sub_admin')).toHaveLength(3);

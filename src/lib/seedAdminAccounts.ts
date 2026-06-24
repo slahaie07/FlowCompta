@@ -28,7 +28,7 @@ export const SEED_ADMIN_ACCOUNTS: SeedAccount[] = [
     label: 'Partenaire Cabinet (Support Arabe)',
   },
   {
-    email: 'queen.eth1@outlook.com',
+    email: 'stephanie@comptaflow.com',
     role: 'sub_admin',
     fullName: 'Stéphanie Laplante',
     label: 'Partenaire Cabinet',

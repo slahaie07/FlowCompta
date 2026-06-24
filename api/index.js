@@ -1310,7 +1310,7 @@ var SEED_ADMIN_ACCOUNTS = [
     label: "Partenaire Cabinet (Support Arabe)"
   },
   {
-    email: "queen.eth1@outlook.com",
+    email: "stephanie@comptaflow.com",
     role: "sub_admin",
     fullName: "St\xE9phanie Laplante",
     label: "Partenaire Cabinet"

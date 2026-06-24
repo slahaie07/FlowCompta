@@ -295,7 +295,7 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
                     },
                     {
                       id: 'stephanie',
-                      email: 'queen.eth1@outlook.com',
+                      email: 'stephanie@comptaflow.com',
                       name: 'Stéphanie Laplante',
                       role: 'Partenaire CPA / Fiscalité PME',
                       roleEn: 'CPA Partner / SME Tax Strategy',
