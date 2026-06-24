@@ -1298,16 +1298,10 @@ var SEED_ADMIN_ACCOUNTS = [
     label: "Super Admin"
   },
   {
-    email: "sadmin1@comptaflow.com",
+    email: "viviee28@hotmail.com",
     role: "sub_admin",
-    fullName: "Mini Admin 1",
-    label: "Sub-admin cabinet 1"
-  },
-  {
-    email: "sadmin2@comptaflow.com",
-    role: "sub_admin",
-    fullName: "Mini Admin 2",
-    label: "Sub-admin cabinet 2"
+    fullName: "Sylvie Charette-Cl\xE9ment",
+    label: "Partenaire Cabinet"
   }
 ];
 var PORTAL_HOME_BY_ROLE = {
@@ -2008,13 +2002,21 @@ app.post("/api/webhook/onboarding-complete", async (req, res) => {
     };
     if (process.env.RESEND_API_KEY) {
       await sendSupremeEmail(email, subjects[lang], htmlBodies[lang]);
+      const notificationHtml = `<p>Nouveau client inscrit : <strong>${displayName || email}</strong></p>
+         <p>Province : ${province || "QC"} \xB7 Langue : ${lang}</p>
+         <p><a href="${portalUrl}">Portail client</a></p>`;
       await sendSupremeEmail(
         PLATFORM_SUPPORT_EMAIL,
         `[ComptaFlow] Nouvelle inscription \u2014 ${displayName || email}`,
-        `<p>Nouveau client inscrit : <strong>${displayName || email}</strong></p>
-         <p>Province : ${province || "QC"} \xB7 Langue : ${lang}</p>
-         <p><a href="${portalUrl}">Portail client</a></p>`
+        notificationHtml
       );
+      if (PLATFORM_SUPPORT_EMAIL !== "s.lahaie07@gmail.com") {
+        await sendSupremeEmail(
+          "s.lahaie07@gmail.com",
+          `[ComptaFlow] Nouvelle inscription \u2014 ${displayName || email}`,
+          notificationHtml
+        );
+      }
     }
     if (userId && serviceRoleKey) {
       const { data: profile } = await supabase.from("profiles").select("metadata").eq("id", userId).single();

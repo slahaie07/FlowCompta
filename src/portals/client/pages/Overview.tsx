@@ -24,6 +24,41 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
   const [cpaInfo, setCpaInfo] = useState<any>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const checklistFileInputRef = useRef<HTMLInputElement>(null);
+  const uploadCategoryRef = useRef<any>('general');
+  const [isMandateSigned, setIsMandateSigned] = useState(() => {
+    if (!userData?.id) return false;
+    return localStorage.getItem(`comptaflow_mandate_signed_${userData.id}`) === 'true';
+  });
+
+  const handleChecklistFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setIsUploading(true);
+      const cat = uploadCategoryRef.current;
+      try {
+        const success = await uploadDocument(file, cat);
+        if (success) {
+          toast.success(`Le document ${file.name} a été classé dans la catégorie "${cat}" avec succès.`);
+        }
+      } catch (err) {
+        toast.error("Échec du dépôt.");
+      } finally {
+        setIsUploading(false);
+      }
+    }
+  };
+
+  const triggerChecklistUpload = (category: string) => {
+    uploadCategoryRef.current = category;
+    checklistFileInputRef.current?.click();
+  };
+
+  useEffect(() => {
+    if (userData?.id) {
+      setIsMandateSigned(localStorage.getItem(`comptaflow_mandate_signed_${userData.id}`) === 'true');
+    }
+  }, [userData]);
 
   // Charger les coordonnées Interac du comptable attitré
   useEffect(() => {
@@ -87,8 +122,29 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
     refreshInvoices();
   };
 
+  // Calculs du Guide de Démarrage
+  const activeNeeds = userData.needs && typeof userData.needs === 'object' ? userData.needs : { [userData.selectedServiceId || '']: true };
+  const checklistItems = getRequiredChecklistForServices(activeNeeds);
+  const uploadedRequiredCount = checklistItems.filter(item => documents.some(doc => doc.category === item.category)).length;
+  const isDocsComplete = checklistItems.length > 0 ? uploadedRequiredCount === checklistItems.length : true;
+  const isBillingComplete = pendingInvoices.length === 0;
+
+  const step1Progress = isMandateSigned ? 100 : 0;
+  const step2Progress = checklistItems.length > 0 ? Math.round((uploadedRequiredCount / checklistItems.length) * 100) : 100;
+  const step3Progress = isBillingComplete ? 100 : 0;
+  const overallProgress = Math.round((step1Progress + step2Progress + step3Progress) / 3);
+
   return (
     <div className="space-y-10">
+      {/* Input de dépôt classé */}
+      <input 
+        type="file" 
+        ref={checklistFileInputRef} 
+        onChange={handleChecklistFileChange} 
+        className="hidden" 
+        accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls,.doc,.docx" 
+      />
+
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative">
         <div className="absolute -top-16 -left-8 w-64 h-64 bg-gold/[0.04] rounded-full blur-[100px] pointer-events-none" />
         <div className="relative z-10">
@@ -114,6 +170,128 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
            </Button>
         </div>
       </header>
+
+      {/* 🚀 Guide Rapide de Prise en Charge */}
+      {userData.selectedServiceId && (
+        <Card className="p-8 premium-border-gold bg-gradient-to-tr from-gold/[0.02] to-transparent space-y-6" glow="gold">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-6">
+            <div>
+              <h3 className="text-xl font-serif font-bold text-ivoire flex items-center gap-2">
+                <span>🚀</span> Guide de Prise en Charge Interactif
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Complétez ces 3 étapes simples pour permettre à notre cabinet de démarrer votre comptabilité.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-500 uppercase font-black tracking-widest">
+                Progression globale :
+              </span>
+              <Badge variant={overallProgress === 100 ? "success" : "gold"} className="h-7 px-3 text-xs font-bold">
+                {overallProgress}%
+              </Badge>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Étape 1 : Signature du Mandat */}
+            <div className={`p-5 rounded-2xl border transition-all ${isMandateSigned ? 'bg-green-500/5 border-green-500/20' : 'bg-white/5 border-white/10'}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Étape 1</span>
+                  <h4 className="text-sm font-bold text-ivoire font-serif italic">Mandat & Engagement</h4>
+                </div>
+                {isMandateSigned ? (
+                  <span className="text-green-400 text-xs font-bold bg-green-500/10 px-2.5 py-1 rounded-lg border border-green-500/20">✓ Signé</span>
+                ) : (
+                  <span className="text-gold text-xs font-bold bg-gold/10 px-2.5 py-1 rounded-lg border border-gold/20">À faire</span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 mt-3 leading-relaxed">
+                Autorisez formellement nos comptables agréés à représenter votre dossier auprès des autorités fiscales.
+              </p>
+              {!isMandateSigned && (
+                <Button variant="gold" size="sm" className="w-full mt-4 text-[10px] uppercase font-black tracking-wider h-9" onClick={onSignMandate}>
+                  Signer le mandat
+                </Button>
+              )}
+            </div>
+
+            {/* Étape 2 : Dépôt des Documents */}
+            <div className={`p-5 rounded-2xl border transition-all ${isDocsComplete ? 'bg-green-500/5 border-green-500/20' : 'bg-white/5 border-white/10'}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Étape 2</span>
+                  <h4 className="text-sm font-bold text-ivoire font-serif italic">Dépôt des Pièces</h4>
+                </div>
+                {isDocsComplete ? (
+                  <span className="text-green-400 text-xs font-bold bg-green-500/10 px-2.5 py-1 rounded-lg border border-green-500/20">✓ Complet</span>
+                ) : (
+                  <span className="text-gold text-xs font-bold bg-gold/10 px-2.5 py-1 rounded-lg border border-gold/20">
+                    {uploadedRequiredCount}/{checklistItems.length} Reçus
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 mt-3 leading-relaxed">
+                Fournissez les documents requis selon les services actifs sur votre dossier pour vérification.
+              </p>
+              
+              <div className="mt-4 space-y-2 border-t border-white/5 pt-3">
+                {checklistItems.map(item => {
+                  const docFound = documents.find(d => d.category === item.category);
+                  return (
+                    <div key={item.id} className="flex justify-between items-center bg-black/25 p-2.5 rounded-xl border border-white/5">
+                      <div className="min-w-0 pr-2">
+                        <p className="text-[10px] font-bold text-silver truncate" title={item.label}>
+                          {item.label}
+                        </p>
+                        {docFound ? (
+                          <p className="text-[9px] text-green-400 truncate">{docFound.fileName}</p>
+                        ) : (
+                          <p className="text-[9px] text-slate-500">Document Requis</p>
+                        )}
+                      </div>
+                      {docFound ? (
+                        <span className="text-[9px] text-green-400 font-bold bg-green-500/10 px-2 py-0.5 rounded border border-green-500/20">Reçu</span>
+                      ) : (
+                        <button 
+                          onClick={() => triggerChecklistUpload(item.category)}
+                          className="text-[9px] text-gold font-bold hover:bg-gold hover:text-black border border-gold/30 px-2 py-0.5 rounded transition-all shrink-0"
+                        >
+                          Déposer
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Étape 3 : Facturation & Lancement */}
+            <div className={`p-5 rounded-2xl border transition-all ${isBillingComplete ? 'bg-green-500/5 border-green-500/20' : 'bg-white/5 border-white/10'}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Étape 3</span>
+                  <h4 className="text-sm font-bold text-ivoire font-serif italic">Règlement & Lancement</h4>
+                </div>
+                {isBillingComplete ? (
+                  <span className="text-green-400 text-xs font-bold bg-green-500/10 px-2.5 py-1 rounded-lg border border-green-500/20">✓ Payé</span>
+                ) : (
+                  <span className="text-gold text-xs font-bold bg-gold/10 px-2.5 py-1 rounded-lg border border-gold/20">Facture en attente</span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 mt-3 leading-relaxed">
+                Réglez le forfait initial ou versez l'acompte de démarrage par transfert Interac sécurisé.
+              </p>
+              {!isBillingComplete && (
+                <Button variant="secondary" size="sm" className="w-full mt-4 text-[10px] uppercase font-black tracking-wider h-9" onClick={() => portalNavigate('invoices')}>
+                  Voir les factures
+                </Button>
+              )}
+            </div>
+          </div>
+        </Card>
+      )}
 
       <ClientJourneyNudge userData={userData} />
 
@@ -287,3 +465,83 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
     </div>
   );
 }
+
+interface ChecklistItem {
+  id: string;
+  label: string;
+  category: 'bank' | 'general' | 'payroll' | 'fiscal' | 'tax' | 'legal';
+  required: boolean;
+}
+
+function getRequiredChecklistForServices(needs: any): ChecklistItem[] {
+  const list: ChecklistItem[] = [];
+  
+  const activeNeeds: Record<string, boolean> = {};
+  if (Array.isArray(needs)) {
+    needs.forEach(k => { activeNeeds[k] = true; });
+  } else if (needs && typeof needs === 'object') {
+    Object.assign(activeNeeds, needs);
+  }
+
+  const hasNeed = (keys: string[]) => keys.some(key => activeNeeds[key] === true);
+
+  if (hasNeed(['hourlyBookkeeping', 'monthlyMicro', 'monthlySmall', 'monthlySme', 'catchUp'])) {
+    list.push({
+      id: 'bank',
+      label: 'Relevés Bancaires (PDF/CSV)',
+      category: 'bank',
+      required: true
+    });
+    list.push({
+      id: 'general',
+      label: 'Factures de Vente & Reçus de Dépenses',
+      category: 'general',
+      required: true
+    });
+  }
+
+  if (hasNeed(['payroll', 't4Releve1'])) {
+    list.push({
+      id: 'payroll',
+      label: 'Registre des Employés & Heures de Paie',
+      category: 'payroll',
+      required: true
+    });
+  }
+
+  if (hasNeed(['gstQst'])) {
+    list.push({
+      id: 'fiscal',
+      label: 'Rapports des Ventes / Taxes (TPS/TVQ)',
+      category: 'fiscal',
+      required: true
+    });
+  }
+
+  if (hasNeed(['taxHelpAutonomous'])) {
+    list.push({
+      id: 'tax',
+      label: 'Feuillets Fiscaux (T4, T5, T3) & Cotisations',
+      category: 'tax',
+      required: true
+    });
+  }
+
+  if (list.length === 0) {
+    list.push({
+      id: 'legal',
+      label: 'Pièce d’identité officielle (Loi 25)',
+      category: 'legal',
+      required: true
+    });
+    list.push({
+      id: 'general',
+      label: 'Documents comptables divers',
+      category: 'general',
+      required: false
+    });
+  }
+
+  return list;
+}
+

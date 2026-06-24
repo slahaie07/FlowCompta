@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, FileText, CheckCircle, Clock, ExternalLink, Download, UploadCloud, FileSpreadsheet, Calculator, Database, Server, Plus, X } from 'lucide-react';
+import { Users, FileText, CheckCircle, Clock, ExternalLink, Download, UploadCloud, FileSpreadsheet, Calculator, Database, Server, Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { ClientRecord } from '../../../types';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
@@ -10,6 +10,7 @@ import { SERVICE_CATALOG } from '../../../lib/servicesCatalog';
 import { useTransactions } from '../../../hooks/useTransactions';
 import { toast } from 'sonner';
 import { useLanguage } from '../../../hooks/useLanguage';
+import { supabase } from '../../../lib/supabase';
 
 export function AdminClients({ 
   clients, 
@@ -24,6 +25,30 @@ export function AdminClients({
   const { uploadDocument, documents } = useDocuments();
   const { transactions } = useTransactions(undefined, isAdmin);
   
+  const [expandedClientId, setExpandedClientId] = useState<string | null>(null);
+
+  const handleUpdateStatus = async (clientId: string, nextStatus: string) => {
+    try {
+      const { error: pErr } = await supabase
+        .from('profiles')
+        .update({ status: nextStatus })
+        .eq('id', clientId);
+
+      const { error: cErr } = await supabase
+        .from('clients')
+        .update({ status: nextStatus })
+        .eq('id', clientId);
+
+      if (pErr && cErr) {
+        throw new Error("Impossible de mettre à jour le statut.");
+      }
+
+      toast.success(`Le statut du dossier a été mis à jour à : ${nextStatus}`);
+    } catch (e: any) {
+      toast.error(e.message || "Erreur de mise à jour.");
+    }
+  };
+
   // Modal State
   const [showAddModal, setShowAddModal] = useState(false);
   const [newClientName, setNewClientName] = useState('');
@@ -195,42 +220,68 @@ export function AdminClients({
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {clients.map((client) => (
-                <tr key={client.id} className="hover:bg-white/5 transition-colors group">
-                  <td className="px-8 py-6">
-                    <div className="flex flex-col">
-                      <span className="text-silver font-bold">{client.displayName}</span>
-                      <span className="text-xs text-slate-500">{client.companyName || t('adminClients.individual')}</span>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <div className="flex flex-wrap gap-2">{renderNeeds(client)}</div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <Badge variant={client.status === 'En règle' || client.status === 'Actif' ? 'success' : (client.status === 'À réviser' ? 'error' : 'warning')}>
-                      {client.status}
-                    </Badge>
-                  </td>
-                  <td className="px-8 py-6">
-                    <div className="flex justify-end gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
-                       <div className="flex gap-1 bg-noir/50 p-1 rounded-xl border border-white/5">
-                          <button onClick={() => handleUniversalExport(client, 'excel')} className="p-2 hover:text-gold transition-colors" title="Export Excel"><FileSpreadsheet size={16}/></button>
-                          <button onClick={() => handleUniversalExport(client, 'qb')} className="p-2 hover:text-gold transition-colors" title="Export QuickBooks"><Calculator size={16}/></button>
-                          <button onClick={() => handleUniversalExport(client, 'sage')} className="p-2 hover:text-gold transition-colors" title="Export Sage"><Database size={16}/></button>
-                       </div>
-                       <Button variant="ghost" size="sm" className="gap-2 text-[10px] uppercase font-bold" onClick={() => handleAdminExport(client)}>
-                          <Download size={14}/> Rapport
-                       </Button>
-                       <label className="cursor-pointer">
-                          <div className="h-9 px-4 rounded-xl bg-gold/10 text-gold text-[10px] font-bold uppercase flex items-center gap-2 hover:bg-gold hover:text-noir transition-all">
-                             <UploadCloud size={14}/> Livrer
+              {clients.map((client) => {
+                const isExpanded = expandedClientId === client.id;
+                return (
+                  <React.Fragment key={client.id}>
+                    <tr className={`hover:bg-white/5 transition-colors group ${isExpanded ? 'bg-white/[0.02]' : ''}`}>
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-3">
+                          <button 
+                            onClick={() => setExpandedClientId(prev => prev === client.id ? null : client.id)}
+                            className="p-1.5 rounded-xl hover:bg-white/5 text-slate-500 hover:text-gold transition-all"
+                            title={isExpanded ? "Réduire" : "Vérifier les fichiers"}
+                          >
+                            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                          </button>
+                          <div className="flex flex-col">
+                            <span 
+                              className="text-silver font-bold cursor-pointer hover:text-gold transition-colors"
+                              onClick={() => setExpandedClientId(prev => prev === client.id ? null : client.id)}
+                            >
+                              {client.displayName}
+                            </span>
+                            <span className="text-xs text-slate-500">{client.companyName || t('adminClients.individual')}</span>
                           </div>
-                          <input type="file" className="hidden" onChange={(e) => handleAdminUpload(e, client.id)} />
-                       </label>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <div className="flex flex-wrap gap-2">{renderNeeds(client)}</div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <Badge variant={client.status === 'En règle' || client.status === 'Actif' ? 'success' : (client.status === 'À réviser' ? 'error' : 'warning')}>
+                          {client.status}
+                        </Badge>
+                      </td>
+                      <td className="px-8 py-6">
+                        <div className="flex justify-end gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
+                           <div className="flex gap-1 bg-noir/50 p-1 rounded-xl border border-white/5">
+                              <button onClick={() => handleUniversalExport(client, 'excel')} className="p-2 hover:text-gold transition-colors" title="Export Excel"><FileSpreadsheet size={16}/></button>
+                              <button onClick={() => handleUniversalExport(client, 'qb')} className="p-2 hover:text-gold transition-colors" title="Export QuickBooks"><Calculator size={16}/></button>
+                              <button onClick={() => handleUniversalExport(client, 'sage')} className="p-2 hover:text-gold transition-colors" title="Export Sage"><Database size={16}/></button>
+                           </div>
+                           <Button variant="ghost" size="sm" className="gap-2 text-[10px] uppercase font-bold" onClick={() => handleAdminExport(client)}>
+                              <Download size={14}/> Rapport
+                           </Button>
+                           <label className="cursor-pointer">
+                              <div className="h-9 px-4 rounded-xl bg-gold/10 text-gold text-[10px] font-bold uppercase flex items-center gap-2 hover:bg-gold hover:text-noir transition-all">
+                                 <UploadCloud size={14}/> Livrer
+                              </div>
+                              <input type="file" className="hidden" onChange={(e) => handleAdminUpload(e, client.id)} />
+                           </label>
+                        </div>
+                      </td>
+                    </tr>
+                    {isExpanded && (
+                      <tr className="bg-black/35">
+                        <td colSpan={4} className="px-8 py-6">
+                          <ClientFileAuditSection client={client} onUpdateStatus={handleUpdateStatus} />
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -238,36 +289,57 @@ export function AdminClients({
 
       {/* Clients Cards — mobile */}
       <div className="md:hidden space-y-4">
-        {clients.map((client) => (
-          <Card key={client.id} className="p-5 space-y-4 glass-card">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="font-bold text-silver">{client.displayName}</p>
-                <p className="text-xs text-slate-500 mt-0.5">{client.companyName || 'Individuel'}</p>
-              </div>
-              <Badge variant={client.status === 'En règle' || client.status === 'Actif' ? 'success' : (client.status === 'À réviser' ? 'error' : 'warning')}>
-                {client.status}
-              </Badge>
-            </div>
-            <div className="flex flex-wrap gap-2">{renderNeeds(client)}</div>
-            <div className="flex items-center gap-2 pt-2 border-t border-white/5 flex-wrap">
-              <div className="flex gap-1 bg-noir/50 p-1 rounded-xl border border-white/5">
-                <button onClick={() => handleUniversalExport(client, 'excel')} className="p-2 hover:text-gold transition-colors text-slate-500" title="Excel"><FileSpreadsheet size={15}/></button>
-                <button onClick={() => handleUniversalExport(client, 'qb')} className="p-2 hover:text-gold transition-colors text-slate-500" title="QuickBooks"><Calculator size={15}/></button>
-                <button onClick={() => handleUniversalExport(client, 'sage')} className="p-2 hover:text-gold transition-colors text-slate-500" title="Sage"><Database size={15}/></button>
-              </div>
-              <Button variant="ghost" size="sm" className="gap-1.5 text-[10px] uppercase font-bold h-9 px-3 flex-1" onClick={() => handleAdminExport(client)}>
-                <Download size={13}/> Rapport
-              </Button>
-              <label className="cursor-pointer flex-1">
-                <div className="h-9 px-3 rounded-xl bg-gold/10 text-gold text-[10px] font-bold uppercase flex items-center justify-center gap-1.5 hover:bg-gold hover:text-noir transition-all">
-                  <UploadCloud size={13}/> Livrer
+        {clients.map((client) => {
+          const isExpanded = expandedClientId === client.id;
+          return (
+            <Card key={client.id} className="p-5 space-y-4 glass-card">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => setExpandedClientId(prev => prev === client.id ? null : client.id)}
+                    className="p-1 rounded-lg hover:bg-white/5 text-slate-400 hover:text-gold transition-colors"
+                  >
+                    {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </button>
+                  <div>
+                    <p 
+                      className="font-bold text-silver cursor-pointer hover:text-gold"
+                      onClick={() => setExpandedClientId(prev => prev === client.id ? null : client.id)}
+                    >
+                      {client.displayName}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">{client.companyName || 'Individuel'}</p>
+                  </div>
                 </div>
-                <input type="file" className="hidden" onChange={(e) => handleAdminUpload(e, client.id)} />
-              </label>
-            </div>
-          </Card>
-        ))}
+                <Badge variant={client.status === 'En règle' || client.status === 'Actif' ? 'success' : (client.status === 'À réviser' ? 'error' : 'warning')}>
+                  {client.status}
+                </Badge>
+              </div>
+              <div className="flex flex-wrap gap-2">{renderNeeds(client)}</div>
+              <div className="flex items-center gap-2 pt-2 border-t border-white/5 flex-wrap">
+                <div className="flex gap-1 bg-noir/50 p-1 rounded-xl border border-white/5">
+                  <button onClick={() => handleUniversalExport(client, 'excel')} className="p-2 hover:text-gold transition-colors text-slate-500" title="Excel"><FileSpreadsheet size={15}/></button>
+                  <button onClick={() => handleUniversalExport(client, 'qb')} className="p-2 hover:text-gold transition-colors text-slate-500" title="QuickBooks"><Calculator size={15}/></button>
+                  <button onClick={() => handleUniversalExport(client, 'sage')} className="p-2 hover:text-gold transition-colors text-slate-500" title="Sage"><Database size={15}/></button>
+                </div>
+                <Button variant="ghost" size="sm" className="gap-1.5 text-[10px] uppercase font-bold h-9 px-3 flex-1" onClick={() => handleAdminExport(client)}>
+                  <Download size={13}/> Rapport
+                </Button>
+                <label className="cursor-pointer flex-1">
+                  <div className="h-9 px-3 rounded-xl bg-gold/10 text-gold text-[10px] font-bold uppercase flex items-center justify-center gap-1.5 hover:bg-gold hover:text-noir transition-all">
+                    <UploadCloud size={13}/> Livrer
+                  </div>
+                  <input type="file" className="hidden" onChange={(e) => handleAdminUpload(e, client.id)} />
+                </label>
+              </div>
+              {isExpanded && (
+                <div className="pt-4 border-t border-white/5">
+                  <ClientFileAuditSection client={client} onUpdateStatus={handleUpdateStatus} />
+                </div>
+              )}
+            </Card>
+          );
+        })}
       </div>
 
       {/* Add Client Modal */}
@@ -371,3 +443,212 @@ export function AdminClients({
     </div>
   );
 }
+
+interface ChecklistItem {
+  id: string;
+  label: string;
+  category: 'bank' | 'general' | 'payroll' | 'fiscal' | 'tax' | 'legal';
+  required: boolean;
+}
+
+function getRequiredChecklistForServices(needs: any): ChecklistItem[] {
+  const list: ChecklistItem[] = [];
+  
+  const activeNeeds: Record<string, boolean> = {};
+  if (Array.isArray(needs)) {
+    needs.forEach(k => { activeNeeds[k] = true; });
+  } else if (needs && typeof needs === 'object') {
+    Object.assign(activeNeeds, needs);
+  } else if (typeof needs === 'string') {
+    activeNeeds[needs] = true;
+  }
+
+  const hasNeed = (keys: string[]) => keys.some(key => 
+    activeNeeds[key] === true || 
+    (typeof needs === 'string' && keys.some(k => needs.toLowerCase().includes(k.toLowerCase()))) ||
+    (Array.isArray(needs) && needs.some(val => keys.some(k => String(val).toLowerCase().includes(k.toLowerCase()))))
+  );
+
+  if (hasNeed(['bookkeeping', 'hourlyBookkeeping', 'monthlyMicro', 'monthlySmall', 'monthlySme', 'catchUp', 'tenue', 'livres'])) {
+    list.push({
+      id: 'bank',
+      label: 'Relevés Bancaires (PDF/CSV)',
+      category: 'bank',
+      required: true
+    });
+    list.push({
+      id: 'general',
+      label: 'Factures de Vente & Reçus de Dépenses',
+      category: 'general',
+      required: true
+    });
+  }
+
+  if (hasNeed(['payroll', 't4Releve1', 'paie', 'salaires'])) {
+    list.push({
+      id: 'payroll',
+      label: 'Registre des Employés & Heures de Paie',
+      category: 'payroll',
+      required: true
+    });
+  }
+
+  if (hasNeed(['gstQst', 'taxes', 'tps', 'tvq'])) {
+    list.push({
+      id: 'fiscal',
+      label: 'Rapports des Ventes / Taxes (TPS/TVQ)',
+      category: 'fiscal',
+      required: true
+    });
+  }
+
+  if (hasNeed(['taxHelpAutonomous', 'taxes_biz', 'taxes_perso', 'impôt', 'impot'])) {
+    list.push({
+      id: 'tax',
+      label: 'Feuillets Fiscaux (T4, T5, T3) & Cotisations',
+      category: 'tax',
+      required: true
+    });
+  }
+
+  if (list.length === 0) {
+    list.push({
+      id: 'legal',
+      label: 'Pièce d’identité officielle (Loi 25)',
+      category: 'legal',
+      required: true
+    });
+    list.push({
+      id: 'general',
+      label: 'Documents comptables divers',
+      category: 'general',
+      required: false
+    });
+  }
+
+  return list;
+}
+
+function ClientFileAuditSection({ 
+  client,
+  onUpdateStatus
+}: { 
+  client: ClientRecord,
+  onUpdateStatus: (clientId: string, nextStatus: string) => Promise<void>
+}) {
+  const { documents, loading, getSecureDownloadUrl } = useDocuments(client.id);
+  const [updating, setUpdating] = useState(false);
+
+  const handleDownload = async (urlPath: string, fileName: string) => {
+    const signedUrl = await getSecureDownloadUrl(urlPath);
+    if (signedUrl) {
+      window.open(signedUrl, '_blank');
+    } else {
+      toast.error("Impossible de récupérer l'URL de téléchargement sécurisé.");
+    }
+  };
+
+  const handleLocalStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setUpdating(true);
+    await onUpdateStatus(client.id, e.target.value);
+    setUpdating(false);
+  };
+
+  const checklistItems = getRequiredChecklistForServices(client.needs);
+  
+  return (
+    <div className="bg-black/40 p-6 rounded-2xl border border-white/5 space-y-6 text-left my-2 animate-in fade-in duration-300">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-white/5 pb-4">
+        <div>
+          <h4 className="text-base font-serif font-bold text-ivoire">📁 Audit & Vérification des Pièces Comptables</h4>
+          <p className="text-xs text-slate-400 mt-0.5">Vérifiez les pièces justificatives fournies par le client pour lancer son dossier.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <label className="text-xs font-bold text-slate-400">Statut Dossier :</label>
+          <select 
+            value={client.status} 
+            onChange={handleLocalStatusChange}
+            disabled={updating}
+            className="bg-midnight border border-white/10 rounded-xl px-3 py-1.5 text-xs text-silver outline-none focus:border-gold/50 transition-all font-bold"
+          >
+            <option value="En règle">En règle</option>
+            <option value="En attente">En attente</option>
+            <option value="À réviser">À réviser</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Checklist des pièces */}
+        <div className="space-y-3">
+          <h5 className="text-xs font-bold text-gold uppercase tracking-widest">Checklist de Conformité</h5>
+          <div className="space-y-2.5">
+            {checklistItems.map(item => {
+              const docFound = documents.find(d => d.category === item.category);
+              return (
+                <div key={item.id} className="flex justify-between items-center bg-[#0d0d0d] p-3.5 rounded-xl border border-white/5">
+                  <div className="min-w-0 pr-2">
+                    <p className="text-xs font-bold text-silver">{item.label}</p>
+                    {docFound ? (
+                      <p className="text-[10px] text-green-400 truncate mt-0.5">✓ Fichier : {docFound.fileName}</p>
+                    ) : (
+                      <p className="text-[10px] text-amber-500 mt-0.5">⚠ Manquant</p>
+                    )}
+                  </div>
+                  {docFound ? (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 text-[10px] gap-1 px-3 border-green-500/20 text-green-400 hover:bg-green-500/10 hover:text-green-300"
+                      onClick={() => handleDownload(docFound.url || '', docFound.fileName)}
+                    >
+                      <Download size={12}/> Télécharger
+                    </Button>
+                  ) : (
+                    <span className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-lg border border-amber-500/20 shrink-0">
+                      En attente
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Tous les documents du client */}
+        <div className="space-y-3">
+          <h5 className="text-xs font-bold text-gold uppercase tracking-widest">Coffre-fort client ({documents.length} fichiers)</h5>
+          {loading ? (
+            <p className="text-xs text-slate-500 italic">Chargement du coffre-fort...</p>
+          ) : documents.length === 0 ? (
+            <p className="text-xs text-slate-500 italic">Aucun document déposé dans le coffre-fort pour le moment.</p>
+          ) : (
+            <div className="space-y-2 max-h-[220px] overflow-y-auto custom-scrollbar">
+              {documents.map(doc => (
+                <div key={doc.id} className="flex justify-between items-center bg-[#0d0d0d] p-2.5 rounded-xl border border-white/5">
+                  <div className="min-w-0 pr-2">
+                    <p className="text-xs text-silver truncate font-medium">{doc.fileName}</p>
+                    <div className="flex gap-2 text-[9px] text-slate-500 mt-0.5 uppercase tracking-wider">
+                      <span>Catégorie: <strong className="text-gold">{doc.category}</strong></span>
+                      <span>•</span>
+                      <span>Taille: {doc.fileSize}</span>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 text-[9px] gap-1 px-2.5 border-white/10 text-slate-400 hover:text-gold"
+                    onClick={() => handleDownload(doc.url || '', doc.fileName)}
+                  >
+                    <Download size={10}/> Télécharger
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+

@@ -248,7 +248,13 @@ export function PortalShell({
       </main>
 
       {showMandateSigning && (
-        <EliteSignature contract={currentContract} onComplete={() => setShowMandateSigning(false)} />
+        <EliteSignature contract={currentContract} onComplete={() => {
+          if (userData?.id) {
+            localStorage.setItem(`comptaflow_mandate_signed_${userData.id}`, 'true');
+          }
+          setShowMandateSigning(false);
+          if (onRefreshProfile) onRefreshProfile();
+        }} />
       )}
     </div>
   );
