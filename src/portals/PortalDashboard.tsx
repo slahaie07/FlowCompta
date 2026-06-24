@@ -3,6 +3,7 @@ import { useAdminClients } from '../hooks/useAdminClients';
 import { PortalShell } from './shared/PortalShell';
 import { SubAdminPortalShell } from './sub-admin/SubAdminPortalShell';
 import { SuperAdminPortalShell } from './super-admin/SuperAdminPortalShell';
+import { ClientPortalShell } from './client/ClientPortalShell';
 import { getPortalHomePath, roleFromPortalSlug } from './config/paths';
 import type { PortalShellProps, PortalRole } from './types';
 
@@ -44,6 +45,18 @@ export function PortalDashboard(props: PortalShellProps) {
     );
   }
 
+  if (role === 'client') {
+    return (
+      <ClientPortalShell
+        {...props}
+        routeContext={{
+          adminClients,
+          addClient,
+        }}
+      />
+    );
+  }
+
   return (
     <PortalShell
       {...props}
@@ -54,6 +67,7 @@ export function PortalDashboard(props: PortalShellProps) {
     />
   );
 }
+
 
 
 export default PortalDashboard;
