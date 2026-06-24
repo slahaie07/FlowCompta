@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { UploadCloud, CheckCircle, ChevronRight, Building, Lock, ShieldCheck, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { UserData } from '../../types';
@@ -23,6 +23,10 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
 
   const { lang: globalLang, changeLanguage } = useLanguage();
   const [selectedLang, setSelectedLang] = useState<LanguageCode>(globalLang);
+
+  useEffect(() => {
+    setSelectedLang(globalLang);
+  }, [globalLang]);
 
   const tr = (key: string) => t(selectedLang, key);
 
@@ -74,6 +78,10 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
       }
       if (profileType === 'business' && (!data.companyName || !data.neq)) {
         toast.warning(tr('onboarding.businessRequired'));
+        return;
+      }
+      if (data.neq && !/^\d{10}$/.test(data.neq)) {
+        toast.warning(tr('onboarding.neqInvalid') || 'Le NEQ doit contenir exactement 10 chiffres.');
         return;
       }
     }

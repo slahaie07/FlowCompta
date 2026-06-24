@@ -11,24 +11,28 @@ export const communicationService = {
   /**
    * Envoi générique vers le bus d'automatisation
    */
-  async _postToAutomation(webhookUrl: string, payload: any) {
+  async _postToAutomation(webhookUrl: string, payload: any, maxRetries = 3) {
     if (!webhookUrl || webhookUrl.includes('your-n8n-instance')) {
-      console.info("[CommunicationService] Webhook non configuré. Payload:", payload);
+      console.warn("[CommunicationService] Webhook non configuré — notification ignorée.", { payload });
       return;
     }
 
-    try {
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const response = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return;
+      } catch (e) {
+        if (attempt === maxRetries - 1) {
+          console.error(`[CommunicationService] Échec définitif après ${maxRetries} tentatives:`, e, { webhookUrl, payload });
+        } else {
+          await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000));
+        }
       }
-    } catch (e) {
-      console.error("[CommunicationService] Échec de la notification:", e);
     }
   },
 

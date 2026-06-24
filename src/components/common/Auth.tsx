@@ -42,6 +42,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
   const [resending, setResending] = useState(false);
 
   const checkIsMock = (email: string) => {
+    if (import.meta.env.PROD) return false;
     return email.toLowerCase().includes('mock') || !window.navigator.onLine;
   };
 
@@ -88,7 +89,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
           mockLogin(cleanEmail, finalRole);
         }
         onAuthentication(cleanEmail);
-        toast.success("Connexion de démonstration réussie.");
+        toast.success(lang === 'en' ? 'Mock login successful.' : lang === 'ar' ? 'نجح تسجيل الدخول التجريبي.' : 'Connexion de démonstration réussie.');
         navigate(nextPath);
       }, 1200);
       return;

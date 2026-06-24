@@ -56,9 +56,12 @@ export const CONFIG = {
     SUPER_ADMIN_EMAILS: ['admin@compta-flow.net', 's.lahaie07@gmail.com'],
     SUB_ADMIN_EMAILS: ['comptable@compta-flow.net', 'partenaire@compta-flow.net'],
     SUPPORT_EMAIL: 'comptaflow.officiel@gmail.com',
+    PRIVACY_EMAIL: 'privacy@compta-flow.net',
     SITE_URL: 'https://compta-flow.net',
     /** Destinataire par défaut des virements Interac plateforme (distinct des comptes auth admin). */
     INTERAC_EMAIL: 'comptaflow.officiel@gmail.com',
+    /** Délai d'inactivité avant déconnexion automatique (ms). */
+    SESSION_TIMEOUT_MS: 900_000,
   }
 };
 

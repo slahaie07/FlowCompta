@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, Scale, Shield } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { getActiveRegions, getRegion, SITE } from '../../lib/canadaNetwork';
@@ -10,7 +10,8 @@ export function RegionalLanding() {
   const navigate = useNavigate();
   const { lang } = useLanguage();
 
-  const region = getActiveRegions().find((r) => r.seoSlug === slug) ?? getRegion('QC');
+  const region = getActiveRegions().find((r) => r.seoSlug === slug);
+  if (!region) return <Navigate to="/" replace />;
   const isFr = lang === 'fr';
 
   return (
