@@ -6,6 +6,8 @@
     <meta name="theme-color" content="#0A0A0A" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icon-192.jpg" />
     
     <!-- SEO & Branding -->
     <title>ComptaFlow — Comptabilité premium pour entrepreneurs | Canada</title>
@@ -244,5 +246,15 @@
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          const swPath = window.location.pathname.startsWith('/flowcompta') ? './sw.js' : '/sw.js';
+          navigator.serviceWorker.register(swPath)
+            .then(reg => console.log('Service Worker registered successfully:', reg.scope))
+            .catch(err => console.error('Service Worker registration failed:', err));
+        });
+      }
+    </script>
   </body>
 </html>

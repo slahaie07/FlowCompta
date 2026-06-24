@@ -6,7 +6,9 @@ import {
   Menu,
   X,
   Globe,
-  LogIn
+  LogIn,
+  Laptop,
+  Download
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -15,12 +17,14 @@ import { ServicesCatalogSection } from './ServicesCatalogSection';
 import { PricingGrid } from './PricingGrid';
 import { TeamAndTools } from './TeamAndTools';
 import { CONFIG } from '../../lib/config';
+import { usePwaInstall } from '../../hooks/usePwaInstall';
 
 export function Landing() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { lang, toggleLanguage, t } = useLanguage();
+  const { isInstallable, install } = usePwaInstall();
 
   const goToSignup = () => navigate('/login?next=/onboarding&register=1');
 
@@ -319,6 +323,40 @@ export function Landing() {
           </div>
         </div>
       </section>
+
+      {/* App Install Callout (PWA) */}
+      {isInstallable && (
+        <section className="py-16 border-t border-gold/15 bg-gold/[0.01] relative overflow-hidden">
+          <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gold/5 rounded-full blur-[80px] pointer-events-none" />
+          <div className="max-w-4xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="w-14 h-14 rounded-2xl border border-gold/30 bg-gold/5 flex items-center justify-center text-gold shrink-0 shadow-[0_0_20px_rgba(212,175,55,0.1)]">
+                <Laptop size={28} />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-serif font-bold text-ivoire text-xl">
+                  {lang === 'en' ? 'Install the ComptaFlow App' : lang === 'ar' ? 'تثبيت تطبيق ComptaFlow' : 'Installer l\'application ComptaFlow'}
+                </h4>
+                <p className="text-xs text-silver max-w-lg leading-relaxed">
+                  {lang === 'en' 
+                    ? 'Get instant secure access directly from your desktop dock or mobile homescreen. Optimized offline capabilities.' 
+                    : lang === 'ar' 
+                    ? 'احصل على وصول آمن وسريع مباشرة من شاشة جهازك المحمول أو سطح المكتب.' 
+                    : 'Accédez instantanément à votre espace sécurisé depuis votre PC ou votre écran d\'accueil mobile. Fluidité optimale.'}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="gold"
+              onClick={install}
+              className="gap-2 text-xs font-bold uppercase tracking-widest px-8 h-14 rounded-2xl cursor-pointer shadow-gold/20 hover:scale-[1.02] transition-transform shrink-0"
+            >
+              <Download size={15} />
+              {lang === 'en' ? 'Install App' : lang === 'ar' ? 'تثبيت التطبيق' : 'Installer l\'App'}
+            </Button>
+          </div>
+        </section>
+      )}
 
       {/* Footer */}
       <footer className="py-20 border-t border-gold/20 bg-noir">

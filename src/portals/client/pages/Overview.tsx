@@ -1,4 +1,4 @@
-import { FileText, AlertCircle, TrendingUp, CheckCircle2, ArrowUpRight, HelpCircle, Mail as MailIcon, UploadCloud, ShieldCheck, Check } from 'lucide-react';
+import { FileText, AlertCircle, TrendingUp, CheckCircle2, ArrowUpRight, HelpCircle, Mail as MailIcon, UploadCloud, ShieldCheck, Check, Laptop, Download } from 'lucide-react';
 import { UserData, AppMode } from '../../../types';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
@@ -15,10 +15,12 @@ import { toast } from 'sonner';
 import { useLanguage } from '../../../hooks/useLanguage';
 import { usePortalNavigate } from '../../../hooks/usePortalNavigate';
 import { CONFIG } from '../../../lib/config';
+import { usePwaInstall } from '../../../hooks/usePwaInstall';
 
 export function Overview({ userData, isLoading: authLoading, currentMode, onSignMandate, onRefreshProfile }: { userData: UserData, isLoading: boolean, currentMode: AppMode, onSignMandate?: () => void, onRefreshProfile?: () => void }) {
   const { t } = useLanguage();
   const portalNavigate = usePortalNavigate();
+  const { isInstallable, install } = usePwaInstall();
   const { invoices, loading: invoicesLoading, declarePaidByClient, refreshInvoices } = useInvoices(undefined, false);
   const { documents, loading: docsLoading, uploadDocument } = useDocuments();
   const [cpaInfo, setCpaInfo] = useState<any>(null);
@@ -170,6 +172,34 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
            </Button>
         </div>
       </header>
+
+      {/* Install App notification banner */}
+      {isInstallable && (
+        <Card className="p-6 bg-gradient-to-r from-gold/10 to-transparent border border-gold/30 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3 text-left">
+            <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold shrink-0 shadow-[0_0_15px_rgba(212,175,55,0.08)]">
+              <Laptop size={20} />
+            </div>
+            <div>
+              <h4 className="font-serif font-bold text-ivoire text-sm">
+                Application de Bureau & Mobile Disponible
+              </h4>
+              <p className="text-[11px] text-slate-400 leading-normal">
+                Installez l'application ComptaFlow sur votre ordinateur ou votre téléphone pour un accès sécurisé immédiat et une meilleure expérience.
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="gold"
+            size="sm"
+            onClick={install}
+            className="gap-2 text-[10px] uppercase font-bold tracking-wider rounded-xl h-10 px-5 cursor-pointer shadow-gold/10 hover:scale-[1.02] transition-transform"
+          >
+            <Download size={12} />
+            Installer l'Application
+          </Button>
+        </Card>
+      )}
 
       {/* 🚀 Guide Rapide de Prise en Charge */}
       {userData.selectedServiceId && (

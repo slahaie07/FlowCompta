@@ -1,0 +1,25 @@
+{
+  "short_name": "ComptaFlow",
+  "name": "ComptaFlow - La comptabilité qui coule de source",
+  "description": "Portail d'aide comptable, de tenue de livres et de conformité fiscale en ligne au Canada.",
+  "icons": [
+    {
+      "src": "icon-192.jpg",
+      "type": "image/jpeg",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.jpg",
+      "type": "image/jpeg",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./",
+  "background_color": "#0d0d0d",
+  "theme_color": "#d4af37",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "categories": ["finance", "business"]
+}
