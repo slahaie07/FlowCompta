@@ -112,7 +112,8 @@ function AppContent() {
       status: 'active',
       role: 'client',
       needs: createEmptyUserNeeds(),
-      metadata: { province: data.province },
+      sub_admin_id: data.subAdminId || null,
+      metadata: { province: data.province, phone: (data as any).phone || null },
     });
 
     if (error) {
@@ -136,6 +137,27 @@ function AppContent() {
       });
     } catch {
       /* email/webhook best-effort */
+    }
+
+    // Notify assigned admin (email + SMS) — best-effort
+    if (data.subAdminId) {
+      try {
+        await fetch('/api/admin/notify-new-client', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subAdminId: data.subAdminId,
+            clientName: data.displayName,
+            clientEmail: data.email || user.email,
+            clientPhone: (data as any).phone || null,
+            province: data.province,
+            companyName: data.companyName || null,
+            language: data.language || 'fr',
+          }),
+        });
+      } catch {
+        /* notification best-effort */
+      }
     }
 
     toast.success(
