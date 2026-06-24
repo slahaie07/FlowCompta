@@ -89,6 +89,23 @@ function AppContent() {
   const handleOnboardingComplete = async (data: UserData) => {
     if (!user?.id) return;
 
+    let subAdminId: string | null = null;
+    const selectedExpertEmail = (data as any).selectedExpertEmail;
+    if (selectedExpertEmail) {
+      try {
+        const { data: adminProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('email', selectedExpertEmail)
+          .single();
+        if (adminProfile) {
+          subAdminId = adminProfile.id;
+        }
+      } catch (err) {
+        console.error('Failed to lookup assigned expert:', err);
+      }
+    }
+
     const { error } = await supabase.from('profiles').upsert({
       id: user.id,
       display_name: data.displayName,
@@ -102,6 +119,7 @@ function AppContent() {
       preferred_language: data.language || 'fr',
       status: 'active',
       role: 'client',
+      sub_admin_id: subAdminId,
       needs: createEmptyUserNeeds(),
       metadata: { province: data.province },
     });
@@ -123,6 +141,7 @@ function AppContent() {
           displayName: data.displayName,
           province: data.province,
           language: data.language || 'fr',
+          selectedExpertEmail: selectedExpertEmail,
         }),
       });
     } catch {

@@ -26,7 +26,7 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
 
   const tr = (key: string) => t(selectedLang, key);
 
-  const [data, setData] = useState<UserData>({
+  const [data, setData] = useState<UserData & { selectedExpertEmail?: string }>({
     displayName: initialDisplayName || '',
     companyName: '',
     email: initialEmail || '',
@@ -36,10 +36,12 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
     employeeCount: '1-5',
     province: 'QC',
     language: 'fr',
+    selectedExpertEmail: 's.lahaie07@gmail.com', // Samuel par défaut
   });
 
   const stepLabels = [
     tr('onboarding.stepCoords'),
+    selectedLang === 'en' ? 'Expert' : 'Expert',
     tr('onboarding.stepDocs'),
     tr('onboarding.stepConfirm'),
   ];
@@ -249,7 +251,90 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
             )}
 
             {step === 2 && (
-              <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="max-w-2xl mx-auto text-center space-y-12">
+              <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-12">
+                <div className="text-center space-y-4 max-w-2xl mx-auto">
+                  <span className="text-gold text-xs font-bold tracking-[0.4em] uppercase">
+                    {selectedLang === 'en' ? 'CO-FOUNDERS & CPAS' : 'CO-FONDATEURS & CPAS'}
+                  </span>
+                  <h2 className="text-4xl md:text-5xl font-serif text-ivoire tracking-tight italic">
+                    {selectedLang === 'en' ? 'Choose your reference' : 'Choisissez votre expert de'} <span className="text-gold">{selectedLang === 'en' ? 'expert' : 'référence'}</span>
+                  </h2>
+                  <p className="text-silver font-light text-sm italic">
+                    {selectedLang === 'en' ? 'Every client space is routed to a dedicated accountant for total isolation and data safety.' : 'Chaque dossier client est dirigé vers un comptable dédié pour une isolation complète de vos données.'}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto pt-6">
+                  {[
+                    {
+                      id: 'samuel',
+                      email: 's.lahaie07@gmail.com',
+                      name: 'Samuel Lahaie',
+                      role: 'Fondateur / Senior CPA',
+                      roleEn: 'Founder / Senior CPA',
+                      desc: 'Samuel est le visionnaire derrière Compta-Flow. Avec plus d\'une décennie d\'expérience en restructuration d\'entreprises et stratégies fiscales complexes, il guide les entreprises vers l\'efficacité financière.',
+                      descEn: 'Samuel is the visionary behind Compta-Flow. With over a decade of experience in corporate restructuring and high-net-worth tax strategy, he guides businesses toward financial efficiency.'
+                    },
+                    {
+                      id: 'eya',
+                      email: 'eya-cpa@outlook.com',
+                      name: 'Eya',
+                      role: 'Fiscaliste / CPA Indépendante',
+                      roleEn: 'Tax Specialist / Independent CPA',
+                      desc: 'Eya est une CPA indépendante spécialisée dans les normes fiscales internationales et la conformité multi-juridictionnelle. Elle est l\'experte privilégiée pour les opérations transfrontalières.',
+                      descEn: 'Eya is an independent CPA specializing in international tax norms and dual-jurisdiction compliance. She is the expert of choice for cross-border operations and multilingue setups.'
+                    },
+                    {
+                      id: 'sylvie',
+                      email: 'viviee28@hotmail.com',
+                      name: 'Sylvie Charette-Clément',
+                      role: 'Partenaire CPA / Tenue de livres',
+                      roleEn: 'CPA Partner / Bookkeeping',
+                      desc: 'Sylvie apporte une rigueur absolue à la tenue de livres et aux systèmes de paie. Spécialisée dans les entreprises locales, elle assure une comptabilité quotidienne impeccable.',
+                      descEn: 'Sylvie brings rigorous attention to detail to bookkeeping and payroll systems. She specializes in local businesses, ensuring flawless day-to-day accounts.'
+                    }
+                  ].map((expert) => {
+                    const isSelected = data.selectedExpertEmail === expert.email;
+                    return (
+                      <button
+                        key={expert.id}
+                        type="button"
+                        onClick={() => setData({ ...data, selectedExpertEmail: expert.email })}
+                        className={`p-6 rounded-3xl bg-surface border transition-all text-left flex flex-col justify-between min-h-[350px] relative group cursor-pointer focus-ring ${
+                          isSelected ? 'border-gold shadow-[0_0_30px_rgba(212,175,55,0.15)] bg-gold/[0.02]' : 'border-white/5 hover:border-gold/30 hover:bg-white/[0.01]'
+                        }`}
+                      >
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-start">
+                            <div className="w-12 h-12 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold font-serif font-bold text-xl group-hover:scale-105 transition-transform">
+                              {expert.name.charAt(0)}
+                            </div>
+                            {isSelected && (
+                              <Badge variant="gold" className="text-[10px] uppercase font-black tracking-widest">{selectedLang === 'en' ? 'SELECTED' : 'CHOISI'}</Badge>
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-serif text-ivoire font-bold group-hover:text-gold transition-colors">{expert.name}</h3>
+                            <p className="text-[11px] text-gold/70 font-bold uppercase tracking-wider mt-1">
+                              {selectedLang === 'en' ? expert.roleEn : expert.role}
+                            </p>
+                          </div>
+                          <p className="text-xs text-slate-400 font-light leading-relaxed">
+                            {selectedLang === 'en' ? expert.descEn : expert.desc}
+                          </p>
+                        </div>
+                        <div className="pt-4 border-t border-white/5 text-[10px] font-mono text-slate-500 truncate w-full">
+                          {expert.email}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+
+            {step === 3 && (
+              <motion.div key="s3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="max-w-2xl mx-auto text-center space-y-12">
                 <div className="space-y-4">
                   <span className="text-gold text-xs font-bold tracking-[0.4em] uppercase">{tr('onboarding.vaultTag')}</span>
                   <h2 className="text-4xl md:text-5xl font-serif text-ivoire tracking-tight italic">
@@ -277,8 +362,8 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
               </motion.div>
             )}
 
-            {step === 3 && (
-              <motion.div key="s3" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-xl mx-auto text-center space-y-8">
+            {step === 4 && (
+              <motion.div key="s4" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-xl mx-auto text-center space-y-8">
                 <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto border border-gold/20 text-gold">
                   <CheckCircle size={40} />
                 </div>
@@ -302,9 +387,9 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
           >
             ← {tr('back')}
           </Button>
-          {step > 0 && step < 3 && (
-            <Button variant="gold" className="gap-2 px-12 h-14 shadow-gold/10 font-bold uppercase tracking-widest text-xs" onClick={step === 2 ? () => setStep(3) : nextStep}>
-              {step === 2 ? tr('onboarding.skip') : tr('continue')} <ChevronRight size={18} />
+          {step > 0 && step < 4 && (
+            <Button variant="gold" className="gap-2 px-12 h-14 shadow-gold/10 font-bold uppercase tracking-widest text-xs" onClick={step === 3 ? () => setStep(4) : nextStep}>
+              {step === 3 ? tr('onboarding.skip') : tr('continue')} <ChevronRight size={18} />
             </Button>
           )}
         </footer>

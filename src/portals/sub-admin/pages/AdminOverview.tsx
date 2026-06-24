@@ -1,4 +1,5 @@
-import { BarChart3, Users, Clock, TrendingUp, ArrowUpRight, Activity, Send, AlertTriangle, Calculator } from 'lucide-react';
+import { useState } from 'react';
+import { BarChart3, Users, Clock, TrendingUp, ArrowUpRight, Activity, Send, AlertTriangle, Calculator, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { UserData, ClientRecord } from '../../../types';
 import { Card } from '../../../components/ui/Card';
@@ -10,9 +11,85 @@ import { OrganicLoader } from '../../../components/ui/OrganicLoader';
 import { useLanguage } from '../../../hooks/useLanguage';
 import { getPortalPath } from '../../config/paths';
 
-export function AdminOverview() {
-  const { t } = useLanguage();
+interface AdminOverviewProps {
+  userData?: UserData;
+}
+
+export function AdminOverview({ userData }: AdminOverviewProps) {
+  const { t, lang } = useLanguage();
   const { stats, loading } = useAdminHub();
+
+  // Eya's currency/tax region toggle
+  const [taxRegion, setTaxRegion] = useState<'CA' | 'TN'>('CA');
+
+  // Calculator states
+  const [calcService, setCalcService] = useState<'student' | 'individual' | 'autonomous' | 'bookkeeping'>('autonomous');
+  const [calcProvince, setCalcProvince] = useState<string>('QC');
+  const [calcCatchUpHours, setCalcCatchUpHours] = useState<number>(0);
+  const [calcSoftwareSetup, setCalcSoftwareSetup] = useState<boolean>(false);
+  const [calcPayroll, setCalcPayroll] = useState<boolean>(false);
+
+  const isEya = userData?.email === 'eya-cpa@outlook.com' || userData?.fullName?.includes('Eya') || userData?.displayName?.includes('Eya');
+
+  // Exchange rate: 1 CAD = 2.25 TND
+  const exchangeRate = 2.25;
+  const currencySymbol = taxRegion === 'TN' ? ' TND' : ' $';
+
+  const formatMoney = (val: number) => {
+    const converted = taxRegion === 'TN' ? val * exchangeRate : val;
+    return converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + currencySymbol;
+  };
+
+  const getCalcResults = () => {
+    let base = 0;
+    if (calcService === 'student') base = 49.99;
+    else if (calcService === 'individual') base = 89.99;
+    else if (calcService === 'autonomous') base = 199.99;
+    else if (calcService === 'bookkeeping') base = 249.99;
+
+    let addons = 0;
+    addons += calcCatchUpHours * 60.00;
+    if (calcSoftwareSetup) addons += 225.00;
+    if (calcPayroll) addons += 65.00;
+
+    const ht = base + addons;
+
+    // Tax calculation based on province
+    let tpsRate = 0.05;
+    let tvqRate = 0;
+    let tvhRate = 0;
+
+    if (calcProvince === 'QC') {
+      tvqRate = 0.09975;
+    } else if (['ON', 'NB', 'NL', 'NS', 'PE'].includes(calcProvince)) {
+      tpsRate = 0;
+      tvhRate = calcProvince === 'ON' ? 0.13 : 0.15;
+    } else if (['BC', 'MB', 'SK'].includes(calcProvince)) {
+      tvqRate = calcProvince === 'BC' ? 0.07 : calcProvince === 'MB' ? 0.07 : 0.06;
+    } else {
+      tpsRate = 0.05;
+    }
+
+    const tps = ht * tpsRate;
+    const tvq = ht * tvqRate;
+    const tvh = ht * tvhRate;
+    const total = ht + tps + tvq + tvh;
+
+    return {
+      base,
+      addons,
+      ht,
+      tps,
+      tvq,
+      tvh,
+      total,
+      tpsRate,
+      tvqRate,
+      tvhRate
+    };
+  };
+
+  const calc = getCalcResults();
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center py-20 gap-8">
@@ -35,6 +112,41 @@ export function AdminOverview() {
         </div>
         <Badge variant="gold" className="bg-gold/10 text-gold border-gold/20 py-2 px-6 text-xs font-black uppercase tracking-[0.3em] mb-2">{t('adminHub.badge')}</Badge>
       </header>
+
+      {/* Bouton Bascule "Canada / Tunisie" (Spécifique pour Eya) */}
+      {isEya && (
+        <div className="flex items-center justify-between gap-6 rounded-2xl border border-gold/20 bg-gold/[0.02] p-6 max-w-xl shadow-[0_0_30px_rgba(212,175,55,0.05)]">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-2xl">
+              {taxRegion === 'CA' ? '🇨🇦' : '🇹🇳'}
+            </div>
+            <div>
+              <p className="font-bold text-ivoire uppercase tracking-wider text-sm">Zone Fiscale Active (Eya)</p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Basculez instantanément les normes comptables, les taxes et la devise de référence.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className={`text-[10px] font-black uppercase tracking-widest ${taxRegion === 'CA' ? 'text-gold' : 'text-slate-500'}`}>Canada</span>
+            <button
+              type="button"
+              onClick={() => {
+                setTaxRegion(prev => prev === 'CA' ? 'TN' : 'CA');
+                toast.info(taxRegion === 'CA' ? "Passage aux normes comptables tunisiennes (TND)" : "Retour aux normes canadiennes (CAD)");
+              }}
+              className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gold/30 bg-gold/20"
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-gold shadow ring-0 transition duration-200 ease-in-out ${
+                  taxRegion === 'TN' ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+            <span className={`text-[10px] font-black uppercase tracking-widest ${taxRegion === 'TN' ? 'text-gold' : 'text-slate-500'}`}>Tunisie</span>
+          </div>
+        </div>
+      )}
 
       {stats.pendingInteracValidations > 0 && (
         <Link
@@ -79,9 +191,9 @@ export function AdminOverview() {
         <Card className="p-8 space-y-6 premium-border-gold relative overflow-hidden group" glow="gold">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-gold/10 transition-colors" />
           <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] relative z-10">
-            <TrendingUp size={16} className="text-gold" /> {t('adminHub.grossRevenue')}
+            <TrendingUp size={16} className="text-gold" /> {taxRegion === 'TN' ? "Chiffre d'affaires brut" : t('adminHub.grossRevenue')}
           </div>
-          <p className="text-4xl font-serif font-bold text-ivoire relative z-10">{(stats.totalRevenue || 0).toLocaleString()} $</p>
+          <p className="text-3xl font-serif font-bold text-ivoire relative z-10">{formatMoney(stats.totalRevenue || 0)}</p>
           <div className="flex items-center gap-2 relative z-10">
             <Badge variant="success" className="bg-green-500/10 text-green-400 border-green-500/20 font-black">+12.4%</Badge>
             <span className="text-xs text-slate-600 font-bold uppercase tracking-widest">{t('adminHub.vsLastMonth')}</span>
@@ -91,22 +203,22 @@ export function AdminOverview() {
         <Card className="p-8 space-y-6 glass-card relative overflow-hidden group" glow="gold">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-gold/10 transition-colors" />
           <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] relative z-10">
-            <TrendingUp size={16} className="text-amber-500" /> {t('adminHub.networkFees')}
+            <TrendingUp size={16} className="text-amber-500" /> {taxRegion === 'TN' ? "Impôt estimé (15 %)" : t('adminHub.networkFees')}
           </div>
-          <p className="text-4xl font-serif font-bold text-amber-500 relative z-10">{((stats.totalRevenue || 0) * 0.05).toLocaleString()} $</p>
+          <p className="text-3xl font-serif font-bold text-amber-500 relative z-10">{formatMoney((stats.totalRevenue || 0) * (taxRegion === 'TN' ? 0.15 : 0.05))}</p>
           <div className="flex items-center gap-2 relative z-10">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{t('adminHub.networkRoyalty')}</span>
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{taxRegion === 'TN' ? "Taux impôt Tunisie" : t('adminHub.networkRoyalty')}</span>
           </div>
         </Card>
 
         <Card className="p-8 space-y-6 glass-card relative overflow-hidden group" glow="sapphire">
           <div className="absolute top-0 right-0 w-32 h-32 bg-sapphire/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-sapphire/10 transition-colors" />
           <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] relative z-10">
-            <TrendingUp size={16} className="text-sapphire-light" /> {t('adminHub.netRevenue')}
+            <TrendingUp size={16} className="text-sapphire-light" /> {taxRegion === 'TN' ? "Revenu net estimé" : t('adminHub.netRevenue')}
           </div>
-          <p className="text-4xl font-serif font-bold text-gold relative z-10">{((stats.totalRevenue || 0) * 0.95).toLocaleString()} $</p>
+          <p className="text-3xl font-serif font-bold text-gold relative z-10">{formatMoney((stats.totalRevenue || 0) * (taxRegion === 'TN' ? 0.85 : 0.95))}</p>
           <div className="flex items-center gap-2 relative z-10">
-            <Badge variant="info" className="bg-sapphire/10 text-sapphire-light border-sapphire/20 font-black">{t('adminHub.netCollected')}</Badge>
+            <Badge variant="info" className="bg-sapphire/10 text-sapphire-light border-sapphire/20 font-black">{taxRegion === 'TN' ? "Net disponible" : t('adminHub.netCollected')}</Badge>
           </div>
         </Card>
         
@@ -114,7 +226,7 @@ export function AdminOverview() {
           <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">
             <Users size={16} className="text-slate-400" /> {t('adminHub.clientPortfolio')}
           </div>
-          <p className="text-4xl font-serif font-bold text-ivoire">{stats.activeClients}</p>
+          <p className="text-3xl font-serif font-bold text-ivoire">{stats.activeClients}</p>
           <p className="text-xs text-slate-500 font-black uppercase tracking-widest">{t('adminHub.compliantFiles')}</p>
         </Card>
 
@@ -122,7 +234,7 @@ export function AdminOverview() {
           <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">
             <Clock size={16} className="text-red-400" /> {t('adminHub.workflow')}
           </div>
-          <p className="text-4xl font-serif font-bold text-ivoire">{stats.pendingTasks}</p>
+          <p className="text-3xl font-serif font-bold text-ivoire">{stats.pendingTasks}</p>
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
             <span className="text-xs text-red-500/70 font-black uppercase tracking-widest italic">{t('adminHub.criticalPriority')}</span>
@@ -199,6 +311,155 @@ export function AdminOverview() {
            </div>
         </Card>
       </div>
+
+      {/* 🧮 WIDGET CALCULATEUR D'AIDE TARIF COMPTAFLOW */}
+      <section className="space-y-6 mt-10">
+        <h2 className="text-xl font-serif font-bold text-ivoire flex items-center gap-2">
+          <span>🧮</span> {lang === 'en' ? 'COMPTAFLOW HELP QUOTE & TAX CALCULATOR' : 'CALCULATEUR D\'AIDE TARIF & TAXES COMPTAFLOW'}
+        </h2>
+        <Card className="p-8 premium-border-gold relative overflow-hidden" glow="gold">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 blur-3xl rounded-full -mt-32 -mr-32" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
+            {/* Form Inputs */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="calc-service" className="text-xs font-black uppercase tracking-widest text-slate-500 block mb-2">Forfait / Service</label>
+                  <select
+                    id="calc-service"
+                    value={calcService}
+                    onChange={(e) => setCalcService(e.target.value as any)}
+                    className="w-full bg-noir border border-white/10 rounded-xl px-4 py-3 text-ivoire outline-none focus-ring text-sm appearance-none"
+                  >
+                    <option value="student">Étudiants (49.99 $)</option>
+                    <option value="individual">Particuliers (89.99 $)</option>
+                    <option value="autonomous">Travailleurs Autonomes (199.99 $)</option>
+                    <option value="bookkeeping">Tenue de livres & Taxes (249.99 $/mois)</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="calc-province" className="text-xs font-black uppercase tracking-widest text-slate-500 block mb-2">Province Fiscale</label>
+                  <select
+                    id="calc-province"
+                    value={calcProvince}
+                    onChange={(e) => setCalcProvince(e.target.value)}
+                    className="w-full bg-noir border border-white/10 rounded-xl px-4 py-3 text-ivoire outline-none focus-ring text-sm appearance-none"
+                  >
+                    <option value="QC">Québec (TPS 5% + TVQ 9.975%)</option>
+                    <option value="ON">Ontario (TVH 13%)</option>
+                    <option value="BC">Colombie-Britannique (TPS 5% + TVP 7%)</option>
+                    <option value="AB">Alberta (TPS 5%)</option>
+                    <option value="MB">Manitoba (TPS 5% + TVP 7%)</option>
+                    <option value="NB">Nouveau-Brunswick (TVH 15%)</option>
+                    <option value="NL">Terre-Neuve (TVH 15%)</option>
+                    <option value="NS">Nouvelle-Écosse (TVH 15%)</option>
+                    <option value="PE">Île-du-Prince-Édouard (TVH 15%)</option>
+                    <option value="SK">Saskatchewan (TPS 5% + TVP 6%)</option>
+                    <option value="YT">Yukon (TPS 5%)</option>
+                    <option value="NT">Territoires du Nord-Ouest (TPS 5%)</option>
+                    <option value="NU">Nunavut (TPS 5%)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-500">Options complémentaires</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="flex items-center gap-3 p-4 bg-white/5 border border-white/5 rounded-xl hover:border-gold/20 transition-all">
+                    <input
+                      type="checkbox"
+                      id="calcSoftwareSetup"
+                      checked={calcSoftwareSetup}
+                      onChange={(e) => setCalcSoftwareSetup(e.target.checked)}
+                      className="accent-gold h-4 w-4 rounded border-white/10"
+                    />
+                    <label htmlFor="calcSoftwareSetup" className="text-xs font-semibold text-ivoire cursor-pointer select-none">
+                      Config. Logiciel (+225.00 $)
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-3 p-4 bg-white/5 border border-white/5 rounded-xl hover:border-gold/20 transition-all">
+                    <input
+                      type="checkbox"
+                      id="calcPayroll"
+                      checked={calcPayroll}
+                      onChange={(e) => setCalcPayroll(e.target.checked)}
+                      className="accent-gold h-4 w-4 rounded border-white/10"
+                    />
+                    <label htmlFor="calcPayroll" className="text-xs font-semibold text-ivoire cursor-pointer select-none">
+                      Traitement Paie (+65.00 $)
+                    </label>
+                  </div>
+                  <div className="p-4 bg-white/5 border border-white/5 rounded-xl hover:border-gold/20 transition-all space-y-2">
+                    <label htmlFor="calcCatchUpHours" className="text-xs font-semibold text-ivoire block select-none">
+                      Heures de retard (60 $/h)
+                    </label>
+                    <input
+                      type="number"
+                      id="calcCatchUpHours"
+                      min="0"
+                      value={calcCatchUpHours || ''}
+                      onChange={(e) => setCalcCatchUpHours(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-full bg-noir border border-white/10 rounded-lg px-2 py-1 text-ivoire text-xs"
+                      placeholder="0 heures"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Calculations Result */}
+            <div className="lg:col-span-5 bg-white/[0.02] border border-white/5 p-6 rounded-2xl flex flex-col justify-between">
+              <div className="space-y-4">
+                <p className="text-xs font-black uppercase tracking-widest text-gold">Détail des Calculs</p>
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Tarif de base :</span>
+                    <span className="font-mono text-ivoire">{calc.base.toFixed(2)} $</span>
+                  </div>
+                  {calc.addons > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Options / Heures de retard :</span>
+                      <span className="font-mono text-ivoire">+{calc.addons.toFixed(2)} $</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between border-t border-white/5 pt-2 font-semibold">
+                    <span className="text-ivoire">Total Hors Taxes (H.T.) :</span>
+                    <span className="font-mono text-ivoire">{calc.ht.toFixed(2)} $</span>
+                  </div>
+                  <div className="space-y-1 pl-4 border-l border-white/10 text-slate-500">
+                    {calc.tpsRate > 0 && (
+                      <div className="flex justify-between">
+                        <span>TPS (5 %) :</span>
+                        <span className="font-mono">{calc.tps.toFixed(2)} $</span>
+                      </div>
+                    )}
+                    {calc.tvqRate > 0 && (
+                      <div className="flex justify-between">
+                        <span>{calcProvince === 'QC' ? 'TVQ (9.975 %)' : 'TVP / TVH'} :</span>
+                        <span className="font-mono">{calc.tvq.toFixed(2)} $</span>
+                      </div>
+                    )}
+                    {calc.tvhRate > 0 && (
+                      <div className="flex justify-between">
+                        <span>TVH ({calc.tvhRate * 100} %) :</span>
+                        <span className="font-mono">{calc.tvh.toFixed(2)} $</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-white/5 pt-4 mt-6">
+                <div className="flex justify-between items-baseline mb-2">
+                  <span className="text-sm font-black uppercase tracking-wider text-ivoire">Total Estimé :</span>
+                  <span className="text-3xl font-serif font-bold text-gold">{calc.total.toFixed(2)} $</span>
+                </div>
+                <p className="text-[10px] text-slate-500 font-mono">TPS/TVH/TVQ calculées selon les normes de la province {calcProvince}.</p>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </section>
 
       {/* 🏛️ PROTOCOLE DE COLLABORATION CABINET */}
       <section className="space-y-6 mt-12">

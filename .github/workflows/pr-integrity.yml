@@ -1,0 +1,46 @@
+# 🏛️ Cabinet Comptaflow — Intégrité Pull Request (PR-CI)
+# Ce workflow s'exécute automatiquement sur toute nouvelle Pull Request ou mise à jour de PR.
+# Il garantit qu'aucune PR contenant des régressions, des erreurs de typage ou des échecs de build ne puisse être fusionnée.
+
+name: Pull Request Integrity Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - master
+      - 'feature/*'
+      - 'bugfix/*'
+      - 'release/*'
+
+concurrency:
+  group: pr-integrity-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  qa-validation:
+    name: 🛡️ Audit Qualité & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Récupérer le code source (Checkout)
+        uses: actions/checkout@v4
+
+      - name: 🟢 Configurer l'environnement Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Installer les dépendances (Clean Install)
+        run: npm ci
+
+      - name: ⚡ Validation Complète de l'Intégrité (CI)
+        run: npm run ci
+        env:
+          # Configuration fictive pour le build en environnement CI
+          VITE_SUPABASE_URL: "https://mock-supabase-url.supabase.co"
+          VITE_SUPABASE_ANON_KEY: "mock-supabase-anon-key"
+          VITE_N8N_INVOICE_WEBHOOK_URL: "https://mock-n8n.com/invoice"
+          VITE_N8N_SUBSCRIPTION_WEBHOOK_URL: "https://mock-n8n.com/sub"

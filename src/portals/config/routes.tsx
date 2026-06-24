@@ -57,7 +57,7 @@ export const PORTAL_ROUTES: PortalRouteDefinition[] = [
   {
     path: 'admin_overview',
     roles: ['sub_admin'],
-    render: () => <LazyAdminOverview />,
+    render: (ctx) => <LazyAdminOverview userData={ctx.userData} />,
   },
   {
     path: 'admin_clients',
