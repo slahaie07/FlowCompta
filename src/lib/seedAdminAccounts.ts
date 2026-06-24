@@ -21,6 +21,12 @@ export const SEED_ADMIN_ACCOUNTS: SeedAccount[] = [
     fullName: 'Sylvie Charette-Clément',
     label: 'Partenaire Cabinet',
   },
+  {
+    email: 'eya-cpa@outlook.com',
+    role: 'sub_admin',
+    fullName: 'Eya (Sous-Admin)',
+    label: 'Partenaire Cabinet (Support Arabe)',
+  },
 ];
 
 export const PORTAL_HOME_BY_ROLE: Record<AdminRole, string> = {
