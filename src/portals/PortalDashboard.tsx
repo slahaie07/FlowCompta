@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAdminClients } from '../hooks/useAdminClients';
 import { PortalShell } from './shared/PortalShell';
+import { SubAdminPortalShell } from './sub-admin/SubAdminPortalShell';
 import { getPortalHomePath, roleFromPortalSlug } from './config/paths';
 import type { PortalShellProps, PortalRole } from './types';
 
@@ -18,6 +19,18 @@ export function PortalDashboard(props: PortalShellProps) {
   const isSubAdmin = role === 'sub_admin';
   const { clients: adminClients, addClient } = useAdminClients(isSubAdmin);
 
+  if (role === 'sub_admin') {
+    return (
+      <SubAdminPortalShell
+        {...props}
+        routeContext={{
+          adminClients,
+          addClient,
+        }}
+      />
+    );
+  }
+
   return (
     <PortalShell
       {...props}
@@ -30,3 +43,4 @@ export function PortalDashboard(props: PortalShellProps) {
 }
 
 export default PortalDashboard;
+
