@@ -12,6 +12,8 @@ import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { useLanguage } from '../../hooks/useLanguage';
 import { ServicesCatalogSection } from './ServicesCatalogSection';
+import { PricingGrid } from './PricingGrid';
+import { TeamAndTools } from './TeamAndTools';
 import { CONFIG } from '../../lib/config';
 
 export function Landing() {
@@ -63,7 +65,16 @@ export function Landing() {
             <button onClick={() => navigate('/estimate')} className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.getEstimate')}</button>
             <a href="#processus" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.processus')}</a>
             <a href="#faq" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.faq')}</a>
-            <button onClick={() => navigate('/login')} className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.clientSpace')}</button>
+            
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => navigate('/login')}
+              className="glass-button border-gold/20 flex gap-2 items-center group cursor-pointer"
+            >
+              <LogIn size={13} className="text-gold group-hover:scale-110 transition-transform" />
+              <span>{lang === 'en' ? 'Client Login' : lang === 'ar' ? 'تسجيل الدخول' : 'Connexion Client'}</span>
+            </Button>
             
             <button 
               onClick={toggleLanguage} 
@@ -108,8 +119,15 @@ export function Landing() {
             <a href="#services" onClick={() => setIsMenuOpen(false)} className="text-lg font-serif">{t('nav.mobileMenuTitle')}</a>
             <a href="#processus" onClick={() => setIsMenuOpen(false)} className="text-lg font-serif">{t('nav.mobileFlux')}</a>
             <a href="#faq" onClick={() => setIsMenuOpen(false)} className="text-lg font-serif">{t('nav.mobileFaq')}</a>
-            <button onClick={() => navigate('/login')} className="text-lg font-serif text-left">→ {t('nav.clientSpace')}</button>
-            <Button variant="gold" onClick={goToSignup}>{t('nav.mobileOpen')}</Button>
+            <Button
+              variant="secondary"
+              onClick={() => { setIsMenuOpen(false); navigate('/login'); }}
+              className="w-full flex gap-3 justify-center items-center py-4 cursor-pointer"
+            >
+              <LogIn size={18} className="text-gold" />
+              {lang === 'en' ? 'Client Login' : lang === 'ar' ? 'تسجيل الدخول' : 'Connexion Client'}
+            </Button>
+            <Button variant="gold" onClick={goToSignup} className="py-4 shadow-gold/20">{t('nav.mobileOpen')}</Button>
           </motion.div>
         )}
       </nav>
@@ -159,7 +177,7 @@ export function Landing() {
                   className="px-8 py-7 text-lg glass-button border-gold/20 flex gap-3 items-center group"
                 >
                   <LogIn size={20} className="group-hover:scale-110 transition-transform text-gold" />
-                  {t('hero.clientArea')}
+                  {lang === 'en' ? 'Client Login' : 'Connexion Client'}
                 </Button>
               </div>
             </motion.div>
@@ -237,38 +255,13 @@ export function Landing() {
         </div>
       </div>
 
-      {/* Services Section */}
-      <section id="services" className="py-32 relative">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-16 lg:gap-20 mb-16">
-            <div className="lg:sticky lg:top-32 h-fit space-y-8">
-              <span className="text-gold text-xs font-bold tracking-[0.4em] uppercase">
-                {t('landing.registry')}
-              </span>
-              <h2 className="text-4xl md:text-5xl font-serif font-bold tracking-tight leading-tight">
-                <span className="animated-gradient-text">{t('services.title')}</span>
-              </h2>
-              <p className="text-silver font-light leading-relaxed">{t('services.subtitle')}</p>
-              <div className="flex flex-col gap-2 text-xs text-slate-500">
-                <a href="#tarif-horaire" className="hover:text-gold transition-colors">
-                  → {t('services.categories.hourly.title')}
-                </a>
-                <a href="#forfaits-mensuels" className="hover:text-gold transition-colors">
-                  → {t('services.categories.monthly.title')}
-                </a>
-                <a href="#services-carte" className="hover:text-gold transition-colors">
-                  → {t('services.categories.alacarte.title')}
-                </a>
-              </div>
-              <Button variant="gold" size="lg" onClick={goToSignup}>
-                {t('services.composer')}
-              </Button>
-            </div>
-
-            <ServicesCatalogSection t={t} />
-          </div>
-        </div>
+      {/* Services & Pricing Section */}
+      <section id="services">
+        <PricingGrid />
       </section>
+
+      {/* Team & Tools Section */}
+      <TeamAndTools />
 
       {/* Process Section */}
       <section id="processus" className="py-32 bg-surface relative overflow-hidden">
