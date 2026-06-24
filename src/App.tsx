@@ -17,12 +17,15 @@ import { Legal } from './components/common/Legal';
 import { Cookies } from './components/common/Cookies';
 import { RegionalLanding } from './components/common/RegionalLanding';
 import { EstimatePage } from './components/common/EstimatePage';
+import { NotFound } from './components/common/NotFound';
 import { LegalCookieBanner } from './components/common/LegalCookieBanner';
 import { OrganicLoader } from './components/ui/OrganicLoader';
 import { CanadaNetworkProvider } from './context/CanadaNetworkProvider';
 
 import { useAuth } from './hooks/useAuth';
 import { useAppMode } from './hooks/useAppMode';
+import { useLanguage } from './hooks/useLanguage';
+import { CONFIG } from './lib/config';
 import { toast } from 'sonner';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { supabase } from './lib/supabase';
@@ -44,6 +47,7 @@ function isClientProfileComplete(userData: UserData | null | undefined): boolean
 function AppContent() {
   const { user, userData, loading, logout, isAuthenticated, refreshProfile } = useAuth();
   const { mode, toggleMode } = useAppMode();
+  const { lang } = useLanguage();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -58,9 +62,14 @@ function AppContent() {
       if (timeoutId) window.clearTimeout(timeoutId);
       timeoutId = window.setTimeout(() => {
         logout();
-        toast.warning("Votre session a expiré pour cause d'inactivité (Sécurité Loi 25).");
+        const msg = lang === 'en'
+          ? 'Your session expired due to inactivity (Law 25 Security).'
+          : lang === 'ar'
+            ? 'انتهت جلستك بسبب عدم النشاط (أمان القانون 25).'
+            : "Votre session a expiré pour cause d'inactivité (Sécurité Loi 25).";
+        toast.warning(msg);
         navigate('/login');
-      }, 900000);
+      }, CONFIG.APP.SESSION_TIMEOUT_MS);
     };
 
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
@@ -103,7 +112,8 @@ function AppContent() {
       status: 'active',
       role: 'client',
       needs: createEmptyUserNeeds(),
-      metadata: { province: data.province },
+      sub_admin_id: data.subAdminId || null,
+      metadata: { province: data.province, phone: (data as any).phone || null },
     });
 
     if (error) {
@@ -127,6 +137,27 @@ function AppContent() {
       });
     } catch {
       /* email/webhook best-effort */
+    }
+
+    // Notify assigned admin (email + SMS) — best-effort
+    if (data.subAdminId) {
+      try {
+        await fetch('/api/admin/notify-new-client', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subAdminId: data.subAdminId,
+            clientName: data.displayName,
+            clientEmail: data.email || user.email,
+            clientPhone: (data as any).phone || null,
+            province: data.province,
+            companyName: data.companyName || null,
+            language: data.language || 'fr',
+          }),
+        });
+      } catch {
+        /* notification best-effort */
+      }
     }
 
     toast.success(
@@ -258,7 +289,7 @@ function AppContent() {
         }
       />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
     <LegalCookieBanner />
     </>

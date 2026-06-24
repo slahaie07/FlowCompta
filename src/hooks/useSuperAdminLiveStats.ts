@@ -21,6 +21,7 @@ export interface SuperAdminLiveStats {
   byProvince: Record<string, number>;
   byService: Record<string, number>;
   partners: SuperAdminPartnerRow[];
+  monthlyRevenue: { month: string; revenue: number }[];
 }
 
 const EMPTY_STATS: SuperAdminLiveStats = {
@@ -34,6 +35,7 @@ const EMPTY_STATS: SuperAdminLiveStats = {
   byProvince: {},
   byService: {},
   partners: [],
+  monthlyRevenue: [],
 };
 
 function computeStats(profiles: any[], invoices: any[]): SuperAdminLiveStats {
@@ -90,6 +92,17 @@ function computeStats(profiles: any[], invoices: any[]): SuperAdminLiveStats {
     };
   });
 
+  const now = new Date();
+  const monthlyRevenue = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - 5 + i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const label = d.toLocaleDateString('fr-CA', { month: 'short', year: '2-digit' });
+    const revenue = invoices
+      .filter((inv) => inv.statut === 'payee' && inv.created_at?.startsWith(key))
+      .reduce((sum: number, inv: any) => sum + parseFloat(inv.montant_total || 0), 0);
+    return { month: label, revenue };
+  });
+
   return {
     subAdminsCount: subAdminsList.length,
     clientsCount: clientsList.length,
@@ -101,6 +114,7 @@ function computeStats(profiles: any[], invoices: any[]): SuperAdminLiveStats {
     byProvince,
     byService,
     partners,
+    monthlyRevenue,
   };
 }
 
@@ -119,7 +133,7 @@ export function useSuperAdminLiveStats(enabled = true) {
       const [{ data: profiles, error: pError }, { data: invoices, error: invError }] =
         await Promise.all([
           supabase.from('profiles').select('id, role, full_name, email, created_at, sub_admin_id, metadata, needs'),
-          supabase.from('invoices').select('montant_total, statut, sub_admin_id'),
+          supabase.from('invoices').select('montant_total, statut, sub_admin_id, created_at'),
         ]);
 
       if (pError) throw pError;

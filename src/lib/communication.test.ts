@@ -15,7 +15,7 @@ describe('communicationService', () => {
   });
 
   it('logs to console when webhook is not configured', async () => {
-    const consoleSpy = vi.spyOn(console, 'info');
+    const consoleSpy = vi.spyOn(console, 'warn');
     await communicationService.notifyAdminOfInvoice({ id: '1' });
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringContaining('Webhook non configuré'),

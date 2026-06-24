@@ -1,12 +1,13 @@
 import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
   ArrowRight,
   Menu,
   X,
   Globe,
-  LogIn
+  LogIn,
+  UserPlus
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -63,7 +64,13 @@ export function Landing() {
             <button onClick={() => navigate('/estimate')} className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.getEstimate')}</button>
             <a href="#processus" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.processus')}</a>
             <a href="#faq" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.faq')}</a>
-            <button onClick={() => navigate('/login')} className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.clientSpace')}</button>
+            <button
+              onClick={() => navigate('/login')}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold/40 bg-white/5 text-sm font-semibold text-gold hover:bg-gold hover:text-noir transition-all duration-300 focus-ring"
+            >
+              <LogIn size={14} />
+              {t('nav.clientSpace')}
+            </button>
             
             <button 
               onClick={toggleLanguage} 
@@ -74,7 +81,10 @@ export function Landing() {
               <span>{lang.toUpperCase()}</span>
             </button>
 
-            <Button variant="gold" size="sm" onClick={goToSignup} className="shadow-gold/20">{t('nav.becomeClient')}</Button>
+            <Button variant="gold" size="sm" onClick={goToSignup} className="shadow-gold/20 flex items-center gap-2">
+              <UserPlus size={14} />
+              {t('nav.becomeClient')}
+            </Button>
           </div>
 
           <div className="flex items-center gap-4 md:hidden">
@@ -108,8 +118,17 @@ export function Landing() {
             <a href="#services" onClick={() => setIsMenuOpen(false)} className="text-lg font-serif">{t('nav.mobileMenuTitle')}</a>
             <a href="#processus" onClick={() => setIsMenuOpen(false)} className="text-lg font-serif">{t('nav.mobileFlux')}</a>
             <a href="#faq" onClick={() => setIsMenuOpen(false)} className="text-lg font-serif">{t('nav.mobileFaq')}</a>
-            <button onClick={() => navigate('/login')} className="text-lg font-serif text-left">→ {t('nav.clientSpace')}</button>
-            <Button variant="gold" onClick={goToSignup}>{t('nav.mobileOpen')}</Button>
+            <button
+              onClick={() => { navigate('/login'); setIsMenuOpen(false); }}
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-gold/40 bg-white/5 text-base font-semibold text-gold hover:bg-gold hover:text-noir transition-all duration-300 self-start"
+            >
+              <LogIn size={16} />
+              {t('nav.clientSpace')}
+            </button>
+            <Button variant="gold" onClick={goToSignup} className="flex items-center gap-2 self-start">
+              <UserPlus size={16} />
+              {lang === 'en' ? 'Create my account' : 'Créer mon compte'}
+            </Button>
           </motion.div>
         )}
       </nav>
@@ -140,27 +159,30 @@ export function Landing() {
               <p className="text-silver text-lg font-light max-w-lg leading-relaxed">
                 {t('hero.subtitle')}
               </p>
-              <div className="flex flex-wrap gap-4">
-                <Button variant="gold" size="lg" onClick={goToSignup} className="px-10 py-7 text-lg group">
-                  {t('hero.cta')} <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  onClick={() => navigate('/estimate')}
-                  className="px-8 py-7 text-lg glass-button border-gold/20"
-                >
-                  {t('hero.estimateCta')}
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="lg" 
-                  onClick={() => navigate('/login')} 
-                  className="px-8 py-7 text-lg glass-button border-gold/20 flex gap-3 items-center group"
-                >
-                  <LogIn size={20} className="group-hover:scale-110 transition-transform text-gold" />
-                  {t('hero.clientArea')}
-                </Button>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-wrap gap-4">
+                  <Button variant="gold" size="lg" onClick={goToSignup} className="px-10 py-7 text-lg group">
+                    {lang === 'en' ? 'Open My Account' : 'Ouvrir mon dossier'} <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    onClick={() => navigate('/estimate')}
+                    className="px-8 py-7 text-lg glass-button border-gold/20"
+                  >
+                    {t('hero.estimateCta')}
+                  </Button>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-slate-500 font-medium">{lang === 'en' ? 'Already a client?' : 'Déjà client ?'}</span>
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="flex items-center gap-2 text-sm font-semibold text-gold hover:underline underline-offset-4 transition-all group"
+                  >
+                    <LogIn size={15} className="group-hover:translate-x-0.5 transition-transform" />
+                    {lang === 'en' ? 'Sign in to my portal' : 'Se connecter à mon portail'}
+                  </button>
+                </div>
               </div>
             </motion.div>
 

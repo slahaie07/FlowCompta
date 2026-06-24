@@ -1864,4 +1864,89 @@ if (process.env.VERCEL && process.env.AUTO_APPLY_DB_MIGRATIONS !== 'false') {
     .catch((err: Error) => console.warn('[migrations] Error:', err.message));
 }
 
+// --- NOTIFY ADMIN ON NEW CLIENT ASSIGNMENT ---
+app.post('/api/admin/notify-new-client', async (req, res) => {
+  const {
+    subAdminId,
+    clientName,
+    clientEmail,
+    clientPhone,
+    province,
+    companyName,
+    language,
+  } = req.body || {};
+
+  if (!subAdminId || !clientEmail) {
+    return res.status(400).json({ error: 'subAdminId et clientEmail requis' });
+  }
+
+  try {
+    // Fetch the sub_admin profile to get their email and phone
+    const { data: adminProfile, error: adminErr } = await supabase
+      .from('profiles')
+      .select('full_name, email, metadata')
+      .eq('id', subAdminId)
+      .eq('role', 'sub_admin')
+      .single();
+
+    if (adminErr || !adminProfile) {
+      return res.status(404).json({ error: 'Administrateur introuvable' });
+    }
+
+    const adminEmail = adminProfile.email;
+    const adminName = adminProfile.full_name || 'Administrateur';
+    const adminPhone = (adminProfile.metadata as any)?.phone || null;
+
+    const portalUrl = 'https://compta-flow.net/portal/admin/clients';
+    const clientInfo = companyName ? `${clientName} (${companyName})` : clientName;
+    const langLabel = language === 'en' ? 'Anglais' : language === 'ar' ? 'Arabe' : 'Français';
+
+    // --- Email to admin ---
+    if (process.env.RESEND_API_KEY && adminEmail) {
+      const subject = `[ComptaFlow] Nouveau client assigné — ${clientInfo || clientEmail}`;
+      const html = `
+        <h2 style="color:#D4AF37">Nouveau client vous a choisi comme superviseur</h2>
+        <table style="border-collapse:collapse;width:100%;margin-top:20px">
+          <tr><td style="padding:8px 12px;color:#A39E92;font-size:12px;text-transform:uppercase;letter-spacing:2px">Nom</td><td style="padding:8px 12px;color:#F5F1E8;font-weight:bold">${clientName || '—'}</td></tr>
+          ${companyName ? `<tr><td style="padding:8px 12px;color:#A39E92;font-size:12px;text-transform:uppercase;letter-spacing:2px">Entreprise</td><td style="padding:8px 12px;color:#F5F1E8">${companyName}</td></tr>` : ''}
+          <tr><td style="padding:8px 12px;color:#A39E92;font-size:12px;text-transform:uppercase;letter-spacing:2px">Courriel</td><td style="padding:8px 12px"><a href="mailto:${clientEmail}" style="color:#D4AF37">${clientEmail}</a></td></tr>
+          ${clientPhone ? `<tr><td style="padding:8px 12px;color:#A39E92;font-size:12px;text-transform:uppercase;letter-spacing:2px">Téléphone</td><td style="padding:8px 12px;color:#F5F1E8">${clientPhone}</td></tr>` : ''}
+          <tr><td style="padding:8px 12px;color:#A39E92;font-size:12px;text-transform:uppercase;letter-spacing:2px">Province</td><td style="padding:8px 12px;color:#F5F1E8">${province || '—'}</td></tr>
+          <tr><td style="padding:8px 12px;color:#A39E92;font-size:12px;text-transform:uppercase;letter-spacing:2px">Langue</td><td style="padding:8px 12px;color:#F5F1E8">${langLabel}</td></tr>
+        </table>
+        <p style="margin-top:30px">
+          <a href="${portalUrl}" style="background:#D4AF37;color:#050505;padding:12px 24px;text-decoration:none;font-weight:bold;border-radius:8px;display:inline-block">
+            Voir mes clients →
+          </a>
+        </p>
+        <p style="margin-top:20px;font-size:12px;color:#64748b">Ce client a été automatiquement lié à votre compte. Contactez-le pour démarrer le dossier.</p>
+      `;
+      await sendSupremeEmail(adminEmail, subject, html);
+    }
+
+    // --- SMS to admin ---
+    if (process.env.TWILIO_ACCOUNT_SID && adminPhone) {
+      const smsBody = `[ComptaFlow] Nouveau client : ${clientName || clientEmail}${companyName ? ` (${companyName})` : ''} — Province: ${province || '?'} — Courriel: ${clientEmail}${clientPhone ? ` — Tél: ${clientPhone}` : ''}\nVoir: ${portalUrl}`;
+      try {
+        await twilioClient.messages.create({
+          body: smsBody,
+          from: process.env.TWILIO_PHONE_NUMBER || '+1234567890',
+          to: adminPhone,
+        });
+      } catch (smsErr: any) {
+        console.warn('[notify-new-client] SMS failed (non-fatal):', smsErr.message);
+      }
+    } else if (!process.env.TWILIO_ACCOUNT_SID) {
+      console.log(`[SMS MOCK → ${adminPhone || 'no phone'}] New client: ${clientEmail}`);
+    }
+
+    botLog('NEW_CLIENT_ASSIGNED', subAdminId, `Client: ${clientEmail} → Admin: ${adminEmail}`);
+
+    res.json({ success: true, adminEmail, smsSent: !!(process.env.TWILIO_ACCOUNT_SID && adminPhone) });
+  } catch (err: any) {
+    console.error('[notify-new-client] Error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default app;

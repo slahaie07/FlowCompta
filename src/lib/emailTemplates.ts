@@ -1,4 +1,7 @@
 import { UserData, Transaction, Invoice } from '../types';
+import { CONFIG } from './config';
+
+const PORTAL_URL = CONFIG.APP.SITE_URL;
 
 /**
  * Gabarit de courriel haut de gamme (Style Canva/Stripe)
@@ -49,7 +52,7 @@ export function generateMonthlyClientEmail(userData: UserData, invoices: Invoice
           <p style="font-size: 14px;">Plusieurs documents sont prêts pour votre signature électronique dans le coffre-fort.</p>
           
           <div style="text-align: center;">
-            <a href="https://flowcompta.netlify.app" class="button">Ouvrir mon Portail</a>
+            <a href="${PORTAL_URL}" class="button">Ouvrir mon Portail</a>
           </div>
         </div>
         <div class="footer">
