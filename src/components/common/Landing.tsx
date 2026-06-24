@@ -63,7 +63,13 @@ export function Landing() {
             <button onClick={() => navigate('/estimate')} className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.getEstimate')}</button>
             <a href="#processus" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.processus')}</a>
             <a href="#faq" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.faq')}</a>
-            <button onClick={() => navigate('/login')} className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.clientSpace')}</button>
+            <button
+              onClick={() => navigate('/login')}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold/40 bg-white/5 text-sm font-semibold text-gold hover:bg-gold hover:text-noir transition-all duration-300 focus-ring"
+            >
+              <LogIn size={14} />
+              {t('nav.clientSpace')}
+            </button>
             
             <button 
               onClick={toggleLanguage} 
@@ -108,7 +114,13 @@ export function Landing() {
             <a href="#services" onClick={() => setIsMenuOpen(false)} className="text-lg font-serif">{t('nav.mobileMenuTitle')}</a>
             <a href="#processus" onClick={() => setIsMenuOpen(false)} className="text-lg font-serif">{t('nav.mobileFlux')}</a>
             <a href="#faq" onClick={() => setIsMenuOpen(false)} className="text-lg font-serif">{t('nav.mobileFaq')}</a>
-            <button onClick={() => navigate('/login')} className="text-lg font-serif text-left">→ {t('nav.clientSpace')}</button>
+            <button
+              onClick={() => { navigate('/login'); setIsMenuOpen(false); }}
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-gold/40 bg-white/5 text-base font-semibold text-gold hover:bg-gold hover:text-noir transition-all duration-300 self-start"
+            >
+              <LogIn size={16} />
+              {t('nav.clientSpace')}
+            </button>
             <Button variant="gold" onClick={goToSignup}>{t('nav.mobileOpen')}</Button>
           </motion.div>
         )}
