@@ -658,25 +658,16 @@ app.post('/api/webhook/onboarding-complete', async (req, res) => {
         </div>
       `;
 
-      // Envoyer à compta-flow@outlook.com
-      await sendSupremeEmail(
+      // Envoyer aux destinataires concernés de manière unique
+      const targetEmails = Array.from(new Set([
         'compta-flow@outlook.com',
-        `[ComptaFlow] Nouvelle inscription — ${displayName || email}`,
-        detailedNotificationHtml
-      );
-      
-      // Envoyer également aux autres emails de support configurés
-      if (PLATFORM_SUPPORT_EMAIL !== 'compta-flow@outlook.com') {
+        PLATFORM_SUPPORT_EMAIL,
+        's.lahaie07@gmail.com'
+      ])).filter(Boolean);
+
+      for (const targetEmail of targetEmails) {
         await sendSupremeEmail(
-          PLATFORM_SUPPORT_EMAIL,
-          `[ComptaFlow] Nouvelle inscription — ${displayName || email}`,
-          detailedNotificationHtml
-        );
-      }
-      
-      if (PLATFORM_SUPPORT_EMAIL !== 's.lahaie07@gmail.com' && 's.lahaie07@gmail.com' !== 'compta-flow@outlook.com') {
-        await sendSupremeEmail(
-          's.lahaie07@gmail.com',
+          targetEmail,
           `[ComptaFlow] Nouvelle inscription — ${displayName || email}`,
           detailedNotificationHtml
         );

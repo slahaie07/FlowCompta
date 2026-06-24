@@ -2487,21 +2487,14 @@ app.post("/api/webhook/onboarding-complete", async (req, res) => {
           <p style="margin-top:20px;"><a href="${portalUrl}" style="display:inline-block;background:#D4AF37;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;font-weight:bold;">Acc\xE9der au portail client</a></p>
         </div>
       `;
-      await sendSupremeEmail(
+      const targetEmails = Array.from(/* @__PURE__ */ new Set([
         "compta-flow@outlook.com",
-        `[ComptaFlow] Nouvelle inscription \u2014 ${displayName || email}`,
-        detailedNotificationHtml
-      );
-      if (PLATFORM_SUPPORT_EMAIL !== "compta-flow@outlook.com") {
+        PLATFORM_SUPPORT_EMAIL,
+        "s.lahaie07@gmail.com"
+      ])).filter(Boolean);
+      for (const targetEmail of targetEmails) {
         await sendSupremeEmail(
-          PLATFORM_SUPPORT_EMAIL,
-          `[ComptaFlow] Nouvelle inscription \u2014 ${displayName || email}`,
-          detailedNotificationHtml
-        );
-      }
-      if (PLATFORM_SUPPORT_EMAIL !== "s.lahaie07@gmail.com" && true) {
-        await sendSupremeEmail(
-          "s.lahaie07@gmail.com",
+          targetEmail,
           `[ComptaFlow] Nouvelle inscription \u2014 ${displayName || email}`,
           detailedNotificationHtml
         );
