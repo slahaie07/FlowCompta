@@ -781,6 +781,82 @@ app.post('/api/support/ai-chat', async (req, res) => {
   }
 });
 
+// ============================================================
+// 🤖 J.A.R.V.I.S. — Just A Rather Very Intelligent System
+// ============================================================
+
+const JARVIS_SYSTEM_PROMPT = `Tu es J.A.R.V.I.S. (Just A Rather Very Intelligent System), l'assistant IA intégré de ComptaFlow — expert-comptable virtuel canadien, disponible 24h/24 sur mobile et desktop.
+
+Personnalité: précis, proactif, efficace. Légèrement formel mais accessible et bienveillant.
+Tu n'es PAS un humain — tu es un système IA avancé. Ne te présente jamais comme un conseiller humain.
+
+Capacités:
+- Fiscalité canadienne (TPS/TVH/TVQ/TVP selon province), T1, T2, T4, Relevé 1
+- Tenue de livres, rapprochement bancaire, catégorisation transactions
+- Facturation Interac e-Transfer, suivi paiements
+- Navigation dans le portail ComptaFlow (client, admin, super-admin)
+- Conformité Loi 25, PIPEDA, sécurité AES-256
+- Paie, déductions, CNESST, RRQ/RPC
+
+Navigation: pour suggérer une redirection vers une page du portail, utilise le format exact:
+[NAV:/portal/client/xxx|Libellé du bouton]
+Exemples:
+- [NAV:/portal/client/invoices|Voir mes factures]
+- [NAV:/portal/client/vault|Accéder au coffre-fort]
+- [NAV:/portal/client/messaging|Messagerie CPA]
+- [NAV:/portal/admin/clients|Mes clients]
+
+Règles:
+- Réponds toujours dans la langue demandée (fr par défaut)
+- Sois concis: 2-4 phrases max sauf si l'utilisateur demande des détails
+- Ne révèle jamais de montants ou taux sans les confirmer selon la province
+- Si calcul fiscal complexe: recommande de valider avec un CPA certifié`;
+
+app.post('/api/jarvis/chat', async (req, res) => {
+  const { message, context, history } = req.body;
+
+  if (!message || typeof message !== 'string') {
+    return res.status(400).json({ error: 'message requis' });
+  }
+
+  const lang = context?.language === 'en' || context?.language === 'ar' ? context.language : 'fr';
+  const contextExtras: string[] = [];
+  if (context?.province) contextExtras.push(`Province: ${context.province}`);
+  if (context?.role) contextExtras.push(`Rôle: ${context.role}`);
+  if (context?.currentPage) contextExtras.push(`Page actuelle: ${context.currentPage}`);
+  contextExtras.push(`Langue de réponse: ${lang}`);
+
+  const systemPrompt = `${JARVIS_SYSTEM_PROMPT}\n\nContexte session:\n${contextExtras.join('\n')}`;
+
+  try {
+    const historyParts: string[] = [];
+    if (Array.isArray(history) && history.length > 0) {
+      history.slice(-6).forEach((h: { role: string; content: string }) => {
+        historyParts.push(`${h.role === 'user' ? 'Utilisateur' : 'JARVIS'}: ${h.content}`);
+      });
+    }
+
+    const fullPrompt = historyParts.length > 0
+      ? `${historyParts.join('\n')}\nUtilisateur: ${message}`
+      : message;
+
+    const result = await agenticModel.generateContent([
+      { text: `Système: ${systemPrompt}\n\n${fullPrompt}` },
+    ]);
+
+    const answer = result.response.text();
+    botLog('JARVIS', 'chat', `${lang} ${answer.length}c`);
+    res.json({ answer });
+  } catch (e: any) {
+    botLog('JARVIS_CRASH', 'chat', e.message);
+    const fallback =
+      lang === 'en'
+        ? 'J.A.R.V.I.S. systems briefly offline. Please retry in a moment.'
+        : 'Systèmes J.A.R.V.I.S. temporairement hors ligne. Veuillez réessayer.';
+    res.json({ answer: fallback });
+  }
+});
+
 // --- Auth helpers (JWT Supabase) ---
 async function getAuthenticatedUserFromRequest(req: express.Request) {
   const authHeader = req.headers.authorization;

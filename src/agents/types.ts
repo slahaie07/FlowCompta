@@ -104,7 +104,7 @@ export interface AgentContext {
 
   language?: 'fr' | 'en' | 'ar';
 
-  channel?: 'support-chat' | 'cli' | 'api' | 'cron' | 'admin';
+  channel?: 'support-chat' | 'jarvis-mobile' | 'cli' | 'api' | 'cron' | 'admin';
 
   metadata?: Record<string, unknown>;
 

@@ -12,6 +12,7 @@ import { PortalRoutes } from './PortalRoutes';
 import { getPortalNav, isPathAllowedForRole } from '../config';
 import { getPortalBasePath, getActiveSegment } from '../config/paths';
 import type { PortalShellProps, PortalRole, PortalRouteContext } from '../types';
+import { Jarvis } from '../../components/jarvis';
 
 interface PortalShellComponentProps extends PortalShellProps {
   routeContext: Omit<PortalRouteContext, keyof PortalShellProps | 'isVaultUnlocked' | 'setIsVaultUnlocked' | 'setShowMandateSigning'>;
@@ -256,6 +257,14 @@ export function PortalShell({
           if (onRefreshProfile) onRefreshProfile();
         }} />
       )}
+
+      <Jarvis
+        userId={userData.id}
+        role={userData.role ?? 'client'}
+        province={(userData as any).province ?? (userData as any).metadata?.province}
+        language={(userData as any).language ?? 'fr'}
+        userName={userData.fullName || userData.displayName}
+      />
     </div>
   );
 }
