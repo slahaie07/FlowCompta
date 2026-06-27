@@ -15,6 +15,7 @@
     <meta name="keywords" content="comptabilité, tenue de livres, CPA, TPS, TVQ, TVH, paie, Québec, Canada, portail client, Interac, PME, entrepreneur" />
     <meta name="author" content="ComptaFlow" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="google-site-verification" content="mkKqy6q_WpehY1wakueWqypgZZniXp2K7U0fkf-GkF8" />
     <meta name="geo.region" content="CA" />
     <meta name="geo.placename" content="Canada" />
     <meta name="language" content="French" />
@@ -84,13 +85,13 @@
           "inLanguage": ["fr-CA", "en-CA"]
         },
         {
-          "@type": "ProfessionalService",
+          "@type": ["AccountingService", "ProfessionalService"],
           "@id": "https://compta-flow.net/#service",
           "name": "ComptaFlow",
           "url": "https://compta-flow.net",
           "image": "https://compta-flow.net/marketing/general/promo-cabinet-cpa.png",
           "description": "Services comptables pour PME et entrepreneurs : tenue de livres horaire ou forfaitaire, TPS/TVQ/TVH, paie, T4/Relevé 1, configuration logiciel comptable.",
-          "email": "comptaflow.officiel@gmail.com",
+          "email": "compta-flow@outlook.com",
           "priceRange": "$$",
           "areaServed": {
             "@type": "Country",
@@ -148,6 +149,56 @@
     }
     </script>
 
+    <!-- FAQPage schema — rich snippets Google -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Comment fonctionne le tarif horaire ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Pour les mandats ponctuels ou les remplacements, nous facturons entre 45 $ et 75 $ de l'heure selon la complexité. Un devis vous est fourni avant tout travail."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Quel forfait mensuel me convient ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Micro-entreprise (150–250 $/mois) pour peu de transactions sans employés ; Petite entreprise (300–500 $/mois) pour un volume moyen ; PME avec paie (500–800 $+/mois) pour les dossiers plus exigeants."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Mes documents sont-ils en sécurité ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Oui. Vos fichiers sont transmis chiffrés (TLS) et stockés dans une base de données hébergée au Canada, accessible uniquement par vous et votre préparateur comptable. Conformité PIPEDA et Loi 25."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Les prix affichés incluent-ils les taxes ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Non. Les tarifs sont hors taxes (TPS, TVH, TVQ, TVP, etc. selon votre province). Un devis détaillé vous est remis avant confirmation du mandat."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Combien coûte l'ouverture d'un dossier ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "L'accès au portail et la création de votre dossier sont totalement gratuits. Vous ne payez que pour les travaux effectués."
+          }
+        }
+      ]
+    }
+    </script>
+
     <!-- Tracking Pixel (GA4 / GTM Server-Side Ready) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
     <script>
@@ -159,9 +210,11 @@
       });
     </script>
 
-    <!-- Google Fonts -->
+    <!-- Font preloading for LCP performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400;1,700&family=Outfit:wght@300;400;600&display=swap">
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   </head>
   <body>
