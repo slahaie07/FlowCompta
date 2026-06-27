@@ -28,18 +28,26 @@ function PortalPageContent() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    router.push("/portal/dashboard");
+    try {
+      await new Promise((r) => setTimeout(r, 1200));
+      router.push("/portal/dashboard");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!registerData.termsAccepted) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setSuccess(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    router.push("/portal/dashboard");
+    try {
+      await new Promise((r) => setTimeout(r, 1500));
+      setSuccess(true);
+      await new Promise((r) => setTimeout(r, 1000));
+      router.push("/portal/dashboard");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (success) {

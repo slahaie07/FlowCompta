@@ -82,17 +82,20 @@ export default function Dashboard() {
   const generateItinerary = async () => {
     if (!plannerInput.trim()) return;
     setPlannerLoading(true);
-    await new Promise((r) => setTimeout(r, 2000));
-    setItinerary([
-      `Jour 1 — Arrivée et découverte du centre-ville. Hôtel: Boutique 4★ (inclus).`,
-      `Jour 2 — Visite des sites emblématiques. Tour guidé VIP en matinée.`,
-      `Jour 3 — Excursion en dehors de la ville. Déjeuner traditionnel inclus.`,
-      `Jour 4 — Journée plage / spa / activités selon préférence.`,
-      `Jour 5 — Shopping et marché local. Dîner gastronomique.`,
-      `Jour 6 — Excursion optionnelle ou temps libre. Soirée culturelle.`,
-      `Jour 7 — Départ. Transfert aéroport inclus.`,
-    ]);
-    setPlannerLoading(false);
+    try {
+      await new Promise((r) => setTimeout(r, 2000));
+      setItinerary([
+        `Jour 1 — Arrivée et découverte du centre-ville. Hôtel: Boutique 4★ (inclus).`,
+        `Jour 2 — Visite des sites emblématiques. Tour guidé VIP en matinée.`,
+        `Jour 3 — Excursion en dehors de la ville. Déjeuner traditionnel inclus.`,
+        `Jour 4 — Journée plage / spa / activités selon préférence.`,
+        `Jour 5 — Shopping et marché local. Dîner gastronomique.`,
+        `Jour 6 — Excursion optionnelle ou temps libre. Soirée culturelle.`,
+        `Jour 7 — Départ. Transfert aéroport inclus.`,
+      ]);
+    } finally {
+      setPlannerLoading(false);
+    }
   };
 
   return (

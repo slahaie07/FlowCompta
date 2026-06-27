@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { flashDeals } from "@/lib/data";
 import { formatCountdown } from "@/lib/utils";
 
@@ -9,6 +9,7 @@ export default function FlashDeals() {
     Object.fromEntries(flashDeals.map((d) => [d.id, d.expiresIn]))
   );
   const [flashing, setFlashing] = useState<Record<number, boolean>>({});
+  const flashTimeoutsRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -20,12 +21,19 @@ export default function FlashDeals() {
         return next;
       });
     }, 1000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      flashTimeoutsRef.current.forEach(clearTimeout);
+      flashTimeoutsRef.current.clear();
+    };
   }, []);
 
   const handleBook = (id: number) => {
+    const existing = flashTimeoutsRef.current.get(id);
+    if (existing) clearTimeout(existing);
     setFlashing((f) => ({ ...f, [id]: true }));
-    setTimeout(() => setFlashing((f) => ({ ...f, [id]: false })), 300);
+    const t = setTimeout(() => setFlashing((f) => ({ ...f, [id]: false })), 300);
+    flashTimeoutsRef.current.set(id, t);
   };
 
   return (

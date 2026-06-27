@@ -117,44 +117,44 @@ function SearchContent() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {sorted.map((dest) => (
-              <div key={dest.id} className="glass rounded-2xl overflow-hidden card-hover group">
+            {sorted.map((result) => (
+              <div key={result.id} className="glass rounded-2xl overflow-hidden card-hover group">
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src={dest.image}
-                    alt={dest.name}
+                    src={result.image}
+                    alt={result.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                   <div
-                    className={`absolute top-3 left-3 ${dest.tagColor} text-white text-xs font-bold px-2 py-1 rounded-full`}
+                    className={`absolute top-3 left-3 ${result.tagColor} text-white text-xs font-bold px-2 py-1 rounded-full`}
                   >
-                    -{dest.discount}%
+                    -{result.discount}%
                   </div>
                   <div className="absolute bottom-3 left-3 text-white">
                     <h3 className="font-bold">
-                      {dest.emoji} {dest.name}
+                      {result.emoji} {result.name}
                     </h3>
-                    <p className="text-xs text-gray-300">{dest.duration}</p>
+                    <p className="text-xs text-gray-300">{result.duration}</p>
                   </div>
                 </div>
                 <div className="p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-amber-400 text-sm">
-                      {"★".repeat(Math.floor(dest.rating))}
+                      {"★".repeat(Math.floor(result.rating))}
                     </span>
-                    <span className="text-sm text-white">{dest.rating}</span>
+                    <span className="text-sm text-white">{result.rating}</span>
                     <span className="text-xs text-gray-500">
-                      ({dest.reviews.toLocaleString("fr-CA")})
+                      ({result.reviews.toLocaleString("fr-CA")})
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs text-gray-500 line-through block">
-                        {dest.originalPrice * travelers}$
+                        {result.originalPrice * travelers}$
                       </span>
                       <span className="text-xl font-black text-white">
-                        {prices[dest.id] * travelers}$
+                        {prices[result.id] * travelers}$
                       </span>
                       <span className="text-xs text-gray-400 ml-1">
                         pour {travelers} pers.

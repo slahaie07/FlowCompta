@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { destinations, categories } from "@/lib/data";
 import { getRandomFluctuation } from "@/lib/utils";
 
@@ -12,6 +12,7 @@ export default function DestinationGrid() {
   const [priceChanges, setPriceChanges] = useState<Record<number, "up" | "down" | null>>(
     {}
   );
+  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // Live price simulation
   useEffect(() => {
@@ -21,14 +22,19 @@ export default function DestinationGrid() {
         const base = destinations.find((d) => d.id === id)!.price;
         const next = getRandomFluctuation(base);
         setPriceChanges((c) => ({ ...c, [id]: next < prev[id] ? "down" : "up" }));
-        setTimeout(
+        const t = setTimeout(
           () => setPriceChanges((c) => ({ ...c, [id]: null })),
           2000
         );
+        timeoutsRef.current.push(t);
         return { ...prev, [id]: next };
       });
     }, 2500);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      timeoutsRef.current.forEach(clearTimeout);
+      timeoutsRef.current = [];
+    };
   }, []);
 
   const filtered =
