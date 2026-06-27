@@ -6,7 +6,7 @@ import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { toast } from 'sonner';
 
-export function EliteSignature({ contract, onComplete }: { contract: { title: string, content: string }, onComplete: () => void }) {
+export function EliteSignature({ contract, onComplete }: { contract: { title: string, content: string }, onComplete: (signatureData?: string) => void }) {
   const [step, setStatus] = useState<'review' | 'signing' | 'certified'>('review');
   const [signatureData, setSignatureData] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -26,10 +26,11 @@ export function EliteSignature({ contract, onComplete }: { contract: { title: st
   const finalize = () => {
     const canvas = canvasRef.current;
     if (canvas) {
-      setSignatureData(canvas.toDataURL());
+      const dataUrl = canvas.toDataURL();
+      setSignatureData(dataUrl);
       setStatus('certified');
       toast.success("Mandat certifié numériquement.");
-      setTimeout(onComplete, 3000);
+      setTimeout(() => onComplete(dataUrl), 3000);
     }
   };
 
