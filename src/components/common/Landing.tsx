@@ -15,7 +15,6 @@ import { Badge } from '../ui/Badge';
 import { useLanguage } from '../../hooks/useLanguage';
 import { ServicesCatalogSection } from './ServicesCatalogSection';
 import { PricingGrid } from './PricingGrid';
-import { TeamAndTools } from './TeamAndTools';
 import { CONFIG } from '../../lib/config';
 import { usePwaInstall } from '../../hooks/usePwaInstall';
 
@@ -263,9 +262,6 @@ export function Landing() {
       <section id="services">
         <PricingGrid />
       </section>
-
-      {/* Team & Tools Section */}
-      <TeamAndTools />
 
       {/* Process Section */}
       <section id="processus" className="py-32 bg-surface relative overflow-hidden">
