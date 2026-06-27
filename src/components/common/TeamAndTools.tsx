@@ -1,5 +1,5 @@
-import { motion } from ‘motion/react’;
-import { ShieldCheck, FileText, Camera } from ‘lucide-react’;
+import { motion } from 'motion/react';
+import { ShieldCheck, FileText, Camera } from 'lucide-react';
 
 export function TeamAndTools() {
   const tools = [
@@ -7,20 +7,20 @@ export function TeamAndTools() {
       name: 'Dext',
       icon: Camera,
       descEn: 'Instant receipt capture. Snap a photo of your invoices or receipts from your smartphone, and Dext automatically extracts data, eliminating paper clutter.',
-      descFr: 'Capture instantanée des reçus. Prenez en photo vos factures d’achat depuis votre téléphone, et Dext extrait automatiquement les données pour éliminer la paperasse.'
+      descFr: "Capture instantanée des reçus. Prenez en photo vos factures d'achat depuis votre téléphone, et Dext extrait automatiquement les données pour éliminer la paperasse.",
     },
     {
       name: 'DocuSign',
       icon: FileText,
       descEn: 'Fully secure, legally binding electronic signatures. Sign representation mandates and official tax documents in a single click from any device.',
-      descFr: 'Signatures électroniques sécurisées et juridiquement contraignantes. Signez vos mandats de représentation et documents fiscaux en un clic depuis n’importe quel appareil.'
+      descFr: "Signatures électroniques sécurisées et juridiquement contraignantes. Signez vos mandats de représentation et documents fiscaux en un clic depuis n'importe quel appareil.",
     },
     {
       name: 'Intuit ProFile',
       icon: ShieldCheck,
       descEn: 'Industry-standard professional tax filing software. Ensures compliance, optimizes tax credits, and enables instant direct transmission (TED) to the CRA and Revenu Québec.',
-      descFr: 'Logiciel de déclaration d’impôts professionnel de référence. Garantit la conformité, optimise les crédits fiscaux et permet une transmission électronique directe (TED) rapide.'
-    }
+      descFr: "Logiciel de déclaration d'impôts professionnel de référence. Garantit la conformité, optimise les crédits fiscaux et permet une transmission électronique directe (TED) rapide.",
+    },
   ];
 
   return (
@@ -29,9 +29,9 @@ export function TeamAndTools() {
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gold/5 rounded-full blur-[120px] pointer-events-none" />
       <section id="outils" className="max-w-7xl mx-auto px-6 relative z-10 space-y-16">
         <div className="text-center space-y-4 max-w-3xl mx-auto">
-          <span className="text-gold text-xs font-black tracking-[0.4em] uppercase">Sécurité & Technologie</span>
+          <span className="text-gold text-xs font-black tracking-[0.4em] uppercase">Sécurité &amp; Technologie</span>
           <h2 className="text-4xl md:text-5xl font-serif font-bold text-ivoire tracking-tight italic">
-            Les meilleurs outils <span className="text-gold">de l'industrie.</span>
+            Les meilleurs outils <span className="text-gold">de l&apos;industrie.</span>
           </h2>
           <p className="text-silver font-light text-base leading-relaxed">
             Pour garantir une protection maximale de vos données (Loi 25) et une efficacité totale, nous travaillons exclusivement avec des connecteurs et logiciels professionnels de confiance.
@@ -55,20 +55,14 @@ export function TeamAndTools() {
                 <h3 className="text-2xl font-serif text-ivoire font-bold">{tool.name}</h3>
               </div>
 
-              {/* English Desc (First) */}
               <div className="space-y-1">
                 <span className="text-[9px] font-black tracking-widest text-slate-500 uppercase">English</span>
-                <p className="text-xs text-silver font-light leading-relaxed">
-                  {tool.descEn}
-                </p>
+                <p className="text-xs text-silver font-light leading-relaxed">{tool.descEn}</p>
               </div>
 
-              {/* French Desc (Second) */}
               <div className="space-y-1 pt-4 border-t border-white/5">
                 <span className="text-[9px] font-black tracking-widest text-slate-500 uppercase">Français</span>
-                <p className="text-xs text-slate-400 font-light leading-relaxed">
-                  {tool.descFr}
-                </p>
+                <p className="text-xs text-slate-400 font-light leading-relaxed">{tool.descFr}</p>
               </div>
             </motion.div>
           ))}
