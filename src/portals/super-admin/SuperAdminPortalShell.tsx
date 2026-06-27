@@ -83,6 +83,9 @@ export function SuperAdminPortalShell({
   const [newNoteText, setNewNoteText] = useState('');
   const [newNoteColor, setNewNoteColor] = useState<'yellow' | 'green' | 'pink' | 'blue'>('yellow');
 
+  // Tax rates from DB
+  const [taxRates, setTaxRates] = useState<any[]>([]);
+
   // Vault state
   const [vaultPassword, setVaultPassword] = useState('');
   const [isVaultUnlocked, setIsVaultUnlocked] = useState(false);
@@ -127,6 +130,94 @@ export function SuperAdminPortalShell({
   const [themeColor, setThemeColor] = useState<'emerald' | 'gold' | 'sapphire'>('gold');
   const [newPassword, setNewPassword] = useState('');
 
+  // Load live data from Supabase
+  const loadLiveData = async () => {
+    if (!userData?.id) return;
+
+    // 1. Fetch quick notes from DB
+    try {
+      const { data, error } = await supabase
+        .from('quick_notes')
+        .select('*')
+        .eq('user_id', userData.id)
+        .order('created_at', { ascending: false });
+      if (!error && data && data.length > 0) {
+        setNotes(data.map(note => ({
+          id: note.id,
+          text: note.text,
+          color: (note.color || 'yellow') as 'yellow' | 'green' | 'pink' | 'blue',
+          createdAt: note.created_at || new Date().toISOString()
+        })));
+      }
+    } catch (e) {
+      console.warn("Quick notes load failed, using local fallback.", e);
+    }
+
+    // 2. Fetch tax rates from DB
+    try {
+      const { data, error } = await supabase
+        .from('tax_rates')
+        .select('*');
+      if (!error && data) {
+        setTaxRates(data);
+      }
+    } catch (e) {
+      console.warn("Tax rates load failed, using fallback static rates.", e);
+    }
+
+    // 3. Fetch subAdmins (Cabinets) and Clients List from DB
+    try {
+      // Fetch sub_admins
+      const { data: saData, error: saErr } = await supabase
+        .from('profiles')
+        .select('id, full_name, display_name, email, status')
+        .eq('role', 'sub_admin');
+      
+      // Fetch client profiles
+      const { data: clData, error: clErr } = await supabase
+        .from('profiles')
+        .select('id, full_name, display_name, company_name, email, status, sub_admin_id')
+        .eq('role', 'client');
+
+      if (!saErr && saData && saData.length > 0) {
+        // Calculate dynamic load & clientsCount for subAdmins
+        const updatedSubAdmins = saData.map(sa => {
+          const count = clData ? clData.filter(cl => cl.sub_admin_id === sa.id).length : 0;
+          let loadStr = 'Modérée';
+          if (count > 10) loadStr = 'Maximale';
+          else if (count > 5) loadStr = 'Optimale';
+          
+          return {
+            id: sa.id,
+            name: sa.full_name || sa.display_name || 'Cabinet',
+            email: sa.email || '',
+            clientsCount: count,
+            status: sa.status === 'active' ? 'Actif' : 'Inactif',
+            load: loadStr
+          };
+        });
+        setSubAdmins(updatedSubAdmins);
+
+        // Map sub_admin names for assignedTo field in clientsList
+        const saNameMap = new Map(saData.map(sa => [sa.id, sa.full_name || sa.display_name || 'Cabinet']));
+        
+        if (!clErr && clData) {
+          const updatedClients = clData.map(cl => ({
+            id: cl.id,
+            name: cl.full_name || cl.display_name || 'Client',
+            company: cl.company_name || 'Particulier',
+            email: cl.email || '',
+            assignedTo: cl.sub_admin_id ? (saNameMap.get(cl.sub_admin_id) || 'Non assigné') : 'Non assigné',
+            status: cl.status === 'active' ? 'Actif' : 'Inactif'
+          }));
+          setClientsList(updatedClients);
+        }
+      }
+    } catch (e) {
+      console.warn("Sub-admins and clients network load failed, using mock data.", e);
+    }
+  };
+
   // Load Date, Weather, and Notes
   useEffect(() => {
     // Local date formatted in French
@@ -154,6 +245,8 @@ export function SuperAdminPortalShell({
       setNotes(initialNotes);
       localStorage.setItem(`comptaflow_super_notes_${userData?.id || 'default'}`, JSON.stringify(initialNotes));
     }
+
+    loadLiveData();
   }, [userData?.id]);
 
   // Sidebar item configuration
@@ -215,26 +308,68 @@ export function SuperAdminPortalShell({
     localStorage.setItem(`comptaflow_super_notes_${userData?.id || 'default'}`, JSON.stringify(updatedNotes));
   };
 
-  const handleAddNote = (e: React.FormEvent) => {
+  const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newNoteText.trim()) return;
+    if (!newNoteText.trim() || !userData?.id) return;
 
+    const localId = Date.now().toString();
     const newNote: StickyNoteItem = {
-      id: Date.now().toString(),
+      id: localId,
       text: newNoteText,
       color: newNoteColor,
       createdAt: new Date().toISOString()
     };
 
-    saveNotes([newNote, ...notes]);
+    const updated = [newNote, ...notes];
+    setNotes(updated);
+    localStorage.setItem(`comptaflow_super_notes_${userData.id}`, JSON.stringify(updated));
     setNewNoteText('');
-    toast.success('Note ajoutée au tableau de bord réseau !');
+
+    try {
+      const { data, error } = await supabase
+        .from('quick_notes')
+        .insert({
+          user_id: userData.id,
+          text: newNoteText,
+          color: newNoteColor
+        })
+        .select();
+      if (error) throw error;
+      if (data && data[0]) {
+        setNotes(prev => prev.map(n => n.id === localId ? {
+          id: data[0].id,
+          text: data[0].text,
+          color: data[0].color,
+          createdAt: data[0].created_at || new Date().toISOString()
+        } : n));
+      }
+      toast.success('Note ajoutée au tableau de bord réseau !');
+    } catch (err) {
+      console.warn("Failed to insert note to DB, saved to localStorage.", err);
+      toast.warning("Mode hors-ligne : Note enregistrée localement.");
+    }
   };
 
-  const handleDeleteNote = (id: string) => {
+  const handleDeleteNote = async (id: string) => {
     const filtered = notes.filter(n => n.id !== id);
-    saveNotes(filtered);
-    toast.success('Note réseau supprimée.');
+    setNotes(filtered);
+    if (userData?.id) {
+      localStorage.setItem(`comptaflow_super_notes_${userData.id}`, JSON.stringify(filtered));
+    }
+
+    try {
+      if (id.includes('-')) {
+        const { error } = await supabase
+          .from('quick_notes')
+          .delete()
+          .eq('id', id);
+        if (error) throw error;
+      }
+      toast.success('Note réseau supprimée.');
+    } catch (err) {
+      console.warn("Failed to delete note from DB.", err);
+      toast.success('Note réseau supprimée localement.');
+    }
   };
 
   // Vault unlocking action
@@ -298,21 +433,43 @@ export function SuperAdminPortalShell({
 
   // Calculators helper
   const calculateTaxes = () => {
+    const rateObj = taxRates.find(r => r.province_code === calcProvince);
+    let gst = 0.05;
+    let pst = 0.00;
+    let hst = 0.00;
+    
+    if (rateObj) {
+      gst = Number(rateObj.gst_rate);
+      pst = Number(rateObj.pst_qst_rate);
+      hst = Number(rateObj.hst_rate);
+    } else {
+      if (calcProvince === 'QC') {
+        gst = 0.05;
+        pst = 0.09975;
+      } else if (calcProvince === 'ON') {
+        gst = 0.00;
+        pst = 0.00;
+        hst = 0.13;
+      } else if (calcProvince === 'BC') {
+        gst = 0.05;
+        pst = 0.07;
+      } else {
+        gst = 0.05;
+      }
+    }
+    
     let tps = 0;
     let tvq = 0;
-    if (calcProvince === 'QC') {
-      tps = calcAmount * 0.05;
-      tvq = calcAmount * 0.09975;
-    } else if (calcProvince === 'ON') {
-      tps = calcAmount * 0.13;
-    } else if (calcProvince === 'BC') {
-      tps = calcAmount * 0.05;
-      tvq = calcAmount * 0.07;
+    
+    if (hst > 0) {
+      tps = calcAmount * hst;
     } else {
-      tps = calcAmount * 0.05;
+      tps = calcAmount * gst;
+      tvq = calcAmount * pst;
     }
+    
     const total = calcAmount + tps + tvq;
-    return { tps, tvq, total };
+    return { tps, tvq, total, hstActive: hst > 0 };
   };
 
   const calcTaxesResults = calculateTaxes();

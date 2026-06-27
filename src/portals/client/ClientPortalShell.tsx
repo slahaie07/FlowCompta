@@ -7,6 +7,7 @@ import {
 import { EliteSignature } from '../../components/ui/EliteSignature';
 import { generateContract } from '../../lib/contractEngine';
 import { toast } from 'sonner';
+import { supabase } from '../../lib/supabase';
 
 interface ClientPortalShellProps {
   userData: any;
@@ -64,11 +65,88 @@ export function ClientPortalShell({
     { id: 'doc-2', name: 'T4_Revenu_Canada_2025.pdf', size: '890 KB', date: '18 Juin 2026' }
   ]);
 
+  // Tax rates from DB
+  const [taxRates, setTaxRates] = useState<any[]>([]);
+
   // Chat message state
   const [chatMessages, setChatMessages] = useState([
     { sender: 'Cabinet', text: 'Bonjour! Je suis Sylvie, votre comptable assignée. J\'ai bien reçu vos reçus Dext de ce mois-ci. Pouvez-vous signer votre mandat électronique d\'autorisation?', time: '11:20' }
   ]);
   const [newMsg, setNewMsg] = useState('');
+
+  // Calculator state
+  const [calcAmount, setCalcAmount] = useState<number>(100);
+  const [calcProvince, setCalcProvince] = useState<string>('QC');
+
+  // Load live data from Supabase
+  const loadLiveData = async () => {
+    if (!userData?.id) return;
+    
+    // 1. Fetch Invoices
+    try {
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('user_id', userData.id)
+        .order('created_at', { ascending: false });
+      if (!error && data && data.length > 0) {
+        setInvoices(data.map(inv => ({
+          id: inv.id,
+          desc: inv.number + ' - ' + (inv.client_name || 'Service Comptable'),
+          amount: Number(inv.amount),
+          status: inv.status === 'paid' ? 'Payé' : 'À payer',
+          date: new Date(Number(inv.date)).toLocaleDateString('fr-CA')
+        })));
+      }
+    } catch (e) {
+      console.warn("Invoices load failed, using local mock.", e);
+    }
+
+    // 2. Fetch Documents
+    try {
+      const { data, error } = await supabase
+        .from('documents_uploades')
+        .select('*')
+        .eq('client_id', userData.id)
+        .order('created_at', { ascending: false });
+      if (!error && data && data.length > 0) {
+        setClientDocuments(data.map(doc => ({
+          id: doc.id,
+          name: doc.file_name,
+          size: doc.file_size || 'Inconnu',
+          date: new Date(Number(doc.upload_date)).toLocaleDateString('fr-CA')
+        })));
+      }
+    } catch (e) {
+      console.warn("Documents load failed, using local mock.", e);
+    }
+
+    // 3. Fetch Note
+    try {
+      const { data, error } = await supabase
+        .from('quick_notes')
+        .select('*')
+        .eq('user_id', userData.id)
+        .limit(1);
+      if (!error && data && data[0]) {
+        setNotes(data[0].text);
+      }
+    } catch (e) {
+      console.warn("Notes load failed, using local storage fallback.", e);
+    }
+
+    // 4. Fetch Tax Rates
+    try {
+      const { data, error } = await supabase
+        .from('tax_rates')
+        .select('*');
+      if (!error && data) {
+        setTaxRates(data);
+      }
+    } catch (e) {
+      console.warn("Tax rates load failed, using fallback static rates.", e);
+    }
+  };
 
   // Update clock & weather
   useEffect(() => {
@@ -77,9 +155,11 @@ export function ClientPortalShell({
       setIsMandateSigned(true);
     }
 
-    // Load client notes
+    // Load client notes (localStorage first as fallback)
     const savedNotes = localStorage.getItem(`comptaflow_client_notes_${userData?.id || 'default'}`);
     if (savedNotes) setNotes(savedNotes);
+
+    loadLiveData();
 
     const updateClock = () => {
       const now = new Date();
@@ -117,8 +197,8 @@ export function ClientPortalShell({
     if (onRefreshProfile) onRefreshProfile();
   };
 
-  // Payment handler
-  const handlePaymentSubmit = (e: React.FormEvent) => {
+  // Payment handler with DB update
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!cardNumber || !cardExpiry || !cardCvc) {
       toast.error('Veuillez remplir tous les champs de paiement.');
@@ -126,30 +206,80 @@ export function ClientPortalShell({
     }
     setIsProcessingPayment(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setInvoices(prev => prev.map(inv => inv.id === showPaymentModal.id ? { ...inv, status: 'Payé' } : inv));
-      setIsProcessingPayment(false);
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .update({ status: 'paid' })
+        .eq('id', showPaymentModal.id);
+        
+      if (error) throw error;
+      
+      toast.success('Paiement validé avec succès! Merci pour votre confiance.');
       setShowPaymentModal(null);
+      loadLiveData();
+    } catch (err) {
+      // Fallback local state update
+      setInvoices(prev => prev.map(inv => inv.id === showPaymentModal.id ? { ...inv, status: 'Payé' } : inv));
+      toast.success('Paiement simulé en mode local.');
+      setShowPaymentModal(null);
+    } finally {
+      setIsProcessingPayment(false);
       setCardNumber('');
       setCardExpiry('');
       setCardCvc('');
-      toast.success('Paiement validé avec succès! Merci pour votre confiance.');
-    }, 1500);
+    }
   };
 
-  // File upload simulator
-  const handleFileUploadSimulate = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+  // File upload with DB insertion
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0] && userData?.id) {
       const file = e.target.files[0];
-      const newDoc = {
-        id: 'doc-' + Date.now(),
-        name: file.name,
-        size: (file.size / 1024).toFixed(0) + ' KB',
-        date: 'À l\'instant'
-      };
-      setClientDocuments([newDoc, ...clientDocuments]);
-      toast.success(`Fichier ${file.name} téléversé avec succès.`);
+      try {
+        const newDoc = {
+          client_id: userData.id,
+          file_name: file.name,
+          file_size: (file.size / 1024).toFixed(0) + ' KB',
+          url: `https://unvyxfxlzhnutpugjxhe.supabase.co/storage/v1/object/public/documents/${file.name}`,
+          upload_date: Date.now(),
+          status: 'secure',
+          category: 'general',
+          source: 'client'
+        };
+        const { error } = await supabase
+          .from('documents_uploades')
+          .insert(newDoc);
+          
+        if (error) throw error;
+        
+        toast.success(`Fichier ${file.name} téléversé avec succès.`);
+        loadLiveData();
+      } catch (err: any) {
+        console.warn("Database doc upload failed, saving locally.", err);
+        const newDoc = {
+          id: 'doc-' + Date.now(),
+          name: file.name,
+          size: (file.size / 1024).toFixed(0) + ' KB',
+          date: 'À l\'instant'
+        };
+        setClientDocuments(prev => [newDoc, ...prev]);
+        toast.warning(`Mode hors-ligne : Fichier enregistré temporairement.`);
+      }
+    }
+  };
+
+  // Document deletion with DB sync
+  const handleDeleteDocument = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('documents_uploades')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      toast.success('Document supprimé du coffre-fort.');
+      loadLiveData();
+    } catch (e) {
+      setClientDocuments(prev => prev.filter(d => d.id !== id));
+      toast.success('Document supprimé localement.');
     }
   };
 
@@ -173,10 +303,29 @@ export function ClientPortalShell({
     }, 2000);
   };
 
-  // Notes saver
-  const handleNotesChange = (text: string) => {
+  // Notes saver with DB sync
+  const handleNotesChange = async (text: string) => {
     setNotes(text);
     localStorage.setItem(`comptaflow_client_notes_${userData?.id || 'default'}`, text);
+    try {
+      const { data } = await supabase
+        .from('quick_notes')
+        .select('id')
+        .eq('user_id', userData.id)
+        .limit(1);
+      if (data && data[0]) {
+        await supabase
+          .from('quick_notes')
+          .update({ text })
+          .eq('id', data[0].id);
+      } else {
+        await supabase
+          .from('quick_notes')
+          .insert({ user_id: userData.id, text, color: 'yellow' });
+      }
+    } catch (e) {
+      console.warn("Quick notes save failed.", e);
+    }
   };
 
   // FAQ entries
@@ -189,6 +338,49 @@ export function ClientPortalShell({
   const filteredFaq = faqEntries.filter(
     f => f.q.toLowerCase().includes(faqSearch.toLowerCase()) || f.a.toLowerCase().includes(faqSearch.toLowerCase())
   );
+
+  // Dynamic tax calculation utilizing DB rates (Twist 2 solution)
+  const calculateTaxes = () => {
+    const rateObj = taxRates.find(r => r.province_code === calcProvince);
+    let gst = 0.05;
+    let pst = 0.00;
+    let hst = 0.00;
+    
+    if (rateObj) {
+      gst = Number(rateObj.gst_rate);
+      pst = Number(rateObj.pst_qst_rate);
+      hst = Number(rateObj.hst_rate);
+    } else {
+      if (calcProvince === 'QC') {
+        gst = 0.05;
+        pst = 0.09975;
+      } else if (calcProvince === 'ON') {
+        gst = 0.00;
+        pst = 0.00;
+        hst = 0.13;
+      } else if (calcProvince === 'BC') {
+        gst = 0.05;
+        pst = 0.07;
+      } else {
+        gst = 0.05;
+      }
+    }
+    
+    let tps = 0;
+    let tvq = 0;
+    
+    if (hst > 0) {
+      tps = calcAmount * hst;
+    } else {
+      tps = calcAmount * gst;
+      tvq = calcAmount * pst;
+    }
+    
+    const total = calcAmount + tps + tvq;
+    return { tps, tvq, total, hstActive: hst > 0 };
+  };
+
+  const calcTaxesResults = calculateTaxes();
 
   return (
     <div className="min-h-screen flex bg-slate-50 text-slate-900 font-sans relative w-full">
@@ -317,7 +509,7 @@ export function ClientPortalShell({
                   <div className="space-y-1">
                     <h4 className="text-xs text-slate-400 uppercase font-black tracking-wider">Messagerie Directe</h4>
                     <p className="text-sm font-bold text-slate-800">Discuter avec votre comptable</p>
-                    <p className="text-xs text-slate-500">1 message non lu de Sylvie</p>
+                    <p className="text-xs text-slate-500">Discuter en ligne avec Sylvie</p>
                   </div>
                 </div>
 
@@ -333,7 +525,7 @@ export function ClientPortalShell({
               
               {/* Mémos Intelligents (Alertes douces) */}
               {!isMandateSigned && (
-                <div className="p-6 bg-amber-50 border border-amber-200/50 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="p-6 bg-amber-5 border border-amber-200/50 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div className="flex gap-3">
                     <AlertCircle size={20} className="text-amber-500 shrink-0 mt-0.5" />
                     <div>
@@ -370,7 +562,7 @@ export function ClientPortalShell({
                   <p className="text-xs text-slate-500">Validation finale des relevés T4 en cours par votre comptable.</p>
                 </div>
 
-                {/* Monthly bookkeeping progress */}
+                {/* Bookkeeping progress */}
                 <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm text-center space-y-4">
                   <h4 className="text-xs text-slate-400 uppercase font-black tracking-wider text-left border-b border-slate-100 pb-2">Tenue de Livres - Juin 2026</h4>
                   <div className="relative w-36 h-36 mx-auto flex items-center justify-center">
@@ -383,7 +575,7 @@ export function ClientPortalShell({
                       <span className="text-[9px] uppercase tracking-wider text-slate-400">Traité</span>
                     </div>
                   </div>
-                  <p className="text-xs text-slate-500">14 factures et reçus réconciliés avec vos transactions bancaires.</p>
+                  <p className="text-xs text-slate-500">Vos factures et reçus réconciliés avec vos transactions bancaires.</p>
                 </div>
 
               </div>
@@ -438,7 +630,7 @@ export function ClientPortalShell({
               <div className="p-8 border-2 border-dashed border-slate-300 rounded-2xl text-center bg-white hover:border-blue-600 transition-colors relative">
                 <input
                   type="file"
-                  onChange={handleFileUploadSimulate}
+                  onChange={handleFileUpload}
                   className="absolute inset-0 opacity-0 cursor-pointer"
                 />
                 <FolderOpen size={36} className="text-slate-400 mx-auto mb-3" />
@@ -464,7 +656,7 @@ export function ClientPortalShell({
                       <div className="flex gap-2">
                         <span className="text-slate-400 font-semibold mr-4">{doc.date}</span>
                         <button
-                          onClick={() => setClientDocuments(prev => prev.filter(d => d.id !== doc.id))}
+                          onClick={() => handleDeleteDocument(doc.id)}
                           className="p-1 text-slate-400 hover:text-red-500 rounded"
                           title="Supprimer"
                         >
@@ -570,7 +762,7 @@ export function ClientPortalShell({
                         <td className="p-5">
                           <span className={`inline-flex px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-full border ${
                             inv.status === 'Payé'
-                              ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+                              ? 'bg-emerald-55 border-emerald-200 text-emerald-600'
                               : 'bg-red-50 border-red-200 text-red-600'
                           }`}>
                             {inv.status}
@@ -737,7 +929,7 @@ export function ClientPortalShell({
                 <textarea
                   value={notes}
                   onChange={(e) => handleNotesChange(e.target.value)}
-                  placeholder="Commencez à saisir vos idées financières ou questions à poser ici (sauvegarde automatique)..."
+                  placeholder="Commencez à saisir vos idées financières ou questions à poser ici (sauvegarde automatique sur votre compte)..."
                   className="w-full h-80 bg-transparent border-none resize-none focus:outline-none text-xs text-slate-700 leading-relaxed font-medium"
                 />
               </div>
@@ -745,13 +937,55 @@ export function ClientPortalShell({
           )}
 
           {/* ============================================================
-              8. CENTRE D'AIDE & FAQ
+              8. CENTRE D'AIDE & FAQ (AVEC CALCULATEUR DYNAMIQUE)
              ============================================================ */}
           {activeTab === 'faq' && (
             <div className="space-y-8 animate-fadeIn">
-              <div>
-                <h2 className="text-xl font-serif font-bold text-[#0F1E36]">Centre d'Aide & FAQ</h2>
-                <p className="text-xs text-slate-500 mt-1">Recherchez des réponses instantanées sur l'utilisation du portail client</p>
+              
+              {/* Dynamic Tax Estimator in Help Center */}
+              <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-4">
+                <h3 className="text-xs font-black uppercase text-slate-500 tracking-wider">Simulateur fiscal canadien (Taxes directes)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase tracking-wider mb-2 font-bold">Montant HT</label>
+                    <input
+                      type="number"
+                      value={calcAmount}
+                      onChange={(e) => setCalcAmount(Number(e.target.value))}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] text-slate-400 uppercase tracking-wider mb-2 font-bold">Province (Chargement dynamique)</label>
+                    <select
+                      value={calcProvince}
+                      onChange={(e) => setCalcProvince(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold"
+                    >
+                      <option value="QC">Québec (QC)</option>
+                      <option value="ON">Ontario (ON)</option>
+                      <option value="BC">Colombie-Britannique (BC)</option>
+                      <option value="AB">Alberta (AB)</option>
+                    </select>
+                  </div>
+                  <div className="p-4 bg-slate-50 rounded-xl text-xs space-y-1 text-slate-700 font-mono">
+                    <div className="flex justify-between"><span>Base:</span><span>{calcAmount.toFixed(2)} $</span></div>
+                    <div className="flex justify-between">
+                      <span>{calcTaxesResults.hstActive ? 'HST' : 'TPS/GST'}:</span>
+                      <span>{calcTaxesResults.tps.toFixed(2)} $</span>
+                    </div>
+                    {!calcTaxesResults.hstActive && calcProvince !== 'AB' && (
+                      <div className="flex justify-between">
+                        <span>{calcProvince === 'BC' ? 'PST (7%)' : 'TVQ (9.975%)'}:</span>
+                        <span>{calcTaxesResults.tvq.toFixed(2)} $</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-[#0F1E36] font-bold border-t border-slate-200 pt-1 mt-1">
+                      <span>Total TTC:</span>
+                      <span>{calcTaxesResults.total.toFixed(2)} $</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Search bar */}

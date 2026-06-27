@@ -77,6 +77,26 @@ export function SubAdminPortalShell({
   const [newNoteText, setNewNoteText] = useState('');
   const [newNoteColor, setNewNoteColor] = useState<'yellow' | 'green' | 'pink' | 'blue'>('yellow');
 
+  // Tax rates from DB
+  const [taxRates, setTaxRates] = useState<any[]>([]);
+
+  // DB client files (services)
+  const [dbServices, setDbServices] = useState<any[]>([]);
+
+  // Helper for services display label
+  const getServiceLabel = (type: string) => {
+    switch (type) {
+      case 'monthly_bookkeeping': return 'Forfaits Mensuels';
+      case 'student_tax': return "L'Étudiant";
+      case 'catchup_bookkeeping': return 'Le Rattrapage';
+      case 'setup_onboarding': return 'Le Setup Onboarding';
+      case 'personal_tax': return 'Impôts Personnels';
+      case 'autonomous_tax': return 'Travailleurs Autonomes';
+      case 'corporate_tax': return 'Impôts de Sociétés';
+      default: return type;
+    }
+  };
+
   // Vault state
   const [vaultPassword, setVaultPassword] = useState('');
   const [isVaultUnlocked, setIsVaultUnlocked] = useState(false);
@@ -128,6 +148,56 @@ export function SubAdminPortalShell({
     stephanie: { read: true, write: false, delete: false }
   });
 
+  // Load live data from Supabase
+  const loadLiveData = async () => {
+    if (!userData?.id) return;
+
+    // 1. Fetch quick notes from DB
+    try {
+      const { data, error } = await supabase
+        .from('quick_notes')
+        .select('*')
+        .eq('user_id', userData.id)
+        .order('created_at', { ascending: false });
+      if (!error && data && data.length > 0) {
+        setNotes(data.map(note => ({
+          id: note.id,
+          text: note.text,
+          color: (note.color || 'yellow') as 'yellow' | 'green' | 'pink' | 'blue',
+          createdAt: note.created_at || new Date().toISOString()
+        })));
+      }
+    } catch (e) {
+      console.warn("Quick notes load failed, using local fallback.", e);
+    }
+
+    // 2. Fetch tax rates from DB
+    try {
+      const { data, error } = await supabase
+        .from('tax_rates')
+        .select('*');
+      if (!error && data) {
+        setTaxRates(data);
+      }
+    } catch (e) {
+      console.warn("Tax rates load failed, using fallback static rates.", e);
+    }
+
+    // 3. Fetch client services queue from DB
+    try {
+      const { data, error } = await supabase
+        .from('services')
+        .select('*, client:client_id(full_name, display_name, company_name, email, metadata)')
+        .eq('sub_admin_id', userData.id)
+        .order('created_at', { ascending: false });
+      if (!error && data) {
+        setDbServices(data);
+      }
+    } catch (e) {
+      console.warn("Services load failed, using mock queue.", e);
+    }
+  };
+
   // Load Date, Weather, and Notes
   useEffect(() => {
     // Local date formatted in French
@@ -162,6 +232,8 @@ export function SubAdminPortalShell({
       setNotes(initialNotes);
       localStorage.setItem(`comptaflow_notes_${userData?.id || 'default'}`, JSON.stringify(initialNotes));
     }
+
+    loadLiveData();
   }, [userData?.id]);
 
   // Sidebar item configuration
@@ -255,26 +327,68 @@ export function SubAdminPortalShell({
     localStorage.setItem(`comptaflow_notes_${userData?.id || 'default'}`, JSON.stringify(updatedNotes));
   };
 
-  const handleAddNote = (e: React.FormEvent) => {
+  const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newNoteText.trim()) return;
+    if (!newNoteText.trim() || !userData?.id) return;
 
+    const localId = Date.now().toString();
     const newNote: StickyNoteItem = {
-      id: Date.now().toString(),
+      id: localId,
       text: newNoteText,
       color: newNoteColor,
       createdAt: new Date().toISOString()
     };
 
-    saveNotes([newNote, ...notes]);
+    const updated = [newNote, ...notes];
+    setNotes(updated);
+    localStorage.setItem(`comptaflow_notes_${userData.id}`, JSON.stringify(updated));
     setNewNoteText('');
-    toast.success('Note ajoutée !');
+
+    try {
+      const { data, error } = await supabase
+        .from('quick_notes')
+        .insert({
+          user_id: userData.id,
+          text: newNoteText,
+          color: newNoteColor
+        })
+        .select();
+      if (error) throw error;
+      if (data && data[0]) {
+        setNotes(prev => prev.map(n => n.id === localId ? {
+          id: data[0].id,
+          text: data[0].text,
+          color: data[0].color,
+          createdAt: data[0].created_at || new Date().toISOString()
+        } : n));
+      }
+      toast.success('Note ajoutée !');
+    } catch (err) {
+      console.warn("Failed to insert note to DB, saved to localStorage.", err);
+      toast.warning("Mode hors-ligne : Note enregistrée localement.");
+    }
   };
 
-  const handleDeleteNote = (id: string) => {
+  const handleDeleteNote = async (id: string) => {
     const filtered = notes.filter(n => n.id !== id);
-    saveNotes(filtered);
-    toast.success('Note supprimée.');
+    setNotes(filtered);
+    if (userData?.id) {
+      localStorage.setItem(`comptaflow_notes_${userData.id}`, JSON.stringify(filtered));
+    }
+
+    try {
+      if (id.includes('-')) {
+        const { error } = await supabase
+          .from('quick_notes')
+          .delete()
+          .eq('id', id);
+        if (error) throw error;
+      }
+      toast.success('Note supprimée.');
+    } catch (err) {
+      console.warn("Failed to delete note from DB.", err);
+      toast.success('Note supprimée localement.');
+    }
   };
 
   // Vault unlocking action
@@ -348,21 +462,43 @@ export function SubAdminPortalShell({
 
   // Calculators helper
   const calculateTaxes = () => {
+    const rateObj = taxRates.find(r => r.province_code === calcProvince);
+    let gst = 0.05;
+    let pst = 0.00;
+    let hst = 0.00;
+    
+    if (rateObj) {
+      gst = Number(rateObj.gst_rate);
+      pst = Number(rateObj.pst_qst_rate);
+      hst = Number(rateObj.hst_rate);
+    } else {
+      if (calcProvince === 'QC') {
+        gst = 0.05;
+        pst = 0.09975;
+      } else if (calcProvince === 'ON') {
+        gst = 0.00;
+        pst = 0.00;
+        hst = 0.13;
+      } else if (calcProvince === 'BC') {
+        gst = 0.05;
+        pst = 0.07;
+      } else {
+        gst = 0.05;
+      }
+    }
+    
     let tps = 0;
     let tvq = 0;
-    if (calcProvince === 'QC') {
-      tps = calcAmount * 0.05;
-      tvq = calcAmount * 0.09975;
-    } else if (calcProvince === 'ON') {
-      tps = calcAmount * 0.13; // HST 13%
-    } else if (calcProvince === 'BC') {
-      tps = calcAmount * 0.05;
-      tvq = calcAmount * 0.07; // PST 7%
+    
+    if (hst > 0) {
+      tps = calcAmount * hst;
     } else {
-      tps = calcAmount * 0.05; // Standard GST 5%
+      tps = calcAmount * gst;
+      tvq = calcAmount * pst;
     }
+    
     const total = calcAmount + tps + tvq;
-    return { tps, tvq, total };
+    return { tps, tvq, total, hstActive: hst > 0 };
   };
 
   const calcTaxesResults = calculateTaxes();
@@ -620,65 +756,113 @@ export function SubAdminPortalShell({
                 </div>
 
                 <div className="space-y-4">
-                  {/* Stéphanie Row */}
-                  <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-gold/20 transition-all">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-ivoire">Stéphanie Laplante</span>
-                        <span className="text-[10px] px-2 py-0.5 border border-gold/30 text-gold rounded-full uppercase tracking-wider font-semibold">Forfaits Mensuels</span>
+                  {dbServices.length > 0 ? (
+                    dbServices.map((service) => {
+                      const clientName = service.client?.full_name || service.client?.display_name || 'Client sans nom';
+                      const company = service.client?.company_name || 'Particulier';
+                      const province = service.client?.metadata?.province || 'QC';
+                      const serviceLabel = getServiceLabel(service.service_type);
+                      const status = service.status;
+                      
+                      let actionText = 'Traiter';
+                      if (status === 'Terminé') actionText = 'Dossier Terminé';
+                      else if (service.service_type === 'student_tax') actionText = 'Télécharger';
+                      else if (service.service_type === 'catchup_bookkeeping') actionText = 'Reconcilier';
+                      
+                      return (
+                        <div key={service.id} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-gold/20 transition-all">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-bold text-ivoire">{clientName}</span>
+                              <span className="text-[10px] px-2 py-0.5 border border-gold/30 text-gold rounded-full uppercase tracking-wider font-semibold">
+                                {serviceLabel}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-500 mt-1">
+                              {company} • {province} • Statut: {status}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                            <div className="text-right">
+                              <span className="text-[10px] text-emerald-400 font-bold block">✓ Actif</span>
+                              <span className="text-xs font-serif text-slate-400">Créé le {new Date(service.created_at).toLocaleDateString('fr-CA')}</span>
+                            </div>
+                            <button
+                              onClick={() => {
+                                toast.success(`Traitement initié pour le dossier de ${clientName}`);
+                              }}
+                              type="button"
+                              className="px-4 py-2 bg-gold text-noir text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-gold-light transition-colors"
+                            >
+                              {actionText}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <>
+                      {/* Stéphanie Row */}
+                      <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-gold/20 transition-all">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-ivoire">Stéphanie Laplante</span>
+                            <span className="text-[10px] px-2 py-0.5 border border-gold/30 text-gold rounded-full uppercase tracking-wider font-semibold">Forfaits Mensuels</span>
+                          </div>
+                          <p className="text-xs text-slate-500 mt-1">Laplante Design Inc. • QC • 14 Reçus Dext OCR</p>
+                        </div>
+                        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                          <div className="text-right">
+                            <span className="text-[10px] text-emerald-400 font-bold block">✓ Dext lié</span>
+                            <span className="text-xs font-serif text-slate-400">TPS: 7.50$ | TVQ: 14.96$</span>
+                          </div>
+                          <button type="button" className="px-4 py-2 bg-gold text-noir text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-gold-light transition-colors">
+                            Traiter
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">Laplante Design Inc. • QC • 14 Reçus Dext OCR</p>
-                    </div>
-                    <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                      <div className="text-right">
-                        <span className="text-[10px] text-emerald-400 font-bold block">✓ Dext lié</span>
-                        <span className="text-xs font-serif text-slate-400">TPS: 7.50$ | TVQ: 14.96$</span>
-                      </div>
-                      <button type="button" className="px-4 py-2 bg-gold text-noir text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-gold-light transition-colors">
-                        Traiter
-                      </button>
-                    </div>
-                  </div>
 
-                  {/* Antoine Row */}
-                  <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-gold/20 transition-all">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-ivoire">Antoine Tremblay</span>
-                        <span className="text-[10px] px-2 py-0.5 border border-blue-500/30 text-blue-400 rounded-full uppercase tracking-wider font-semibold">L'Étudiant</span>
+                      {/* Antoine Row */}
+                      <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-gold/20 transition-all">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-ivoire">Antoine Tremblay</span>
+                            <span className="text-[10px] px-2 py-0.5 border border-blue-500/30 text-blue-400 rounded-full uppercase tracking-wider font-semibold">L'Étudiant</span>
+                          </div>
+                          <p className="text-xs text-slate-500 mt-1">Ontario • 2025 • Tremblay_T4_Releve8_2025.zip</p>
+                        </div>
+                        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                          <div className="text-right">
+                            <span className="text-[10px] text-amber-400 font-bold block">⚠️ Fichiers reçus</span>
+                            <span className="text-xs font-serif text-slate-400">Calculateur T4 Ontario</span>
+                          </div>
+                          <button type="button" className="px-4 py-2 bg-white/5 border border-white/10 text-ivoire text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-white/10 transition-colors">
+                            Télécharger
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">Ontario • 2025 • Tremblay_T4_Releve8_2025.zip</p>
-                    </div>
-                    <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                      <div className="text-right">
-                        <span className="text-[10px] text-amber-400 font-bold block">⚠️ Fichiers reçus</span>
-                        <span className="text-xs font-serif text-slate-400">Calculateur T4 Ontario</span>
-                      </div>
-                      <button type="button" className="px-4 py-2 bg-white/5 border border-white/10 text-ivoire text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-white/10 transition-colors">
-                        Télécharger
-                      </button>
-                    </div>
-                  </div>
 
-                  {/* Sébastien Row */}
-                  <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-gold/20 transition-all">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-ivoire">Sébastien Roy</span>
-                        <span className="text-[10px] px-2 py-0.5 border border-purple-500/30 text-purple-400 rounded-full uppercase tracking-wider font-semibold">Le Rattrapage</span>
+                      {/* Sébastien Row */}
+                      <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-gold/20 transition-all">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-ivoire">Sébastien Roy</span>
+                            <span className="text-[10px] px-2 py-0.5 border border-purple-500/30 text-purple-400 rounded-full uppercase tracking-wider font-semibold">Le Rattrapage</span>
+                          </div>
+                          <p className="text-xs text-slate-500 mt-1">Roy Rénovation • QC • 6 Mois manquants</p>
+                        </div>
+                        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                          <div className="text-right">
+                            <span className="text-[10px] text-emerald-400 font-bold block">✓ Dépôt Stripe payé</span>
+                            <span className="text-xs font-serif text-slate-400">Google Drive: Roy_Rattrapage_2025</span>
+                          </div>
+                          <button type="button" className="px-4 py-2 bg-gold text-noir text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-gold-light transition-colors">
+                            Reconcilier
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">Roy Rénovation • QC • 6 Mois manquants</p>
-                    </div>
-                    <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                      <div className="text-right">
-                        <span className="text-[10px] text-emerald-400 font-bold block">✓ Dépôt Stripe payé</span>
-                        <span className="text-xs font-serif text-slate-400">Google Drive: Roy_Rattrapage_2025</span>
-                      </div>
-                      <button type="button" className="px-4 py-2 bg-gold text-noir text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-gold-light transition-colors">
-                        Reconcilier
-                      </button>
-                    </div>
-                  </div>
+                    </>
+                  )}
                 </div>
               </div>
 

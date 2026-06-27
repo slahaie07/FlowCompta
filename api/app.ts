@@ -1566,7 +1566,7 @@ app.get('/api/network/status', (_req, res) => {
 
 app.get('/sitemap.xml', (_req, res) => {
   const base = 'https://compta-flow.net';
-  const paths = ['/', '/estimate', '/privacy', '/terms', '/legal', '/cookies', '/login', '/showcase',
+  const paths = ['/', '/estimate', '/calculateur-taxes', '/privacy', '/terms', '/legal', '/cookies', '/login', '/showcase',
     ...Object.values(CANADA_REGIONS).map((r) => `/ca/${r.seoSlug}`)];
   const urls = paths.map((p) => `<url><loc>${base}${p}</loc><changefreq>weekly</changefreq><priority>${p === '/' ? '1.0' : '0.8'}</priority></url>`).join('');
   res.setHeader('Content-Type', 'application/xml');

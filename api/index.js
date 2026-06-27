@@ -3230,6 +3230,7 @@ app.get("/sitemap.xml", (_req, res) => {
   const paths = [
     "/",
     "/estimate",
+    "/calculateur-taxes",
     "/privacy",
     "/terms",
     "/legal",
