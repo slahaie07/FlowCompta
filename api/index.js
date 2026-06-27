@@ -3227,19 +3227,23 @@ app.get("/api/network/status", (_req, res) => {
 });
 app.get("/sitemap.xml", (_req, res) => {
   const base = "https://compta-flow.net";
-  const paths = [
-    "/",
-    "/estimate",
-    "/privacy",
-    "/terms",
-    "/legal",
-    "/cookies",
-    "/login",
-    "/showcase",
-    ...Object.values(CANADA_REGIONS).map((r) => `/ca/${r.seoSlug}`)
+  const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+  const pages = [
+    { path: "/", priority: "1.0", changefreq: "daily" },
+    { path: "/estimate", priority: "0.8", changefreq: "weekly" },
+    { path: "/login", priority: "0.5", changefreq: "monthly" },
+    { path: "/showcase", priority: "0.4", changefreq: "monthly" },
+    { path: "/privacy", priority: "0.3", changefreq: "yearly" },
+    { path: "/terms", priority: "0.3", changefreq: "yearly" },
+    { path: "/legal", priority: "0.3", changefreq: "yearly" },
+    { path: "/cookies", priority: "0.3", changefreq: "yearly" },
+    ...Object.values(CANADA_REGIONS).map((r) => ({ path: `/ca/${r.seoSlug}`, priority: "0.9", changefreq: "weekly" }))
   ];
-  const urls = paths.map((p) => `<url><loc>${base}${p}</loc><changefreq>weekly</changefreq><priority>${p === "/" ? "1.0" : "0.8"}</priority></url>`).join("");
+  const urls = pages.map(
+    ({ path: path3, priority, changefreq }) => `<url><loc>${base}${path3}</loc><lastmod>${today}</lastmod><changefreq>${changefreq}</changefreq><priority>${priority}</priority></url>`
+  ).join("");
   res.setHeader("Content-Type", "application/xml");
+  res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
   res.send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`);
 });
 app.post("/api/quote/create", async (req, res) => {
@@ -3569,4 +3573,3 @@ var app_default = app;
 export {
   app_default as default
 };
-//# sourceMappingURL=index.js.map
