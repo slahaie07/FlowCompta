@@ -12,6 +12,7 @@ import { PortalRoutes } from './PortalRoutes';
 import { getPortalNav, isPathAllowedForRole } from '../config';
 import { getPortalBasePath, getActiveSegment } from '../config/paths';
 import type { PortalShellProps, PortalRole, PortalRouteContext } from '../types';
+import { supabase } from '../../lib/supabase';
 
 interface PortalShellComponentProps extends PortalShellProps {
   routeContext: Omit<PortalRouteContext, keyof PortalShellProps | 'isVaultUnlocked' | 'setIsVaultUnlocked' | 'setShowMandateSigning'>;
@@ -248,9 +249,25 @@ export function PortalShell({
       </main>
 
       {showMandateSigning && (
-        <EliteSignature contract={currentContract} onComplete={() => {
+        <EliteSignature contract={currentContract} onComplete={async (signatureData?: string) => {
           if (userData?.id) {
             localStorage.setItem(`comptaflow_mandate_signed_${userData.id}`, 'true');
+            // Persister la signature en DB
+            await supabase.from('mandates').insert({
+              client_id: userData.id,
+              service_type: userData.selectedServiceId ?? null,
+              signature_data: signatureData ?? null,
+              signed_at: new Date().toISOString(),
+            });
+            // Notifier l'admin
+            await supabase.functions.invoke('notify-mandate-signed', {
+              body: {
+                clientName: userData.fullName || userData.displayName || null,
+                clientEmail: userData.email,
+                serviceType: userData.selectedServiceId ?? null,
+                signedAt: new Date().toISOString(),
+              }
+            });
           }
           setShowMandateSigning(false);
           if (onRefreshProfile) onRefreshProfile();
