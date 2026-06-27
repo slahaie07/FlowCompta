@@ -46,7 +46,7 @@ export function TeamAndTools() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="p-8 rounded-3xl bg-surface border border-white/5 hover:border-gold/20 hover:bg-white/[0.01] transition-all duration-300 space-y-6"
+              className="p-8 rounded-3xl glass-card space-y-6"
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold">

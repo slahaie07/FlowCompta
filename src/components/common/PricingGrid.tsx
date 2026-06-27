@@ -185,10 +185,10 @@ export function PricingGrid() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className={`rounded-3xl p-8 flex flex-col justify-between relative transition-all duration-300 border ${
+              className={`rounded-3xl p-8 flex flex-col justify-between relative transition-all duration-500 ${
                 tier.popular
-                  ? 'border-gold bg-gold/[0.02] shadow-[0_0_40px_rgba(212,175,55,0.1)] scale-105 md:scale-105 z-10'
-                  : 'border-white/5 bg-surface hover:border-gold/30 hover:bg-white/[0.01]'
+                  ? 'glass-card premium-border-gold shadow-[0_0_50px_rgba(212,175,55,0.15)] scale-105 md:scale-105 z-10'
+                  : 'glass-card'
               }`}
             >
               {tier.popular && (

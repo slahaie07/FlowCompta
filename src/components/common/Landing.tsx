@@ -188,40 +188,121 @@ export function Landing() {
             </motion.div>
 
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }} 
-              animate={{ opacity: 1, scale: 1 }} 
-              transition={{ duration: 1, delay: 0.2 }}
+              initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
               className="hidden lg:block relative"
             >
-              <div className="p-10 rounded-[24px] glass-card premium-border-gold relative overflow-hidden group">
+              {/* Outer decorative ambient glow */}
+              <div className="absolute -inset-4 bg-gradient-to-r from-gold/15 to-indigo-500/10 rounded-[32px] blur-3xl opacity-60 pointer-events-none" />
+
+              {/* Main Mock Portal Card */}
+              <div className="p-8 rounded-[28px] glass-card premium-border-gold relative overflow-hidden group select-none">
                 {/* Corner Accents */}
-                <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-gold rounded-tl-[24px]" />
-                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-gold rounded-br-[24px]" />
+                <div className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-gold/40 rounded-tl-[28px]" />
+                <div className="absolute bottom-0 right-0 w-10 h-10 border-b-2 border-r-2 border-gold/40 rounded-br-[28px]" />
                 
-                <Badge variant="gold" className="absolute top-6 right-6 font-bold tracking-widest uppercase text-[10px]">{t('hero.preview')}</Badge>
-                
-                <div className="space-y-6 pt-4">
-                  {[
-                    { label: t('hero.item1'), value: t('hero.item1Val') },
-                    { label: t('hero.item2'), value: "12" },
-                    { label: t('hero.item3'), value: t('hero.item3Val') },
-                    { label: t('hero.item4'), value: t('hero.item4Val') },
-                  ].map((item, i) => (
-                    <motion.div 
-                      key={item.label} 
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 + (i * 0.1) }}
-                      className="flex justify-between items-center border-b border-white/10 pb-4"
-                    >
-                      <span className="text-silver font-light">{item.label}</span>
-                      <span className="text-ivoire font-medium">{item.value}</span>
-                    </motion.div>
-                  ))}
-                  <div className="flex justify-between items-center pt-4">
-                    <span className="text-lg font-serif">{t('hero.peace')}</span>
-                    <span className="text-2xl font-serif text-gold border-b-[3px] border-double border-gold pb-1">{t('hero.total')}</span>
+                {/* Mock Portal Header */}
+                <div className="flex justify-between items-center border-b border-white/5 pb-5 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold font-mono text-sm font-bold shadow-[0_0_15px_rgba(212,175,55,0.15)] animate-pulse">
+                      CF
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-mono tracking-widest text-slate-500 uppercase">Espace Client</div>
+                      <div className="text-sm font-serif font-bold text-ivoire">Cabinet ComptaFlow</div>
+                    </div>
                   </div>
+                  <Badge variant="gold" className="font-bold tracking-widest uppercase text-[9px] px-2.5 py-1 bg-gold/10 border-gold/25">
+                    {lang === 'en' ? 'Live Demo' : 'Démo en direct'}
+                  </Badge>
+                </div>
+
+                <div className="space-y-5">
+                  {/* Financial Graph Mock */}
+                  <div className="p-5 rounded-2xl bg-black/40 border border-white/5 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400">Trésorerie active</span>
+                      <span className="text-xs font-mono font-bold text-emerald-400 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                        +14.8%
+                      </span>
+                    </div>
+                    {/* SVG Line Graph */}
+                    <div className="h-16 w-full pt-2">
+                      <svg viewBox="0 0 300 60" className="w-full h-full">
+                        <defs>
+                          <linearGradient id="chart-glow" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.25" />
+                            <stop offset="100%" stopColor="#D4AF37" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        {/* Area */}
+                        <path 
+                          d="M 0 50 Q 50 30 100 45 T 200 15 T 300 10 L 300 60 L 0 60 Z" 
+                          fill="url(#chart-glow)" 
+                        />
+                        {/* Line */}
+                        <path 
+                          d="M 0 50 Q 50 30 100 45 T 200 15 T 300 10" 
+                          fill="none" 
+                          stroke="#D4AF37" 
+                          strokeWidth="2.5" 
+                          strokeLinecap="round"
+                          className="drop-shadow-[0_2px_8px_rgba(212,175,55,0.4)]"
+                        />
+                        {/* Dots */}
+                        <circle cx="100" cy="45" r="3.5" fill="#0A0A0A" stroke="#D4AF37" strokeWidth="1.5" />
+                        <circle cx="200" cy="15" r="3.5" fill="#0A0A0A" stroke="#D4AF37" strokeWidth="1.5" />
+                        <circle cx="300" cy="10" r="4" fill="#D4AF37" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Smart Reconciliation Row */}
+                  <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gold/5 border border-gold/10 flex items-center justify-center text-gold">
+                        <span className="text-[10px] font-mono font-bold">$</span>
+                      </div>
+                      <div className="text-left">
+                        <div className="text-xs font-semibold text-ivoire">Virement Interac Reçu</div>
+                        <div className="text-[10px] text-slate-500 font-mono">1,250.00 $ · RBC Banque</div>
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[9px] font-bold uppercase tracking-wider flex items-center gap-1">
+                      <span className="w-1 h-1 rounded-full bg-emerald-400" />
+                      Rapproché
+                    </span>
+                  </div>
+
+                  {/* CPA Notification */}
+                  <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-gold flex items-center justify-center text-[10px] font-bold text-white shrink-0 shadow-md">
+                      SC
+                    </div>
+                    <div className="text-left space-y-1">
+                      <div className="text-xs font-bold text-ivoire flex items-center gap-1.5">
+                        <span>Sylvie CPA</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-gold" />
+                        <span className="text-[9px] text-gold uppercase tracking-wider font-mono">Conseillère</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 leading-relaxed">
+                        {lang === 'en'
+                          ? "Your Q2 GST/HST declarations are optimized and ready for electronic signature."
+                          : "Vos déclarations de TPS/TVQ du T2 sont optimisées et prêtes pour signature électronique."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Status */}
+                <div className="flex justify-between items-center border-t border-white/5 pt-4 mt-5 text-[10px] font-mono text-slate-500">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    {lang === 'en' ? 'Server: Connected' : 'Serveur : Connecté'}
+                  </span>
+                  <span>PIPEDA &amp; Loi 25 Compliant</span>
                 </div>
               </div>
             </motion.div>
