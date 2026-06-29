@@ -20,7 +20,17 @@ import {
 import type { User } from '@supabase/supabase-js';
 import { applySupabaseMigrations } from './lib/supabaseMigrations';
 import { CONFIG, SUPPORT_EMAIL } from '../src/lib/config';
-import { getClientEmailTemplate, getAgentEmailTemplate, getAdminEmailTemplate, getAccountConfirmedEmailTemplate } from './lib/emailTemplates';
+import {
+  getClientEmailTemplate,
+  getAgentEmailTemplate,
+  getAdminEmailTemplate,
+  getAccountConfirmedEmailTemplate,
+  getOnboardingCompleteEmailTemplate,
+  getAgentWelcomeEmailTemplate,
+  getTransactionAlertEmailTemplate,
+  getSupportResponseEmailTemplate,
+  getPremiumEmailWrapper
+} from './lib/emailTemplates';
 import { calculateCanadianTaxes, formatCAD, getTaxDisplayLines, normalizeProvinceCode } from '../src/lib/financeUtils';
 const { Client } = pg;
 
@@ -224,17 +234,38 @@ const botLog = (action: string, target: string, details: string) => {
 };
 
 const sendSupremeEmail = async (to: string, subject: string, html: string) => {
-    if (!process.env.RESEND_API_KEY) return;
-    await resend.emails.send({
-        from: 'Comptaflow <support@compta-flow.net>',
-        to: [to],
-        subject: subject,
-        html: `<div style="font-family:serif;background:#050505;color:#F5F1E8;padding:50px;border:1px solid #D4AF37;">
-                <h1 style="color:#D4AF37;border-bottom:1px solid #D4AF37;padding-bottom:10px;">Comptaflow ELITE</h1>
-                ${html}
-                <p style="margin-top:40px;font-size:10px;color:#A39E92;">SYSTÈME SUPRÊME AUTOMATISÉ — QUÉBEC</p>
-               </div>`
-    });
+    const resendKey = sanitizeEnvVar(process.env.RESEND_API_KEY) || 're_mock_resend_key_123';
+    const hasRealKey = resendKey && resendKey !== 're_mock_resend_key_123' && !resendKey.startsWith('mock');
+    
+    let finalHtml = html;
+    if (!html.trim().startsWith('<!DOCTYPE') && !html.includes('<html')) {
+        finalHtml = getPremiumEmailWrapper({
+            title: subject,
+            subtitle: subject,
+            bodyHtml: html,
+            buttonUrl: 'https://compta-flow.net/login',
+            buttonLabel: 'Accéder au Portail'
+        });
+    }
+
+    if (hasRealKey) {
+        try {
+            await resend.emails.send({
+                from: 'Comptaflow <support@compta-flow.net>',
+                to: [to],
+                subject: subject,
+                html: finalHtml
+            });
+            botLog('SUPREME_EMAIL_SENT', to, `Email "${subject}" envoyé avec succès.`);
+        } catch (err: any) {
+            console.error("[sendSupremeEmail] Failed to send email:", err.message);
+        }
+    } else {
+        console.log("=================== SIMULATION D'ENVOI D'EMAIL ===================");
+        console.log(`[TO: ${to}] [SUBJECT: ${subject}]`);
+        console.log(`[HTML Content Preview]:\n${html}`);
+        console.log("==================================================================");
+    }
 };
 
 // ============================================================
@@ -624,20 +655,21 @@ app.post('/api/webhook/onboarding-complete', async (req, res) => {
       ar: 'مرحباً بكم في ComptaFlow — الخطوات التالية',
     };
 
-    const htmlBodies = {
-      fr: `<p>Bonjour ${displayName || ''},</p>
-        <p>Votre compte est actif. <strong>Prochaine étape :</strong> choisissez votre service dans l'aperçu, puis suivez votre <a href="${procedureUrl}">parcours dossier</a>.</p>
-        <p><a href="${portalUrl}">Accéder à mon portail</a></p>`,
-      en: `<p>Hello ${displayName || ''},</p>
-        <p>Your account is active. <strong>Next step:</strong> pick your service in Overview, then follow your <a href="${procedureUrl}">guided file path</a>.</p>
-        <p><a href="${portalUrl}">Open my portal</a></p>`,
-      ar: `<p>مرحباً ${displayName || ''},</p>
-        <p>حسابك نشط. <strong>الخطوة التالية:</strong> اختر خدمتك et اتبع <a href="${procedureUrl}">مسار ملفك</a>.</p>
-        <p><a href="${portalUrl}">فتح بوابتي</a></p>`,
-    };
+    const welcomeHtml = getOnboardingCompleteEmailTemplate({
+      clientName: displayName || '',
+      lang,
+      portalUrl,
+      procedureUrl
+    });
+
+    const resendKeyForOnboarding = sanitizeEnvVar(process.env.RESEND_API_KEY) || 're_mock_resend_key_123';
+    if (resendKeyForOnboarding && resendKeyForOnboarding !== 're_mock_resend_key_123' && !resendKeyForOnboarding.startsWith('mock')) {
+      await sendSupremeEmail(email, subjects[lang], welcomeHtml);
+    } else {
+      console.log(`[CLIENT ONBOARDING WELCOME to ${email}] Subject: ${subjects[lang]}`);
+    }
 
     if (process.env.RESEND_API_KEY) {
-      await sendSupremeEmail(email, subjects[lang], htmlBodies[lang]);
       
       const detailedNotificationHtml = `
         <div style="font-family:sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;border:1px solid #eee;padding:20px;border-radius:8px;background-color:#fff;">
@@ -759,7 +791,24 @@ app.post('/api/support/ai-chat', async (req, res) => {
       context?.language === 'en' || context?.language === 'ar' ? context.language : 'fr';
 
     botLog('AGENTIC_REPLY', result.agentId, `${result.intent} ${result.latencyMs}ms`);
-    res.json(toPublicSupportReply(result, lang));
+    const reply = toPublicSupportReply(result, lang);
+
+    // Envoi automatique du suivi d'assistance par courriel si adresse fournie
+    if (context?.email) {
+      const supportEmailHtml = getSupportResponseEmailTemplate({
+        clientName: context.fullName || 'Client Comptaflow',
+        question: message,
+        aiResponse: reply.answer,
+        portalUrl: 'https://compta-flow.net/login'
+      });
+      sendSupremeEmail(
+        context.email.toLowerCase().trim(),
+        lang === 'en' ? '[Compta-Flow] Support Ticket Follow-up' : lang === 'ar' ? '[Compta-Flow] متابعة تذكرة الدعم' : '[Compta-Flow] Suivi de votre demande de support',
+        supportEmailHtml
+      ).catch(err => console.error('[AI Chat Support Email] Failed to send:', err.message));
+    }
+
+    res.json(reply);
   } catch (e: any) {
     botLog('AGENTIC_CRASH', 'Support', e.message);
     const lang =
@@ -1424,6 +1473,31 @@ app.post('/api/admin/create-sub-admin', async (req, res) => {
     });
 
     if (profileError) throw profileError;
+
+    // Envoi automatique du courriel d'accueil collaborateur avec credentials
+    const agentWelcomeHtml = getAgentWelcomeEmailTemplate({
+      agentName: fullName,
+      agentEmail: cleanEmail,
+      portalUrl: 'https://compta-flow.net/login',
+      tempPassword: password
+    });
+
+    const resendKeyForAgent = sanitizeEnvVar(process.env.RESEND_API_KEY) || 're_mock_resend_key_123';
+    if (resendKeyForAgent && resendKeyForAgent !== 're_mock_resend_key_123' && !resendKeyForAgent.startsWith('mock')) {
+      try {
+        await resend.emails.send({
+          from: 'Comptaflow <collab@compta-flow.net>',
+          to: [cleanEmail],
+          subject: '[Compta-Flow] Création de votre accès collaborateur ✦',
+          html: agentWelcomeHtml
+        });
+        botLog('AGENT_WELCOME_EMAIL_SENT', cleanEmail, `Courriel d'accueil collaborateur envoyé.`);
+      } catch (sendErr: any) {
+        console.error("[create-sub-admin] Resend welcome dispatch failed:", sendErr.message);
+      }
+    } else {
+      console.log(`[AGENT WELCOME EMAIL to ${cleanEmail}] Subject: Création de votre accès collaborateur ✦`);
+    }
 
     return res.json({
       success: true,
