@@ -1,6 +1,7 @@
 import Navbar from "./components/Navbar";
 import LiveTicker from "./components/LiveTicker";
 import HeroSearch from "./components/HeroSearch";
+import LiveOffersEngine from "./components/LiveOffersEngine";
 import FlashDeals from "./components/FlashDeals";
 import DestinationGrid from "./components/DestinationGrid";
 import FeaturesSection from "./components/FeaturesSection";
@@ -94,6 +95,8 @@ export default function Home() {
       </section>
 
       {/* Sections */}
+      <div className="section-divider" />
+      <LiveOffersEngine />
       <div className="section-divider" />
       <FlashDeals />
       <div className="section-divider" />
