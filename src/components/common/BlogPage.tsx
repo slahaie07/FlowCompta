@@ -1,3 +1,4 @@
+import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Clock } from 'lucide-react';
 import { Button } from '../ui/Button';
@@ -28,7 +29,7 @@ function formatDate(iso: string, lang: string) {
 // Simple markdown-lite renderer (bold, headings, lists, links)
 function renderBody(body: string) {
   const lines = body.trim().split('\n');
-  const els: JSX.Element[] = [];
+  const els: React.ReactElement[] = [];
   let i = 0;
   while (i < lines.length) {
     const line = lines[i];
@@ -278,7 +279,7 @@ export function BlogArticlePage() {
             <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="gold" size="lg">
               {isFr ? 'Ouvrir mon dossier (Gratuit) →' : 'Open My File (Free) →'}
             </Button>
-            <Button onClick={() => navigate('/estimate')} variant="outline" size="lg">
+            <Button onClick={() => navigate('/estimate')} variant="secondary" size="lg">
               {isFr ? 'Obtenir un devis' : 'Get a Quote'}
             </Button>
           </div>

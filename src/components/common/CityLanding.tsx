@@ -171,7 +171,7 @@ export function CityLanding({ city }: Props) {
             <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="gold" size="lg">
               {isFr ? 'Ouvrir mon dossier (Gratuit)' : 'Open My File (Free)'} <ArrowRight size={16} />
             </Button>
-            <Button onClick={() => navigate('/estimate')} variant="outline" size="lg">
+            <Button onClick={() => navigate('/estimate')} variant="secondary" size="lg">
               {isFr ? 'Obtenir un devis' : 'Get a Quote'}
             </Button>
           </div>
