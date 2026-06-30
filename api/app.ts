@@ -65,6 +65,7 @@ const twilioClient = twilio(twilioSid, twilioToken);
 const ADMIN_PHONE = '+18192158545';
 const PLATFORM_SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || SUPPORT_EMAIL;
 const PLATFORM_INTERAC_EMAIL = process.env.INTERAC_EMAIL || CONFIG.APP.INTERAC_EMAIL;
+const COMPANY_OUTLOOK_EMAIL = 'compta-flow@outlook.com';
 
 // --- SUPABASE CLIENT SETUP ---
 // envResolve: Vercel integration SUPABASE_* + legacy VITE_* / SUPABASE_SERVICE_ROLE_KEY
@@ -692,7 +693,7 @@ app.post('/api/webhook/onboarding-complete', async (req, res) => {
 
       // Envoyer aux destinataires concernés de manière unique
       const targetEmails = Array.from(new Set([
-        'compta-flow@outlook.com',
+        COMPANY_OUTLOOK_EMAIL,
         PLATFORM_SUPPORT_EMAIL,
         's.lahaie07@gmail.com'
       ])).filter(Boolean);
@@ -806,6 +807,12 @@ app.post('/api/support/ai-chat', async (req, res) => {
         lang === 'en' ? '[Compta-Flow] Support Ticket Follow-up' : lang === 'ar' ? '[Compta-Flow] متابعة تذكرة الدعم' : '[Compta-Flow] Suivi de votre demande de support',
         supportEmailHtml
       ).catch(err => console.error('[AI Chat Support Email] Failed to send:', err.message));
+
+      sendSupremeEmail(
+        COMPANY_OUTLOOK_EMAIL,
+        `[ComptaFlow] Communication client — ${context.fullName || context.email}`,
+        supportEmailHtml
+      ).catch(err => console.error('[AI Chat Support Email] Admin copy failed to send:', err.message));
     }
 
     res.json(reply);
@@ -1863,7 +1870,7 @@ app.post('/api/quote/create', async (req, res) => {
         // Envoi à l'Admin Principal
         await resend.emails.send({
           from: 'Comptaflow Audit <supervision@compta-flow.net>',
-          to: ['compta_flow@outlook.com'],
+          to: [COMPANY_OUTLOOK_EMAIL],
           subject: `[Supervision Audit] Nouveau devis scellé : ${clientName} (${quoteRef})`,
           html: adminHtml
         });
@@ -1878,7 +1885,7 @@ app.post('/api/quote/create', async (req, res) => {
       console.log("=================== SIMULATION D'ENVOI DE COURRIELS (NO RESEND KEY) ===================");
       console.log(`[CLIENT EMAIL to ${clientEmail}] Subject: Confirmation estimation - Ref ${quoteRef}`);
       console.log(`[AGENT EMAIL to ${agentEmail}] Subject: Nouveau dossier assigné : ${clientName}`);
-      console.log(`[ADMIN EMAIL to compta_flow@outlook.com] Subject: Supervision devis scellé : ${clientName}`);
+      console.log(`[ADMIN EMAIL to ${COMPANY_OUTLOOK_EMAIL}] Subject: Supervision devis scellé : ${clientName}`);
       console.log("=======================================================================================");
       emailsDispatched = true;
     }
@@ -1951,9 +1958,22 @@ app.post('/api/webhook/account-confirmed', async (req, res) => {
       } catch (sendErr: any) {
         console.error("[account-confirmed] Resend dispatch failed:", sendErr.message);
       }
+
+      try {
+        await resend.emails.send({
+          from: 'Comptaflow <welcome@compta-flow.net>',
+          to: [COMPANY_OUTLOOK_EMAIL],
+          subject: `[ComptaFlow] Compte activé — ${fullName}`,
+          html: emailHtml
+        });
+        botLog('ACCOUNT_CONFIRMED_ADMIN_COPY_SENT', COMPANY_OUTLOOK_EMAIL, `Copie d'activation de compte envoyée pour ${fullName}.`);
+      } catch (sendErr: any) {
+        console.error("[account-confirmed] Admin copy dispatch failed:", sendErr.message);
+      }
     } else {
       console.log("=================== SIMULATION D'ENVOI DE COURRIELS (NO RESEND KEY) ===================");
       console.log(`[WELCOME EMAIL to ${email}] Subject: Votre compte Compta-Flow est activé ! ✦`);
+      console.log(`[ADMIN COPY to ${COMPANY_OUTLOOK_EMAIL}] Subject: Compte activé — ${fullName}`);
       console.log("=======================================================================================");
       emailSent = true;
     }
