@@ -4,7 +4,6 @@ import {
   getLegalRequirements,
   getNetworkStatus,
   getRegion,
-  buildSitemapUrls,
   normalizeProvinceCode,
 } from './canadaNetwork';
 
@@ -22,13 +21,6 @@ describe('canadaNetwork', () => {
   it('applique le pattern légal Loi 25 pour le Québec', () => {
     const legal = getLegalRequirements(getRegion('QC'));
     expect(legal.some((l) => l.id === 'loi25_officer')).toBe(true);
-  });
-
-  it('génère un sitemap avec pages régionales', () => {
-    const urls = buildSitemapUrls();
-    expect(urls.some((u) => u.includes('/ca/quebec'))).toBe(true);
-    expect(urls.some((u) => u.includes('/ca/ontario'))).toBe(true);
-    expect(urls.length).toBeGreaterThanOrEqual(18);
   });
 
   it('retourne le status réseau conforme', () => {

@@ -1984,6 +1984,166 @@ var formatCAD = (amount) => {
   }).format(amount);
 };
 
+// src/lib/canadaNetwork.ts
+var CANADIAN_REGIONS = {
+  QC: {
+    code: "QC",
+    nameFr: "Qu\xE9bec",
+    nameEn: "Quebec",
+    timezone: "America/Toronto",
+    edgeRegion: "yul1",
+    privacyLaw: "loi25",
+    taxLabelFr: "TPS 5 % + TVQ 9,975 %",
+    taxLabelEn: "GST 5% + QST 9.975%",
+    seoSlug: "quebec",
+    active: true
+  },
+  ON: {
+    code: "ON",
+    nameFr: "Ontario",
+    nameEn: "Ontario",
+    timezone: "America/Toronto",
+    edgeRegion: "yyz1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TVH 13 %",
+    taxLabelEn: "HST 13%",
+    seoSlug: "ontario",
+    active: true
+  },
+  BC: {
+    code: "BC",
+    nameFr: "Colombie-Britannique",
+    nameEn: "British Columbia",
+    timezone: "America/Vancouver",
+    edgeRegion: "yvr1",
+    privacyLaw: "pipeda_bc",
+    taxLabelFr: "TPS 5 % + TVP 7 %",
+    taxLabelEn: "GST 5% + PST 7%",
+    seoSlug: "colombie-britannique",
+    active: true
+  },
+  AB: {
+    code: "AB",
+    nameFr: "Alberta",
+    nameEn: "Alberta",
+    timezone: "America/Edmonton",
+    edgeRegion: "yyc1",
+    privacyLaw: "pipa_ab",
+    taxLabelFr: "TPS 5 %",
+    taxLabelEn: "GST 5%",
+    seoSlug: "alberta",
+    active: true
+  },
+  MB: {
+    code: "MB",
+    nameFr: "Manitoba",
+    nameEn: "Manitoba",
+    timezone: "America/Winnipeg",
+    edgeRegion: "ywg1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TPS 5 % + TVP 7 %",
+    taxLabelEn: "GST 5% + PST 7%",
+    seoSlug: "manitoba",
+    active: true
+  },
+  SK: {
+    code: "SK",
+    nameFr: "Saskatchewan",
+    nameEn: "Saskatchewan",
+    timezone: "America/Regina",
+    edgeRegion: "yxe1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TPS 5 % + TVP 6 %",
+    taxLabelEn: "GST 5% + PST 6%",
+    seoSlug: "saskatchewan",
+    active: true
+  },
+  NB: {
+    code: "NB",
+    nameFr: "Nouveau-Brunswick",
+    nameEn: "New Brunswick",
+    timezone: "America/Moncton",
+    edgeRegion: "yfc1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TVH 15 %",
+    taxLabelEn: "HST 15%",
+    seoSlug: "nouveau-brunswick",
+    active: true
+  },
+  NS: {
+    code: "NS",
+    nameFr: "Nouvelle-\xC9cosse",
+    nameEn: "Nova Scotia",
+    timezone: "America/Halifax",
+    edgeRegion: "yhz1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TVH 15 %",
+    taxLabelEn: "HST 15%",
+    seoSlug: "nouvelle-ecosse",
+    active: true
+  },
+  PE: {
+    code: "PE",
+    nameFr: "\xCEle-du-Prince-\xC9douard",
+    nameEn: "Prince Edward Island",
+    timezone: "America/Halifax",
+    edgeRegion: "yhz1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TVH 15 %",
+    taxLabelEn: "HST 15%",
+    seoSlug: "ipe",
+    active: true
+  },
+  NL: {
+    code: "NL",
+    nameFr: "Terre-Neuve-et-Labrador",
+    nameEn: "Newfoundland and Labrador",
+    timezone: "America/St_Johns",
+    edgeRegion: "yyt1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TVH 15 %",
+    taxLabelEn: "HST 15%",
+    seoSlug: "terre-neuve",
+    active: true
+  },
+  YT: {
+    code: "YT",
+    nameFr: "Yukon",
+    nameEn: "Yukon",
+    timezone: "America/Whitehorse",
+    edgeRegion: "yxy1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TPS 5 %",
+    taxLabelEn: "GST 5%",
+    seoSlug: "yukon",
+    active: true
+  },
+  NT: {
+    code: "NT",
+    nameFr: "Territoires du Nord-Ouest",
+    nameEn: "Northwest Territories",
+    timezone: "America/Yellowknife",
+    edgeRegion: "yxy1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TPS 5 %",
+    taxLabelEn: "GST 5%",
+    seoSlug: "tno",
+    active: true
+  },
+  NU: {
+    code: "NU",
+    nameFr: "Nunavut",
+    nameEn: "Nunavut",
+    timezone: "America/Iqaluit",
+    edgeRegion: "yxy1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TPS 5 %",
+    taxLabelEn: "GST 5%",
+    seoSlug: "nunavut",
+    active: true
+  }
+};
+
 // api/app.ts
 var { Client: Client2 } = pg2;
 dotenv.config();
@@ -3245,21 +3405,7 @@ app.get("/api/health", async (_req, res) => {
     agents: listAgents({ internal: false }).length
   });
 });
-var CANADA_REGIONS = {
-  QC: { code: "QC", nameFr: "Qu\xE9bec", nameEn: "Quebec", privacyLaw: "loi25", edgeRegion: "yul1", seoSlug: "quebec" },
-  ON: { code: "ON", nameFr: "Ontario", nameEn: "Ontario", privacyLaw: "pipeda", edgeRegion: "yyz1", seoSlug: "ontario" },
-  BC: { code: "BC", nameFr: "Colombie-Britannique", nameEn: "British Columbia", privacyLaw: "pipeda_bc", edgeRegion: "yvr1", seoSlug: "colombie-britannique" },
-  AB: { code: "AB", nameFr: "Alberta", nameEn: "Alberta", privacyLaw: "pipa_ab", edgeRegion: "yyc1", seoSlug: "alberta" },
-  MB: { code: "MB", nameFr: "Manitoba", nameEn: "Manitoba", privacyLaw: "pipeda", edgeRegion: "ywg1", seoSlug: "manitoba" },
-  SK: { code: "SK", nameFr: "Saskatchewan", nameEn: "Saskatchewan", privacyLaw: "pipeda", edgeRegion: "yxe1", seoSlug: "saskatchewan" },
-  NB: { code: "NB", nameFr: "Nouveau-Brunswick", nameEn: "New Brunswick", privacyLaw: "pipeda", edgeRegion: "yfc1", seoSlug: "nouveau-brunswick" },
-  NS: { code: "NS", nameFr: "Nouvelle-\xC9cosse", nameEn: "Nova Scotia", privacyLaw: "pipeda", edgeRegion: "yhz1", seoSlug: "nouvelle-ecosse" },
-  PE: { code: "PE", nameFr: "\xCEle-du-Prince-\xC9douard", nameEn: "Prince Edward Island", privacyLaw: "pipeda", edgeRegion: "yhz1", seoSlug: "ipe" },
-  NL: { code: "NL", nameFr: "Terre-Neuve-et-Labrador", nameEn: "Newfoundland and Labrador", privacyLaw: "pipeda", edgeRegion: "yyt1", seoSlug: "terre-neuve" },
-  YT: { code: "YT", nameFr: "Yukon", nameEn: "Yukon", privacyLaw: "pipeda", edgeRegion: "yxy1", seoSlug: "yukon" },
-  NT: { code: "NT", nameFr: "Territoires du Nord-Ouest", nameEn: "Northwest Territories", privacyLaw: "pipeda", edgeRegion: "yxy1", seoSlug: "tno" },
-  NU: { code: "NU", nameFr: "Nunavut", nameEn: "Nunavut", privacyLaw: "pipeda", edgeRegion: "yxy1", seoSlug: "nunavut" }
-};
+var CANADA_REGIONS = CANADIAN_REGIONS;
 var detectProvince = (req) => {
   const regionHeader = String(req.headers["x-vercel-ip-country-region"] ?? req.headers["cf-region-code"] ?? "");
   if (regionHeader && CANADA_REGIONS[regionHeader.toUpperCase()]) return regionHeader.toUpperCase();
@@ -3313,21 +3459,33 @@ var CITY_SLUGS = [
   "longueuil",
   "sherbrooke",
   "gatineau",
+  "trois-rivieres",
   "toronto",
   "ottawa",
   "mississauga",
   "brampton",
   "hamilton",
+  "kitchener",
+  "london",
+  "windsor",
   "vancouver",
   "victoria",
   "surrey",
+  "burnaby",
+  "richmond",
   "calgary",
   "edmonton",
   "red-deer",
   "winnipeg",
   "halifax",
   "saskatoon",
-  "regina"
+  "regina",
+  "moncton",
+  "charlottetown",
+  "st-johns",
+  "whitehorse",
+  "yellowknife",
+  "iqaluit"
 ];
 var BLOG_SLUGS = [
   "choisir-comptable-en-ligne-canada",

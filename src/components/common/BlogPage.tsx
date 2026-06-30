@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Clock } from 'lucide-react';
 import { Button } from '../ui/Button';
@@ -194,21 +194,22 @@ export function BlogArticlePage() {
 
   const article = getArticle(slug ?? '');
 
-  if (!article) {
-    navigate('/ressources');
-    return null;
-  }
+  useEffect(() => {
+    if (!article) navigate('/ressources');
+  }, [article, navigate]);
 
-  const title = isFr ? article.titleFr : article.titleEn;
-  const excerpt = isFr ? article.excerptFr : article.excerptEn;
-  const body = isFr ? article.bodyFr : article.bodyEn;
+  const title = article ? (isFr ? article.titleFr : article.titleEn) : 'ComptaFlow';
+  const excerpt = article ? (isFr ? article.excerptFr : article.excerptEn) : '';
+  const body = article ? (isFr ? article.bodyFr : article.bodyEn) : '';
 
   usePageMeta({
-    title: `${title} | ComptaFlow`,
+    title: article ? `${title} | ComptaFlow` : 'ComptaFlow',
     description: excerpt,
-    canonical: `${SITE.url}/ressources/${article.slug}`,
-    keywords: article.keywordsFr.join(', '),
+    canonical: article ? `${SITE.url}/ressources/${article.slug}` : `${SITE.url}/ressources`,
+    keywords: article ? article.keywordsFr.join(', ') : undefined,
   });
+
+  if (!article) return null;
 
   const articleSchema = {
     '@context': 'https://schema.org',

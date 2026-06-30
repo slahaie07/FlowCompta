@@ -59,12 +59,14 @@ const TRUST_EN = ['🆓 Free file opening', '🔒 Canadian data hosting', '⚡ 2
 
 export function RegionalLanding() {
   const { slug } = useParams<{ slug: string }>();
+  const city = getCity(slug ?? '');
+  return city ? <CityLanding city={city} /> : <ProvinceLanding slug={slug} />;
+}
+
+function ProvinceLanding({ slug }: { slug?: string }) {
   const navigate = useNavigate();
   const { lang } = useLanguage();
   const isFr = lang === 'fr';
-
-  const city = getCity(slug ?? '');
-  if (city) return <CityLanding city={city} />;
 
   const region = getActiveRegions().find((r) => r.seoSlug === slug) ?? getRegion('QC');
   const regionName = isFr ? region.nameFr : region.nameEn;

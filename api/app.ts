@@ -32,6 +32,7 @@ import {
   getPremiumEmailWrapper
 } from './lib/emailTemplates';
 import { calculateCanadianTaxes, formatCAD, getTaxDisplayLines, normalizeProvinceCode } from '../src/lib/financeUtils';
+import { CANADIAN_REGIONS, type CanadianRegion } from '../src/lib/canadaNetwork';
 const { Client } = pg;
 
 dotenv.config();
@@ -1579,21 +1580,8 @@ app.get('/api/health', async (_req, res) => {
 });
 
 // --- RÉSEAU CANADA : détection région, légal, status ---
-const CANADA_REGIONS: Record<string, { code: string; nameFr: string; nameEn: string; privacyLaw: string; edgeRegion: string; seoSlug: string }> = {
-  QC: { code: 'QC', nameFr: 'Québec', nameEn: 'Quebec', privacyLaw: 'loi25', edgeRegion: 'yul1', seoSlug: 'quebec' },
-  ON: { code: 'ON', nameFr: 'Ontario', nameEn: 'Ontario', privacyLaw: 'pipeda', edgeRegion: 'yyz1', seoSlug: 'ontario' },
-  BC: { code: 'BC', nameFr: 'Colombie-Britannique', nameEn: 'British Columbia', privacyLaw: 'pipeda_bc', edgeRegion: 'yvr1', seoSlug: 'colombie-britannique' },
-  AB: { code: 'AB', nameFr: 'Alberta', nameEn: 'Alberta', privacyLaw: 'pipa_ab', edgeRegion: 'yyc1', seoSlug: 'alberta' },
-  MB: { code: 'MB', nameFr: 'Manitoba', nameEn: 'Manitoba', privacyLaw: 'pipeda', edgeRegion: 'ywg1', seoSlug: 'manitoba' },
-  SK: { code: 'SK', nameFr: 'Saskatchewan', nameEn: 'Saskatchewan', privacyLaw: 'pipeda', edgeRegion: 'yxe1', seoSlug: 'saskatchewan' },
-  NB: { code: 'NB', nameFr: 'Nouveau-Brunswick', nameEn: 'New Brunswick', privacyLaw: 'pipeda', edgeRegion: 'yfc1', seoSlug: 'nouveau-brunswick' },
-  NS: { code: 'NS', nameFr: 'Nouvelle-Écosse', nameEn: 'Nova Scotia', privacyLaw: 'pipeda', edgeRegion: 'yhz1', seoSlug: 'nouvelle-ecosse' },
-  PE: { code: 'PE', nameFr: 'Île-du-Prince-Édouard', nameEn: 'Prince Edward Island', privacyLaw: 'pipeda', edgeRegion: 'yhz1', seoSlug: 'ipe' },
-  NL: { code: 'NL', nameFr: 'Terre-Neuve-et-Labrador', nameEn: 'Newfoundland and Labrador', privacyLaw: 'pipeda', edgeRegion: 'yyt1', seoSlug: 'terre-neuve' },
-  YT: { code: 'YT', nameFr: 'Yukon', nameEn: 'Yukon', privacyLaw: 'pipeda', edgeRegion: 'yxy1', seoSlug: 'yukon' },
-  NT: { code: 'NT', nameFr: 'Territoires du Nord-Ouest', nameEn: 'Northwest Territories', privacyLaw: 'pipeda', edgeRegion: 'yxy1', seoSlug: 'tno' },
-  NU: { code: 'NU', nameFr: 'Nunavut', nameEn: 'Nunavut', privacyLaw: 'pipeda', edgeRegion: 'yxy1', seoSlug: 'nunavut' },
-};
+// Source unique de vérité : src/lib/canadaNetwork.ts (CANADIAN_REGIONS)
+const CANADA_REGIONS: Record<string, CanadianRegion> = CANADIAN_REGIONS;
 
 const detectProvince = (req: express.Request): string => {
   const regionHeader = String(req.headers['x-vercel-ip-country-region'] ?? req.headers['cf-region-code'] ?? '');
@@ -1646,11 +1634,12 @@ app.get('/api/network/status', (_req, res) => {
 });
 
 const CITY_SLUGS = [
-  'montreal', 'quebec-ville', 'laval', 'longueuil', 'sherbrooke', 'gatineau',
-  'toronto', 'ottawa', 'mississauga', 'brampton', 'hamilton',
-  'vancouver', 'victoria', 'surrey',
+  'montreal', 'quebec-ville', 'laval', 'longueuil', 'sherbrooke', 'gatineau', 'trois-rivieres',
+  'toronto', 'ottawa', 'mississauga', 'brampton', 'hamilton', 'kitchener', 'london', 'windsor',
+  'vancouver', 'victoria', 'surrey', 'burnaby', 'richmond',
   'calgary', 'edmonton', 'red-deer',
   'winnipeg', 'halifax', 'saskatoon', 'regina',
+  'moncton', 'charlottetown', 'st-johns', 'whitehorse', 'yellowknife', 'iqaluit',
 ];
 
 const BLOG_SLUGS = [
