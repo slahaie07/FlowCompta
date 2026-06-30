@@ -441,27 +441,74 @@ export function Landing() {
       )}
 
       {/* Canada Network SEO Section */}
-      <section className="py-16 border-t border-gold/15 bg-noir text-center relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 space-y-6">
-          <h4 className="font-serif font-bold text-ivoire text-lg tracking-wider">
-            {lang === 'en' ? 'Bookkeeping Services across Canada' : 'Services de tenue de livres partout au Canada'}
-          </h4>
-          <p className="text-slate-500 text-xs max-w-2xl mx-auto leading-relaxed">
-            {lang === 'en' 
-              ? 'Our secure client portal and automated bookkeeping system is compliant with local regulations across all provinces.' 
-              : 'Notre portail sécurisé et notre système de tenue de livres s\'adaptent aux réglementations fiscales et à la protection des données de chaque province.'}
-          </p>
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 pt-4">
-            {getActiveRegions().map((region) => (
-              <button
-                key={region.code}
-                onClick={() => navigate(`/ca/${region.seoSlug}`)}
-                className="text-xs font-mono text-silver hover:text-gold transition-colors flex items-center gap-1.5 border border-white/5 hover:border-gold/30 px-4 py-2 rounded-full bg-white/[0.01] cursor-pointer"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-                {lang === 'en' ? region.nameEn : region.nameFr} ({region.code})
-              </button>
-            ))}
+      <section className="py-16 border-t border-gold/15 bg-noir relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 space-y-10">
+          {/* Provinces */}
+          <div className="text-center space-y-4">
+            <h4 className="font-serif font-bold text-ivoire text-lg tracking-wider">
+              {lang === 'en' ? 'Bookkeeping Services across Canada' : 'Services de tenue de livres partout au Canada'}
+            </h4>
+            <p className="text-slate-500 text-xs max-w-2xl mx-auto leading-relaxed">
+              {lang === 'en'
+                ? 'Our secure client portal and automated bookkeeping system is compliant with local regulations across all provinces.'
+                : 'Notre portail sécurisé et notre système de tenue de livres s\'adaptent aux réglementations fiscales et à la protection des données de chaque province.'}
+            </p>
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 pt-2">
+              {getActiveRegions().map((region) => (
+                <button
+                  key={region.code}
+                  onClick={() => navigate(`/ca/${region.seoSlug}`)}
+                  className="text-xs font-mono text-silver hover:text-gold transition-colors flex items-center gap-1.5 border border-white/5 hover:border-gold/30 px-3 py-1.5 rounded-full bg-white/[0.01] cursor-pointer"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-gold" />
+                  {lang === 'en' ? region.nameEn : region.nameFr}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Cities */}
+          <div className="text-center space-y-3">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-gold/50">
+              {lang === 'en' ? 'Major cities' : 'Grandes villes'}
+            </p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {[
+                { slug: 'montreal', fr: 'Montréal', en: 'Montreal' },
+                { slug: 'toronto', fr: 'Toronto', en: 'Toronto' },
+                { slug: 'vancouver', fr: 'Vancouver', en: 'Vancouver' },
+                { slug: 'calgary', fr: 'Calgary', en: 'Calgary' },
+                { slug: 'ottawa', fr: 'Ottawa', en: 'Ottawa' },
+                { slug: 'edmonton', fr: 'Edmonton', en: 'Edmonton' },
+                { slug: 'quebec-ville', fr: 'Québec', en: 'Quebec City' },
+                { slug: 'winnipeg', fr: 'Winnipeg', en: 'Winnipeg' },
+                { slug: 'mississauga', fr: 'Mississauga', en: 'Mississauga' },
+                { slug: 'laval', fr: 'Laval', en: 'Laval' },
+                { slug: 'halifax', fr: 'Halifax', en: 'Halifax' },
+                { slug: 'victoria', fr: 'Victoria', en: 'Victoria' },
+              ].map((city) => (
+                <button
+                  key={city.slug}
+                  onClick={() => navigate(`/ca/${city.slug}`)}
+                  className="text-xs text-slate-500 hover:text-gold transition-colors px-3 py-1 rounded-full hover:bg-white/[0.03] border border-transparent hover:border-gold/15"
+                >
+                  {lang === 'en' ? city.en : city.fr}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Blog link */}
+          <div className="text-center pt-2 border-t border-white/5">
+            <p className="text-xs text-slate-500 mb-3">
+              {lang === 'en' ? 'Accounting guides for Canadian entrepreneurs' : 'Guides comptables pour entrepreneurs canadiens'}
+            </p>
+            <button
+              onClick={() => navigate('/ressources')}
+              className="text-xs text-gold hover:underline font-semibold"
+            >
+              {lang === 'en' ? '📚 Browse accounting resources →' : '📚 Consulter les ressources comptables →'}
+            </button>
           </div>
         </div>
       </section>

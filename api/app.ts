@@ -1638,12 +1638,54 @@ app.get('/api/network/status', (_req, res) => {
   });
 });
 
+const CITY_SLUGS = [
+  'montreal', 'quebec-ville', 'laval', 'longueuil', 'sherbrooke', 'gatineau',
+  'toronto', 'ottawa', 'mississauga', 'brampton', 'hamilton',
+  'vancouver', 'victoria', 'surrey',
+  'calgary', 'edmonton', 'red-deer',
+  'winnipeg', 'halifax', 'saskatoon', 'regina',
+];
+
+const BLOG_SLUGS = [
+  'choisir-comptable-en-ligne-canada',
+  'guide-tps-tvq-tvh-canada',
+  'tenue-livres-travailleur-autonome-canada',
+  'quickbooks-sage-wave-comparaison-canada',
+  'paie-t4-guide-employeurs-canada',
+  'demarrer-entreprise-canada-obligations-comptables',
+];
+
 app.get('/sitemap.xml', (_req, res) => {
   const base = 'https://compta-flow.net';
-  const paths = ['/', '/estimate', '/calculateur-taxes', '/privacy', '/terms', '/legal', '/cookies', '/login', '/showcase',
-    ...Object.values(CANADA_REGIONS).map((r) => `/ca/${r.seoSlug}`)];
-  const urls = paths.map((p) => `<url><loc>${base}${p}</loc><changefreq>weekly</changefreq><priority>${p === '/' ? '1.0' : '0.8'}</priority></url>`).join('');
+  const today = new Date().toISOString().split('T')[0];
+
+  interface SitemapEntry { path: string; priority: string; changefreq: string; lastmod?: string }
+  const pages: SitemapEntry[] = [
+    { path: '/', priority: '1.0', changefreq: 'daily', lastmod: today },
+    { path: '/estimate', priority: '0.9', changefreq: 'weekly', lastmod: today },
+    { path: '/calculateur-taxes', priority: '0.9', changefreq: 'monthly', lastmod: today },
+    { path: '/ressources', priority: '0.8', changefreq: 'weekly', lastmod: today },
+    { path: '/login', priority: '0.6', changefreq: 'monthly' },
+    { path: '/showcase', priority: '0.4', changefreq: 'monthly' },
+    { path: '/privacy', priority: '0.3', changefreq: 'yearly' },
+    { path: '/terms', priority: '0.3', changefreq: 'yearly' },
+    { path: '/legal', priority: '0.3', changefreq: 'yearly' },
+    { path: '/cookies', priority: '0.3', changefreq: 'yearly' },
+    // Province pages — high priority
+    ...Object.values(CANADA_REGIONS).map((r) => ({ path: `/ca/${r.seoSlug}`, priority: '0.9', changefreq: 'monthly', lastmod: today })),
+    // City pages — high priority
+    ...CITY_SLUGS.map((s) => ({ path: `/ca/${s}`, priority: '0.85', changefreq: 'monthly', lastmod: today })),
+    // Blog articles
+    ...BLOG_SLUGS.map((s) => ({ path: `/ressources/${s}`, priority: '0.8', changefreq: 'monthly', lastmod: today })),
+  ];
+
+  const urls = pages.map((p) => {
+    const lastmod = p.lastmod ? `<lastmod>${p.lastmod}</lastmod>` : '';
+    return `<url><loc>${base}${p.path}</loc>${lastmod}<changefreq>${p.changefreq}</changefreq><priority>${p.priority}</priority></url>`;
+  }).join('');
+
   res.setHeader('Content-Type', 'application/xml');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
   res.send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`);
 });
 
