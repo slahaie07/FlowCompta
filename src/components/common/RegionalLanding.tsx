@@ -82,6 +82,7 @@ function ProvinceLanding({ slug }: { slug?: string }) {
   usePageMeta({
     title: isFr ? titleFr : titleEn,
     description: isFr ? descFr : descEn,
+    lang: isFr ? 'fr' : 'en',
     canonical: `${SITE.url}/ca/${region.seoSlug}`,
     keywords: isFr
       ? `comptable en ligne ${region.nameFr}, tenue de livres ${region.nameFr}, comptabilité PME ${region.nameFr}, ${region.taxLabelFr}`

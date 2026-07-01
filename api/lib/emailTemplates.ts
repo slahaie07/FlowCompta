@@ -3,6 +3,16 @@
  * Modèles HTML conformes à la charte graphique luxueuse du cabinet.
  */
 
+/** Escapes HTML-significant characters — every field here may originate from user-submitted form data. */
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 interface QuoteData {
   clientName: string;
   clientEmail: string;
@@ -150,11 +160,11 @@ export function getClientEmailTemplate(data: QuoteData): string {
         <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
           <tr>
             <td style="padding: 8px 0; color: #88888F;">الخدمة المحددة:</td>
-            <td style="padding: 8px 0; text-align: left; font-weight: bold;">${data.serviceName}</td>
+            <td style="padding: 8px 0; text-align: left; font-weight: bold;">${escapeHtml(data.serviceName)}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; color: #88888F;">المقاطعة الضريبية:</td>
-            <td style="padding: 8px 0; text-align: left; font-weight: bold;">${data.province}</td>
+            <td style="padding: 8px 0; text-align: left; font-weight: bold;">${escapeHtml(data.province)}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; color: #88888F;">المبلغ الأساسي (قبل الضريبة):</td>
@@ -172,15 +182,15 @@ export function getClientEmailTemplate(data: QuoteData): string {
       <ol style="color: #CCCCCC; font-size: 13px; padding-right: 20px; line-height: 1.8;">
         <li style="margin-bottom: 10px;"><strong>توقيع عقد التمثيل المشترك</strong>: يرجى تسجيل الدخول إلى بوابتك لوضع توقيعك الإلكتروني المؤمن.</li>
         <li style="margin-bottom: 10px;"><strong>تحميل مستنداتك الثبوتية</strong>: قم بإيداع كشوفاتك البنكية وإيصالاتك بأمان في خزنتنا الإلكترونية المشفرة.</li>
-        <li style="margin-bottom: 10px;"><strong>مكالمة انطلاق الخدمة</strong>: احجز لقاءك الترحيبي مع محاسبتك المعتمدة <strong>إيليا (${data.agentName})</strong> لتأكيد مسار ملفك.</li>
+        <li style="margin-bottom: 10px;"><strong>مكالمة انطلاق الخدمة</strong>: احجز لقاءك الترحيبي مع محاسبتك المعتمدة <strong>إيليا (${escapeHtml(data.agentName)})</strong> لتأكيد مسار ملفك.</li>
       </ol>
-      
+
       <p style="color: #88888F; font-size: 12px; font-style: italic; margin-top: 30px; border-right: 2px solid #D4AF37; padding-right: 10px;">لقد أرفقنا تقدير الرسوم الرسمي بصيغة PDF في هذا البريد الإلكتروني للرجوع إليه في أي وقت.</p>
     `;
 
     return getPremiumEmailWrapper({
       title: "تأكيد تقدير الرسوم - Compta-Flow",
-      subtitle: `مرحباً ${data.clientName}،`,
+      subtitle: `مرحباً ${escapeHtml(data.clientName)}،`,
       bodyHtml,
       buttonLabel: "دخول بوابة العملاء",
       buttonUrl: data.portalUrl,
@@ -193,24 +203,24 @@ export function getClientEmailTemplate(data: QuoteData): string {
     <p style="color: #CCCCCC; font-size: 14px;">C'est un honneur et un privilège de vous accompagner dans la structuration et la souveraineté financière de votre entreprise. Votre simulation tarifaire a été scellée avec succès.</p>
     
     <div style="background-color: rgba(214, 175, 55, 0.04); border: 1px solid rgba(214, 175, 55, 0.15); padding: 25px; border-radius: 16px; margin: 30px 0;">
-      <h3 style="color: #D4AF37; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(214, 175, 55, 0.1); padding-bottom: 8px;">Détails de l'Estimation (${data.quoteRef})</h3>
+      <h3 style="color: #D4AF37; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(214, 175, 55, 0.1); padding-bottom: 8px;">Détails de l'Estimation (${escapeHtml(data.quoteRef)})</h3>
       <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Service sélectionné :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.serviceName}</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.serviceName)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Province fiscale :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.province}</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.province)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Montant brut (HT) :</td>
-          <td style="padding: 8px 0; text-align: right; font-family: monospace;">${data.subtotal}</td>
+          <td style="padding: 8px 0; text-align: right; font-family: monospace;">${escapeHtml(data.subtotal)}</td>
         </tr>
         ${data.taxesHtml}
         <tr style="border-top: 1px solid rgba(214, 175, 55, 0.2); font-size: 15px; font-weight: bold;">
           <td style="padding: 12px 0; color: #D4AF37;">Total TTC estimé :</td>
-          <td style="padding: 12px 0; text-align: right; color: #D4AF37; font-family: monospace;">${data.total}</td>
+          <td style="padding: 12px 0; text-align: right; color: #D4AF37; font-family: monospace;">${escapeHtml(data.total)}</td>
         </tr>
       </table>
     </div>
@@ -219,7 +229,7 @@ export function getClientEmailTemplate(data: QuoteData): string {
     <ol style="color: #CCCCCC; font-size: 13px; padding-left: 20px; line-height: 1.8;">
       <li style="margin-bottom: 10px;"><strong>Signer le mandat de représentation</strong> : Connectez-vous à votre portail sécurisé pour apposer votre signature numérique légale.</li>
       <li style="margin-bottom: 10px;"><strong>Téléverser vos pièces justificatives</strong> : Déposez vos relevés bancaires et factures dans votre coffre-fort chiffré.</li>
-      <li style="margin-bottom: 10px;"><strong>Appel de cadrage</strong> : Planifiez votre appel de bienvenue avec votre comptable attitrée, <strong>${data.agentName}</strong>.</li>
+      <li style="margin-bottom: 10px;"><strong>Appel de cadrage</strong> : Planifiez votre appel de bienvenue avec votre comptable attitrée, <strong>${escapeHtml(data.agentName)}</strong>.</li>
     </ol>
     
     <p style="color: #88888F; font-size: 12px; font-style: italic; margin-top: 30px; border-left: 2px solid #D4AF37; padding-left: 10px;">Le devis officiel au format PDF est joint à ce courriel.</p>
@@ -227,7 +237,7 @@ export function getClientEmailTemplate(data: QuoteData): string {
 
   return getPremiumEmailWrapper({
     title: "Confirmation de votre estimation premium - Compta-Flow",
-    subtitle: `Bonjour ${data.clientName},`,
+    subtitle: `Bonjour ${escapeHtml(data.clientName)},`,
     bodyHtml: bodyHtmlFr,
     buttonLabel: "Accéder à mon Espace Client",
     buttonUrl: data.portalUrl,
@@ -247,26 +257,26 @@ export function getAgentEmailTemplate(data: QuoteData): string {
       <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Nom complet / Cie :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.clientName}</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.clientName)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Courriel de contact :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;"><a href="mailto:${data.clientEmail}" style="color: #D4AF37; text-decoration: none;">${data.clientEmail}</a></td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;"><a href="mailto:${escapeHtml(data.clientEmail)}" style="color: #D4AF37; text-decoration: none;">${escapeHtml(data.clientEmail)}</a></td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Service souscrit :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.serviceName}</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.serviceName)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Tarif mensuel :</td>
-          <td style="padding: 8px 0; text-align: right; color: #D4AF37; font-family: monospace; font-weight: bold;">${data.total}</td>
+          <td style="padding: 8px 0; text-align: right; color: #D4AF37; font-family: monospace; font-weight: bold;">${escapeHtml(data.total)}</td>
         </tr>
       </table>
     </div>
 
     <h3 style="font-family: serif; font-size: 16px; color: #FDFBF7; margin-top: 30px;">Actions requises :</h3>
     <ul style="color: #CCCCCC; font-size: 13px; padding-left: 20px; line-height: 1.8;">
-      <li>Valider la conformité des taxes régionales du client (${data.province}).</li>
+      <li>Valider la conformité des taxes régionales du client (${escapeHtml(data.province)}).</li>
       <li>Suivre le téléversement des livrables et la signature du mandat sur votre portail.</li>
       <li>Préparer l'entretien d'accueil et le plan comptable adapté.</li>
     </ul>
@@ -274,7 +284,7 @@ export function getAgentEmailTemplate(data: QuoteData): string {
 
   return getPremiumEmailWrapper({
     title: "[Compta-Flow] Nouveau dossier assigné",
-    subtitle: `Bonjour ${data.agentName},`,
+    subtitle: `Bonjour ${escapeHtml(data.agentName)},`,
     bodyHtml,
     buttonLabel: "Ouvrir mon Portail Agent",
     buttonUrl: data.portalUrl,
@@ -294,29 +304,29 @@ export function getAdminEmailTemplate(data: QuoteData): string {
       <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Client :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.clientName} (${data.clientEmail})</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.clientName)} (${escapeHtml(data.clientEmail)})</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Agent assigné :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.agentName} (${data.agentEmail})</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.agentName)} (${escapeHtml(data.agentEmail)})</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Région fiscale :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.province}</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.province)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Détail financier :</td>
-          <td style="padding: 8px 0; text-align: right; font-family: monospace;">Sub: ${data.subtotal} / Net: ${data.total}</td>
+          <td style="padding: 8px 0; text-align: right; font-family: monospace;">Sub: ${escapeHtml(data.subtotal)} / Net: ${escapeHtml(data.total)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Réf Devis :</td>
-          <td style="padding: 8px 0; text-align: right; font-family: monospace;">${data.quoteRef}</td>
+          <td style="padding: 8px 0; text-align: right; font-family: monospace;">${escapeHtml(data.quoteRef)}</td>
         </tr>
       </table>
     </div>
 
     <div style="background-color: rgba(0, 150, 255, 0.02); border: 1px solid rgba(0, 150, 255, 0.1); padding: 15px; border-radius: 12px; font-size: 12px; color: #A0C0E0; margin-bottom: 30px;">
-      ℹ <strong>Hardening de Sécurité :</strong> La politique d'isolation RLS a été vérifiée automatiquement sur ce dossier. L'accès aux documents et écritures comptables est strictement restreint à l'agent assigné (${data.agentName}) et supervisé par le propriétaire principal.
+      ℹ <strong>Hardening de Sécurité :</strong> La politique d'isolation RLS a été vérifiée automatiquement sur ce dossier. L'accès aux documents et écritures comptables est strictement restreint à l'agent assigné (${escapeHtml(data.agentName)}) et supervisé par le propriétaire principal.
     </div>
   `;
 
@@ -341,7 +351,7 @@ export function getAccountConfirmedEmailTemplate(data: { clientName: string; cli
       </div>
     </div>
     <p style="color: #CCCCCC; font-size: 14px; text-align: center; max-width: 480px; margin: 0 auto 20px auto; font-weight: 300;">
-      Félicitations ! Votre adresse courriel (<strong>${data.clientEmail}</strong>) a été validée avec succès. Votre espace sécurisé Compta-Flow is maintenant pleinement actif et prêt pour la prise en charge de vos besoins comptables.
+      Félicitations ! Votre adresse courriel (<strong>${escapeHtml(data.clientEmail)}</strong>) a été validée avec succès. Votre espace sécurisé Compta-Flow is maintenant pleinement actif et prêt pour la prise en charge de vos besoins comptables.
     </p>
 
     <p style="color: #88888F; font-size: 13px; text-align: center; max-width: 450px; margin: 0 auto 30px auto;">
@@ -351,7 +361,7 @@ export function getAccountConfirmedEmailTemplate(data: { clientName: string; cli
 
   return getPremiumEmailWrapper({
     title: "Votre compte Compta-Flow est activé !",
-    subtitle: `Bonjour ${data.clientName},`,
+    subtitle: `Bonjour ${escapeHtml(data.clientName)},`,
     bodyHtml,
     buttonLabel: "Accéder à mon Portail",
     buttonUrl: data.portalUrl
@@ -375,21 +385,21 @@ export function getOnboardingCompleteEmailTemplate(data: {
   let buttonLabel = '';
   
   if (isAr) {
-    subtitle = `مرحباً ${data.clientName}،`;
+    subtitle = `مرحباً ${escapeHtml(data.clientName)}،`;
     bodyHtml = `
       <p style="color: #CCCCCC; font-size: 14px;">تم تفعيل حسابكم بنجاح واكتمال عملية التسجيل الإرشادية.</p>
       <p style="color: #CCCCCC; font-size: 14px;"><strong>الخطوة التالية:</strong> يرجى اختيار الخدمة المطلوبة من جدول أعمالكم ومتابعة <a href="${data.procedureUrl}" style="color: #D4AF37; text-decoration: none;">مسار ملفكم الاستشاري</a>.</p>
     `;
     buttonLabel = "فتح بوابتي الخاصة";
   } else if (isEn) {
-    subtitle = `Hello ${data.clientName},`;
+    subtitle = `Hello ${escapeHtml(data.clientName)},`;
     bodyHtml = `
       <p style="color: #CCCCCC; font-size: 14px;">Your client onboarding is now complete and your account is active.</p>
       <p style="color: #CCCCCC; font-size: 14px;"><strong>Next step:</strong> please select your desired accounting plan in the Overview tab, then follow your <a href="${data.procedureUrl}" style="color: #D4AF37; text-decoration: none;">guided file path</a>.</p>
     `;
     buttonLabel = "Open My Client Portal";
   } else {
-    subtitle = `Bonjour ${data.clientName},`;
+    subtitle = `Bonjour ${escapeHtml(data.clientName)},`;
     bodyHtml = `
       <p style="color: #CCCCCC; font-size: 14px;">Votre parcours d'intégration client est complété avec succès et votre compte est pleinement actif.</p>
       <p style="color: #CCCCCC; font-size: 14px;"><strong>Prochaine étape :</strong> veuillez sélectionner le service comptable souhaité dans votre tableau de bord, puis suivez votre <a href="${data.procedureUrl}" style="color: #D4AF37; text-decoration: none;">parcours dossier guidé</a>.</p>
@@ -427,12 +437,12 @@ export function getAgentWelcomeEmailTemplate(data: {
       <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Identifiant :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.agentEmail}</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.agentEmail)}</td>
         </tr>
         ${data.tempPassword ? `
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Mot de passe temporaire :</td>
-          <td style="padding: 8px 0; text-align: right; font-family: monospace; font-weight: bold; color: #D4AF37;">${data.tempPassword}</td>
+          <td style="padding: 8px 0; text-align: right; font-family: monospace; font-weight: bold; color: #D4AF37;">${escapeHtml(data.tempPassword)}</td>
         </tr>
         ` : ''}
         <tr>
@@ -446,7 +456,7 @@ export function getAgentWelcomeEmailTemplate(data: {
 
   return getPremiumEmailWrapper({
     title: "[Compta-Flow] Création de votre accès collaborateur",
-    subtitle: `Bonjour ${data.agentName},`,
+    subtitle: `Bonjour ${escapeHtml(data.agentName)},`,
     bodyHtml,
     buttonLabel: "Accéder au Portail Collaborateur",
     buttonUrl: data.portalUrl,
@@ -470,30 +480,30 @@ export function getTransactionAlertEmailTemplate(data: {
       <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Fournisseur / Tiers :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.vendor}</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.vendor)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Montant brut :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #D4AF37; font-family: monospace;">${data.amount} $</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #D4AF37; font-family: monospace;">${escapeHtml(data.amount)} $</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Date de l'opération :</td>
-          <td style="padding: 8px 0; text-align: right;">${data.date}</td>
+          <td style="padding: 8px 0; text-align: right;">${escapeHtml(data.date)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Type / Canal :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.type}</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.type)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Identifiant Transaction :</td>
-          <td style="padding: 8px 0; text-align: right; font-family: monospace; font-size: 11px;">${data.transactionId}</td>
+          <td style="padding: 8px 0; text-align: right; font-family: monospace; font-size: 11px;">${escapeHtml(data.transactionId)}</td>
         </tr>
       </table>
     </div>
   `;
 
   return getPremiumEmailWrapper({
-    title: `[Alerte Flux] Opération de tenue : ${data.vendor}`,
+    title: `[Alerte Flux] Opération de tenue : ${escapeHtml(data.vendor)}`,
     subtitle: "Rapport de Contrôle Financier",
     bodyHtml,
     buttonLabel: "Superviser sur le Portail Admin",
@@ -514,18 +524,18 @@ export function getSupportResponseEmailTemplate(data: {
     <p style="color: #CCCCCC; font-size: 14px;">Votre conseiller virtuel Compta-Flow a traité votre demande d'assistance.</p>
     <div style="background-color: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 12px; margin: 20px 0;">
       <p style="color: #88888F; font-size: 12px; margin-top:0;"><strong>Votre question :</strong></p>
-      <p style="color: #FDFBF7; font-size: 13px; font-style: italic; margin-bottom:0;">"${data.question}"</p>
+      <p style="color: #FDFBF7; font-size: 13px; font-style: italic; margin-bottom:0;">"${escapeHtml(data.question)}"</p>
     </div>
     <div style="background-color: rgba(214, 175, 55, 0.03); border-left: 3px solid #D4AF37; padding: 20px; border-radius: 4px; margin: 20px 0;">
       <p style="color: #D4AF37; font-size: 12px; margin-top:0; font-weight: bold;">Réponse de l'assistant d'élite :</p>
-      <p style="color: #CCCCCC; font-size: 13px; line-height:1.7; margin-bottom:0;">${data.aiResponse.replace(/\n/g, '<br>')}</p>
+      <p style="color: #CCCCCC; font-size: 13px; line-height:1.7; margin-bottom:0;">${escapeHtml(data.aiResponse).replace(/\n/g, '<br>')}</p>
     </div>
     <p style="color: #88888F; font-size: 13px;">Si vous avez besoin de précisions ou de déposer des documents d'analyse, vous pouvez poursuivre la conversation depuis votre espace client.</p>
   `;
 
   return getPremiumEmailWrapper({
     title: "[Compta-Flow] Suivi de votre demande de support",
-    subtitle: `Bonjour ${data.clientName},`,
+    subtitle: `Bonjour ${escapeHtml(data.clientName)},`,
     bodyHtml,
     buttonLabel: "Ouvrir l'Espace Support en ligne",
     buttonUrl: data.portalUrl

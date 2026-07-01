@@ -47,6 +47,7 @@ export function CityLanding({ city }: Props) {
   usePageMeta({
     title: isFr ? titleFr : titleEn,
     description: isFr ? descFr : descEn,
+    lang: isFr ? 'fr' : 'en',
     canonical: `${SITE.url}/ca/${city.slug}`,
     keywords: isFr
       ? `comptable en ligne ${city.nameFr}, tenue de livres ${city.nameFr}, comptabilité PME ${city.nameFr}, ${city.taxNoteFr}`

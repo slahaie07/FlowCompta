@@ -77,10 +77,21 @@ function renderBody(body: string) {
   return els;
 }
 
-function inlineFormat(text: string): string {
+function escapeHtml(text: string): string {
   return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function inlineFormat(text: string): string {
+  return escapeHtml(text)
     .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-gold hover:underline">$1</a>');
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, label: string, url: string) =>
+      /^(https?:\/\/|\/)/i.test(url)
+        ? `<a href="${url}" class="text-gold hover:underline">${label}</a>`
+        : label
+    );
 }
 
 export function BlogListPage() {
@@ -96,6 +107,7 @@ export function BlogListPage() {
     description: isFr
       ? 'Guides, articles et conseils pratiques sur la comptabilité, les taxes (TPS/TVQ/TVH), la paie et la gestion financière pour entrepreneurs canadiens.'
       : 'Guides, articles and practical advice on accounting, taxes (GST/QST/HST), payroll and financial management for Canadian entrepreneurs.',
+    lang: isFr ? 'fr' : 'en',
     canonical: `${SITE.url}/ressources`,
     keywords: isFr
       ? 'ressources comptables Canada, guide TPS TVQ TVH, tenue de livres entrepreneur, comptabilité PME'
@@ -205,6 +217,7 @@ export function BlogArticlePage() {
   usePageMeta({
     title: article ? `${title} | ComptaFlow` : 'ComptaFlow',
     description: excerpt,
+    lang: isFr ? 'fr' : 'en',
     canonical: article ? `${SITE.url}/ressources/${article.slug}` : `${SITE.url}/ressources`,
     keywords: article ? article.keywordsFr.join(', ') : undefined,
   });

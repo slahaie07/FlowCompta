@@ -88,9 +88,17 @@ function isInternalAgentRequest(req: express.Request): boolean {
   if (headerSecret && String(headerSecret) === ADMIN_SECRET) return true;
   const bearer = req.headers.authorization?.split(' ')[1];
   if (bearer && bearer === ADMIN_SECRET) return true;
-  const bodySecret = (req.body as { secret?: string } | undefined)?.secret;
-  if (bodySecret && bodySecret === ADMIN_SECRET) return true;
   return false;
+}
+
+/** Escapes HTML-significant characters to prevent injection into email/SMS templates built from user input. */
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 async function findAuthUserByEmail(
@@ -178,7 +186,15 @@ const saveDb = (data: any) => { try { fs.writeFileSync(DB_PATH, JSON.stringify(d
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(cors());
+const ALLOWED_ORIGINS = [/^https:\/\/(?:[\w-]+\.)*compta-flow\.net$/, /^https:\/\/[\w-]+\.vercel\.app$/];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || ALLOWED_ORIGINS.some((pattern) => pattern.test(origin))) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+}));
 app.use(express.json({ limit: '50mb' }));
 
 // --- MIDDLEWARE DE SÉCURITÉ (HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy - Items 10, 11, 12, 27, 28, 32) ---
@@ -187,7 +203,7 @@ app.use((req, res, next) => {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.supabase.co https://images.unsplash.com; connect-src 'self' https://*.supabase.co; font-src 'self' https://fonts.gstatic.com;");
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.supabase.co https://images.unsplash.com; connect-src 'self' https://*.supabase.co; font-src 'self' https://fonts.gstatic.com;");
     next();
 });
 
@@ -351,7 +367,8 @@ app.post('/api/diagnostics', (req, res) => {
   if (!isInternalAgentRequest(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
-  const matchingEnv: Record<string, string> = {};
+  // Report which sensitive env vars are configured without ever exposing their values.
+  const sensitiveKeysPresent: Record<string, boolean> = {};
   for (const key of Object.keys(process.env)) {
     const keyLower = key.toLowerCase();
     if (
@@ -364,12 +381,12 @@ app.post('/api/diagnostics', (req, res) => {
       keyLower.includes('postgres') ||
       keyLower.includes('service')
     ) {
-      matchingEnv[key] = process.env[key] || '';
+      sensitiveKeysPresent[key] = Boolean(process.env[key]);
     }
   }
   res.json({
     keys: Object.keys(process.env).sort(),
-    matchingEnv
+    sensitiveKeysPresent
   });
 });
 
@@ -398,9 +415,9 @@ app.post('/api/qbo/push-transaction', async (req, res) => {
 // --- LIVE TRANSACTION TRACKER (SMS & EMAIL) ---
 app.post('/api/webhook/transaction-alert', async (req, res) => {
   const { transactionId, amount, vendor, date, type } = req.body;
-  
+
   const summaryMsg = `COMPTAFLOW ALERT: Nouvelle transaction identifiée.\nFournisseur: ${vendor}\nMontant: ${amount}$\nDate: ${date}\nType: ${type}`;
-  
+
   botLog('LIVE_TRACKER', transactionId, `Analyse en temps réel. Envoi du résumé au ${ADMIN_PHONE}`);
 
   try {
@@ -414,12 +431,12 @@ app.post('/api/webhook/transaction-alert', async (req, res) => {
       console.log(`[SMS MOCK to ${ADMIN_PHONE}] \n${summaryMsg}`);
     }
 
-    await sendSupremeEmail(PLATFORM_SUPPORT_EMAIL, `Alerte Transaction: ${vendor}`, `
+    await sendSupremeEmail(PLATFORM_SUPPORT_EMAIL, `Alerte Transaction: ${escapeHtml(vendor)}`, `
       <h2>Nouvelle Transaction Détectée</h2>
-      <p><strong>Fournisseur:</strong> ${vendor}</p>
-      <p><strong>Montant:</strong> ${amount} $</p>
-      <p><strong>Date:</strong> ${date}</p>
-      <p><strong>Type:</strong> ${type}</p>
+      <p><strong>Fournisseur:</strong> ${escapeHtml(vendor)}</p>
+      <p><strong>Montant:</strong> ${escapeHtml(amount)} $</p>
+      <p><strong>Date:</strong> ${escapeHtml(date)}</p>
+      <p><strong>Type:</strong> ${escapeHtml(type)}</p>
     `);
 
     res.json({ success: true, message: "Alerte envoyée avec succès." });
@@ -678,15 +695,15 @@ app.post('/api/webhook/onboarding-complete', async (req, res) => {
           <h2 style="color:#D4AF37;border-bottom:2px solid #D4AF37;padding-bottom:8px;margin-top:0;">🏛️ Nouvelle Inscription Client</h2>
           <p>Un nouveau client a complété son inscription avec les informations suivantes :</p>
           <table style="width:100%;border-collapse:collapse;margin:20px 0;text-align:left;">
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;width:40%;border:1px solid #ddd;">Nom complet :</td><td style="padding:8px;border:1px solid #ddd;">${displayName || 'Non fourni'}</td></tr>
-            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Adresse courriel :</td><td style="padding:8px;border:1px solid #ddd;">${email}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Province :</td><td style="padding:8px;border:1px solid #ddd;">${province || 'QC'}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;width:40%;border:1px solid #ddd;">Nom complet :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(displayName) || 'Non fourni'}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Adresse courriel :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(email)}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Province :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(province) || 'QC'}</td></tr>
             <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Langue :</td><td style="padding:8px;border:1px solid #ddd;">${lang.toUpperCase()}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Type de profil :</td><td style="padding:8px;border:1px solid #ddd;">${initialProfileType || 'Individuel'}</td></tr>
-            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Nom entreprise :</td><td style="padding:8px;border:1px solid #ddd;">${companyName || 'N/A'}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Numéro NEQ :</td><td style="padding:8px;border:1px solid #ddd;">${neq || 'N/A'}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Type de profil :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(initialProfileType) || 'Individuel'}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Nom entreprise :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(companyName) || 'N/A'}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Numéro NEQ :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(neq) || 'N/A'}</td></tr>
             <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Numéro NAS :</td><td style="padding:8px;border:1px solid #ddd;">${nas ? 'Fourni (Sécurisé)' : 'N/A'}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Comptable référé :</td><td style="padding:8px;border:1px solid #ddd;">${selectedExpertEmail || 'Aucun'}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Comptable référé :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(selectedExpertEmail) || 'Aucun'}</td></tr>
           </table>
           <p style="margin-top:20px;"><a href="${portalUrl}" style="display:inline-block;background:#D4AF37;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;font-weight:bold;">Accéder au portail client</a></p>
         </div>
@@ -770,7 +787,7 @@ app.get('/api/internal/agents', async (req, res) => {
   });
 });
 
-app.post('/api/support/ai-chat', async (req, res) => {
+app.post('/api/support/ai-chat', rateLimiter(20, 60000), async (req, res) => {
   const { message, context, history } = req.body;
 
   if (!message || typeof message !== 'string') {
@@ -795,25 +812,36 @@ app.post('/api/support/ai-chat', async (req, res) => {
     botLog('AGENTIC_REPLY', result.agentId, `${result.intent} ${result.latencyMs}ms`);
     const reply = toPublicSupportReply(result, lang);
 
-    // Envoi automatique du suivi d'assistance par courriel si adresse fournie
-    if (context?.email) {
-      const supportEmailHtml = getSupportResponseEmailTemplate({
-        clientName: context.fullName || 'Client Comptaflow',
-        question: message,
-        aiResponse: reply.answer,
-        portalUrl: 'https://compta-flow.net/login'
-      });
-      sendSupremeEmail(
-        context.email.toLowerCase().trim(),
-        lang === 'en' ? '[Compta-Flow] Support Ticket Follow-up' : lang === 'ar' ? '[Compta-Flow] متابعة تذكرة الدعم' : '[Compta-Flow] Suivi de votre demande de support',
-        supportEmailHtml
-      ).catch(err => console.error('[AI Chat Support Email] Failed to send:', err.message));
+    // Envoi automatique du suivi d'assistance par courriel — uniquement si l'adresse correspond
+    // à un profil existant, pour empêcher un tiers non authentifié de faire dispatcher des emails
+    // à une adresse arbitraire via ce endpoint public.
+    if (context?.email && typeof context.email === 'string') {
+      const emailNormalized = context.email.toLowerCase().trim();
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', emailNormalized)
+        .maybeSingle();
 
-      sendSupremeEmail(
-        COMPANY_OUTLOOK_EMAIL,
-        `[ComptaFlow] Communication client — ${context.fullName || context.email}`,
-        supportEmailHtml
-      ).catch(err => console.error('[AI Chat Support Email] Admin copy failed to send:', err.message));
+      if (existingProfile) {
+        const supportEmailHtml = getSupportResponseEmailTemplate({
+          clientName: context.fullName || 'Client Comptaflow',
+          question: message,
+          aiResponse: reply.answer,
+          portalUrl: 'https://compta-flow.net/login'
+        });
+        sendSupremeEmail(
+          emailNormalized,
+          lang === 'en' ? '[Compta-Flow] Support Ticket Follow-up' : lang === 'ar' ? '[Compta-Flow] متابعة تذكرة الدعم' : '[Compta-Flow] Suivi de votre demande de support',
+          supportEmailHtml
+        ).catch(err => console.error('[AI Chat Support Email] Failed to send:', err.message));
+
+        sendSupremeEmail(
+          COMPANY_OUTLOOK_EMAIL,
+          `[ComptaFlow] Communication client — ${context.fullName || emailNormalized}`,
+          supportEmailHtml
+        ).catch(err => console.error('[AI Chat Support Email] Admin copy failed to send:', err.message));
+      }
     }
 
     res.json(reply);
@@ -1126,7 +1154,7 @@ app.post('/api/profile/delete', async (req, res) => {
         user: conf.user,
         password: SUPABASE_DB_PASSWORD,
         database: 'postgres',
-        ssl: { rejectUnauthorized: false },
+        ssl: { rejectUnauthorized: true },
         connectionTimeoutMillis: 5000
       });
       try {
@@ -1233,7 +1261,7 @@ app.post('/api/profile/delete', async (req, res) => {
         user: conf.user,
         password: SUPABASE_DB_PASSWORD,
         database: 'postgres',
-        ssl: { rejectUnauthorized: false },
+        ssl: { rejectUnauthorized: true },
         connectionTimeoutMillis: 5000
       });
       try {
@@ -1376,7 +1404,7 @@ app.post('/api/profile/export', rateLimiter(5, 60000), async (req, res) => {
         user: conf.user,
         password: SUPABASE_DB_PASSWORD,
         database: 'postgres',
-        ssl: { rejectUnauthorized: false },
+        ssl: { rejectUnauthorized: true },
         connectionTimeoutMillis: 5000
       });
       try {

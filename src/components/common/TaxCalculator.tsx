@@ -9,13 +9,25 @@ import {
   getTaxDisplayLines, 
   formatCAD 
 } from '../../lib/financeUtils';
-import { CANADIAN_REGIONS } from '../../lib/canadaNetwork';
+import { CANADIAN_REGIONS, SITE } from '../../lib/canadaNetwork';
 import { useLanguage } from '../../hooks/useLanguage';
+import { usePageMeta } from '../../hooks/usePageMeta';
 
 export function TaxCalculator() {
   const navigate = useNavigate();
   const { lang } = useLanguage();
   const isFr = lang === 'fr';
+
+  usePageMeta({
+    title: isFr
+      ? 'Calculateur de taxes TPS/TVQ/TVH par province | ComptaFlow'
+      : 'GST/QST/HST Tax Calculator by Province | ComptaFlow',
+    description: isFr
+      ? 'Calculez rapidement les taxes de vente (TPS, TVQ, TVH, TVP) applicables dans chaque province et territoire du Canada. Outil gratuit et instantané.'
+      : 'Quickly calculate sales taxes (GST, QST, HST, PST) for every Canadian province and territory. Free, instant tool.',
+    lang: isFr ? 'fr' : 'en',
+    canonical: `${SITE.url}/calculateur-taxes`,
+  });
 
   const [amountInput, setAmountInput] = useState<string>('100.00');
   const [selectedProvince, setSelectedProvince] = useState<ProvinceCode>('QC');

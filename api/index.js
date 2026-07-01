@@ -555,7 +555,7 @@ var CONFIG = {
     VERSION: "1.0.0-PROD",
     SUPER_ADMIN_EMAILS: ["admin@compta-flow.net", "s.lahaie07@gmail.com"],
     SUB_ADMIN_EMAILS: ["comptable@compta-flow.net", "partenaire@compta-flow.net"],
-    SUPPORT_EMAIL: "comptaflow.officiel@gmail.com",
+    SUPPORT_EMAIL: "compta-flow@outlook.com",
     SITE_URL: "https://compta-flow.net",
     /** Destinataire par défaut des virements Interac plateforme (distinct des comptes auth admin). */
     INTERAC_EMAIL: "comptaflow.officiel@gmail.com"
@@ -1522,6 +1522,9 @@ async function applySupabaseMigrations(options) {
 }
 
 // api/lib/emailTemplates.ts
+function escapeHtml(value) {
+  return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
 var COMMON_CSS = `
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: #050505;
@@ -1625,11 +1628,11 @@ function getClientEmailTemplate(data) {
         <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
           <tr>
             <td style="padding: 8px 0; color: #88888F;">\u0627\u0644\u062E\u062F\u0645\u0629 \u0627\u0644\u0645\u062D\u062F\u062F\u0629:</td>
-            <td style="padding: 8px 0; text-align: left; font-weight: bold;">${data.serviceName}</td>
+            <td style="padding: 8px 0; text-align: left; font-weight: bold;">${escapeHtml(data.serviceName)}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; color: #88888F;">\u0627\u0644\u0645\u0642\u0627\u0637\u0639\u0629 \u0627\u0644\u0636\u0631\u064A\u0628\u064A\u0629:</td>
-            <td style="padding: 8px 0; text-align: left; font-weight: bold;">${data.province}</td>
+            <td style="padding: 8px 0; text-align: left; font-weight: bold;">${escapeHtml(data.province)}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; color: #88888F;">\u0627\u0644\u0645\u0628\u0644\u063A \u0627\u0644\u0623\u0633\u0627\u0633\u064A (\u0642\u0628\u0644 \u0627\u0644\u0636\u0631\u064A\u0628\u0629):</td>
@@ -1647,14 +1650,14 @@ function getClientEmailTemplate(data) {
       <ol style="color: #CCCCCC; font-size: 13px; padding-right: 20px; line-height: 1.8;">
         <li style="margin-bottom: 10px;"><strong>\u062A\u0648\u0642\u064A\u0639 \u0639\u0642\u062F \u0627\u0644\u062A\u0645\u062B\u064A\u0644 \u0627\u0644\u0645\u0634\u062A\u0631\u0643</strong>: \u064A\u0631\u062C\u0649 \u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062F\u062E\u0648\u0644 \u0625\u0644\u0649 \u0628\u0648\u0627\u0628\u062A\u0643 \u0644\u0648\u0636\u0639 \u062A\u0648\u0642\u064A\u0639\u0643 \u0627\u0644\u0625\u0644\u0643\u062A\u0631\u0648\u0646\u064A \u0627\u0644\u0645\u0624\u0645\u0646.</li>
         <li style="margin-bottom: 10px;"><strong>\u062A\u062D\u0645\u064A\u0644 \u0645\u0633\u062A\u0646\u062F\u0627\u062A\u0643 \u0627\u0644\u062B\u0628\u0648\u062A\u064A\u0629</strong>: \u0642\u0645 \u0628\u0625\u064A\u062F\u0627\u0639 \u0643\u0634\u0648\u0641\u0627\u062A\u0643 \u0627\u0644\u0628\u0646\u0643\u064A\u0629 \u0648\u0625\u064A\u0635\u0627\u0644\u0627\u062A\u0643 \u0628\u0623\u0645\u0627\u0646 \u0641\u064A \u062E\u0632\u0646\u062A\u0646\u0627 \u0627\u0644\u0625\u0644\u0643\u062A\u0631\u0648\u0646\u064A\u0629 \u0627\u0644\u0645\u0634\u0641\u0631\u0629.</li>
-        <li style="margin-bottom: 10px;"><strong>\u0645\u0643\u0627\u0644\u0645\u0629 \u0627\u0646\u0637\u0644\u0627\u0642 \u0627\u0644\u062E\u062F\u0645\u0629</strong>: \u0627\u062D\u062C\u0632 \u0644\u0642\u0627\u0621\u0643 \u0627\u0644\u062A\u0631\u062D\u064A\u0628\u064A \u0645\u0639 \u0645\u062D\u0627\u0633\u0628\u062A\u0643 \u0627\u0644\u0645\u0639\u062A\u0645\u062F\u0629 <strong>\u0625\u064A\u0644\u064A\u0627 (${data.agentName})</strong> \u0644\u062A\u0623\u0643\u064A\u062F \u0645\u0633\u0627\u0631 \u0645\u0644\u0641\u0643.</li>
+        <li style="margin-bottom: 10px;"><strong>\u0645\u0643\u0627\u0644\u0645\u0629 \u0627\u0646\u0637\u0644\u0627\u0642 \u0627\u0644\u062E\u062F\u0645\u0629</strong>: \u0627\u062D\u062C\u0632 \u0644\u0642\u0627\u0621\u0643 \u0627\u0644\u062A\u0631\u062D\u064A\u0628\u064A \u0645\u0639 \u0645\u062D\u0627\u0633\u0628\u062A\u0643 \u0627\u0644\u0645\u0639\u062A\u0645\u062F\u0629 <strong>\u0625\u064A\u0644\u064A\u0627 (${escapeHtml(data.agentName)})</strong> \u0644\u062A\u0623\u0643\u064A\u062F \u0645\u0633\u0627\u0631 \u0645\u0644\u0641\u0643.</li>
       </ol>
-      
+
       <p style="color: #88888F; font-size: 12px; font-style: italic; margin-top: 30px; border-right: 2px solid #D4AF37; padding-right: 10px;">\u0644\u0642\u062F \u0623\u0631\u0641\u0642\u0646\u0627 \u062A\u0642\u062F\u064A\u0631 \u0627\u0644\u0631\u0633\u0648\u0645 \u0627\u0644\u0631\u0633\u0645\u064A \u0628\u0635\u064A\u063A\u0629 PDF \u0641\u064A \u0647\u0630\u0627 \u0627\u0644\u0628\u0631\u064A\u062F \u0627\u0644\u0625\u0644\u0643\u062A\u0631\u0648\u0646\u064A \u0644\u0644\u0631\u062C\u0648\u0639 \u0625\u0644\u064A\u0647 \u0641\u064A \u0623\u064A \u0648\u0642\u062A.</p>
     `;
     return getPremiumEmailWrapper({
       title: "\u062A\u0623\u0643\u064A\u062F \u062A\u0642\u062F\u064A\u0631 \u0627\u0644\u0631\u0633\u0648\u0645 - Compta-Flow",
-      subtitle: `\u0645\u0631\u062D\u0628\u0627\u064B ${data.clientName}\u060C`,
+      subtitle: `\u0645\u0631\u062D\u0628\u0627\u064B ${escapeHtml(data.clientName)}\u060C`,
       bodyHtml,
       buttonLabel: "\u062F\u062E\u0648\u0644 \u0628\u0648\u0627\u0628\u0629 \u0627\u0644\u0639\u0645\u0644\u0627\u0621",
       buttonUrl: data.portalUrl,
@@ -1665,24 +1668,24 @@ function getClientEmailTemplate(data) {
     <p style="color: #CCCCCC; font-size: 14px;">C'est un honneur et un privil\xE8ge de vous accompagner dans la structuration et la souverainet\xE9 financi\xE8re de votre entreprise. Votre simulation tarifaire a \xE9t\xE9 scell\xE9e avec succ\xE8s.</p>
     
     <div style="background-color: rgba(214, 175, 55, 0.04); border: 1px solid rgba(214, 175, 55, 0.15); padding: 25px; border-radius: 16px; margin: 30px 0;">
-      <h3 style="color: #D4AF37; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(214, 175, 55, 0.1); padding-bottom: 8px;">D\xE9tails de l'Estimation (${data.quoteRef})</h3>
+      <h3 style="color: #D4AF37; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(214, 175, 55, 0.1); padding-bottom: 8px;">D\xE9tails de l'Estimation (${escapeHtml(data.quoteRef)})</h3>
       <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Service s\xE9lectionn\xE9 :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.serviceName}</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.serviceName)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Province fiscale :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.province}</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.province)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Montant brut (HT) :</td>
-          <td style="padding: 8px 0; text-align: right; font-family: monospace;">${data.subtotal}</td>
+          <td style="padding: 8px 0; text-align: right; font-family: monospace;">${escapeHtml(data.subtotal)}</td>
         </tr>
         ${data.taxesHtml}
         <tr style="border-top: 1px solid rgba(214, 175, 55, 0.2); font-size: 15px; font-weight: bold;">
           <td style="padding: 12px 0; color: #D4AF37;">Total TTC estim\xE9 :</td>
-          <td style="padding: 12px 0; text-align: right; color: #D4AF37; font-family: monospace;">${data.total}</td>
+          <td style="padding: 12px 0; text-align: right; color: #D4AF37; font-family: monospace;">${escapeHtml(data.total)}</td>
         </tr>
       </table>
     </div>
@@ -1691,14 +1694,14 @@ function getClientEmailTemplate(data) {
     <ol style="color: #CCCCCC; font-size: 13px; padding-left: 20px; line-height: 1.8;">
       <li style="margin-bottom: 10px;"><strong>Signer le mandat de repr\xE9sentation</strong> : Connectez-vous \xE0 votre portail s\xE9curis\xE9 pour apposer votre signature num\xE9rique l\xE9gale.</li>
       <li style="margin-bottom: 10px;"><strong>T\xE9l\xE9verser vos pi\xE8ces justificatives</strong> : D\xE9posez vos relev\xE9s bancaires et factures dans votre coffre-fort chiffr\xE9.</li>
-      <li style="margin-bottom: 10px;"><strong>Appel de cadrage</strong> : Planifiez votre appel de bienvenue avec votre comptable attitr\xE9e, <strong>${data.agentName}</strong>.</li>
+      <li style="margin-bottom: 10px;"><strong>Appel de cadrage</strong> : Planifiez votre appel de bienvenue avec votre comptable attitr\xE9e, <strong>${escapeHtml(data.agentName)}</strong>.</li>
     </ol>
     
     <p style="color: #88888F; font-size: 12px; font-style: italic; margin-top: 30px; border-left: 2px solid #D4AF37; padding-left: 10px;">Le devis officiel au format PDF est joint \xE0 ce courriel.</p>
   `;
   return getPremiumEmailWrapper({
     title: "Confirmation de votre estimation premium - Compta-Flow",
-    subtitle: `Bonjour ${data.clientName},`,
+    subtitle: `Bonjour ${escapeHtml(data.clientName)},`,
     bodyHtml: bodyHtmlFr,
     buttonLabel: "Acc\xE9der \xE0 mon Espace Client",
     buttonUrl: data.portalUrl,
@@ -1714,33 +1717,33 @@ function getAgentEmailTemplate(data) {
       <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Nom complet / Cie :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.clientName}</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.clientName)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Courriel de contact :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;"><a href="mailto:${data.clientEmail}" style="color: #D4AF37; text-decoration: none;">${data.clientEmail}</a></td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;"><a href="mailto:${escapeHtml(data.clientEmail)}" style="color: #D4AF37; text-decoration: none;">${escapeHtml(data.clientEmail)}</a></td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Service souscrit :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.serviceName}</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.serviceName)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Tarif mensuel :</td>
-          <td style="padding: 8px 0; text-align: right; color: #D4AF37; font-family: monospace; font-weight: bold;">${data.total}</td>
+          <td style="padding: 8px 0; text-align: right; color: #D4AF37; font-family: monospace; font-weight: bold;">${escapeHtml(data.total)}</td>
         </tr>
       </table>
     </div>
 
     <h3 style="font-family: serif; font-size: 16px; color: #FDFBF7; margin-top: 30px;">Actions requises :</h3>
     <ul style="color: #CCCCCC; font-size: 13px; padding-left: 20px; line-height: 1.8;">
-      <li>Valider la conformit\xE9 des taxes r\xE9gionales du client (${data.province}).</li>
+      <li>Valider la conformit\xE9 des taxes r\xE9gionales du client (${escapeHtml(data.province)}).</li>
       <li>Suivre le t\xE9l\xE9versement des livrables et la signature du mandat sur votre portail.</li>
       <li>Pr\xE9parer l'entretien d'accueil et le plan comptable adapt\xE9.</li>
     </ul>
   `;
   return getPremiumEmailWrapper({
     title: "[Compta-Flow] Nouveau dossier assign\xE9",
-    subtitle: `Bonjour ${data.agentName},`,
+    subtitle: `Bonjour ${escapeHtml(data.agentName)},`,
     bodyHtml,
     buttonLabel: "Ouvrir mon Portail Agent",
     buttonUrl: data.portalUrl,
@@ -1756,29 +1759,29 @@ function getAdminEmailTemplate(data) {
       <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Client :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.clientName} (${data.clientEmail})</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.clientName)} (${escapeHtml(data.clientEmail)})</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Agent assign\xE9 :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.agentName} (${data.agentEmail})</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.agentName)} (${escapeHtml(data.agentEmail)})</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">R\xE9gion fiscale :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.province}</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.province)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">D\xE9tail financier :</td>
-          <td style="padding: 8px 0; text-align: right; font-family: monospace;">Sub: ${data.subtotal} / Net: ${data.total}</td>
+          <td style="padding: 8px 0; text-align: right; font-family: monospace;">Sub: ${escapeHtml(data.subtotal)} / Net: ${escapeHtml(data.total)}</td>
         </tr>
         <tr>
           <td style="padding: 8px 0; color: #88888F;">R\xE9f Devis :</td>
-          <td style="padding: 8px 0; text-align: right; font-family: monospace;">${data.quoteRef}</td>
+          <td style="padding: 8px 0; text-align: right; font-family: monospace;">${escapeHtml(data.quoteRef)}</td>
         </tr>
       </table>
     </div>
 
     <div style="background-color: rgba(0, 150, 255, 0.02); border: 1px solid rgba(0, 150, 255, 0.1); padding: 15px; border-radius: 12px; font-size: 12px; color: #A0C0E0; margin-bottom: 30px;">
-      \u2139 <strong>Hardening de S\xE9curit\xE9 :</strong> La politique d'isolation RLS a \xE9t\xE9 v\xE9rifi\xE9e automatiquement sur ce dossier. L'acc\xE8s aux documents et \xE9critures comptables est strictement restreint \xE0 l'agent assign\xE9 (${data.agentName}) et supervis\xE9 par le propri\xE9taire principal.
+      \u2139 <strong>Hardening de S\xE9curit\xE9 :</strong> La politique d'isolation RLS a \xE9t\xE9 v\xE9rifi\xE9e automatiquement sur ce dossier. L'acc\xE8s aux documents et \xE9critures comptables est strictement restreint \xE0 l'agent assign\xE9 (${escapeHtml(data.agentName)}) et supervis\xE9 par le propri\xE9taire principal.
     </div>
   `;
   return getPremiumEmailWrapper({
@@ -1798,7 +1801,7 @@ function getAccountConfirmedEmailTemplate(data) {
       </div>
     </div>
     <p style="color: #CCCCCC; font-size: 14px; text-align: center; max-width: 480px; margin: 0 auto 20px auto; font-weight: 300;">
-      F\xE9licitations ! Votre adresse courriel (<strong>${data.clientEmail}</strong>) a \xE9t\xE9 valid\xE9e avec succ\xE8s. Votre espace s\xE9curis\xE9 Compta-Flow is maintenant pleinement actif et pr\xEAt pour la prise en charge de vos besoins comptables.
+      F\xE9licitations ! Votre adresse courriel (<strong>${escapeHtml(data.clientEmail)}</strong>) a \xE9t\xE9 valid\xE9e avec succ\xE8s. Votre espace s\xE9curis\xE9 Compta-Flow is maintenant pleinement actif et pr\xEAt pour la prise en charge de vos besoins comptables.
     </p>
 
     <p style="color: #88888F; font-size: 13px; text-align: center; max-width: 450px; margin: 0 auto 30px auto;">
@@ -1807,7 +1810,7 @@ function getAccountConfirmedEmailTemplate(data) {
   `;
   return getPremiumEmailWrapper({
     title: "Votre compte Compta-Flow est activ\xE9 !",
-    subtitle: `Bonjour ${data.clientName},`,
+    subtitle: `Bonjour ${escapeHtml(data.clientName)},`,
     bodyHtml,
     buttonLabel: "Acc\xE9der \xE0 mon Portail",
     buttonUrl: data.portalUrl
@@ -1820,21 +1823,21 @@ function getOnboardingCompleteEmailTemplate(data) {
   let bodyHtml = "";
   let buttonLabel = "";
   if (isAr) {
-    subtitle = `\u0645\u0631\u062D\u0628\u0627\u064B ${data.clientName}\u060C`;
+    subtitle = `\u0645\u0631\u062D\u0628\u0627\u064B ${escapeHtml(data.clientName)}\u060C`;
     bodyHtml = `
       <p style="color: #CCCCCC; font-size: 14px;">\u062A\u0645 \u062A\u0641\u0639\u064A\u0644 \u062D\u0633\u0627\u0628\u0643\u0645 \u0628\u0646\u062C\u0627\u062D \u0648\u0627\u0643\u062A\u0645\u0627\u0644 \u0639\u0645\u0644\u064A\u0629 \u0627\u0644\u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u0625\u0631\u0634\u0627\u062F\u064A\u0629.</p>
       <p style="color: #CCCCCC; font-size: 14px;"><strong>\u0627\u0644\u062E\u0637\u0648\u0629 \u0627\u0644\u062A\u0627\u0644\u064A\u0629:</strong> \u064A\u0631\u062C\u0649 \u0627\u062E\u062A\u064A\u0627\u0631 \u0627\u0644\u062E\u062F\u0645\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u0645\u0646 \u062C\u062F\u0648\u0644 \u0623\u0639\u0645\u0627\u0644\u0643\u0645 \u0648\u0645\u062A\u0627\u0628\u0639\u0629 <a href="${data.procedureUrl}" style="color: #D4AF37; text-decoration: none;">\u0645\u0633\u0627\u0631 \u0645\u0644\u0641\u0643\u0645 \u0627\u0644\u0627\u0633\u062A\u0634\u0627\u0631\u064A</a>.</p>
     `;
     buttonLabel = "\u0641\u062A\u062D \u0628\u0648\u0627\u0628\u062A\u064A \u0627\u0644\u062E\u0627\u0635\u0629";
   } else if (isEn) {
-    subtitle = `Hello ${data.clientName},`;
+    subtitle = `Hello ${escapeHtml(data.clientName)},`;
     bodyHtml = `
       <p style="color: #CCCCCC; font-size: 14px;">Your client onboarding is now complete and your account is active.</p>
       <p style="color: #CCCCCC; font-size: 14px;"><strong>Next step:</strong> please select your desired accounting plan in the Overview tab, then follow your <a href="${data.procedureUrl}" style="color: #D4AF37; text-decoration: none;">guided file path</a>.</p>
     `;
     buttonLabel = "Open My Client Portal";
   } else {
-    subtitle = `Bonjour ${data.clientName},`;
+    subtitle = `Bonjour ${escapeHtml(data.clientName)},`;
     bodyHtml = `
       <p style="color: #CCCCCC; font-size: 14px;">Votre parcours d'int\xE9gration client est compl\xE9t\xE9 avec succ\xE8s et votre compte est pleinement actif.</p>
       <p style="color: #CCCCCC; font-size: 14px;"><strong>Prochaine \xE9tape :</strong> veuillez s\xE9lectionner le service comptable souhait\xE9 dans votre tableau de bord, puis suivez votre <a href="${data.procedureUrl}" style="color: #D4AF37; text-decoration: none;">parcours dossier guid\xE9</a>.</p>
@@ -1858,12 +1861,12 @@ function getAgentWelcomeEmailTemplate(data) {
       <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Identifiant :</td>
-          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.agentEmail}</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.agentEmail)}</td>
         </tr>
         ${data.tempPassword ? `
         <tr>
           <td style="padding: 8px 0; color: #88888F;">Mot de passe temporaire :</td>
-          <td style="padding: 8px 0; text-align: right; font-family: monospace; font-weight: bold; color: #D4AF37;">${data.tempPassword}</td>
+          <td style="padding: 8px 0; text-align: right; font-family: monospace; font-weight: bold; color: #D4AF37;">${escapeHtml(data.tempPassword)}</td>
         </tr>
         ` : ""}
         <tr>
@@ -1876,7 +1879,7 @@ function getAgentWelcomeEmailTemplate(data) {
   `;
   return getPremiumEmailWrapper({
     title: "[Compta-Flow] Cr\xE9ation de votre acc\xE8s collaborateur",
-    subtitle: `Bonjour ${data.agentName},`,
+    subtitle: `Bonjour ${escapeHtml(data.agentName)},`,
     bodyHtml,
     buttonLabel: "Acc\xE9der au Portail Collaborateur",
     buttonUrl: data.portalUrl
@@ -1887,17 +1890,17 @@ function getSupportResponseEmailTemplate(data) {
     <p style="color: #CCCCCC; font-size: 14px;">Votre conseiller virtuel Compta-Flow a trait\xE9 votre demande d'assistance.</p>
     <div style="background-color: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 12px; margin: 20px 0;">
       <p style="color: #88888F; font-size: 12px; margin-top:0;"><strong>Votre question :</strong></p>
-      <p style="color: #FDFBF7; font-size: 13px; font-style: italic; margin-bottom:0;">"${data.question}"</p>
+      <p style="color: #FDFBF7; font-size: 13px; font-style: italic; margin-bottom:0;">"${escapeHtml(data.question)}"</p>
     </div>
     <div style="background-color: rgba(214, 175, 55, 0.03); border-left: 3px solid #D4AF37; padding: 20px; border-radius: 4px; margin: 20px 0;">
       <p style="color: #D4AF37; font-size: 12px; margin-top:0; font-weight: bold;">R\xE9ponse de l'assistant d'\xE9lite :</p>
-      <p style="color: #CCCCCC; font-size: 13px; line-height:1.7; margin-bottom:0;">${data.aiResponse.replace(/\n/g, "<br>")}</p>
+      <p style="color: #CCCCCC; font-size: 13px; line-height:1.7; margin-bottom:0;">${escapeHtml(data.aiResponse).replace(/\n/g, "<br>")}</p>
     </div>
     <p style="color: #88888F; font-size: 13px;">Si vous avez besoin de pr\xE9cisions ou de d\xE9poser des documents d'analyse, vous pouvez poursuivre la conversation depuis votre espace client.</p>
   `;
   return getPremiumEmailWrapper({
     title: "[Compta-Flow] Suivi de votre demande de support",
-    subtitle: `Bonjour ${data.clientName},`,
+    subtitle: `Bonjour ${escapeHtml(data.clientName)},`,
     bodyHtml,
     buttonLabel: "Ouvrir l'Espace Support en ligne",
     buttonUrl: data.portalUrl
@@ -2181,9 +2184,10 @@ function isInternalAgentRequest(req) {
   if (headerSecret && String(headerSecret) === ADMIN_SECRET) return true;
   const bearer = req.headers.authorization?.split(" ")[1];
   if (bearer && bearer === ADMIN_SECRET) return true;
-  const bodySecret = req.body?.secret;
-  if (bodySecret && bodySecret === ADMIN_SECRET) return true;
   return false;
+}
+function escapeHtml2(value) {
+  return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 async function findAuthUserByEmail(listUsers, email) {
   const target = email.toLowerCase();
@@ -2266,14 +2270,22 @@ var saveDb = (data) => {
 };
 var app = express();
 var PORT = process.env.PORT || 3e3;
-app.use(cors());
+var ALLOWED_ORIGINS = [/^https:\/\/(?:[\w-]+\.)*compta-flow\.net$/, /^https:\/\/[\w-]+\.vercel\.app$/];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || ALLOWED_ORIGINS.some((pattern) => pattern.test(origin))) {
+      return callback(null, true);
+    }
+    return callback(new Error("Not allowed by CORS"));
+  }
+}));
 app.use(express.json({ limit: "50mb" }));
 app.use((req, res, next) => {
   res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.supabase.co https://images.unsplash.com; connect-src 'self' https://*.supabase.co; font-src 'self' https://fonts.gstatic.com;");
+  res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.supabase.co https://images.unsplash.com; connect-src 'self' https://*.supabase.co; font-src 'self' https://fonts.gstatic.com;");
   next();
 });
 var rateLimitStore = {};
@@ -2411,16 +2423,16 @@ app.post("/api/diagnostics", (req, res) => {
   if (!isInternalAgentRequest(req)) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const matchingEnv = {};
+  const sensitiveKeysPresent = {};
   for (const key of Object.keys(process.env)) {
     const keyLower = key.toLowerCase();
     if (keyLower.includes("supabase") || keyLower.includes("secret") || keyLower.includes("key") || keyLower.includes("db") || keyLower.includes("password") || keyLower.includes("url") || keyLower.includes("postgres") || keyLower.includes("service")) {
-      matchingEnv[key] = process.env[key] || "";
+      sensitiveKeysPresent[key] = Boolean(process.env[key]);
     }
   }
   res.json({
     keys: Object.keys(process.env).sort(),
-    matchingEnv
+    sensitiveKeysPresent
   });
 });
 app.post("/api/plaid/create-link-token", async (req, res) => {
@@ -2458,12 +2470,12 @@ Type: ${type}`;
       console.log(`[SMS MOCK to ${ADMIN_PHONE}] 
 ${summaryMsg}`);
     }
-    await sendSupremeEmail(PLATFORM_SUPPORT_EMAIL, `Alerte Transaction: ${vendor}`, `
+    await sendSupremeEmail(PLATFORM_SUPPORT_EMAIL, `Alerte Transaction: ${escapeHtml2(vendor)}`, `
       <h2>Nouvelle Transaction D\xE9tect\xE9e</h2>
-      <p><strong>Fournisseur:</strong> ${vendor}</p>
-      <p><strong>Montant:</strong> ${amount} $</p>
-      <p><strong>Date:</strong> ${date}</p>
-      <p><strong>Type:</strong> ${type}</p>
+      <p><strong>Fournisseur:</strong> ${escapeHtml2(vendor)}</p>
+      <p><strong>Montant:</strong> ${escapeHtml2(amount)} $</p>
+      <p><strong>Date:</strong> ${escapeHtml2(date)}</p>
+      <p><strong>Type:</strong> ${escapeHtml2(type)}</p>
     `);
     res.json({ success: true, message: "Alerte envoy\xE9e avec succ\xE8s." });
   } catch (error) {
@@ -2674,15 +2686,15 @@ app.post("/api/webhook/onboarding-complete", async (req, res) => {
           <h2 style="color:#D4AF37;border-bottom:2px solid #D4AF37;padding-bottom:8px;margin-top:0;">\u{1F3DB}\uFE0F Nouvelle Inscription Client</h2>
           <p>Un nouveau client a compl\xE9t\xE9 son inscription avec les informations suivantes :</p>
           <table style="width:100%;border-collapse:collapse;margin:20px 0;text-align:left;">
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;width:40%;border:1px solid #ddd;">Nom complet :</td><td style="padding:8px;border:1px solid #ddd;">${displayName || "Non fourni"}</td></tr>
-            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Adresse courriel :</td><td style="padding:8px;border:1px solid #ddd;">${email}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Province :</td><td style="padding:8px;border:1px solid #ddd;">${province || "QC"}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;width:40%;border:1px solid #ddd;">Nom complet :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml2(displayName) || "Non fourni"}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Adresse courriel :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml2(email)}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Province :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml2(province) || "QC"}</td></tr>
             <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Langue :</td><td style="padding:8px;border:1px solid #ddd;">${lang.toUpperCase()}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Type de profil :</td><td style="padding:8px;border:1px solid #ddd;">${initialProfileType || "Individuel"}</td></tr>
-            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Nom entreprise :</td><td style="padding:8px;border:1px solid #ddd;">${companyName || "N/A"}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Num\xE9ro NEQ :</td><td style="padding:8px;border:1px solid #ddd;">${neq || "N/A"}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Type de profil :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml2(initialProfileType) || "Individuel"}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Nom entreprise :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml2(companyName) || "N/A"}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Num\xE9ro NEQ :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml2(neq) || "N/A"}</td></tr>
             <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Num\xE9ro NAS :</td><td style="padding:8px;border:1px solid #ddd;">${nas ? "Fourni (S\xE9curis\xE9)" : "N/A"}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Comptable r\xE9f\xE9r\xE9 :</td><td style="padding:8px;border:1px solid #ddd;">${selectedExpertEmail || "Aucun"}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Comptable r\xE9f\xE9r\xE9 :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml2(selectedExpertEmail) || "Aucun"}</td></tr>
           </table>
           <p style="margin-top:20px;"><a href="${portalUrl}" style="display:inline-block;background:#D4AF37;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;font-weight:bold;">Acc\xE9der au portail client</a></p>
         </div>
@@ -2751,7 +2763,7 @@ app.get("/api/internal/agents", async (req, res) => {
     }))
   });
 });
-app.post("/api/support/ai-chat", async (req, res) => {
+app.post("/api/support/ai-chat", rateLimiter(20, 6e4), async (req, res) => {
   const { message, context, history } = req.body;
   if (!message || typeof message !== "string") {
     return res.status(400).json({ error: "message requis" });
@@ -2770,23 +2782,27 @@ app.post("/api/support/ai-chat", async (req, res) => {
     const lang = context?.language === "en" || context?.language === "ar" ? context.language : "fr";
     botLog("AGENTIC_REPLY", result.agentId, `${result.intent} ${result.latencyMs}ms`);
     const reply = toPublicSupportReply(result, lang);
-    if (context?.email) {
-      const supportEmailHtml = getSupportResponseEmailTemplate({
-        clientName: context.fullName || "Client Comptaflow",
-        question: message,
-        aiResponse: reply.answer,
-        portalUrl: "https://compta-flow.net/login"
-      });
-      sendSupremeEmail(
-        context.email.toLowerCase().trim(),
-        lang === "en" ? "[Compta-Flow] Support Ticket Follow-up" : lang === "ar" ? "[Compta-Flow] \u0645\u062A\u0627\u0628\u0639\u0629 \u062A\u0630\u0643\u0631\u0629 \u0627\u0644\u062F\u0639\u0645" : "[Compta-Flow] Suivi de votre demande de support",
-        supportEmailHtml
-      ).catch((err) => console.error("[AI Chat Support Email] Failed to send:", err.message));
-      sendSupremeEmail(
-        COMPANY_OUTLOOK_EMAIL,
-        `[ComptaFlow] Communication client \u2014 ${context.fullName || context.email}`,
-        supportEmailHtml
-      ).catch((err) => console.error("[AI Chat Support Email] Admin copy failed to send:", err.message));
+    if (context?.email && typeof context.email === "string") {
+      const emailNormalized = context.email.toLowerCase().trim();
+      const { data: existingProfile } = await supabase.from("profiles").select("id").eq("email", emailNormalized).maybeSingle();
+      if (existingProfile) {
+        const supportEmailHtml = getSupportResponseEmailTemplate({
+          clientName: context.fullName || "Client Comptaflow",
+          question: message,
+          aiResponse: reply.answer,
+          portalUrl: "https://compta-flow.net/login"
+        });
+        sendSupremeEmail(
+          emailNormalized,
+          lang === "en" ? "[Compta-Flow] Support Ticket Follow-up" : lang === "ar" ? "[Compta-Flow] \u0645\u062A\u0627\u0628\u0639\u0629 \u062A\u0630\u0643\u0631\u0629 \u0627\u0644\u062F\u0639\u0645" : "[Compta-Flow] Suivi de votre demande de support",
+          supportEmailHtml
+        ).catch((err) => console.error("[AI Chat Support Email] Failed to send:", err.message));
+        sendSupremeEmail(
+          COMPANY_OUTLOOK_EMAIL,
+          `[ComptaFlow] Communication client \u2014 ${context.fullName || emailNormalized}`,
+          supportEmailHtml
+        ).catch((err) => console.error("[AI Chat Support Email] Admin copy failed to send:", err.message));
+      }
     }
     res.json(reply);
   } catch (e) {
@@ -3019,7 +3035,7 @@ app.post("/api/profile/delete", async (req, res) => {
         user: conf.user,
         password: SUPABASE_DB_PASSWORD,
         database: "postgres",
-        ssl: { rejectUnauthorized: false },
+        ssl: { rejectUnauthorized: true },
         connectionTimeoutMillis: 5e3
       });
       try {
@@ -3104,7 +3120,7 @@ app.post("/api/profile/delete", async (req, res) => {
         user: conf.user,
         password: SUPABASE_DB_PASSWORD,
         database: "postgres",
-        ssl: { rejectUnauthorized: false },
+        ssl: { rejectUnauthorized: true },
         connectionTimeoutMillis: 5e3
       });
       try {
@@ -3227,7 +3243,7 @@ app.post("/api/profile/export", rateLimiter(5, 6e4), async (req, res) => {
         user: conf.user,
         password: SUPABASE_DB_PASSWORD,
         database: "postgres",
-        ssl: { rejectUnauthorized: false },
+        ssl: { rejectUnauthorized: true },
         connectionTimeoutMillis: 5e3
       });
       try {
