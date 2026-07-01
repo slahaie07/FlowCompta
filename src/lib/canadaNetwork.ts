@@ -295,13 +295,6 @@ export function getLegalRequirements(region: CanadianRegion): LegalPattern[] {
   );
 }
 
-export function buildSitemapUrls(): string[] {
-  const base = SITE.url;
-  const staticPages = ['/', '/privacy', '/terms', '/legal', '/cookies', '/login', '/showcase'];
-  const regionalPages = getActiveRegions().map((r) => `/ca/${r.seoSlug}`);
-  return [...staticPages, ...regionalPages].map((path) => `${base}${path}`);
-}
-
 export function detectProvinceFromHeaders(headers: Record<string, string | string[] | undefined>): ProvinceCode {
   const vercelRegion = String(headers['x-vercel-ip-country-region'] ?? '');
   if (vercelRegion && PROVINCE_ALIASES[vercelRegion.toUpperCase()]) {

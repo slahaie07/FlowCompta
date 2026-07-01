@@ -1,0 +1,127 @@
+import { useEffect } from 'react';
+
+interface PageMeta {
+  title: string;
+  description: string;
+  lang?: 'fr' | 'en';
+  canonical?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  keywords?: string;
+  geoRegion?: string;
+  geoPlacename?: string;
+}
+
+/** Sets a meta tag's content and returns the previous content (or null if the tag didn't exist), for cleanup restoration. */
+function setMetaTag(name: string, content: string, attr: 'name' | 'property' = 'name'): string | null {
+  let el = document.querySelector<HTMLMetaElement>(`meta[${attr}="${name}"]`);
+  const prev = el ? el.getAttribute('content') : null;
+  if (!el) {
+    el = document.createElement('meta');
+    el.setAttribute(attr, name);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('content', content);
+  return prev;
+}
+
+function restoreMetaTag(name: string, prev: string | null, attr: 'name' | 'property' = 'name') {
+  const el = document.querySelector<HTMLMetaElement>(`meta[${attr}="${name}"]`);
+  if (!el) return;
+  if (prev === null) el.remove();
+  else el.setAttribute('content', prev);
+}
+
+/** Sets a link tag's href and returns the previous href (or null if the tag didn't exist), for cleanup restoration. */
+function setLinkTag(rel: string, href: string): string | null {
+  let el = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
+  const prev = el ? el.getAttribute('href') : null;
+  if (!el) {
+    el = document.createElement('link');
+    el.setAttribute('rel', rel);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('href', href);
+  return prev;
+}
+
+function restoreLinkTag(rel: string, prev: string | null) {
+  const el = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
+  if (!el) return;
+  if (prev === null) el.remove();
+  else el.setAttribute('href', prev);
+}
+
+/** Sets an hreflang alternate link tag's href and returns the previous href (or null), for cleanup restoration. */
+function setHreflangTag(hreflang: string, href: string): string | null {
+  let el = document.querySelector<HTMLLinkElement>(`link[rel="alternate"][hreflang="${hreflang}"]`);
+  const prev = el ? el.getAttribute('href') : null;
+  if (!el) {
+    el = document.createElement('link');
+    el.setAttribute('rel', 'alternate');
+    el.setAttribute('hreflang', hreflang);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('href', href);
+  return prev;
+}
+
+function restoreHreflangTag(hreflang: string, prev: string | null) {
+  const el = document.querySelector<HTMLLinkElement>(`link[rel="alternate"][hreflang="${hreflang}"]`);
+  if (!el) return;
+  if (prev === null) el.remove();
+  else el.setAttribute('href', prev);
+}
+
+export function usePageMeta(meta: PageMeta) {
+  useEffect(() => {
+    const prevTitle = document.title;
+    document.title = meta.title;
+
+    const prevLang = document.documentElement.lang;
+    if (meta.lang) document.documentElement.lang = meta.lang;
+
+    const prevDescription = setMetaTag('description', meta.description);
+    const prevKeywords = meta.keywords ? setMetaTag('keywords', meta.keywords) : null;
+    const prevGeoRegion = meta.geoRegion ? setMetaTag('geo.region', meta.geoRegion) : null;
+    const prevGeoPlacename = meta.geoPlacename ? setMetaTag('geo.placename', meta.geoPlacename) : null;
+
+    const prevOgTitle = setMetaTag('og:title', meta.ogTitle ?? meta.title, 'property');
+    const prevOgDescription = setMetaTag('og:description', meta.ogDescription ?? meta.description, 'property');
+    const prevOgImage = meta.ogImage ? setMetaTag('og:image', meta.ogImage, 'property') : null;
+    let prevOgUrl: string | null = null;
+    let prevCanonical: string | null = null;
+    let prevHreflangFr: string | null = null;
+    let prevHreflangEn: string | null = null;
+    if (meta.canonical) {
+      prevOgUrl = setMetaTag('og:url', meta.canonical, 'property');
+      prevCanonical = setLinkTag('canonical', meta.canonical);
+      prevHreflangFr = setHreflangTag('fr-CA', meta.canonical);
+      prevHreflangEn = setHreflangTag('en-CA', meta.canonical);
+    }
+
+    const prevTwitterTitle = setMetaTag('twitter:title', meta.ogTitle ?? meta.title, 'name');
+    const prevTwitterDescription = setMetaTag('twitter:description', meta.ogDescription ?? meta.description, 'name');
+
+    return () => {
+      document.title = prevTitle;
+      document.documentElement.lang = prevLang;
+      restoreMetaTag('description', prevDescription);
+      if (meta.keywords) restoreMetaTag('keywords', prevKeywords);
+      if (meta.geoRegion) restoreMetaTag('geo.region', prevGeoRegion);
+      if (meta.geoPlacename) restoreMetaTag('geo.placename', prevGeoPlacename);
+      restoreMetaTag('og:title', prevOgTitle, 'property');
+      restoreMetaTag('og:description', prevOgDescription, 'property');
+      if (meta.ogImage) restoreMetaTag('og:image', prevOgImage, 'property');
+      if (meta.canonical) {
+        restoreMetaTag('og:url', prevOgUrl, 'property');
+        restoreLinkTag('canonical', prevCanonical);
+        restoreHreflangTag('fr-CA', prevHreflangFr);
+        restoreHreflangTag('en-CA', prevHreflangEn);
+      }
+      restoreMetaTag('twitter:title', prevTwitterTitle, 'name');
+      restoreMetaTag('twitter:description', prevTwitterDescription, 'name');
+    };
+  }, [meta.title, meta.description, meta.lang, meta.canonical, meta.keywords, meta.geoRegion, meta.geoPlacename, meta.ogTitle, meta.ogDescription, meta.ogImage]);
+}

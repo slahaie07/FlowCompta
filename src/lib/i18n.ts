@@ -196,7 +196,7 @@ export const i18n = {
       admin: "Administration",
       copyright: "© 2026 Comptaflow — Canada",
       contact: "Nous contacter",
-      contactHint: "Une question ? Écrivez-nous à comptaflow.officiel@gmail.com"
+      contactHint: "Une question ? Écrivez-nous à compta-flow@outlook.com"
     },
 
     auth: {
@@ -413,7 +413,7 @@ export const i18n = {
       titleAccent: "Transparence.",
       subtitle: "Sécurité • Confidentialité • Support",
       moreQuestions: "Encore des questions ?",
-      moreDesc: "Notre équipe vous répond sous 24 h à comptaflow.officiel@gmail.com ou via le centre d'aide.",
+      moreDesc: "Notre équipe vous répond sous 24 h à compta-flow@outlook.com ou via le centre d'aide.",
       openTicket: "Ouvrir un ticket de support",
       q1: "Mes données financières sont-elles en sécurité ?",
       a1: "Absolument. ComptaFlow utilise le chiffrement AES-256 pour tous vos documents. Vos données sont isolées via des politiques RLS garantissant que seul vous et votre préparateur assigné y accédez.",
@@ -474,7 +474,7 @@ export const i18n = {
       subtitle: "Votre préparateur à portée de clic",
       formTitle: "Envoyer un message formel",
       sentTitle: "Message acheminé avec succès !",
-      sentDesc: "Votre message a été préparé dans votre courriel — envoyez-le à comptaflow.officiel@gmail.com. Réponse sous 24 h ouvrables.",
+      sentDesc: "Votre message a été préparé dans votre courriel — envoyez-le à compta-flow@outlook.com. Réponse sous 24 h ouvrables.",
       subject: "Objet de la demande",
       subjectPlaceholder: "ex: Question sur ma déclaration de taxes…",
       message: "Message détaillé",
@@ -1110,7 +1110,7 @@ export const i18n = {
       admin: "Administration",
       copyright: "© 2026 Comptaflow — Canada",
       contact: "Contact us",
-      contactHint: "Questions? Email us at comptaflow.officiel@gmail.com"
+      contactHint: "Questions? Email us at compta-flow@outlook.com"
     },
 
     auth: {
@@ -1327,7 +1327,7 @@ export const i18n = {
       titleAccent: "Center.",
       subtitle: "Security • Privacy • Support",
       moreQuestions: "Still have questions?",
-      moreDesc: "Our team replies within 24 hours at comptaflow.officiel@gmail.com or via the help center.",
+      moreDesc: "Our team replies within 24 hours at compta-flow@outlook.com or via the help center.",
       openTicket: "Open a support ticket",
       q1: "Is my financial data secure?",
       a1: "Absolutely. ComptaFlow uses AES-256 encryption for all documents. Data is isolated via RLS policies so only you and your assigned bookkeeper can access it.",
@@ -1388,7 +1388,7 @@ export const i18n = {
       subtitle: "Your bookkeeper within reach",
       formTitle: "Send a formal message",
       sentTitle: "Message sent successfully!",
-      sentDesc: "Your message is ready in your email app — send it to comptaflow.officiel@gmail.com. Reply within 24 business hours.",
+      sentDesc: "Your message is ready in your email app — send it to compta-flow@outlook.com. Reply within 24 business hours.",
       subject: "Request subject",
       subjectPlaceholder: "e.g. Question about my GST filing…",
       message: "Detailed message",
@@ -1974,7 +1974,7 @@ export const i18n = {
       admin: "الإدارة",
       copyright: "© 2026 كومبتا فلو — كندا",
       contact: "اتصل بنا",
-      contactHint: "أسئلة؟ راسلنا على comptaflow.officiel@gmail.com"
+      contactHint: "أسئلة؟ راسلنا على compta-flow@outlook.com"
     },
 
     landing: {
@@ -2182,7 +2182,7 @@ export const i18n = {
       subtitle: "محاسبك على بعد نقرة",
       formTitle: "إرسال رسالة رسمية",
       sentTitle: "تم إرسال الرسالة بنجاح!",
-      sentDesc: "تم تجهيز رسالتك في تطبيق البريد — أرسلها إلى comptaflow.officiel@gmail.com. الرد خلال 24 ساعة عمل.",
+      sentDesc: "تم تجهيز رسالتك في تطبيق البريد — أرسلها إلى compta-flow@outlook.com. الرد خلال 24 ساعة عمل.",
       subject: "موضوع الطلب",
       subjectPlaceholder: "مثال: سؤال حول إقرار TPS…",
       message: "رسالة مفصلة",

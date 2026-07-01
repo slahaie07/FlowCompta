@@ -32,6 +32,7 @@ import {
   getPremiumEmailWrapper
 } from './lib/emailTemplates';
 import { calculateCanadianTaxes, formatCAD, getTaxDisplayLines, normalizeProvinceCode } from '../src/lib/financeUtils';
+import { CANADIAN_REGIONS, type CanadianRegion } from '../src/lib/canadaNetwork';
 const { Client } = pg;
 
 dotenv.config();
@@ -65,6 +66,7 @@ const twilioClient = twilio(twilioSid, twilioToken);
 const ADMIN_PHONE = '+18192158545';
 const PLATFORM_SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || SUPPORT_EMAIL;
 const PLATFORM_INTERAC_EMAIL = process.env.INTERAC_EMAIL || CONFIG.APP.INTERAC_EMAIL;
+const COMPANY_OUTLOOK_EMAIL = 'compta-flow@outlook.com';
 
 // --- SUPABASE CLIENT SETUP ---
 // envResolve: Vercel integration SUPABASE_* + legacy VITE_* / SUPABASE_SERVICE_ROLE_KEY
@@ -86,9 +88,17 @@ function isInternalAgentRequest(req: express.Request): boolean {
   if (headerSecret && String(headerSecret) === ADMIN_SECRET) return true;
   const bearer = req.headers.authorization?.split(' ')[1];
   if (bearer && bearer === ADMIN_SECRET) return true;
-  const bodySecret = (req.body as { secret?: string } | undefined)?.secret;
-  if (bodySecret && bodySecret === ADMIN_SECRET) return true;
   return false;
+}
+
+/** Escapes HTML-significant characters to prevent injection into email/SMS templates built from user input. */
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 async function findAuthUserByEmail(
@@ -176,7 +186,15 @@ const saveDb = (data: any) => { try { fs.writeFileSync(DB_PATH, JSON.stringify(d
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(cors());
+const ALLOWED_ORIGINS = [/^https:\/\/(?:[\w-]+\.)*compta-flow\.net$/, /^https:\/\/[\w-]+\.vercel\.app$/];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || ALLOWED_ORIGINS.some((pattern) => pattern.test(origin))) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+}));
 app.use(express.json({ limit: '50mb' }));
 
 // --- MIDDLEWARE DE SÉCURITÉ (HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy - Items 10, 11, 12, 27, 28, 32) ---
@@ -185,7 +203,7 @@ app.use((req, res, next) => {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.supabase.co https://images.unsplash.com; connect-src 'self' https://*.supabase.co; font-src 'self' https://fonts.gstatic.com;");
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.supabase.co https://images.unsplash.com; connect-src 'self' https://*.supabase.co; font-src 'self' https://fonts.gstatic.com;");
     next();
 });
 
@@ -349,7 +367,8 @@ app.post('/api/diagnostics', (req, res) => {
   if (!isInternalAgentRequest(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
-  const matchingEnv: Record<string, string> = {};
+  // Report which sensitive env vars are configured without ever exposing their values.
+  const sensitiveKeysPresent: Record<string, boolean> = {};
   for (const key of Object.keys(process.env)) {
     const keyLower = key.toLowerCase();
     if (
@@ -362,12 +381,12 @@ app.post('/api/diagnostics', (req, res) => {
       keyLower.includes('postgres') ||
       keyLower.includes('service')
     ) {
-      matchingEnv[key] = process.env[key] || '';
+      sensitiveKeysPresent[key] = Boolean(process.env[key]);
     }
   }
   res.json({
     keys: Object.keys(process.env).sort(),
-    matchingEnv
+    sensitiveKeysPresent
   });
 });
 
@@ -396,9 +415,9 @@ app.post('/api/qbo/push-transaction', async (req, res) => {
 // --- LIVE TRANSACTION TRACKER (SMS & EMAIL) ---
 app.post('/api/webhook/transaction-alert', async (req, res) => {
   const { transactionId, amount, vendor, date, type } = req.body;
-  
+
   const summaryMsg = `COMPTAFLOW ALERT: Nouvelle transaction identifiée.\nFournisseur: ${vendor}\nMontant: ${amount}$\nDate: ${date}\nType: ${type}`;
-  
+
   botLog('LIVE_TRACKER', transactionId, `Analyse en temps réel. Envoi du résumé au ${ADMIN_PHONE}`);
 
   try {
@@ -412,12 +431,12 @@ app.post('/api/webhook/transaction-alert', async (req, res) => {
       console.log(`[SMS MOCK to ${ADMIN_PHONE}] \n${summaryMsg}`);
     }
 
-    await sendSupremeEmail(PLATFORM_SUPPORT_EMAIL, `Alerte Transaction: ${vendor}`, `
+    await sendSupremeEmail(PLATFORM_SUPPORT_EMAIL, `Alerte Transaction: ${escapeHtml(vendor)}`, `
       <h2>Nouvelle Transaction Détectée</h2>
-      <p><strong>Fournisseur:</strong> ${vendor}</p>
-      <p><strong>Montant:</strong> ${amount} $</p>
-      <p><strong>Date:</strong> ${date}</p>
-      <p><strong>Type:</strong> ${type}</p>
+      <p><strong>Fournisseur:</strong> ${escapeHtml(vendor)}</p>
+      <p><strong>Montant:</strong> ${escapeHtml(amount)} $</p>
+      <p><strong>Date:</strong> ${escapeHtml(date)}</p>
+      <p><strong>Type:</strong> ${escapeHtml(type)}</p>
     `);
 
     res.json({ success: true, message: "Alerte envoyée avec succès." });
@@ -676,15 +695,15 @@ app.post('/api/webhook/onboarding-complete', async (req, res) => {
           <h2 style="color:#D4AF37;border-bottom:2px solid #D4AF37;padding-bottom:8px;margin-top:0;">🏛️ Nouvelle Inscription Client</h2>
           <p>Un nouveau client a complété son inscription avec les informations suivantes :</p>
           <table style="width:100%;border-collapse:collapse;margin:20px 0;text-align:left;">
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;width:40%;border:1px solid #ddd;">Nom complet :</td><td style="padding:8px;border:1px solid #ddd;">${displayName || 'Non fourni'}</td></tr>
-            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Adresse courriel :</td><td style="padding:8px;border:1px solid #ddd;">${email}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Province :</td><td style="padding:8px;border:1px solid #ddd;">${province || 'QC'}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;width:40%;border:1px solid #ddd;">Nom complet :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(displayName) || 'Non fourni'}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Adresse courriel :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(email)}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Province :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(province) || 'QC'}</td></tr>
             <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Langue :</td><td style="padding:8px;border:1px solid #ddd;">${lang.toUpperCase()}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Type de profil :</td><td style="padding:8px;border:1px solid #ddd;">${initialProfileType || 'Individuel'}</td></tr>
-            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Nom entreprise :</td><td style="padding:8px;border:1px solid #ddd;">${companyName || 'N/A'}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Numéro NEQ :</td><td style="padding:8px;border:1px solid #ddd;">${neq || 'N/A'}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Type de profil :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(initialProfileType) || 'Individuel'}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Nom entreprise :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(companyName) || 'N/A'}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Numéro NEQ :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(neq) || 'N/A'}</td></tr>
             <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Numéro NAS :</td><td style="padding:8px;border:1px solid #ddd;">${nas ? 'Fourni (Sécurisé)' : 'N/A'}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Comptable référé :</td><td style="padding:8px;border:1px solid #ddd;">${selectedExpertEmail || 'Aucun'}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Comptable référé :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(selectedExpertEmail) || 'Aucun'}</td></tr>
           </table>
           <p style="margin-top:20px;"><a href="${portalUrl}" style="display:inline-block;background:#D4AF37;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;font-weight:bold;">Accéder au portail client</a></p>
         </div>
@@ -692,7 +711,7 @@ app.post('/api/webhook/onboarding-complete', async (req, res) => {
 
       // Envoyer aux destinataires concernés de manière unique
       const targetEmails = Array.from(new Set([
-        'compta-flow@outlook.com',
+        COMPANY_OUTLOOK_EMAIL,
         PLATFORM_SUPPORT_EMAIL,
         's.lahaie07@gmail.com'
       ])).filter(Boolean);
@@ -768,7 +787,7 @@ app.get('/api/internal/agents', async (req, res) => {
   });
 });
 
-app.post('/api/support/ai-chat', async (req, res) => {
+app.post('/api/support/ai-chat', rateLimiter(20, 60000), async (req, res) => {
   const { message, context, history } = req.body;
 
   if (!message || typeof message !== 'string') {
@@ -793,19 +812,36 @@ app.post('/api/support/ai-chat', async (req, res) => {
     botLog('AGENTIC_REPLY', result.agentId, `${result.intent} ${result.latencyMs}ms`);
     const reply = toPublicSupportReply(result, lang);
 
-    // Envoi automatique du suivi d'assistance par courriel si adresse fournie
-    if (context?.email) {
-      const supportEmailHtml = getSupportResponseEmailTemplate({
-        clientName: context.fullName || 'Client Comptaflow',
-        question: message,
-        aiResponse: reply.answer,
-        portalUrl: 'https://compta-flow.net/login'
-      });
-      sendSupremeEmail(
-        context.email.toLowerCase().trim(),
-        lang === 'en' ? '[Compta-Flow] Support Ticket Follow-up' : lang === 'ar' ? '[Compta-Flow] متابعة تذكرة الدعم' : '[Compta-Flow] Suivi de votre demande de support',
-        supportEmailHtml
-      ).catch(err => console.error('[AI Chat Support Email] Failed to send:', err.message));
+    // Envoi automatique du suivi d'assistance par courriel — uniquement si l'adresse correspond
+    // à un profil existant, pour empêcher un tiers non authentifié de faire dispatcher des emails
+    // à une adresse arbitraire via ce endpoint public.
+    if (context?.email && typeof context.email === 'string') {
+      const emailNormalized = context.email.toLowerCase().trim();
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', emailNormalized)
+        .maybeSingle();
+
+      if (existingProfile) {
+        const supportEmailHtml = getSupportResponseEmailTemplate({
+          clientName: context.fullName || 'Client Comptaflow',
+          question: message,
+          aiResponse: reply.answer,
+          portalUrl: 'https://compta-flow.net/login'
+        });
+        sendSupremeEmail(
+          emailNormalized,
+          lang === 'en' ? '[Compta-Flow] Support Ticket Follow-up' : lang === 'ar' ? '[Compta-Flow] متابعة تذكرة الدعم' : '[Compta-Flow] Suivi de votre demande de support',
+          supportEmailHtml
+        ).catch(err => console.error('[AI Chat Support Email] Failed to send:', err.message));
+
+        sendSupremeEmail(
+          COMPANY_OUTLOOK_EMAIL,
+          `[ComptaFlow] Communication client — ${context.fullName || emailNormalized}`,
+          supportEmailHtml
+        ).catch(err => console.error('[AI Chat Support Email] Admin copy failed to send:', err.message));
+      }
     }
 
     res.json(reply);
@@ -1118,7 +1154,7 @@ app.post('/api/profile/delete', async (req, res) => {
         user: conf.user,
         password: SUPABASE_DB_PASSWORD,
         database: 'postgres',
-        ssl: { rejectUnauthorized: false },
+        ssl: { rejectUnauthorized: true },
         connectionTimeoutMillis: 5000
       });
       try {
@@ -1225,7 +1261,7 @@ app.post('/api/profile/delete', async (req, res) => {
         user: conf.user,
         password: SUPABASE_DB_PASSWORD,
         database: 'postgres',
-        ssl: { rejectUnauthorized: false },
+        ssl: { rejectUnauthorized: true },
         connectionTimeoutMillis: 5000
       });
       try {
@@ -1368,7 +1404,7 @@ app.post('/api/profile/export', rateLimiter(5, 60000), async (req, res) => {
         user: conf.user,
         password: SUPABASE_DB_PASSWORD,
         database: 'postgres',
-        ssl: { rejectUnauthorized: false },
+        ssl: { rejectUnauthorized: true },
         connectionTimeoutMillis: 5000
       });
       try {
@@ -1572,21 +1608,8 @@ app.get('/api/health', async (_req, res) => {
 });
 
 // --- RÉSEAU CANADA : détection région, légal, status ---
-const CANADA_REGIONS: Record<string, { code: string; nameFr: string; nameEn: string; privacyLaw: string; edgeRegion: string; seoSlug: string }> = {
-  QC: { code: 'QC', nameFr: 'Québec', nameEn: 'Quebec', privacyLaw: 'loi25', edgeRegion: 'yul1', seoSlug: 'quebec' },
-  ON: { code: 'ON', nameFr: 'Ontario', nameEn: 'Ontario', privacyLaw: 'pipeda', edgeRegion: 'yyz1', seoSlug: 'ontario' },
-  BC: { code: 'BC', nameFr: 'Colombie-Britannique', nameEn: 'British Columbia', privacyLaw: 'pipeda_bc', edgeRegion: 'yvr1', seoSlug: 'colombie-britannique' },
-  AB: { code: 'AB', nameFr: 'Alberta', nameEn: 'Alberta', privacyLaw: 'pipa_ab', edgeRegion: 'yyc1', seoSlug: 'alberta' },
-  MB: { code: 'MB', nameFr: 'Manitoba', nameEn: 'Manitoba', privacyLaw: 'pipeda', edgeRegion: 'ywg1', seoSlug: 'manitoba' },
-  SK: { code: 'SK', nameFr: 'Saskatchewan', nameEn: 'Saskatchewan', privacyLaw: 'pipeda', edgeRegion: 'yxe1', seoSlug: 'saskatchewan' },
-  NB: { code: 'NB', nameFr: 'Nouveau-Brunswick', nameEn: 'New Brunswick', privacyLaw: 'pipeda', edgeRegion: 'yfc1', seoSlug: 'nouveau-brunswick' },
-  NS: { code: 'NS', nameFr: 'Nouvelle-Écosse', nameEn: 'Nova Scotia', privacyLaw: 'pipeda', edgeRegion: 'yhz1', seoSlug: 'nouvelle-ecosse' },
-  PE: { code: 'PE', nameFr: 'Île-du-Prince-Édouard', nameEn: 'Prince Edward Island', privacyLaw: 'pipeda', edgeRegion: 'yhz1', seoSlug: 'ipe' },
-  NL: { code: 'NL', nameFr: 'Terre-Neuve-et-Labrador', nameEn: 'Newfoundland and Labrador', privacyLaw: 'pipeda', edgeRegion: 'yyt1', seoSlug: 'terre-neuve' },
-  YT: { code: 'YT', nameFr: 'Yukon', nameEn: 'Yukon', privacyLaw: 'pipeda', edgeRegion: 'yxy1', seoSlug: 'yukon' },
-  NT: { code: 'NT', nameFr: 'Territoires du Nord-Ouest', nameEn: 'Northwest Territories', privacyLaw: 'pipeda', edgeRegion: 'yxy1', seoSlug: 'tno' },
-  NU: { code: 'NU', nameFr: 'Nunavut', nameEn: 'Nunavut', privacyLaw: 'pipeda', edgeRegion: 'yxy1', seoSlug: 'nunavut' },
-};
+// Source unique de vérité : src/lib/canadaNetwork.ts (CANADIAN_REGIONS)
+const CANADA_REGIONS: Record<string, CanadianRegion> = CANADIAN_REGIONS;
 
 const detectProvince = (req: express.Request): string => {
   const regionHeader = String(req.headers['x-vercel-ip-country-region'] ?? req.headers['cf-region-code'] ?? '');
@@ -1638,12 +1661,55 @@ app.get('/api/network/status', (_req, res) => {
   });
 });
 
+const CITY_SLUGS = [
+  'montreal', 'quebec-ville', 'laval', 'longueuil', 'sherbrooke', 'gatineau', 'trois-rivieres',
+  'toronto', 'ottawa', 'mississauga', 'brampton', 'hamilton', 'kitchener', 'london', 'windsor',
+  'vancouver', 'victoria', 'surrey', 'burnaby', 'richmond',
+  'calgary', 'edmonton', 'red-deer',
+  'winnipeg', 'halifax', 'saskatoon', 'regina',
+  'moncton', 'charlottetown', 'st-johns', 'whitehorse', 'yellowknife', 'iqaluit',
+];
+
+const BLOG_SLUGS = [
+  'choisir-comptable-en-ligne-canada',
+  'guide-tps-tvq-tvh-canada',
+  'tenue-livres-travailleur-autonome-canada',
+  'quickbooks-sage-wave-comparaison-canada',
+  'paie-t4-guide-employeurs-canada',
+  'demarrer-entreprise-canada-obligations-comptables',
+];
+
 app.get('/sitemap.xml', (_req, res) => {
   const base = 'https://compta-flow.net';
-  const paths = ['/', '/estimate', '/calculateur-taxes', '/privacy', '/terms', '/legal', '/cookies', '/login', '/showcase',
-    ...Object.values(CANADA_REGIONS).map((r) => `/ca/${r.seoSlug}`)];
-  const urls = paths.map((p) => `<url><loc>${base}${p}</loc><changefreq>weekly</changefreq><priority>${p === '/' ? '1.0' : '0.8'}</priority></url>`).join('');
+  const today = new Date().toISOString().split('T')[0];
+
+  interface SitemapEntry { path: string; priority: string; changefreq: string; lastmod?: string }
+  const pages: SitemapEntry[] = [
+    { path: '/', priority: '1.0', changefreq: 'daily', lastmod: today },
+    { path: '/estimate', priority: '0.9', changefreq: 'weekly', lastmod: today },
+    { path: '/calculateur-taxes', priority: '0.9', changefreq: 'monthly', lastmod: today },
+    { path: '/ressources', priority: '0.8', changefreq: 'weekly', lastmod: today },
+    { path: '/login', priority: '0.6', changefreq: 'monthly' },
+    { path: '/showcase', priority: '0.4', changefreq: 'monthly' },
+    { path: '/privacy', priority: '0.3', changefreq: 'yearly' },
+    { path: '/terms', priority: '0.3', changefreq: 'yearly' },
+    { path: '/legal', priority: '0.3', changefreq: 'yearly' },
+    { path: '/cookies', priority: '0.3', changefreq: 'yearly' },
+    // Province pages — high priority
+    ...Object.values(CANADA_REGIONS).map((r) => ({ path: `/ca/${r.seoSlug}`, priority: '0.9', changefreq: 'monthly', lastmod: today })),
+    // City pages — high priority
+    ...CITY_SLUGS.map((s) => ({ path: `/ca/${s}`, priority: '0.85', changefreq: 'monthly', lastmod: today })),
+    // Blog articles
+    ...BLOG_SLUGS.map((s) => ({ path: `/ressources/${s}`, priority: '0.8', changefreq: 'monthly', lastmod: today })),
+  ];
+
+  const urls = pages.map((p) => {
+    const lastmod = p.lastmod ? `<lastmod>${p.lastmod}</lastmod>` : '';
+    return `<url><loc>${base}${p.path}</loc>${lastmod}<changefreq>${p.changefreq}</changefreq><priority>${p.priority}</priority></url>`;
+  }).join('');
+
   res.setHeader('Content-Type', 'application/xml');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
   res.send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`);
 });
 
@@ -1821,7 +1887,7 @@ app.post('/api/quote/create', async (req, res) => {
         // Envoi à l'Admin Principal
         await resend.emails.send({
           from: 'Comptaflow Audit <supervision@compta-flow.net>',
-          to: ['compta_flow@outlook.com'],
+          to: [COMPANY_OUTLOOK_EMAIL],
           subject: `[Supervision Audit] Nouveau devis scellé : ${clientName} (${quoteRef})`,
           html: adminHtml
         });
@@ -1836,7 +1902,7 @@ app.post('/api/quote/create', async (req, res) => {
       console.log("=================== SIMULATION D'ENVOI DE COURRIELS (NO RESEND KEY) ===================");
       console.log(`[CLIENT EMAIL to ${clientEmail}] Subject: Confirmation estimation - Ref ${quoteRef}`);
       console.log(`[AGENT EMAIL to ${agentEmail}] Subject: Nouveau dossier assigné : ${clientName}`);
-      console.log(`[ADMIN EMAIL to compta_flow@outlook.com] Subject: Supervision devis scellé : ${clientName}`);
+      console.log(`[ADMIN EMAIL to ${COMPANY_OUTLOOK_EMAIL}] Subject: Supervision devis scellé : ${clientName}`);
       console.log("=======================================================================================");
       emailsDispatched = true;
     }
@@ -1909,9 +1975,22 @@ app.post('/api/webhook/account-confirmed', async (req, res) => {
       } catch (sendErr: any) {
         console.error("[account-confirmed] Resend dispatch failed:", sendErr.message);
       }
+
+      try {
+        await resend.emails.send({
+          from: 'Comptaflow <welcome@compta-flow.net>',
+          to: [COMPANY_OUTLOOK_EMAIL],
+          subject: `[ComptaFlow] Compte activé — ${fullName}`,
+          html: emailHtml
+        });
+        botLog('ACCOUNT_CONFIRMED_ADMIN_COPY_SENT', COMPANY_OUTLOOK_EMAIL, `Copie d'activation de compte envoyée pour ${fullName}.`);
+      } catch (sendErr: any) {
+        console.error("[account-confirmed] Admin copy dispatch failed:", sendErr.message);
+      }
     } else {
       console.log("=================== SIMULATION D'ENVOI DE COURRIELS (NO RESEND KEY) ===================");
       console.log(`[WELCOME EMAIL to ${email}] Subject: Votre compte Compta-Flow est activé ! ✦`);
+      console.log(`[ADMIN COPY to ${COMPANY_OUTLOOK_EMAIL}] Subject: Compte activé — ${fullName}`);
       console.log("=======================================================================================");
       emailSent = true;
     }

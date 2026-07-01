@@ -555,7 +555,7 @@ var CONFIG = {
     VERSION: "1.0.0-PROD",
     SUPER_ADMIN_EMAILS: ["admin@compta-flow.net", "s.lahaie07@gmail.com"],
     SUB_ADMIN_EMAILS: ["comptable@compta-flow.net", "partenaire@compta-flow.net"],
-    SUPPORT_EMAIL: "comptaflow.officiel@gmail.com",
+    SUPPORT_EMAIL: "compta-flow@outlook.com",
     SITE_URL: "https://compta-flow.net",
     /** Destinataire par défaut des virements Interac plateforme (distinct des comptes auth admin). */
     INTERAC_EMAIL: "comptaflow.officiel@gmail.com"
@@ -1522,6 +1522,9 @@ async function applySupabaseMigrations(options) {
 }
 
 // api/lib/emailTemplates.ts
+function escapeHtml(value) {
+  return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
 var COMMON_CSS = `
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: #050505;
@@ -1573,316 +1576,335 @@ var FOOTER_STYLE = `
   letter-spacing: 0.1em;
   text-transform: uppercase;
 `;
-function getClientEmailTemplate(data) {
-  const isAr = data.lang === "ar";
+function getPremiumEmailWrapper(options) {
+  const isAr = options.lang === "ar";
   const dir = isAr ? "rtl" : "ltr";
   const textAlign = isAr ? "right" : "left";
+  const logoText = "Compta-Flow";
+  const brandSub = isAr ? "\u0645\u0643\u062A\u0628 \u0627\u0644\u0645\u062D\u0627\u0633\u0628\u0629 \u0627\u0644\u0633\u064A\u0627\u062F\u064A \u0627\u0644\u0645\u062A\u0645\u064A\u0632" : "Cabinet Comptable Souverain d'\xC9lite";
+  const footerText = isAr ? "\u062A\u0646\u0628\u064A\u0647 \u0623\u0645\u0646\u064A Loi 25 \xB7 \u0646\u0638\u0627\u0645 \u0643\u0648\u0645\u0628\u062A\u0627 \u0641\u0644\u0648 \u0627\u0644\u0645\u062D\u0645\u064A \u0648\u0627\u0644\u0645\u0634\u0641\u0631 \xB7 \u0643\u0646\u062F\u0627" : "S\xE9curis\xE9 Loi 25 \xB7 Cryptage AES-256 \xB7 Compta-Flow Canada";
+  const buttonHtml = options.buttonLabel && options.buttonUrl ? `<div style="text-align: center; margin: 30px 0;">
+        <a href="${options.buttonUrl}" style="${BUTTON_STYLE}">${options.buttonLabel}</a>
+       </div>` : "";
+  return `<!DOCTYPE html>
+<html lang="${options.lang || "fr"}" dir="${dir}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${options.title}</title>
+  ${options.preheader ? `<span style="display:none !important; visibility:hidden; opacity:0; color:transparent; height:0; width:0; font-size: 0px;">${options.preheader}</span>` : ""}
+  <style>
+    body { ${COMMON_CSS} }
+  </style>
+</head>
+<body style="margin:0; padding:0; background-color:#050505;">
+  <div style="${CONTAINER_STYLE} direction: ${dir}; text-align: ${textAlign};">
+    <div style="${HEADER_STYLE}">
+      <div style="font-size: 32px; font-family: serif; color: #D4AF37; font-style: italic; font-weight: bold; letter-spacing: 1px;">${logoText}</div>
+      <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 3px; color: #88888F; margin-top: 6px;">${brandSub}</div>
+    </div>
+    
+    <div style="${CONTENT_STYLE}">
+      <h2 style="font-family: serif; font-size: 24px; color: #FDFBF7; font-style: italic; margin-top: 0; margin-bottom: 20px;">${options.subtitle}</h2>
+      ${options.bodyHtml}
+      ${buttonHtml}
+    </div>
+    
+    <div style="${FOOTER_STYLE}">
+      ${footerText}
+    </div>
+  </div>
+</body>
+</html>`;
+}
+function getClientEmailTemplate(data) {
+  const isAr = data.lang === "ar";
   if (isAr) {
-    return `
-      <!DOCTYPE html>
-      <html lang="ar" dir="rtl">
-      <head>
-        <meta charset="UTF-8">
-        <title>\u062A\u0623\u0643\u064A\u062F \u062A\u0642\u062F\u064A\u0631 \u0627\u0644\u0631\u0633\u0648\u0645 - Compta-Flow</title>
-        <style>
-          body { ${COMMON_CSS} }
-        </style>
-      </head>
-      <body>
-        <div style="${CONTAINER_STYLE} direction: rtl; text-align: right;">
-          <div style="${HEADER_STYLE}">
-            <div style="font-size: 32px; font-family: serif; color: #D4AF37; font-style: italic; font-weight: bold; letter-spacing: 1px;">Compta-Flow</div>
-            <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: #88888F; margin-top: 6px;">\u0645\u0643\u062A\u0628 \u0627\u0644\u0645\u062D\u0627\u0633\u0628\u0629 \u0627\u0644\u0633\u064A\u0627\u062F\u064A \u0627\u0644\u0645\u062A\u0645\u064A\u0632</div>
-          </div>
-          
-          <div style="${CONTENT_STYLE}">
-            <h2 style="font-family: serif; font-size: 24px; color: #FDFBF7; font-style: italic; margin-bottom: 20px;">\u0645\u0631\u062D\u0628\u0627\u064B ${data.clientName}\u060C</h2>
-            <p style="color: #CCCCCC; font-size: 14px;">\u064A\u0633\u0639\u062F\u0646\u0627 \u062C\u062F\u0627\u064B \u0648\u064A\u0634\u0631\u0641\u0646\u0627 \u0645\u0631\u0627\u0641\u0642\u062A\u0643\u0645 \u0641\u064A \u0625\u062F\u0627\u0631\u0629 \u062D\u0633\u0627\u0628\u0627\u062A\u0643\u0645 \u0648\u062A\u0646\u0638\u064A\u0645 \u0647\u064A\u0643\u0644\u0643\u0645 \u0627\u0644\u0645\u0627\u0644\u064A. \u062A\u0645 \u062D\u0641\u0638 \u0645\u062D\u0627\u0643\u0627\u0629 \u0627\u0644\u0623\u0633\u0639\u0627\u0631 \u0627\u0644\u062E\u0627\u0635\u0629 \u0628\u0643\u0645 \u0628\u0646\u062C\u0627\u062D.</p>
-            
-            <div style="background-color: rgba(214, 175, 55, 0.04); border: 1px solid rgba(214, 175, 55, 0.15); padding: 25px; border-radius: 16px; margin: 30px 0;">
-              <h3 style="color: #D4AF37; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(214, 175, 55, 0.1); padding-bottom: 8px;">\u062A\u0641\u0627\u0635\u064A\u0644 \u062A\u0642\u062F\u064A\u0631 \u0627\u0644\u0633\u0639\u0631 (${data.quoteRef})</h3>
-              <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
-                <tr>
-                  <td style="padding: 8px 0; color: #88888F;">\u0627\u0644\u062E\u062F\u0645\u0629 \u0627\u0644\u0645\u062D\u062F\u062F\u0629:</td>
-                  <td style="padding: 8px 0; text-align: left; font-weight: bold;">${data.serviceName}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; color: #88888F;">\u0627\u0644\u0645\u0642\u0627\u0637\u0639\u0629 \u0627\u0644\u0636\u0631\u064A\u0628\u064A\u0629:</td>
-                  <td style="padding: 8px 0; text-align: left; font-weight: bold;">${data.province}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 8px 0; color: #88888F;">\u0627\u0644\u0645\u0628\u0644\u063A \u0627\u0644\u0623\u0633\u0627\u0633\u064A (\u0642\u0628\u0644 \u0627\u0644\u0636\u0631\u064A\u0628\u0629):</td>
-                  <td style="padding: 8px 0; text-align: left; font-family: monospace;">${data.subtotal}</td>
-                </tr>
-                ${data.taxesHtml}
-                <tr style="border-top: 1px solid rgba(214, 175, 55, 0.2); font-size: 15px; font-weight: bold;">
-                  <td style="padding: 12px 0; color: #D4AF37;">\u0627\u0644\u0645\u062C\u0645\u0648\u0639 \u0627\u0644\u0625\u062C\u0645\u0627\u0644\u064A \u0634\u0627\u0645\u0644 \u0627\u0644\u0636\u0631\u064A\u0628\u0629:</td>
-                  <td style="padding: 12px 0; text-align: left; color: #D4AF37; font-family: monospace;">${data.total}</td>
-                </tr>
-              </table>
-            </div>
-
-            <h3 style="font-family: serif; font-size: 18px; color: #FDFBF7; margin-top: 30px;">\u0627\u0644\u062E\u0637\u0648\u0627\u062A \u0627\u0644\u062A\u0627\u0644\u064A\u0629 \u0644\u062A\u0641\u0639\u064A\u0644 \u062D\u0633\u0627\u0628\u0643\u0645:</h3>
-            <ol style="color: #CCCCCC; font-size: 13px; padding-right: 20px; line-height: 1.8;">
-              <li style="margin-bottom: 10px;"><strong>\u062A\u0648\u0642\u064A\u0639 \u0639\u0642\u062F \u0627\u0644\u062A\u0645\u062B\u064A\u0644 \u0627\u0644\u0645\u0634\u062A\u0631\u0643</strong>: \u064A\u0631\u062C\u0649 \u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062F\u062E\u0648\u0644 \u0625\u0644\u0649 \u0628\u0648\u0627\u0628\u062A\u0643 \u0644\u0648\u0636\u0639 \u062A\u0648\u0642\u064A\u0639\u0643 \u0627\u0644\u0625\u0644\u0643\u062A\u0631\u0648\u0646\u064A \u0627\u0644\u0645\u0624\u0645\u0646.</li>
-              <li style="margin-bottom: 10px;"><strong>\u062A\u062D\u0645\u064A\u0644 \u0645\u0633\u062A\u0646\u062F\u0627\u062A\u0643 \u0627\u0644\u062B\u0628\u0648\u062A\u064A\u0629</strong>: \u0642\u0645 \u0628\u0625\u064A\u062F\u0627\u0639 \u0643\u0634\u0648\u0641\u0627\u062A\u0643 \u0627\u0644\u0628\u0646\u0643\u064A\u0629 \u0648\u0625\u064A\u0635\u0627\u0644\u0627\u062A\u0643 \u0628\u0623\u0645\u0627\u0646 \u0641\u064A \u062E\u0632\u0646\u062A\u0646\u0627 \u0627\u0644\u0625\u0644\u0643\u062A\u0631\u0648\u0646\u064A\u0629 \u0627\u0644\u0645\u0634\u0641\u0631\u0629.</li>
-              <li style="margin-bottom: 10px;"><strong>\u0645\u0643\u0627\u0644\u0645\u0629 \u0627\u0646\u0637\u0644\u0627\u0642 \u0627\u0644\u062E\u062F\u0645\u0629</strong>: \u0627\u062D\u062C\u0632 \u0644\u0642\u0627\u0621\u0643 \u0627\u0644\u062A\u0631\u062D\u064A\u0628\u064A \u0645\u0639 \u0645\u062D\u0627\u0633\u0628\u062A\u0643 \u0627\u0644\u0645\u0639\u062A\u0645\u062F\u0629 <strong>\u0625\u064A\u0644\u064A\u0627 (${data.agentName})</strong> \u0644\u062A\u0623\u0643\u064A\u062F \u0645\u0633\u0627\u0631 \u0645\u0644\u0641\u0643.</li>
-            </ol>
-
-            <div style="text-align: center;">
-              <a href="${data.portalUrl}" style="${BUTTON_STYLE}">\u062F\u062E\u0648\u0644 \u0628\u0648\u0627\u0628\u0629 \u0627\u0644\u0639\u0645\u0644\u0627\u0621</a>
-            </div>
-            
-            <p style="color: #88888F; font-size: 12px; font-style: italic; margin-top: 30px; border-right: 2px solid #D4AF37; padding-right: 10px;">\u0644\u0642\u062F \u0623\u0631\u0641\u0642\u0646\u0627 \u062A\u0642\u062F\u064A\u0631 \u0627\u0644\u0631\u0633\u0648\u0645 \u0627\u0644\u0631\u0633\u0645\u064A \u0628\u0635\u064A\u063A\u0629 PDF \u0641\u064A \u0647\u0630\u0627 \u0627\u0644\u0628\u0631\u064A\u062F \u0627\u0644\u0625\u0644\u0643\u062A\u0631\u0648\u0646\u064A \u0644\u0644\u0631\u062C\u0648\u0639 \u0625\u0644\u064A\u0647 \u0641\u064A \u0623\u064A \u0648\u0642\u062A.</p>
-          </div>
-          
-          <div style="${FOOTER_STYLE}">
-            \u062A\u0646\u0628\u064A\u0647 \u0623\u0645\u0646\u064A Loi 25 \xB7 \u0646\u0638\u0627\u0645 \u0643\u0648\u0645\u0628\u062A\u0627 \u0641\u0644\u0648 \u0627\u0644\u0645\u062D\u0645\u064A \u0648\u0627\u0644\u0645\u0634\u0641\u0631 \xB7 \u0643\u0646\u062F\u0627
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-  }
-  return `
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-      <meta charset="UTF-8">
-      <title>Confirmation de votre estimation premium - Compta-Flow</title>
-      <style>
-        body { ${COMMON_CSS} }
-      </style>
-    </head>
-    <body>
-      <div style="${CONTAINER_STYLE}">
-        <div style="${HEADER_STYLE}">
-          <div style="font-size: 32px; font-family: serif; color: #D4AF37; font-style: italic; font-weight: bold; letter-spacing: 1px;">Compta-Flow</div>
-          <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 3px; color: #88888F; margin-top: 6px;">Cabinet Comptable Souverain d'\xC9lite</div>
-        </div>
-        
-        <div style="${CONTENT_STYLE}">
-          <h2 style="font-family: serif; font-size: 24px; color: #FDFBF7; font-style: italic; margin-bottom: 20px;">Bonjour ${data.clientName},</h2>
-          <p style="color: #CCCCCC; font-size: 14px;">C'est un honneur et un privil\xE8ge de vous accompagner dans la structuration et la souverainet\xE9 financi\xE8re de votre entreprise. Votre simulation tarifaire a \xE9t\xE9 scell\xE9e avec succ\xE8s.</p>
-          
-          <div style="background-color: rgba(214, 175, 55, 0.04); border: 1px solid rgba(214, 175, 55, 0.15); padding: 25px; border-radius: 16px; margin: 30px 0;">
-            <h3 style="color: #D4AF37; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(214, 175, 55, 0.1); padding-bottom: 8px;">D\xE9tails de l'Estimation (${data.quoteRef})</h3>
-            <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
-              <tr>
-                <td style="padding: 8px 0; color: #88888F;">Service s\xE9lectionn\xE9 :</td>
-                <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.serviceName}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #88888F;">Province fiscale :</td>
-                <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.province}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #88888F;">Montant brut (HT) :</td>
-                <td style="padding: 8px 0; text-align: right; font-family: monospace;">${data.subtotal}</td>
-              </tr>
-              ${data.taxesHtml}
-              <tr style="border-top: 1px solid rgba(214, 175, 55, 0.2); font-size: 15px; font-weight: bold;">
-                <td style="padding: 12px 0; color: #D4AF37;">Total TTC estim\xE9 :</td>
-                <td style="padding: 12px 0; text-align: right; color: #D4AF37; font-family: monospace;">${data.total}</td>
-              </tr>
-            </table>
-          </div>
-
-          <h3 style="font-family: serif; font-size: 18px; color: #FDFBF7; margin-top: 30px;">Vos prochaines \xE9tapes pour le d\xE9marrage :</h3>
-          <ol style="color: #CCCCCC; font-size: 13px; padding-left: 20px; line-height: 1.8;">
-            <li style="margin-bottom: 10px;"><strong>Signer le mandat de repr\xE9sentation</strong> : Connectez-vous \xE0 votre portail s\xE9curis\xE9 pour apposer votre signature num\xE9rique l\xE9gale.</li>
-            <li style="margin-bottom: 10px;"><strong>T\xE9l\xE9verser vos pi\xE8ces justificatives</strong> : D\xE9posez vos relev\xE9s bancaires et factures dans votre coffre-fort chiffr\xE9.</li>
-            <li style="margin-bottom: 10px;"><strong>Appel de cadrage</strong> : Planifiez votre appel de bienvenue avec votre comptable attitr\xE9e, <strong>${data.agentName}</strong>.</li>
-          </ol>
-
-          <div style="text-align: center;">
-            <a href="${data.portalUrl}" style="${BUTTON_STYLE}">Acc\xE9der \xE0 mon Espace Client</a>
-          </div>
-          
-          <p style="color: #88888F; font-size: 12px; font-style: italic; margin-top: 30px; border-left: 2px solid #D4AF37; padding-left: 10px;">Le devis officiel au format PDF est joint \xE0 ce courriel.</p>
-        </div>
-        
-        <div style="${FOOTER_STYLE}">
-          S\xE9curis\xE9 Loi 25 \xB7 Cryptage AES-256 \xB7 Compta-Flow Canada
-        </div>
+    const bodyHtml = `
+      <p style="color: #CCCCCC; font-size: 14px;">\u064A\u0633\u0639\u062F\u0646\u0627 \u062C\u062F\u0627\u064B \u0648\u064A\u0634\u0631\u0641\u0646\u0627 \u0645\u0631\u0627\u0641\u0642\u062A\u0643\u0645 \u0641\u064A \u0625\u062F\u0627\u0631\u0629 \u062D\u0633\u0627\u0628\u0627\u062A\u0643\u0645 \u0648\u062A\u0646\u0638\u064A\u0645 \u0647\u064A\u0643\u0644\u0643\u0645 \u0627\u0644\u0645\u0627\u0644\u064A. \u062A\u0645 \u062D\u0641\u0638 \u0645\u062D\u0627\u0643\u0627\u0629 \u0627\u0644\u0623\u0633\u0639\u0627\u0631 \u0627\u0644\u062E\u0627\u0635\u0629 \u0628\u0643\u0645 \u0628\u0646\u062C\u0627\u062D.</p>
+      
+      <div style="background-color: rgba(214, 175, 55, 0.04); border: 1px solid rgba(214, 175, 55, 0.15); padding: 25px; border-radius: 16px; margin: 30px 0;">
+        <h3 style="color: #D4AF37; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(214, 175, 55, 0.1); padding-bottom: 8px;">\u062A\u0641\u0627\u0635\u064A\u0644 \u062A\u0642\u062F\u064A\u0631 \u0627\u0644\u0633\u0639\u0631 (${data.quoteRef})</h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
+          <tr>
+            <td style="padding: 8px 0; color: #88888F;">\u0627\u0644\u062E\u062F\u0645\u0629 \u0627\u0644\u0645\u062D\u062F\u062F\u0629:</td>
+            <td style="padding: 8px 0; text-align: left; font-weight: bold;">${escapeHtml(data.serviceName)}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #88888F;">\u0627\u0644\u0645\u0642\u0627\u0637\u0639\u0629 \u0627\u0644\u0636\u0631\u064A\u0628\u064A\u0629:</td>
+            <td style="padding: 8px 0; text-align: left; font-weight: bold;">${escapeHtml(data.province)}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; color: #88888F;">\u0627\u0644\u0645\u0628\u0644\u063A \u0627\u0644\u0623\u0633\u0627\u0633\u064A (\u0642\u0628\u0644 \u0627\u0644\u0636\u0631\u064A\u0628\u0629):</td>
+            <td style="padding: 8px 0; text-align: left; font-family: monospace;">${data.subtotal}</td>
+          </tr>
+          ${data.taxesHtml}
+          <tr style="border-top: 1px solid rgba(214, 175, 55, 0.2); font-size: 15px; font-weight: bold;">
+            <td style="padding: 12px 0; color: #D4AF37;">\u0627\u0644\u0645\u062C\u0645\u0648\u0639 \u0627\u0644\u0625\u062C\u0645\u0627\u0644\u064A \u0634\u0627\u0645\u0644 \u0627\u0644\u0636\u0631\u064A\u0628\u0629:</td>
+            <td style="padding: 12px 0; text-align: left; color: #D4AF37; font-family: monospace;">${data.total}</td>
+          </tr>
+        </table>
       </div>
-    </body>
-    </html>
+
+      <h3 style="font-family: serif; font-size: 18px; color: #FDFBF7; margin-top: 30px;">\u0627\u0644\u062E\u0637\u0648\u0627\u062A \u0627\u0644\u062A\u0627\u0644\u064A\u0629 \u0644\u062A\u0641\u0639\u064A\u0644 \u062D\u0633\u0627\u0628\u0643\u0645:</h3>
+      <ol style="color: #CCCCCC; font-size: 13px; padding-right: 20px; line-height: 1.8;">
+        <li style="margin-bottom: 10px;"><strong>\u062A\u0648\u0642\u064A\u0639 \u0639\u0642\u062F \u0627\u0644\u062A\u0645\u062B\u064A\u0644 \u0627\u0644\u0645\u0634\u062A\u0631\u0643</strong>: \u064A\u0631\u062C\u0649 \u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062F\u062E\u0648\u0644 \u0625\u0644\u0649 \u0628\u0648\u0627\u0628\u062A\u0643 \u0644\u0648\u0636\u0639 \u062A\u0648\u0642\u064A\u0639\u0643 \u0627\u0644\u0625\u0644\u0643\u062A\u0631\u0648\u0646\u064A \u0627\u0644\u0645\u0624\u0645\u0646.</li>
+        <li style="margin-bottom: 10px;"><strong>\u062A\u062D\u0645\u064A\u0644 \u0645\u0633\u062A\u0646\u062F\u0627\u062A\u0643 \u0627\u0644\u062B\u0628\u0648\u062A\u064A\u0629</strong>: \u0642\u0645 \u0628\u0625\u064A\u062F\u0627\u0639 \u0643\u0634\u0648\u0641\u0627\u062A\u0643 \u0627\u0644\u0628\u0646\u0643\u064A\u0629 \u0648\u0625\u064A\u0635\u0627\u0644\u0627\u062A\u0643 \u0628\u0623\u0645\u0627\u0646 \u0641\u064A \u062E\u0632\u0646\u062A\u0646\u0627 \u0627\u0644\u0625\u0644\u0643\u062A\u0631\u0648\u0646\u064A\u0629 \u0627\u0644\u0645\u0634\u0641\u0631\u0629.</li>
+        <li style="margin-bottom: 10px;"><strong>\u0645\u0643\u0627\u0644\u0645\u0629 \u0627\u0646\u0637\u0644\u0627\u0642 \u0627\u0644\u062E\u062F\u0645\u0629</strong>: \u0627\u062D\u062C\u0632 \u0644\u0642\u0627\u0621\u0643 \u0627\u0644\u062A\u0631\u062D\u064A\u0628\u064A \u0645\u0639 \u0645\u062D\u0627\u0633\u0628\u062A\u0643 \u0627\u0644\u0645\u0639\u062A\u0645\u062F\u0629 <strong>\u0625\u064A\u0644\u064A\u0627 (${escapeHtml(data.agentName)})</strong> \u0644\u062A\u0623\u0643\u064A\u062F \u0645\u0633\u0627\u0631 \u0645\u0644\u0641\u0643.</li>
+      </ol>
+
+      <p style="color: #88888F; font-size: 12px; font-style: italic; margin-top: 30px; border-right: 2px solid #D4AF37; padding-right: 10px;">\u0644\u0642\u062F \u0623\u0631\u0641\u0642\u0646\u0627 \u062A\u0642\u062F\u064A\u0631 \u0627\u0644\u0631\u0633\u0648\u0645 \u0627\u0644\u0631\u0633\u0645\u064A \u0628\u0635\u064A\u063A\u0629 PDF \u0641\u064A \u0647\u0630\u0627 \u0627\u0644\u0628\u0631\u064A\u062F \u0627\u0644\u0625\u0644\u0643\u062A\u0631\u0648\u0646\u064A \u0644\u0644\u0631\u062C\u0648\u0639 \u0625\u0644\u064A\u0647 \u0641\u064A \u0623\u064A \u0648\u0642\u062A.</p>
+    `;
+    return getPremiumEmailWrapper({
+      title: "\u062A\u0623\u0643\u064A\u062F \u062A\u0642\u062F\u064A\u0631 \u0627\u0644\u0631\u0633\u0648\u0645 - Compta-Flow",
+      subtitle: `\u0645\u0631\u062D\u0628\u0627\u064B ${escapeHtml(data.clientName)}\u060C`,
+      bodyHtml,
+      buttonLabel: "\u062F\u062E\u0648\u0644 \u0628\u0648\u0627\u0628\u0629 \u0627\u0644\u0639\u0645\u0644\u0627\u0621",
+      buttonUrl: data.portalUrl,
+      lang: "ar"
+    });
+  }
+  const bodyHtmlFr = `
+    <p style="color: #CCCCCC; font-size: 14px;">C'est un honneur et un privil\xE8ge de vous accompagner dans la structuration et la souverainet\xE9 financi\xE8re de votre entreprise. Votre simulation tarifaire a \xE9t\xE9 scell\xE9e avec succ\xE8s.</p>
+    
+    <div style="background-color: rgba(214, 175, 55, 0.04); border: 1px solid rgba(214, 175, 55, 0.15); padding: 25px; border-radius: 16px; margin: 30px 0;">
+      <h3 style="color: #D4AF37; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(214, 175, 55, 0.1); padding-bottom: 8px;">D\xE9tails de l'Estimation (${escapeHtml(data.quoteRef)})</h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">Service s\xE9lectionn\xE9 :</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.serviceName)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">Province fiscale :</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.province)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">Montant brut (HT) :</td>
+          <td style="padding: 8px 0; text-align: right; font-family: monospace;">${escapeHtml(data.subtotal)}</td>
+        </tr>
+        ${data.taxesHtml}
+        <tr style="border-top: 1px solid rgba(214, 175, 55, 0.2); font-size: 15px; font-weight: bold;">
+          <td style="padding: 12px 0; color: #D4AF37;">Total TTC estim\xE9 :</td>
+          <td style="padding: 12px 0; text-align: right; color: #D4AF37; font-family: monospace;">${escapeHtml(data.total)}</td>
+        </tr>
+      </table>
+    </div>
+
+    <h3 style="font-family: serif; font-size: 18px; color: #FDFBF7; margin-top: 30px;">Vos prochaines \xE9tapes pour le d\xE9marrage :</h3>
+    <ol style="color: #CCCCCC; font-size: 13px; padding-left: 20px; line-height: 1.8;">
+      <li style="margin-bottom: 10px;"><strong>Signer le mandat de repr\xE9sentation</strong> : Connectez-vous \xE0 votre portail s\xE9curis\xE9 pour apposer votre signature num\xE9rique l\xE9gale.</li>
+      <li style="margin-bottom: 10px;"><strong>T\xE9l\xE9verser vos pi\xE8ces justificatives</strong> : D\xE9posez vos relev\xE9s bancaires et factures dans votre coffre-fort chiffr\xE9.</li>
+      <li style="margin-bottom: 10px;"><strong>Appel de cadrage</strong> : Planifiez votre appel de bienvenue avec votre comptable attitr\xE9e, <strong>${escapeHtml(data.agentName)}</strong>.</li>
+    </ol>
+    
+    <p style="color: #88888F; font-size: 12px; font-style: italic; margin-top: 30px; border-left: 2px solid #D4AF37; padding-left: 10px;">Le devis officiel au format PDF est joint \xE0 ce courriel.</p>
   `;
+  return getPremiumEmailWrapper({
+    title: "Confirmation de votre estimation premium - Compta-Flow",
+    subtitle: `Bonjour ${escapeHtml(data.clientName)},`,
+    bodyHtml: bodyHtmlFr,
+    buttonLabel: "Acc\xE9der \xE0 mon Espace Client",
+    buttonUrl: data.portalUrl,
+    lang: data.lang
+  });
 }
 function getAgentEmailTemplate(data) {
-  return `
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-      <meta charset="UTF-8">
-      <title>[Compta-Flow] Nouveau dossier assign\xE9 - ${data.clientName}</title>
-      <style>
-        body { ${COMMON_CSS} }
-      </style>
-    </head>
-    <body>
-      <div style="${CONTAINER_STYLE}">
-        <div style="${HEADER_STYLE}">
-          <div style="font-size: 26px; font-family: serif; color: #D4AF37; font-style: italic; font-weight: bold;">Nouveau Dossier Assign\xE9</div>
-          <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: #88888F; margin-top: 6px;">Notification Collaborateur</div>
-        </div>
-        
-        <div style="${CONTENT_STYLE}">
-          <h2 style="font-family: serif; font-size: 20px; color: #FDFBF7; font-style: italic; margin-bottom: 20px;">Bonjour ${data.agentName},</h2>
-          <p style="color: #CCCCCC; font-size: 14px;">Un nouveau client vient de finaliser sa simulation de services et a \xE9t\xE9 rattach\xE9 \xE0 votre portefeuille comptable.</p>
-          
-          <div style="background-color: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); padding: 25px; border-radius: 16px; margin: 30px 0;">
-            <h3 style="color: #D4AF37; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 8px;">Fiche Client</h3>
-            <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
-              <tr>
-                <td style="padding: 8px 0; color: #88888F;">Nom complet / Cie :</td>
-                <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.clientName}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #88888F;">Courriel de contact :</td>
-                <td style="padding: 8px 0; text-align: right; font-weight: bold;"><a href="mailto:${data.clientEmail}" style="color: #D4AF37; text-decoration: none;">${data.clientEmail}</a></td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #88888F;">Service souscrit :</td>
-                <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.serviceName}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #88888F;">Tarif mensuel :</td>
-                <td style="padding: 8px 0; text-align: right; color: #D4AF37; font-family: monospace; font-weight: bold;">${data.total}</td>
-              </tr>
-            </table>
-          </div>
+  const bodyHtml = `
+    <p style="color: #CCCCCC; font-size: 14px;">Un nouveau client vient de finaliser sa simulation de services et a \xE9t\xE9 rattach\xE9 \xE0 votre portefeuille comptable.</p>
+    
+    <div style="background-color: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); padding: 25px; border-radius: 16px; margin: 30px 0;">
+      <h3 style="color: #D4AF37; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 8px;">Fiche Client</h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">Nom complet / Cie :</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.clientName)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">Courriel de contact :</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;"><a href="mailto:${escapeHtml(data.clientEmail)}" style="color: #D4AF37; text-decoration: none;">${escapeHtml(data.clientEmail)}</a></td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">Service souscrit :</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.serviceName)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">Tarif mensuel :</td>
+          <td style="padding: 8px 0; text-align: right; color: #D4AF37; font-family: monospace; font-weight: bold;">${escapeHtml(data.total)}</td>
+        </tr>
+      </table>
+    </div>
 
-          <h3 style="font-family: serif; font-size: 16px; color: #FDFBF7; margin-top: 30px;">Actions requises :</h3>
-          <ul style="color: #CCCCCC; font-size: 13px; padding-left: 20px; line-height: 1.8;">
-            <li>Valider la conformit\xE9 des taxes r\xE9gionales du client (${data.province}).</li>
-            <li>Suivre le t\xE9l\xE9versement des livrables et la signature du mandat sur votre portail.</li>
-            <li>Pr\xE9parer l'entretien d'accueil et le plan comptable adapt\xE9.</li>
-          </ul>
-
-          <div style="text-align: center;">
-            <a href="${data.portalUrl}" style="${BUTTON_STYLE}">Ouvrir mon Portail Agent</a>
-          </div>
-        </div>
-        
-        <div style="${FOOTER_STYLE}">
-          Isolation RLS Active \xB7 Compta-Flow Agent Network
-        </div>
-      </div>
-    </body>
-    </html>
+    <h3 style="font-family: serif; font-size: 16px; color: #FDFBF7; margin-top: 30px;">Actions requises :</h3>
+    <ul style="color: #CCCCCC; font-size: 13px; padding-left: 20px; line-height: 1.8;">
+      <li>Valider la conformit\xE9 des taxes r\xE9gionales du client (${escapeHtml(data.province)}).</li>
+      <li>Suivre le t\xE9l\xE9versement des livrables et la signature du mandat sur votre portail.</li>
+      <li>Pr\xE9parer l'entretien d'accueil et le plan comptable adapt\xE9.</li>
+    </ul>
   `;
+  return getPremiumEmailWrapper({
+    title: "[Compta-Flow] Nouveau dossier assign\xE9",
+    subtitle: `Bonjour ${escapeHtml(data.agentName)},`,
+    bodyHtml,
+    buttonLabel: "Ouvrir mon Portail Agent",
+    buttonUrl: data.portalUrl,
+    lang: data.lang
+  });
 }
 function getAdminEmailTemplate(data) {
-  return `
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-      <meta charset="UTF-8">
-      <title>[Rapport Financier] Nouvelle Transaction de Services - ${data.clientName}</title>
-      <style>
-        body { ${COMMON_CSS} }
-      </style>
-    </head>
-    <body>
-      <div style="${CONTAINER_STYLE}">
-        <div style="${HEADER_STYLE}">
-          <div style="font-size: 26px; font-family: serif; color: #D4AF37; font-style: italic; font-weight: bold;">Supervision Transactionnelle</div>
-          <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: #88888F; margin-top: 6px;">Rapport de Cadrage Principal</div>
-        </div>
-        
-        <div style="${CONTENT_STYLE}">
-          <h2 style="font-family: serif; font-size: 20px; color: #FDFBF7; font-style: italic; margin-bottom: 20px;">Bonjour Samuel,</h2>
-          <p style="color: #CCCCCC; font-size: 14px;">Le syst\xE8me a scell\xE9 une nouvelle estimation financi\xE8re et affect\xE9 le dossier associ\xE9 avec isolation stricte.</p>
-          
-          <div style="background-color: rgba(214, 175, 55, 0.02); border: 1px solid rgba(214, 175, 55, 0.1); padding: 25px; border-radius: 16px; margin: 30px 0;">
-            <h3 style="color: #D4AF37; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(214, 175, 55, 0.05); padding-bottom: 8px;">D\xE9tails d'Audit</h3>
-            <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
-              <tr>
-                <td style="padding: 8px 0; color: #88888F;">Client :</td>
-                <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.clientName} (${data.clientEmail})</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #88888F;">Agent assign\xE9 :</td>
-                <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.agentName} (${data.agentEmail})</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #88888F;">R\xE9gion fiscale :</td>
-                <td style="padding: 8px 0; text-align: right; font-weight: bold;">${data.province}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #88888F;">D\xE9tail financier :</td>
-                <td style="padding: 8px 0; text-align: right; font-family: monospace;">Sub: ${data.subtotal} / Net: ${data.total}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #88888F;">R\xE9f Devis :</td>
-                <td style="padding: 8px 0; text-align: right; font-family: monospace;">${data.quoteRef}</td>
-              </tr>
-            </table>
-          </div>
+  const bodyHtml = `
+    <p style="color: #CCCCCC; font-size: 14px;">Le syst\xE8me a scell\xE9 une nouvelle estimation financi\xE8re et affect\xE9 le dossier associ\xE9 avec isolation stricte.</p>
+    
+    <div style="background-color: rgba(214, 175, 55, 0.02); border: 1px solid rgba(214, 175, 55, 0.1); padding: 25px; border-radius: 16px; margin: 30px 0;">
+      <h3 style="color: #D4AF37; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(214, 175, 55, 0.05); padding-bottom: 8px;">D\xE9tails d'Audit</h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">Client :</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.clientName)} (${escapeHtml(data.clientEmail)})</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">Agent assign\xE9 :</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.agentName)} (${escapeHtml(data.agentEmail)})</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">R\xE9gion fiscale :</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.province)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">D\xE9tail financier :</td>
+          <td style="padding: 8px 0; text-align: right; font-family: monospace;">Sub: ${escapeHtml(data.subtotal)} / Net: ${escapeHtml(data.total)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">R\xE9f Devis :</td>
+          <td style="padding: 8px 0; text-align: right; font-family: monospace;">${escapeHtml(data.quoteRef)}</td>
+        </tr>
+      </table>
+    </div>
 
-          <div style="background-color: rgba(0, 150, 255, 0.02); border: 1px solid rgba(0, 150, 255, 0.1); padding: 15px; border-radius: 12px; font-size: 12px; color: #A0C0E0; margin-bottom: 30px;">
-            \u2139 <strong>Hardening de S\xE9curit\xE9 :</strong> La politique d'isolation RLS a \xE9t\xE9 v\xE9rifi\xE9e automatiquement sur ce dossier. L'acc\xE8s aux documents et \xE9critures comptables est strictement restreint \xE0 l'agent assign\xE9 (${data.agentName}) et supervis\xE9 par le propri\xE9taire principal.
-          </div>
-
-          <div style="text-align: center;">
-            <a href="${data.portalUrl}" style="${BUTTON_STYLE}">Ouvrir le Panneau Propri\xE9taire</a>
-          </div>
-        </div>
-        
-        <div style="${FOOTER_STYLE}">
-          ADMIN COMPTA-FLOW \xB7 SUPERVISION DIRECTE
-        </div>
-      </div>
-    </body>
-    </html>
+    <div style="background-color: rgba(0, 150, 255, 0.02); border: 1px solid rgba(0, 150, 255, 0.1); padding: 15px; border-radius: 12px; font-size: 12px; color: #A0C0E0; margin-bottom: 30px;">
+      \u2139 <strong>Hardening de S\xE9curit\xE9 :</strong> La politique d'isolation RLS a \xE9t\xE9 v\xE9rifi\xE9e automatiquement sur ce dossier. L'acc\xE8s aux documents et \xE9critures comptables est strictement restreint \xE0 l'agent assign\xE9 (${escapeHtml(data.agentName)}) et supervis\xE9 par le propri\xE9taire principal.
+    </div>
   `;
+  return getPremiumEmailWrapper({
+    title: "[Rapport Financier] Nouvelle Transaction de Services",
+    subtitle: "Bonjour Samuel,",
+    bodyHtml,
+    buttonLabel: "Ouvrir le Panneau Propri\xE9taire",
+    buttonUrl: data.portalUrl,
+    lang: data.lang
+  });
 }
 function getAccountConfirmedEmailTemplate(data) {
-  return `
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-      <meta charset="UTF-8">
-      <title>Votre compte Compta-Flow est activ\xE9 !</title>
-      <style>
-        body { ${COMMON_CSS} }
-      </style>
-    </head>
-    <body>
-      <div style="${CONTAINER_STYLE}">
-        <div style="${HEADER_STYLE}">
-          <div style="font-size: 32px; font-family: serif; color: #D4AF37; font-style: italic; font-weight: bold; letter-spacing: 1px;">Compta-Flow</div>
-          <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 3px; color: #88888F; margin-top: 6px;">Compte Activ\xE9 avec Succ\xE8s</div>
-        </div>
-        
-        <div style="${CONTENT_STYLE}; text-align: center;">
-          <div style="display: inline-block; background-color: rgba(46, 213, 115, 0.08); border: 1px solid rgba(46, 213, 115, 0.3); padding: 6px 20px; border-radius: 50px; font-size: 10px; font-weight: bold; color: #2ed573; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 25px;">
-            \u2726 Courriel Confirm\xE9 \u2726
-          </div>
-
-          <h2 style="font-family: serif; font-size: 24px; color: #FDFBF7; font-style: italic; margin-bottom: 20px;">Bonjour ${data.clientName},</h2>
-          <p style="color: #CCCCCC; font-size: 14px; max-width: 480px; margin: 0 auto 20px auto; font-weight: 300;">
-            F\xE9licitations ! Votre adresse courriel (<strong>${data.clientEmail}</strong>) a \xE9t\xE9 valid\xE9e avec succ\xE8s. Votre espace s\xE9curis\xE9 Compta-Flow est maintenant pleinement actif et pr\xEAt pour la prise en charge de vos besoins comptables.
-          </p>
-
-          <p style="color: #88888F; font-size: 13px; max-width: 450px; margin: 0 auto 30px auto;">
-            Vous pouvez \xE0 tout moment vous connecter pour configurer vos besoins de tenue de livres, imp\xF4ts ou \xE9tats financiers.
-          </p>
-
-          <div style="text-align: center;">
-            <a href="${data.portalUrl}" style="${BUTTON_STYLE}">Acc\xE9der \xE0 mon Portail</a>
-          </div>
-        </div>
-        
-        <div style="${FOOTER_STYLE}">
-          Souverainet\xE9 Num\xE9rique \xB7 Donn\xE9es h\xE9berg\xE9es au Canada (YUL)
-        </div>
+  const bodyHtml = `
+    <div style="text-align: center;">
+      <div style="display: inline-block; background-color: rgba(46, 213, 115, 0.08); border: 1px solid rgba(46, 213, 115, 0.3); padding: 6px 20px; border-radius: 50px; font-size: 10px; font-weight: bold; color: #2ed573; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 25px;">
+        \u2726 Courriel Confirm\xE9 \u2726
       </div>
-    </body>
-    </html>
+    </div>
+    <p style="color: #CCCCCC; font-size: 14px; text-align: center; max-width: 480px; margin: 0 auto 20px auto; font-weight: 300;">
+      F\xE9licitations ! Votre adresse courriel (<strong>${escapeHtml(data.clientEmail)}</strong>) a \xE9t\xE9 valid\xE9e avec succ\xE8s. Votre espace s\xE9curis\xE9 Compta-Flow is maintenant pleinement actif et pr\xEAt pour la prise en charge de vos besoins comptables.
+    </p>
+
+    <p style="color: #88888F; font-size: 13px; text-align: center; max-width: 450px; margin: 0 auto 30px auto;">
+      Vous pouvez \xE0 tout moment vous connecter pour configurer vos besoins de tenue de livres, imp\xF4ts ou \xE9tats financiers.
+    </p>
   `;
+  return getPremiumEmailWrapper({
+    title: "Votre compte Compta-Flow est activ\xE9 !",
+    subtitle: `Bonjour ${escapeHtml(data.clientName)},`,
+    bodyHtml,
+    buttonLabel: "Acc\xE9der \xE0 mon Portail",
+    buttonUrl: data.portalUrl
+  });
+}
+function getOnboardingCompleteEmailTemplate(data) {
+  const isAr = data.lang === "ar";
+  const isEn = data.lang === "en";
+  let subtitle = "";
+  let bodyHtml = "";
+  let buttonLabel = "";
+  if (isAr) {
+    subtitle = `\u0645\u0631\u062D\u0628\u0627\u064B ${escapeHtml(data.clientName)}\u060C`;
+    bodyHtml = `
+      <p style="color: #CCCCCC; font-size: 14px;">\u062A\u0645 \u062A\u0641\u0639\u064A\u0644 \u062D\u0633\u0627\u0628\u0643\u0645 \u0628\u0646\u062C\u0627\u062D \u0648\u0627\u0643\u062A\u0645\u0627\u0644 \u0639\u0645\u0644\u064A\u0629 \u0627\u0644\u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u0625\u0631\u0634\u0627\u062F\u064A\u0629.</p>
+      <p style="color: #CCCCCC; font-size: 14px;"><strong>\u0627\u0644\u062E\u0637\u0648\u0629 \u0627\u0644\u062A\u0627\u0644\u064A\u0629:</strong> \u064A\u0631\u062C\u0649 \u0627\u062E\u062A\u064A\u0627\u0631 \u0627\u0644\u062E\u062F\u0645\u0629 \u0627\u0644\u0645\u0637\u0644\u0648\u0628\u0629 \u0645\u0646 \u062C\u062F\u0648\u0644 \u0623\u0639\u0645\u0627\u0644\u0643\u0645 \u0648\u0645\u062A\u0627\u0628\u0639\u0629 <a href="${data.procedureUrl}" style="color: #D4AF37; text-decoration: none;">\u0645\u0633\u0627\u0631 \u0645\u0644\u0641\u0643\u0645 \u0627\u0644\u0627\u0633\u062A\u0634\u0627\u0631\u064A</a>.</p>
+    `;
+    buttonLabel = "\u0641\u062A\u062D \u0628\u0648\u0627\u0628\u062A\u064A \u0627\u0644\u062E\u0627\u0635\u0629";
+  } else if (isEn) {
+    subtitle = `Hello ${escapeHtml(data.clientName)},`;
+    bodyHtml = `
+      <p style="color: #CCCCCC; font-size: 14px;">Your client onboarding is now complete and your account is active.</p>
+      <p style="color: #CCCCCC; font-size: 14px;"><strong>Next step:</strong> please select your desired accounting plan in the Overview tab, then follow your <a href="${data.procedureUrl}" style="color: #D4AF37; text-decoration: none;">guided file path</a>.</p>
+    `;
+    buttonLabel = "Open My Client Portal";
+  } else {
+    subtitle = `Bonjour ${escapeHtml(data.clientName)},`;
+    bodyHtml = `
+      <p style="color: #CCCCCC; font-size: 14px;">Votre parcours d'int\xE9gration client est compl\xE9t\xE9 avec succ\xE8s et votre compte est pleinement actif.</p>
+      <p style="color: #CCCCCC; font-size: 14px;"><strong>Prochaine \xE9tape :</strong> veuillez s\xE9lectionner le service comptable souhait\xE9 dans votre tableau de bord, puis suivez votre <a href="${data.procedureUrl}" style="color: #D4AF37; text-decoration: none;">parcours dossier guid\xE9</a>.</p>
+    `;
+    buttonLabel = "Acc\xE9der \xE0 mon Espace Client";
+  }
+  return getPremiumEmailWrapper({
+    title: isAr ? "\u0645\u0631\u062D\u0628\u0627\u064B \u0628\u0643\u0645 \u0641\u064A ComptaFlow \u2014 \u0627\u0644\u062E\u0637\u0648\u0627\u062A \u0627\u0644\u062A\u0627\u0644\u064A\u0629" : isEn ? "Welcome to ComptaFlow \u2014 your next steps" : "Bienvenue chez ComptaFlow \u2014 vos prochaines \xE9tapes",
+    subtitle,
+    bodyHtml,
+    buttonLabel,
+    buttonUrl: data.portalUrl,
+    lang: data.lang
+  });
+}
+function getAgentWelcomeEmailTemplate(data) {
+  const bodyHtml = `
+    <p style="color: #CCCCCC; font-size: 14px;">F\xE9licitations ! Un acc\xE8s collaborateur a \xE9t\xE9 cr\xE9\xE9 pour vous au sein du r\xE9seau Compta-Flow.</p>
+    <div style="background-color: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); padding: 25px; border-radius: 16px; margin: 30px 0;">
+      <h3 style="color: #D4AF37; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 8px;">Vos identifiants d'acc\xE8s</h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">Identifiant :</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold;">${escapeHtml(data.agentEmail)}</td>
+        </tr>
+        ${data.tempPassword ? `
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">Mot de passe temporaire :</td>
+          <td style="padding: 8px 0; text-align: right; font-family: monospace; font-weight: bold; color: #D4AF37;">${escapeHtml(data.tempPassword)}</td>
+        </tr>
+        ` : ""}
+        <tr>
+          <td style="padding: 8px 0; color: #88888F;">R\xF4le syst\xE8me :</td>
+          <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #D4AF37;">Collaborateur / Agent Comptable</td>
+        </tr>
+      </table>
+    </div>
+    <p style="color: #88888F; font-size: 13px;">Lors de votre premi\xE8re connexion, nous vous conseillons de r\xE9initialiser votre mot de passe depuis les param\xE8tres de votre profil.</p>
+  `;
+  return getPremiumEmailWrapper({
+    title: "[Compta-Flow] Cr\xE9ation de votre acc\xE8s collaborateur",
+    subtitle: `Bonjour ${escapeHtml(data.agentName)},`,
+    bodyHtml,
+    buttonLabel: "Acc\xE9der au Portail Collaborateur",
+    buttonUrl: data.portalUrl
+  });
+}
+function getSupportResponseEmailTemplate(data) {
+  const bodyHtml = `
+    <p style="color: #CCCCCC; font-size: 14px;">Votre conseiller virtuel Compta-Flow a trait\xE9 votre demande d'assistance.</p>
+    <div style="background-color: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 12px; margin: 20px 0;">
+      <p style="color: #88888F; font-size: 12px; margin-top:0;"><strong>Votre question :</strong></p>
+      <p style="color: #FDFBF7; font-size: 13px; font-style: italic; margin-bottom:0;">"${escapeHtml(data.question)}"</p>
+    </div>
+    <div style="background-color: rgba(214, 175, 55, 0.03); border-left: 3px solid #D4AF37; padding: 20px; border-radius: 4px; margin: 20px 0;">
+      <p style="color: #D4AF37; font-size: 12px; margin-top:0; font-weight: bold;">R\xE9ponse de l'assistant d'\xE9lite :</p>
+      <p style="color: #CCCCCC; font-size: 13px; line-height:1.7; margin-bottom:0;">${escapeHtml(data.aiResponse).replace(/\n/g, "<br>")}</p>
+    </div>
+    <p style="color: #88888F; font-size: 13px;">Si vous avez besoin de pr\xE9cisions ou de d\xE9poser des documents d'analyse, vous pouvez poursuivre la conversation depuis votre espace client.</p>
+  `;
+  return getPremiumEmailWrapper({
+    title: "[Compta-Flow] Suivi de votre demande de support",
+    subtitle: `Bonjour ${escapeHtml(data.clientName)},`,
+    bodyHtml,
+    buttonLabel: "Ouvrir l'Espace Support en ligne",
+    buttonUrl: data.portalUrl
+  });
 }
 
 // src/lib/financeUtils.ts
@@ -1965,6 +1987,166 @@ var formatCAD = (amount) => {
   }).format(amount);
 };
 
+// src/lib/canadaNetwork.ts
+var CANADIAN_REGIONS = {
+  QC: {
+    code: "QC",
+    nameFr: "Qu\xE9bec",
+    nameEn: "Quebec",
+    timezone: "America/Toronto",
+    edgeRegion: "yul1",
+    privacyLaw: "loi25",
+    taxLabelFr: "TPS 5 % + TVQ 9,975 %",
+    taxLabelEn: "GST 5% + QST 9.975%",
+    seoSlug: "quebec",
+    active: true
+  },
+  ON: {
+    code: "ON",
+    nameFr: "Ontario",
+    nameEn: "Ontario",
+    timezone: "America/Toronto",
+    edgeRegion: "yyz1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TVH 13 %",
+    taxLabelEn: "HST 13%",
+    seoSlug: "ontario",
+    active: true
+  },
+  BC: {
+    code: "BC",
+    nameFr: "Colombie-Britannique",
+    nameEn: "British Columbia",
+    timezone: "America/Vancouver",
+    edgeRegion: "yvr1",
+    privacyLaw: "pipeda_bc",
+    taxLabelFr: "TPS 5 % + TVP 7 %",
+    taxLabelEn: "GST 5% + PST 7%",
+    seoSlug: "colombie-britannique",
+    active: true
+  },
+  AB: {
+    code: "AB",
+    nameFr: "Alberta",
+    nameEn: "Alberta",
+    timezone: "America/Edmonton",
+    edgeRegion: "yyc1",
+    privacyLaw: "pipa_ab",
+    taxLabelFr: "TPS 5 %",
+    taxLabelEn: "GST 5%",
+    seoSlug: "alberta",
+    active: true
+  },
+  MB: {
+    code: "MB",
+    nameFr: "Manitoba",
+    nameEn: "Manitoba",
+    timezone: "America/Winnipeg",
+    edgeRegion: "ywg1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TPS 5 % + TVP 7 %",
+    taxLabelEn: "GST 5% + PST 7%",
+    seoSlug: "manitoba",
+    active: true
+  },
+  SK: {
+    code: "SK",
+    nameFr: "Saskatchewan",
+    nameEn: "Saskatchewan",
+    timezone: "America/Regina",
+    edgeRegion: "yxe1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TPS 5 % + TVP 6 %",
+    taxLabelEn: "GST 5% + PST 6%",
+    seoSlug: "saskatchewan",
+    active: true
+  },
+  NB: {
+    code: "NB",
+    nameFr: "Nouveau-Brunswick",
+    nameEn: "New Brunswick",
+    timezone: "America/Moncton",
+    edgeRegion: "yfc1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TVH 15 %",
+    taxLabelEn: "HST 15%",
+    seoSlug: "nouveau-brunswick",
+    active: true
+  },
+  NS: {
+    code: "NS",
+    nameFr: "Nouvelle-\xC9cosse",
+    nameEn: "Nova Scotia",
+    timezone: "America/Halifax",
+    edgeRegion: "yhz1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TVH 15 %",
+    taxLabelEn: "HST 15%",
+    seoSlug: "nouvelle-ecosse",
+    active: true
+  },
+  PE: {
+    code: "PE",
+    nameFr: "\xCEle-du-Prince-\xC9douard",
+    nameEn: "Prince Edward Island",
+    timezone: "America/Halifax",
+    edgeRegion: "yhz1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TVH 15 %",
+    taxLabelEn: "HST 15%",
+    seoSlug: "ipe",
+    active: true
+  },
+  NL: {
+    code: "NL",
+    nameFr: "Terre-Neuve-et-Labrador",
+    nameEn: "Newfoundland and Labrador",
+    timezone: "America/St_Johns",
+    edgeRegion: "yyt1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TVH 15 %",
+    taxLabelEn: "HST 15%",
+    seoSlug: "terre-neuve",
+    active: true
+  },
+  YT: {
+    code: "YT",
+    nameFr: "Yukon",
+    nameEn: "Yukon",
+    timezone: "America/Whitehorse",
+    edgeRegion: "yxy1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TPS 5 %",
+    taxLabelEn: "GST 5%",
+    seoSlug: "yukon",
+    active: true
+  },
+  NT: {
+    code: "NT",
+    nameFr: "Territoires du Nord-Ouest",
+    nameEn: "Northwest Territories",
+    timezone: "America/Yellowknife",
+    edgeRegion: "yxy1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TPS 5 %",
+    taxLabelEn: "GST 5%",
+    seoSlug: "tno",
+    active: true
+  },
+  NU: {
+    code: "NU",
+    nameFr: "Nunavut",
+    nameEn: "Nunavut",
+    timezone: "America/Iqaluit",
+    edgeRegion: "yxy1",
+    privacyLaw: "pipeda",
+    taxLabelFr: "TPS 5 %",
+    taxLabelEn: "GST 5%",
+    seoSlug: "nunavut",
+    active: true
+  }
+};
+
 // api/app.ts
 var { Client: Client2 } = pg2;
 dotenv.config();
@@ -1990,6 +2172,7 @@ var twilioClient = twilio(twilioSid, twilioToken);
 var ADMIN_PHONE = "+18192158545";
 var PLATFORM_SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || SUPPORT_EMAIL;
 var PLATFORM_INTERAC_EMAIL = process.env.INTERAC_EMAIL || CONFIG.APP.INTERAC_EMAIL;
+var COMPANY_OUTLOOK_EMAIL = "compta-flow@outlook.com";
 var supabaseUrl = resolveSupabaseUrl();
 var supabaseAnonKey = resolveSupabaseAnonKey();
 var serviceRoleKey = resolveSupabaseServiceRoleKey();
@@ -2001,9 +2184,10 @@ function isInternalAgentRequest(req) {
   if (headerSecret && String(headerSecret) === ADMIN_SECRET) return true;
   const bearer = req.headers.authorization?.split(" ")[1];
   if (bearer && bearer === ADMIN_SECRET) return true;
-  const bodySecret = req.body?.secret;
-  if (bodySecret && bodySecret === ADMIN_SECRET) return true;
   return false;
+}
+function escapeHtml2(value) {
+  return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 async function findAuthUserByEmail(listUsers, email) {
   const target = email.toLowerCase();
@@ -2086,14 +2270,22 @@ var saveDb = (data) => {
 };
 var app = express();
 var PORT = process.env.PORT || 3e3;
-app.use(cors());
+var ALLOWED_ORIGINS = [/^https:\/\/(?:[\w-]+\.)*compta-flow\.net$/, /^https:\/\/[\w-]+\.vercel\.app$/];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || ALLOWED_ORIGINS.some((pattern) => pattern.test(origin))) {
+      return callback(null, true);
+    }
+    return callback(new Error("Not allowed by CORS"));
+  }
+}));
 app.use(express.json({ limit: "50mb" }));
 app.use((req, res, next) => {
   res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.supabase.co https://images.unsplash.com; connect-src 'self' https://*.supabase.co; font-src 'self' https://fonts.gstatic.com;");
+  res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://*.supabase.co https://images.unsplash.com; connect-src 'self' https://*.supabase.co; font-src 'self' https://fonts.gstatic.com;");
   next();
 });
 var rateLimitStore = {};
@@ -2131,17 +2323,37 @@ var botLog = (action, target, details) => {
   }
 };
 var sendSupremeEmail = async (to, subject, html) => {
-  if (!process.env.RESEND_API_KEY) return;
-  await resend.emails.send({
-    from: "Comptaflow <support@compta-flow.net>",
-    to: [to],
-    subject,
-    html: `<div style="font-family:serif;background:#050505;color:#F5F1E8;padding:50px;border:1px solid #D4AF37;">
-                <h1 style="color:#D4AF37;border-bottom:1px solid #D4AF37;padding-bottom:10px;">Comptaflow ELITE</h1>
-                ${html}
-                <p style="margin-top:40px;font-size:10px;color:#A39E92;">SYST\xC8ME SUPR\xCAME AUTOMATIS\xC9 \u2014 QU\xC9BEC</p>
-               </div>`
-  });
+  const resendKey2 = sanitizeEnvVar(process.env.RESEND_API_KEY) || "re_mock_resend_key_123";
+  const hasRealKey = resendKey2 && resendKey2 !== "re_mock_resend_key_123" && !resendKey2.startsWith("mock");
+  let finalHtml = html;
+  if (!html.trim().startsWith("<!DOCTYPE") && !html.includes("<html")) {
+    finalHtml = getPremiumEmailWrapper({
+      title: subject,
+      subtitle: subject,
+      bodyHtml: html,
+      buttonUrl: "https://compta-flow.net/login",
+      buttonLabel: "Acc\xE9der au Portail"
+    });
+  }
+  if (hasRealKey) {
+    try {
+      await resend.emails.send({
+        from: "Comptaflow <support@compta-flow.net>",
+        to: [to],
+        subject,
+        html: finalHtml
+      });
+      botLog("SUPREME_EMAIL_SENT", to, `Email "${subject}" envoy\xE9 avec succ\xE8s.`);
+    } catch (err) {
+      console.error("[sendSupremeEmail] Failed to send email:", err.message);
+    }
+  } else {
+    console.log("=================== SIMULATION D'ENVOI D'EMAIL ===================");
+    console.log(`[TO: ${to}] [SUBJECT: ${subject}]`);
+    console.log(`[HTML Content Preview]:
+${html}`);
+    console.log("==================================================================");
+  }
 };
 app.post("/api/bootstrap-admins", async (req, res) => {
   if (!isInternalAgentRequest(req)) {
@@ -2211,16 +2423,16 @@ app.post("/api/diagnostics", (req, res) => {
   if (!isInternalAgentRequest(req)) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const matchingEnv = {};
+  const sensitiveKeysPresent = {};
   for (const key of Object.keys(process.env)) {
     const keyLower = key.toLowerCase();
     if (keyLower.includes("supabase") || keyLower.includes("secret") || keyLower.includes("key") || keyLower.includes("db") || keyLower.includes("password") || keyLower.includes("url") || keyLower.includes("postgres") || keyLower.includes("service")) {
-      matchingEnv[key] = process.env[key] || "";
+      sensitiveKeysPresent[key] = Boolean(process.env[key]);
     }
   }
   res.json({
     keys: Object.keys(process.env).sort(),
-    matchingEnv
+    sensitiveKeysPresent
   });
 });
 app.post("/api/plaid/create-link-token", async (req, res) => {
@@ -2258,12 +2470,12 @@ Type: ${type}`;
       console.log(`[SMS MOCK to ${ADMIN_PHONE}] 
 ${summaryMsg}`);
     }
-    await sendSupremeEmail(PLATFORM_SUPPORT_EMAIL, `Alerte Transaction: ${vendor}`, `
+    await sendSupremeEmail(PLATFORM_SUPPORT_EMAIL, `Alerte Transaction: ${escapeHtml2(vendor)}`, `
       <h2>Nouvelle Transaction D\xE9tect\xE9e</h2>
-      <p><strong>Fournisseur:</strong> ${vendor}</p>
-      <p><strong>Montant:</strong> ${amount} $</p>
-      <p><strong>Date:</strong> ${date}</p>
-      <p><strong>Type:</strong> ${type}</p>
+      <p><strong>Fournisseur:</strong> ${escapeHtml2(vendor)}</p>
+      <p><strong>Montant:</strong> ${escapeHtml2(amount)} $</p>
+      <p><strong>Date:</strong> ${escapeHtml2(date)}</p>
+      <p><strong>Type:</strong> ${escapeHtml2(type)}</p>
     `);
     res.json({ success: true, message: "Alerte envoy\xE9e avec succ\xE8s." });
   } catch (error) {
@@ -2456,39 +2668,39 @@ app.post("/api/webhook/onboarding-complete", async (req, res) => {
       en: "Welcome to ComptaFlow \u2014 your next steps",
       ar: "\u0645\u0631\u062D\u0628\u0627\u064B \u0628\u0643\u0645 \u0641\u064A ComptaFlow \u2014 \u0627\u0644\u062E\u0637\u0648\u0627\u062A \u0627\u0644\u062A\u0627\u0644\u064A\u0629"
     };
-    const htmlBodies = {
-      fr: `<p>Bonjour ${displayName || ""},</p>
-        <p>Votre compte est actif. <strong>Prochaine \xE9tape :</strong> choisissez votre service dans l'aper\xE7u, puis suivez votre <a href="${procedureUrl}">parcours dossier</a>.</p>
-        <p><a href="${portalUrl}">Acc\xE9der \xE0 mon portail</a></p>`,
-      en: `<p>Hello ${displayName || ""},</p>
-        <p>Your account is active. <strong>Next step:</strong> pick your service in Overview, then follow your <a href="${procedureUrl}">guided file path</a>.</p>
-        <p><a href="${portalUrl}">Open my portal</a></p>`,
-      ar: `<p>\u0645\u0631\u062D\u0628\u0627\u064B ${displayName || ""},</p>
-        <p>\u062D\u0633\u0627\u0628\u0643 \u0646\u0634\u0637. <strong>\u0627\u0644\u062E\u0637\u0648\u0629 \u0627\u0644\u062A\u0627\u0644\u064A\u0629:</strong> \u0627\u062E\u062A\u0631 \u062E\u062F\u0645\u062A\u0643 et \u0627\u062A\u0628\u0639 <a href="${procedureUrl}">\u0645\u0633\u0627\u0631 \u0645\u0644\u0641\u0643</a>.</p>
-        <p><a href="${portalUrl}">\u0641\u062A\u062D \u0628\u0648\u0627\u0628\u062A\u064A</a></p>`
-    };
+    const welcomeHtml = getOnboardingCompleteEmailTemplate({
+      clientName: displayName || "",
+      lang,
+      portalUrl,
+      procedureUrl
+    });
+    const resendKeyForOnboarding = sanitizeEnvVar(process.env.RESEND_API_KEY) || "re_mock_resend_key_123";
+    if (resendKeyForOnboarding && resendKeyForOnboarding !== "re_mock_resend_key_123" && !resendKeyForOnboarding.startsWith("mock")) {
+      await sendSupremeEmail(email, subjects[lang], welcomeHtml);
+    } else {
+      console.log(`[CLIENT ONBOARDING WELCOME to ${email}] Subject: ${subjects[lang]}`);
+    }
     if (process.env.RESEND_API_KEY) {
-      await sendSupremeEmail(email, subjects[lang], htmlBodies[lang]);
       const detailedNotificationHtml = `
         <div style="font-family:sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;border:1px solid #eee;padding:20px;border-radius:8px;background-color:#fff;">
           <h2 style="color:#D4AF37;border-bottom:2px solid #D4AF37;padding-bottom:8px;margin-top:0;">\u{1F3DB}\uFE0F Nouvelle Inscription Client</h2>
           <p>Un nouveau client a compl\xE9t\xE9 son inscription avec les informations suivantes :</p>
           <table style="width:100%;border-collapse:collapse;margin:20px 0;text-align:left;">
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;width:40%;border:1px solid #ddd;">Nom complet :</td><td style="padding:8px;border:1px solid #ddd;">${displayName || "Non fourni"}</td></tr>
-            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Adresse courriel :</td><td style="padding:8px;border:1px solid #ddd;">${email}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Province :</td><td style="padding:8px;border:1px solid #ddd;">${province || "QC"}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;width:40%;border:1px solid #ddd;">Nom complet :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml2(displayName) || "Non fourni"}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Adresse courriel :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml2(email)}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Province :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml2(province) || "QC"}</td></tr>
             <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Langue :</td><td style="padding:8px;border:1px solid #ddd;">${lang.toUpperCase()}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Type de profil :</td><td style="padding:8px;border:1px solid #ddd;">${initialProfileType || "Individuel"}</td></tr>
-            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Nom entreprise :</td><td style="padding:8px;border:1px solid #ddd;">${companyName || "N/A"}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Num\xE9ro NEQ :</td><td style="padding:8px;border:1px solid #ddd;">${neq || "N/A"}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Type de profil :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml2(initialProfileType) || "Individuel"}</td></tr>
+            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Nom entreprise :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml2(companyName) || "N/A"}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Num\xE9ro NEQ :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml2(neq) || "N/A"}</td></tr>
             <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Num\xE9ro NAS :</td><td style="padding:8px;border:1px solid #ddd;">${nas ? "Fourni (S\xE9curis\xE9)" : "N/A"}</td></tr>
-            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Comptable r\xE9f\xE9r\xE9 :</td><td style="padding:8px;border:1px solid #ddd;">${selectedExpertEmail || "Aucun"}</td></tr>
+            <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Comptable r\xE9f\xE9r\xE9 :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml2(selectedExpertEmail) || "Aucun"}</td></tr>
           </table>
           <p style="margin-top:20px;"><a href="${portalUrl}" style="display:inline-block;background:#D4AF37;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;font-weight:bold;">Acc\xE9der au portail client</a></p>
         </div>
       `;
       const targetEmails = Array.from(/* @__PURE__ */ new Set([
-        "compta-flow@outlook.com",
+        COMPANY_OUTLOOK_EMAIL,
         PLATFORM_SUPPORT_EMAIL,
         "s.lahaie07@gmail.com"
       ])).filter(Boolean);
@@ -2551,7 +2763,7 @@ app.get("/api/internal/agents", async (req, res) => {
     }))
   });
 });
-app.post("/api/support/ai-chat", async (req, res) => {
+app.post("/api/support/ai-chat", rateLimiter(20, 6e4), async (req, res) => {
   const { message, context, history } = req.body;
   if (!message || typeof message !== "string") {
     return res.status(400).json({ error: "message requis" });
@@ -2569,7 +2781,30 @@ app.post("/api/support/ai-chat", async (req, res) => {
     );
     const lang = context?.language === "en" || context?.language === "ar" ? context.language : "fr";
     botLog("AGENTIC_REPLY", result.agentId, `${result.intent} ${result.latencyMs}ms`);
-    res.json(toPublicSupportReply(result, lang));
+    const reply = toPublicSupportReply(result, lang);
+    if (context?.email && typeof context.email === "string") {
+      const emailNormalized = context.email.toLowerCase().trim();
+      const { data: existingProfile } = await supabase.from("profiles").select("id").eq("email", emailNormalized).maybeSingle();
+      if (existingProfile) {
+        const supportEmailHtml = getSupportResponseEmailTemplate({
+          clientName: context.fullName || "Client Comptaflow",
+          question: message,
+          aiResponse: reply.answer,
+          portalUrl: "https://compta-flow.net/login"
+        });
+        sendSupremeEmail(
+          emailNormalized,
+          lang === "en" ? "[Compta-Flow] Support Ticket Follow-up" : lang === "ar" ? "[Compta-Flow] \u0645\u062A\u0627\u0628\u0639\u0629 \u062A\u0630\u0643\u0631\u0629 \u0627\u0644\u062F\u0639\u0645" : "[Compta-Flow] Suivi de votre demande de support",
+          supportEmailHtml
+        ).catch((err) => console.error("[AI Chat Support Email] Failed to send:", err.message));
+        sendSupremeEmail(
+          COMPANY_OUTLOOK_EMAIL,
+          `[ComptaFlow] Communication client \u2014 ${context.fullName || emailNormalized}`,
+          supportEmailHtml
+        ).catch((err) => console.error("[AI Chat Support Email] Admin copy failed to send:", err.message));
+      }
+    }
+    res.json(reply);
   } catch (e) {
     botLog("AGENTIC_CRASH", "Support", e.message);
     const lang = context?.language === "en" || context?.language === "ar" ? context.language : "fr";
@@ -2800,7 +3035,7 @@ app.post("/api/profile/delete", async (req, res) => {
         user: conf.user,
         password: SUPABASE_DB_PASSWORD,
         database: "postgres",
-        ssl: { rejectUnauthorized: false },
+        ssl: { rejectUnauthorized: true },
         connectionTimeoutMillis: 5e3
       });
       try {
@@ -2885,7 +3120,7 @@ app.post("/api/profile/delete", async (req, res) => {
         user: conf.user,
         password: SUPABASE_DB_PASSWORD,
         database: "postgres",
-        ssl: { rejectUnauthorized: false },
+        ssl: { rejectUnauthorized: true },
         connectionTimeoutMillis: 5e3
       });
       try {
@@ -3008,7 +3243,7 @@ app.post("/api/profile/export", rateLimiter(5, 6e4), async (req, res) => {
         user: conf.user,
         password: SUPABASE_DB_PASSWORD,
         database: "postgres",
-        ssl: { rejectUnauthorized: false },
+        ssl: { rejectUnauthorized: true },
         connectionTimeoutMillis: 5e3
       });
       try {
@@ -3097,6 +3332,28 @@ app.post("/api/admin/create-sub-admin", async (req, res) => {
       status: "active"
     });
     if (profileError) throw profileError;
+    const agentWelcomeHtml = getAgentWelcomeEmailTemplate({
+      agentName: fullName,
+      agentEmail: cleanEmail,
+      portalUrl: "https://compta-flow.net/login",
+      tempPassword: password
+    });
+    const resendKeyForAgent = sanitizeEnvVar(process.env.RESEND_API_KEY) || "re_mock_resend_key_123";
+    if (resendKeyForAgent && resendKeyForAgent !== "re_mock_resend_key_123" && !resendKeyForAgent.startsWith("mock")) {
+      try {
+        await resend.emails.send({
+          from: "Comptaflow <collab@compta-flow.net>",
+          to: [cleanEmail],
+          subject: "[Compta-Flow] Cr\xE9ation de votre acc\xE8s collaborateur \u2726",
+          html: agentWelcomeHtml
+        });
+        botLog("AGENT_WELCOME_EMAIL_SENT", cleanEmail, `Courriel d'accueil collaborateur envoy\xE9.`);
+      } catch (sendErr) {
+        console.error("[create-sub-admin] Resend welcome dispatch failed:", sendErr.message);
+      }
+    } else {
+      console.log(`[AGENT WELCOME EMAIL to ${cleanEmail}] Subject: Cr\xE9ation de votre acc\xE8s collaborateur \u2726`);
+    }
     return res.json({
       success: true,
       userId,
@@ -3164,21 +3421,7 @@ app.get("/api/health", async (_req, res) => {
     agents: listAgents({ internal: false }).length
   });
 });
-var CANADA_REGIONS = {
-  QC: { code: "QC", nameFr: "Qu\xE9bec", nameEn: "Quebec", privacyLaw: "loi25", edgeRegion: "yul1", seoSlug: "quebec" },
-  ON: { code: "ON", nameFr: "Ontario", nameEn: "Ontario", privacyLaw: "pipeda", edgeRegion: "yyz1", seoSlug: "ontario" },
-  BC: { code: "BC", nameFr: "Colombie-Britannique", nameEn: "British Columbia", privacyLaw: "pipeda_bc", edgeRegion: "yvr1", seoSlug: "colombie-britannique" },
-  AB: { code: "AB", nameFr: "Alberta", nameEn: "Alberta", privacyLaw: "pipa_ab", edgeRegion: "yyc1", seoSlug: "alberta" },
-  MB: { code: "MB", nameFr: "Manitoba", nameEn: "Manitoba", privacyLaw: "pipeda", edgeRegion: "ywg1", seoSlug: "manitoba" },
-  SK: { code: "SK", nameFr: "Saskatchewan", nameEn: "Saskatchewan", privacyLaw: "pipeda", edgeRegion: "yxe1", seoSlug: "saskatchewan" },
-  NB: { code: "NB", nameFr: "Nouveau-Brunswick", nameEn: "New Brunswick", privacyLaw: "pipeda", edgeRegion: "yfc1", seoSlug: "nouveau-brunswick" },
-  NS: { code: "NS", nameFr: "Nouvelle-\xC9cosse", nameEn: "Nova Scotia", privacyLaw: "pipeda", edgeRegion: "yhz1", seoSlug: "nouvelle-ecosse" },
-  PE: { code: "PE", nameFr: "\xCEle-du-Prince-\xC9douard", nameEn: "Prince Edward Island", privacyLaw: "pipeda", edgeRegion: "yhz1", seoSlug: "ipe" },
-  NL: { code: "NL", nameFr: "Terre-Neuve-et-Labrador", nameEn: "Newfoundland and Labrador", privacyLaw: "pipeda", edgeRegion: "yyt1", seoSlug: "terre-neuve" },
-  YT: { code: "YT", nameFr: "Yukon", nameEn: "Yukon", privacyLaw: "pipeda", edgeRegion: "yxy1", seoSlug: "yukon" },
-  NT: { code: "NT", nameFr: "Territoires du Nord-Ouest", nameEn: "Northwest Territories", privacyLaw: "pipeda", edgeRegion: "yxy1", seoSlug: "tno" },
-  NU: { code: "NU", nameFr: "Nunavut", nameEn: "Nunavut", privacyLaw: "pipeda", edgeRegion: "yxy1", seoSlug: "nunavut" }
-};
+var CANADA_REGIONS = CANADIAN_REGIONS;
 var detectProvince = (req) => {
   const regionHeader = String(req.headers["x-vercel-ip-country-region"] ?? req.headers["cf-region-code"] ?? "");
   if (regionHeader && CANADA_REGIONS[regionHeader.toUpperCase()]) return regionHeader.toUpperCase();
@@ -3225,22 +3468,76 @@ app.get("/api/network/status", (_req, res) => {
     timestamp: (/* @__PURE__ */ new Date()).toISOString()
   });
 });
+var CITY_SLUGS = [
+  "montreal",
+  "quebec-ville",
+  "laval",
+  "longueuil",
+  "sherbrooke",
+  "gatineau",
+  "trois-rivieres",
+  "toronto",
+  "ottawa",
+  "mississauga",
+  "brampton",
+  "hamilton",
+  "kitchener",
+  "london",
+  "windsor",
+  "vancouver",
+  "victoria",
+  "surrey",
+  "burnaby",
+  "richmond",
+  "calgary",
+  "edmonton",
+  "red-deer",
+  "winnipeg",
+  "halifax",
+  "saskatoon",
+  "regina",
+  "moncton",
+  "charlottetown",
+  "st-johns",
+  "whitehorse",
+  "yellowknife",
+  "iqaluit"
+];
+var BLOG_SLUGS = [
+  "choisir-comptable-en-ligne-canada",
+  "guide-tps-tvq-tvh-canada",
+  "tenue-livres-travailleur-autonome-canada",
+  "quickbooks-sage-wave-comparaison-canada",
+  "paie-t4-guide-employeurs-canada",
+  "demarrer-entreprise-canada-obligations-comptables"
+];
 app.get("/sitemap.xml", (_req, res) => {
   const base = "https://compta-flow.net";
-  const paths = [
-    "/",
-    "/estimate",
-    "/calculateur-taxes",
-    "/privacy",
-    "/terms",
-    "/legal",
-    "/cookies",
-    "/login",
-    "/showcase",
-    ...Object.values(CANADA_REGIONS).map((r) => `/ca/${r.seoSlug}`)
+  const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+  const pages = [
+    { path: "/", priority: "1.0", changefreq: "daily", lastmod: today },
+    { path: "/estimate", priority: "0.9", changefreq: "weekly", lastmod: today },
+    { path: "/calculateur-taxes", priority: "0.9", changefreq: "monthly", lastmod: today },
+    { path: "/ressources", priority: "0.8", changefreq: "weekly", lastmod: today },
+    { path: "/login", priority: "0.6", changefreq: "monthly" },
+    { path: "/showcase", priority: "0.4", changefreq: "monthly" },
+    { path: "/privacy", priority: "0.3", changefreq: "yearly" },
+    { path: "/terms", priority: "0.3", changefreq: "yearly" },
+    { path: "/legal", priority: "0.3", changefreq: "yearly" },
+    { path: "/cookies", priority: "0.3", changefreq: "yearly" },
+    // Province pages — high priority
+    ...Object.values(CANADA_REGIONS).map((r) => ({ path: `/ca/${r.seoSlug}`, priority: "0.9", changefreq: "monthly", lastmod: today })),
+    // City pages — high priority
+    ...CITY_SLUGS.map((s) => ({ path: `/ca/${s}`, priority: "0.85", changefreq: "monthly", lastmod: today })),
+    // Blog articles
+    ...BLOG_SLUGS.map((s) => ({ path: `/ressources/${s}`, priority: "0.8", changefreq: "monthly", lastmod: today }))
   ];
-  const urls = paths.map((p) => `<url><loc>${base}${p}</loc><changefreq>weekly</changefreq><priority>${p === "/" ? "1.0" : "0.8"}</priority></url>`).join("");
+  const urls = pages.map((p) => {
+    const lastmod = p.lastmod ? `<lastmod>${p.lastmod}</lastmod>` : "";
+    return `<url><loc>${base}${p.path}</loc>${lastmod}<changefreq>${p.changefreq}</changefreq><priority>${p.priority}</priority></url>`;
+  }).join("");
   res.setHeader("Content-Type", "application/xml");
+  res.setHeader("Cache-Control", "public, max-age=3600");
   res.send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`);
 });
 app.post("/api/quote/create", async (req, res) => {
@@ -3370,7 +3667,7 @@ app.post("/api/quote/create", async (req, res) => {
         });
         await resend.emails.send({
           from: "Comptaflow Audit <supervision@compta-flow.net>",
-          to: ["compta_flow@outlook.com"],
+          to: [COMPANY_OUTLOOK_EMAIL],
           subject: `[Supervision Audit] Nouveau devis scell\xE9 : ${clientName} (${quoteRef})`,
           html: adminHtml
         });
@@ -3383,7 +3680,7 @@ app.post("/api/quote/create", async (req, res) => {
       console.log("=================== SIMULATION D'ENVOI DE COURRIELS (NO RESEND KEY) ===================");
       console.log(`[CLIENT EMAIL to ${clientEmail}] Subject: Confirmation estimation - Ref ${quoteRef}`);
       console.log(`[AGENT EMAIL to ${agentEmail}] Subject: Nouveau dossier assign\xE9 : ${clientName}`);
-      console.log(`[ADMIN EMAIL to compta_flow@outlook.com] Subject: Supervision devis scell\xE9 : ${clientName}`);
+      console.log(`[ADMIN EMAIL to ${COMPANY_OUTLOOK_EMAIL}] Subject: Supervision devis scell\xE9 : ${clientName}`);
       console.log("=======================================================================================");
       emailsDispatched = true;
     }
@@ -3443,9 +3740,21 @@ app.post("/api/webhook/account-confirmed", async (req, res) => {
       } catch (sendErr) {
         console.error("[account-confirmed] Resend dispatch failed:", sendErr.message);
       }
+      try {
+        await resend.emails.send({
+          from: "Comptaflow <welcome@compta-flow.net>",
+          to: [COMPANY_OUTLOOK_EMAIL],
+          subject: `[ComptaFlow] Compte activ\xE9 \u2014 ${fullName}`,
+          html: emailHtml
+        });
+        botLog("ACCOUNT_CONFIRMED_ADMIN_COPY_SENT", COMPANY_OUTLOOK_EMAIL, `Copie d'activation de compte envoy\xE9e pour ${fullName}.`);
+      } catch (sendErr) {
+        console.error("[account-confirmed] Admin copy dispatch failed:", sendErr.message);
+      }
     } else {
       console.log("=================== SIMULATION D'ENVOI DE COURRIELS (NO RESEND KEY) ===================");
       console.log(`[WELCOME EMAIL to ${email}] Subject: Votre compte Compta-Flow est activ\xE9 ! \u2726`);
+      console.log(`[ADMIN COPY to ${COMPANY_OUTLOOK_EMAIL}] Subject: Compte activ\xE9 \u2014 ${fullName}`);
       console.log("=======================================================================================");
       emailSent = true;
     }

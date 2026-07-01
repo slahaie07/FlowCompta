@@ -16,6 +16,7 @@ import { Terms } from './components/common/Terms';
 import { Legal } from './components/common/Legal';
 import { Cookies } from './components/common/Cookies';
 import { RegionalLanding } from './components/common/RegionalLanding';
+import { BlogListPage, BlogArticlePage } from './components/common/BlogPage';
 import { EstimatePage } from './components/common/EstimatePage';
 import { TaxCalculator } from './components/common/TaxCalculator';
 import { LegalCookieBanner } from './components/common/LegalCookieBanner';
@@ -198,6 +199,9 @@ function AppContent() {
       <Route path="/legal" element={<Legal />} />
       <Route path="/cookies" element={<Cookies />} />
       <Route path="/ca/:slug" element={<RegionalLanding />} />
+      <Route path="/ressources" element={<BlogListPage />} />
+      <Route path="/ressources/:slug" element={<BlogArticlePage />} />
+      <Route path="/resources" element={<Navigate to="/ressources" replace />} />
       <Route path="/estimate" element={<EstimatePage />} />
       <Route path="/calculateur-taxes" element={<TaxCalculator />} />
       <Route path="/tax-calculator" element={<Navigate to="/calculateur-taxes" replace />} />
