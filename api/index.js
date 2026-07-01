@@ -1906,6 +1906,72 @@ function getSupportResponseEmailTemplate(data) {
     buttonUrl: data.portalUrl
   });
 }
+var SERVICE_TYPE_LABELS = {
+  monthly_bookkeeping: "Forfait Mensuel (Tenue de livres)",
+  student_tax: "L'\xC9tudiant (Imp\xF4ts simples)",
+  catchup_bookkeeping: "Le Rattrapage (Tenue de livres en retard)",
+  setup_onboarding: "Le Setup (Configuration)",
+  personal_tax: "Imp\xF4ts Personnels",
+  autonomous_tax: "Travailleurs Autonomes",
+  corporate_tax: "Imp\xF4ts de Soci\xE9t\xE9s"
+};
+function getWeeklyReportEmailTemplate(data) {
+  const formatDate = (iso) => new Date(iso).toLocaleDateString("fr-CA", { year: "numeric", month: "long", day: "numeric" });
+  const clientsRows = data.newClients.length ? data.newClients.map(
+    (c) => `
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">${escapeHtml(c.fullName) || "Non fourni"}</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: right;">${escapeHtml(c.email)}</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: right; color: #88888F; font-size: 11px;">${formatDate(c.createdAt)}</td>
+        </tr>`
+  ).join("") : `<tr><td colspan="3" style="padding: 12px 0; color: #88888F; font-style: italic;">Aucun nouveau client cette semaine.</td></tr>`;
+  const servicesRows = data.newServices.length ? data.newServices.map(
+    (s) => `
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">${escapeHtml(s.clientName) || "Client inconnu"}</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: right;">${escapeHtml(SERVICE_TYPE_LABELS[s.serviceType] ?? s.serviceType)}</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: right; color: #88888F; font-size: 11px;">${formatDate(s.createdAt)}</td>
+        </tr>`
+  ).join("") : `<tr><td colspan="3" style="padding: 12px 0; color: #88888F; font-style: italic;">Aucun nouveau service souscrit cette semaine.</td></tr>`;
+  const bodyHtml = `
+    <p style="color: #CCCCCC; font-size: 14px;">R\xE9sum\xE9 de l'activit\xE9 du ${escapeHtml(formatDate(data.periodStart))} au ${escapeHtml(formatDate(data.periodEnd))}.</p>
+
+    <div style="background-color: rgba(214, 175, 55, 0.04); border: 1px solid rgba(214, 175, 55, 0.15); padding: 25px; border-radius: 16px; margin: 30px 0;">
+      <h3 style="color: #D4AF37; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px;">Nouveaux clients (${data.newClients.length})</h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
+        <thead>
+          <tr style="color: #88888F; font-size: 11px; text-transform: uppercase;">
+            <td style="padding-bottom: 8px;">Nom</td>
+            <td style="padding-bottom: 8px; text-align: right;">Courriel</td>
+            <td style="padding-bottom: 8px; text-align: right;">Date</td>
+          </tr>
+        </thead>
+        <tbody>${clientsRows}</tbody>
+      </table>
+    </div>
+
+    <div style="background-color: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); padding: 25px; border-radius: 16px; margin: 30px 0;">
+      <h3 style="color: #D4AF37; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px;">Nouveaux services souscrits (${data.newServices.length})</h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
+        <thead>
+          <tr style="color: #88888F; font-size: 11px; text-transform: uppercase;">
+            <td style="padding-bottom: 8px;">Client</td>
+            <td style="padding-bottom: 8px; text-align: right;">Service</td>
+            <td style="padding-bottom: 8px; text-align: right;">Date</td>
+          </tr>
+        </thead>
+        <tbody>${servicesRows}</tbody>
+      </table>
+    </div>
+  `;
+  return getPremiumEmailWrapper({
+    title: "[Compta-Flow] Rapport hebdomadaire \u2014 Clients & Services",
+    subtitle: "Rapport hebdomadaire",
+    bodyHtml,
+    buttonLabel: "Ouvrir le Panneau Admin",
+    buttonUrl: data.portalUrl
+  });
+}
 
 // src/lib/financeUtils.ts
 function normalizeProvinceCode(value) {
@@ -2346,6 +2412,7 @@ var sendSupremeEmail = async (to, subject, html) => {
       botLog("SUPREME_EMAIL_SENT", to, `Email "${subject}" envoy\xE9 avec succ\xE8s.`);
     } catch (err) {
       console.error("[sendSupremeEmail] Failed to send email:", err.message);
+      throw err;
     }
   } else {
     console.log("=================== SIMULATION D'ENVOI D'EMAIL ===================");
@@ -2518,11 +2585,15 @@ app.post("/api/payment/create-checkout", async (req, res) => {
     });
   }
   botLog("PAYMENT_PENDING", reference, `Instructions Interac envoy\xE9es \xE0 ${customerEmail}`);
-  await sendSupremeEmail(customerEmail, `Action : Virement Comptaflow ${reference}`, `
-            <h2>Validation de votre mandat</h2>
-            <p>Veuillez effectuer le virement de <strong>${items.reduce((a, b) => a + b.price, 0) + 60}$</strong>.</p>
-            <p>Destinataire: <strong>${PLATFORM_INTERAC_EMAIL}</strong><br>R\xE9f\xE9rence: <strong>${reference}</strong></p>
-        `);
+  try {
+    await sendSupremeEmail(customerEmail, `Action : Virement Comptaflow ${reference}`, `
+              <h2>Validation de votre mandat</h2>
+              <p>Veuillez effectuer le virement de <strong>${items.reduce((a, b) => a + b.price, 0) + 60}$</strong>.</p>
+              <p>Destinataire: <strong>${PLATFORM_INTERAC_EMAIL}</strong><br>R\xE9f\xE9rence: <strong>${reference}</strong></p>
+          `);
+  } catch (err) {
+    console.error("[payment/create-checkout] \xC9chec envoi email:", err.message);
+  }
   return res.json({ success: true, manual: true, method: "interac", reference });
 });
 app.post("/api/payment/setup-direct-debit", (_req, res) => {
@@ -2601,6 +2672,51 @@ Industrie: ${mockLead.industry}`;
     res.json({ success: true, message: "La chasse a \xE9t\xE9 fructueuse.", geminiLive });
   } catch (error) {
     botLog("ELITE_HUNTER_CRON_ERROR", "System", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get("/api/cron/weekly-report", async (req, res) => {
+  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (process.env.NODE_ENV === "production") return res.status(401).json({ error: "Unauthorized" });
+  }
+  try {
+    if (!serviceRoleKey) {
+      botLog("WEEKLY_REPORT_CRON_ERROR", "System", "SUPABASE_SERVICE_ROLE_KEY manquant \u2014 abandon pour \xE9viter un faux rapport vide.");
+      return res.status(503).json({ error: "SUPABASE_SERVICE_ROLE_KEY not configured on server" });
+    }
+    const periodEnd = /* @__PURE__ */ new Date();
+    const periodStart = new Date(periodEnd.getTime() - 7 * 24 * 60 * 60 * 1e3);
+    const sAdmin = createClient(supabaseUrl, serviceRoleKey);
+    const { data: clientRows, error: clientsErr } = await sAdmin.from("profiles").select("full_name, email, created_at").eq("role", "client").gte("created_at", periodStart.toISOString()).order("created_at", { ascending: false });
+    if (clientsErr) throw clientsErr;
+    const { data: serviceRows, error: servicesErr } = await sAdmin.from("services").select("service_type, created_at, profiles!services_client_id_fkey(full_name)").gte("created_at", periodStart.toISOString()).order("created_at", { ascending: false });
+    if (servicesErr) throw servicesErr;
+    const newClients = (clientRows ?? []).map((c) => ({
+      fullName: c.full_name,
+      email: c.email,
+      createdAt: c.created_at
+    }));
+    const newServices = (serviceRows ?? []).map((s) => ({
+      clientName: s.profiles?.full_name ?? null,
+      serviceType: s.service_type,
+      createdAt: s.created_at
+    }));
+    const html = getWeeklyReportEmailTemplate({
+      periodStart: periodStart.toISOString(),
+      periodEnd: periodEnd.toISOString(),
+      newClients,
+      newServices,
+      portalUrl: "https://compta-flow.net/login"
+    });
+    await sendSupremeEmail(
+      COMPANY_OUTLOOK_EMAIL,
+      `[ComptaFlow] Rapport hebdomadaire \u2014 ${newClients.length} client(s), ${newServices.length} service(s)`,
+      html
+    );
+    botLog("WEEKLY_REPORT_CRON", "System", `Envoy\xE9 \xE0 ${COMPANY_OUTLOOK_EMAIL} \u2014 ${newClients.length} client(s), ${newServices.length} service(s).`);
+    res.json({ success: true, newClientsCount: newClients.length, newServicesCount: newServices.length });
+  } catch (error) {
+    botLog("WEEKLY_REPORT_CRON_ERROR", "System", error.message);
     res.status(500).json({ error: error.message });
   }
 });

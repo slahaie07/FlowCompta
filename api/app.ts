@@ -29,6 +29,7 @@ import {
   getAgentWelcomeEmailTemplate,
   getTransactionAlertEmailTemplate,
   getSupportResponseEmailTemplate,
+  getWeeklyReportEmailTemplate,
   getPremiumEmailWrapper
 } from './lib/emailTemplates';
 import { calculateCanadianTaxes, formatCAD, getTaxDisplayLines, normalizeProvinceCode } from '../src/lib/financeUtils';
@@ -277,6 +278,7 @@ const sendSupremeEmail = async (to: string, subject: string, html: string) => {
             botLog('SUPREME_EMAIL_SENT', to, `Email "${subject}" envoyé avec succès.`);
         } catch (err: any) {
             console.error("[sendSupremeEmail] Failed to send email:", err.message);
+            throw err;
         }
     } else {
         console.log("=================== SIMULATION D'ENVOI D'EMAIL ===================");
@@ -490,11 +492,15 @@ app.post('/api/payment/create-checkout', async (req, res) => {
     }
 
     botLog('PAYMENT_PENDING', reference, `Instructions Interac envoyées à ${customerEmail}`);
-    await sendSupremeEmail(customerEmail, `Action : Virement Comptaflow ${reference}`, `
-            <h2>Validation de votre mandat</h2>
-            <p>Veuillez effectuer le virement de <strong>${items.reduce((a: any, b: any) => a + b.price, 0) + 60}$</strong>.</p>
-            <p>Destinataire: <strong>${PLATFORM_INTERAC_EMAIL}</strong><br>Référence: <strong>${reference}</strong></p>
-        `);
+    try {
+      await sendSupremeEmail(customerEmail, `Action : Virement Comptaflow ${reference}`, `
+              <h2>Validation de votre mandat</h2>
+              <p>Veuillez effectuer le virement de <strong>${items.reduce((a: any, b: any) => a + b.price, 0) + 60}$</strong>.</p>
+              <p>Destinataire: <strong>${PLATFORM_INTERAC_EMAIL}</strong><br>Référence: <strong>${reference}</strong></p>
+          `);
+    } catch (err: any) {
+      console.error('[payment/create-checkout] Échec envoi email:', err.message);
+    }
     return res.json({ success: true, manual: true, method: 'interac', reference });
 });
 
@@ -591,6 +597,72 @@ Industrie: ${mockLead.industry}`;
     res.json({ success: true, message: "La chasse a été fructueuse.", geminiLive });
   } catch (error: any) {
     botLog('ELITE_HUNTER_CRON_ERROR', 'System', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// --- RAPPORT HEBDOMADAIRE (NATIVE CRON JOB — nouveaux clients & services) ---
+app.get('/api/cron/weekly-report', async (req, res) => {
+  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (process.env.NODE_ENV === 'production') return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    if (!serviceRoleKey) {
+      botLog('WEEKLY_REPORT_CRON_ERROR', 'System', 'SUPABASE_SERVICE_ROLE_KEY manquant — abandon pour éviter un faux rapport vide.');
+      return res.status(503).json({ error: 'SUPABASE_SERVICE_ROLE_KEY not configured on server' });
+    }
+
+    const periodEnd = new Date();
+    const periodStart = new Date(periodEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const sAdmin = createClient(supabaseUrl, serviceRoleKey);
+
+    const { data: clientRows, error: clientsErr } = await sAdmin
+      .from('profiles')
+      .select('full_name, email, created_at')
+      .eq('role', 'client')
+      .gte('created_at', periodStart.toISOString())
+      .order('created_at', { ascending: false });
+    if (clientsErr) throw clientsErr;
+
+    const { data: serviceRows, error: servicesErr } = await sAdmin
+      .from('services')
+      .select('service_type, created_at, profiles!services_client_id_fkey(full_name)')
+      .gte('created_at', periodStart.toISOString())
+      .order('created_at', { ascending: false });
+    if (servicesErr) throw servicesErr;
+
+    const newClients = (clientRows ?? []).map((c) => ({
+      fullName: c.full_name as string | null,
+      email: c.email as string,
+      createdAt: c.created_at as string,
+    }));
+
+    const newServices = (serviceRows ?? []).map((s: any) => ({
+      clientName: (s.profiles?.full_name as string | null) ?? null,
+      serviceType: s.service_type as string,
+      createdAt: s.created_at as string,
+    }));
+
+    const html = getWeeklyReportEmailTemplate({
+      periodStart: periodStart.toISOString(),
+      periodEnd: periodEnd.toISOString(),
+      newClients,
+      newServices,
+      portalUrl: 'https://compta-flow.net/login',
+    });
+
+    await sendSupremeEmail(
+      COMPANY_OUTLOOK_EMAIL,
+      `[ComptaFlow] Rapport hebdomadaire — ${newClients.length} client(s), ${newServices.length} service(s)`,
+      html
+    );
+
+    botLog('WEEKLY_REPORT_CRON', 'System', `Envoyé à ${COMPANY_OUTLOOK_EMAIL} — ${newClients.length} client(s), ${newServices.length} service(s).`);
+    res.json({ success: true, newClientsCount: newClients.length, newServicesCount: newServices.length });
+  } catch (error: any) {
+    botLog('WEEKLY_REPORT_CRON_ERROR', 'System', error.message);
     res.status(500).json({ error: error.message });
   }
 });

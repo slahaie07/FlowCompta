@@ -541,3 +541,94 @@ export function getSupportResponseEmailTemplate(data: {
     buttonUrl: data.portalUrl
   });
 }
+
+/** Libellés français des 7 types de service (voir supabase/migrations/20260624_seven_services.sql). */
+const SERVICE_TYPE_LABELS: Record<string, string> = {
+  monthly_bookkeeping: 'Forfait Mensuel (Tenue de livres)',
+  student_tax: "L'Étudiant (Impôts simples)",
+  catchup_bookkeeping: 'Le Rattrapage (Tenue de livres en retard)',
+  setup_onboarding: 'Le Setup (Configuration)',
+  personal_tax: 'Impôts Personnels',
+  autonomous_tax: 'Travailleurs Autonomes',
+  corporate_tax: 'Impôts de Sociétés',
+};
+
+/**
+ * 9. Rapport hebdomadaire des nouveaux clients et nouveaux services (envoyé au cabinet)
+ */
+export function getWeeklyReportEmailTemplate(data: {
+  periodStart: string;
+  periodEnd: string;
+  newClients: Array<{ fullName: string | null; email: string; createdAt: string }>;
+  newServices: Array<{ clientName: string | null; serviceType: string; createdAt: string }>;
+  portalUrl: string;
+}): string {
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const clientsRows = data.newClients.length
+    ? data.newClients
+        .map(
+          (c) => `
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">${escapeHtml(c.fullName) || 'Non fourni'}</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: right;">${escapeHtml(c.email)}</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: right; color: #88888F; font-size: 11px;">${formatDate(c.createdAt)}</td>
+        </tr>`
+        )
+        .join('')
+    : `<tr><td colspan="3" style="padding: 12px 0; color: #88888F; font-style: italic;">Aucun nouveau client cette semaine.</td></tr>`;
+
+  const servicesRows = data.newServices.length
+    ? data.newServices
+        .map(
+          (s) => `
+        <tr>
+          <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">${escapeHtml(s.clientName) || 'Client inconnu'}</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: right;">${escapeHtml(SERVICE_TYPE_LABELS[s.serviceType] ?? s.serviceType)}</td>
+          <td style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: right; color: #88888F; font-size: 11px;">${formatDate(s.createdAt)}</td>
+        </tr>`
+        )
+        .join('')
+    : `<tr><td colspan="3" style="padding: 12px 0; color: #88888F; font-style: italic;">Aucun nouveau service souscrit cette semaine.</td></tr>`;
+
+  const bodyHtml = `
+    <p style="color: #CCCCCC; font-size: 14px;">Résumé de l'activité du ${escapeHtml(formatDate(data.periodStart))} au ${escapeHtml(formatDate(data.periodEnd))}.</p>
+
+    <div style="background-color: rgba(214, 175, 55, 0.04); border: 1px solid rgba(214, 175, 55, 0.15); padding: 25px; border-radius: 16px; margin: 30px 0;">
+      <h3 style="color: #D4AF37; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px;">Nouveaux clients (${data.newClients.length})</h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
+        <thead>
+          <tr style="color: #88888F; font-size: 11px; text-transform: uppercase;">
+            <td style="padding-bottom: 8px;">Nom</td>
+            <td style="padding-bottom: 8px; text-align: right;">Courriel</td>
+            <td style="padding-bottom: 8px; text-align: right;">Date</td>
+          </tr>
+        </thead>
+        <tbody>${clientsRows}</tbody>
+      </table>
+    </div>
+
+    <div style="background-color: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); padding: 25px; border-radius: 16px; margin: 30px 0;">
+      <h3 style="color: #D4AF37; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-top: 0; margin-bottom: 15px;">Nouveaux services souscrits (${data.newServices.length})</h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #FDFBF7;">
+        <thead>
+          <tr style="color: #88888F; font-size: 11px; text-transform: uppercase;">
+            <td style="padding-bottom: 8px;">Client</td>
+            <td style="padding-bottom: 8px; text-align: right;">Service</td>
+            <td style="padding-bottom: 8px; text-align: right;">Date</td>
+          </tr>
+        </thead>
+        <tbody>${servicesRows}</tbody>
+      </table>
+    </div>
+  `;
+
+  return getPremiumEmailWrapper({
+    title: '[Compta-Flow] Rapport hebdomadaire — Clients & Services',
+    subtitle: 'Rapport hebdomadaire',
+    bodyHtml,
+    buttonLabel: 'Ouvrir le Panneau Admin',
+    buttonUrl: data.portalUrl,
+  });
+}
