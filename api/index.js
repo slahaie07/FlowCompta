@@ -2412,6 +2412,7 @@ var sendSupremeEmail = async (to, subject, html) => {
       botLog("SUPREME_EMAIL_SENT", to, `Email "${subject}" envoy\xE9 avec succ\xE8s.`);
     } catch (err) {
       console.error("[sendSupremeEmail] Failed to send email:", err.message);
+      throw err;
     }
   } else {
     console.log("=================== SIMULATION D'ENVOI D'EMAIL ===================");
@@ -2584,11 +2585,15 @@ app.post("/api/payment/create-checkout", async (req, res) => {
     });
   }
   botLog("PAYMENT_PENDING", reference, `Instructions Interac envoy\xE9es \xE0 ${customerEmail}`);
-  await sendSupremeEmail(customerEmail, `Action : Virement Comptaflow ${reference}`, `
-            <h2>Validation de votre mandat</h2>
-            <p>Veuillez effectuer le virement de <strong>${items.reduce((a, b) => a + b.price, 0) + 60}$</strong>.</p>
-            <p>Destinataire: <strong>${PLATFORM_INTERAC_EMAIL}</strong><br>R\xE9f\xE9rence: <strong>${reference}</strong></p>
-        `);
+  try {
+    await sendSupremeEmail(customerEmail, `Action : Virement Comptaflow ${reference}`, `
+              <h2>Validation de votre mandat</h2>
+              <p>Veuillez effectuer le virement de <strong>${items.reduce((a, b) => a + b.price, 0) + 60}$</strong>.</p>
+              <p>Destinataire: <strong>${PLATFORM_INTERAC_EMAIL}</strong><br>R\xE9f\xE9rence: <strong>${reference}</strong></p>
+          `);
+  } catch (err) {
+    console.error("[payment/create-checkout] \xC9chec envoi email:", err.message);
+  }
   return res.json({ success: true, manual: true, method: "interac", reference });
 });
 app.post("/api/payment/setup-direct-debit", (_req, res) => {
@@ -2675,9 +2680,13 @@ app.get("/api/cron/weekly-report", async (req, res) => {
     if (process.env.NODE_ENV === "production") return res.status(401).json({ error: "Unauthorized" });
   }
   try {
+    if (!serviceRoleKey) {
+      botLog("WEEKLY_REPORT_CRON_ERROR", "System", "SUPABASE_SERVICE_ROLE_KEY manquant \u2014 abandon pour \xE9viter un faux rapport vide.");
+      return res.status(503).json({ error: "SUPABASE_SERVICE_ROLE_KEY not configured on server" });
+    }
     const periodEnd = /* @__PURE__ */ new Date();
     const periodStart = new Date(periodEnd.getTime() - 7 * 24 * 60 * 60 * 1e3);
-    const sAdmin = createClient(supabaseUrl, serviceRoleKey || supabaseAnonKey);
+    const sAdmin = createClient(supabaseUrl, serviceRoleKey);
     const { data: clientRows, error: clientsErr } = await sAdmin.from("profiles").select("full_name, email, created_at").eq("role", "client").gte("created_at", periodStart.toISOString()).order("created_at", { ascending: false });
     if (clientsErr) throw clientsErr;
     const { data: serviceRows, error: servicesErr } = await sAdmin.from("services").select("service_type, created_at, profiles!services_client_id_fkey(full_name)").gte("created_at", periodStart.toISOString()).order("created_at", { ascending: false });
