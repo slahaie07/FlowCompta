@@ -74,7 +74,9 @@ export type AgentId =
 
   | 'kyc-review'
 
-  | 'marketing-hunter';
+  | 'marketing-hunter'
+
+  | 'growth-strategist';
 
 
 

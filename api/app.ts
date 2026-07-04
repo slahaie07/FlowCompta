@@ -10,7 +10,7 @@ import twilio from 'twilio';
 import pg from 'pg';
 import { createClient } from '@supabase/supabase-js';
 import { runAgentOrchestrator, listAgents, AGENT_REGISTRY, toPublicSupportReply } from '../src/agents/index';
-import { runInternalCronJob, INTERNAL_CRON_JOBS } from './internal-jobs';
+import { runInternalCronJob, INTERNAL_CRON_JOBS, runGveScan } from './internal-jobs';
 import { SEED_ADMIN_ACCOUNTS, PORTAL_HOME_BY_ROLE } from '../src/lib/seedAdminAccounts';
 import {
   resolveSupabaseAnonKey,
@@ -34,6 +34,7 @@ import {
 } from './lib/emailTemplates';
 import { calculateCanadianTaxes, formatCAD, getTaxDisplayLines, normalizeProvinceCode } from '../src/lib/financeUtils';
 import { CANADIAN_REGIONS, type CanadianRegion } from '../src/lib/canadaNetwork';
+import { buildGrowthPlan, listChannels } from '../src/lib/gve';
 const { Client } = pg;
 
 dotenv.config();
@@ -665,6 +666,59 @@ app.get('/api/cron/weekly-report', async (req, res) => {
     botLog('WEEKLY_REPORT_CRON_ERROR', 'System', error.message);
     res.status(500).json({ error: error.message });
   }
+});
+
+// ============================================================
+// 🌱 GVE — GROWTH & VISIBILITY ENGINE (croissance organique légitime)
+// ============================================================
+// Moteur déterministe : priorise des canaux d'acquisition 100 % légitimes,
+// projette trafic/ROI et génère un plan d'action éthique. Aucun faux compte,
+// aucune identité synthétique, aucun contournement de protection anti-robot.
+
+// Catalogue public des canaux — mis en cache par le CDN.
+app.get('/api/gve/channels', (_req, res) => {
+  res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+  res.json({ channels: listChannels() });
+});
+
+// Génère un plan de croissance à partir d'un profil de cible.
+// Calculateur sans donnée sensible — public mais limité en débit.
+app.post('/api/gve/plan', rateLimiter(30, 60000), (req, res) => {
+  const body = req.body || {};
+  const horizon = Math.min(36, Math.max(3, parseInt(String(body.horizonMonths ?? 12), 10) || 12));
+
+  try {
+    const plan = buildGrowthPlan(
+      {
+        name: typeof body.name === 'string' ? body.name.slice(0, 120) : undefined,
+        url: typeof body.url === 'string' ? body.url.slice(0, 300) : undefined,
+        niche: typeof body.niche === 'string' ? body.niche.slice(0, 80) : undefined,
+        province: body.province ? normalizeProvinceCode(String(body.province)) : undefined,
+        language: body.language === 'en' ? 'en' : 'fr',
+        monthlyBudgetCad: Number(body.monthlyBudgetCad),
+        currentMonthlySessions: Number(body.currentMonthlySessions),
+        avgDealValueCad: Number(body.avgDealValueCad),
+        conversionRatePct: Number(body.conversionRatePct),
+        teamCapacityHoursPerWeek: Number(body.teamCapacityHoursPerWeek),
+      },
+      horizon
+    );
+    botLog('GVE_PLAN', plan.target.niche, `Plan généré — ${plan.recommendedChannelIds.length} canaux, ROI ${Math.round(plan.summary.roi * 100)} %`);
+    res.json(plan);
+  } catch (error: any) {
+    botLog('GVE_PLAN_ERROR', 'System', error.message);
+    res.status(500).json({ error: 'Erreur lors de la génération du plan de croissance.' });
+  }
+});
+
+// Cron GVE — analyse quotidienne des opportunités de croissance du cabinet.
+app.get('/api/cron/gve-scan', (req, res) => {
+  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (process.env.NODE_ENV === 'production') return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const result = runGveScan();
+  botLog('GVE_SCAN_CRON', 'System', result.message);
+  res.json(result);
 });
 
 // --- AGENTIC MIND (interne — non exposé aux clients) ---
