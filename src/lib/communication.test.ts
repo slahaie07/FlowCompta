@@ -1,9 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { communicationService } from './communication';
 
 describe('communicationService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Test hermétique : force le webhook à « non configuré » quel que soit
+    // l'environnement (la CI définit VITE_N8N_INVOICE_WEBHOOK_URL). On teste
+    // ici le comportement de repli, indépendamment des variables ambiantes.
+    vi.stubEnv('VITE_N8N_INVOICE_WEBHOOK_URL', '');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it('notifies admin of invoice with correct payload', async () => {
