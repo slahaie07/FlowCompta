@@ -58,6 +58,7 @@ Architecture modulaire : routeur → spécialiste → revue CPA (si applicable),
 | DevOps | `devops` | Deploy, migrations |
 | KYC | `kyc-review` | Revue profils |
 | Elite Hunter | `marketing-hunter` | Prospection B2B (cron) |
+| **Stratège croissance** | **`growth-strategist`** | **Briefs de contenu & plans de canaux du GVE (cron/CLI)** |
 
 ### Super-agent CPA (`cpa-supervisor`)
 

@@ -1,16 +1,19 @@
 import { listAgents, AGENT_REGISTRY } from '../src/agents/index';
+import { buildGrowthPlan } from '../src/lib/gve';
 
 export type InternalCronJob =
   | 'agent-health'
   | 'reconciliation'
   | 'elite-hunter'
-  | 'marketing-hunter';
+  | 'marketing-hunter'
+  | 'gve-scan';
 
 export const INTERNAL_CRON_JOBS: InternalCronJob[] = [
   'agent-health',
   'reconciliation',
   'elite-hunter',
   'marketing-hunter',
+  'gve-scan',
 ];
 
 export interface CronJobResult {
@@ -71,6 +74,46 @@ export function runMarketingHunterStub(): CronJobResult {
   };
 }
 
+/**
+ * GVE — Analyse quotidienne des opportunités de croissance organique du cabinet.
+ * Déterministe : classe les canaux légitimes et résume la meilleure prochaine action.
+ */
+export function runGveScan(): CronJobResult {
+  const plan = buildGrowthPlan({
+    name: 'ComptaFlow',
+    url: 'https://compta-flow.net',
+    niche: 'comptabilité',
+    province: 'QC',
+    language: 'fr',
+    monthlyBudgetCad: 300,
+    currentMonthlySessions: 1500,
+    avgDealValueCad: 1800,
+    conversionRatePct: 2.5,
+    teamCapacityHoursPerWeek: 12,
+  });
+
+  const top = plan.opportunities[0];
+  const nextAction = plan.playbook[0];
+
+  return {
+    job: 'gve-scan',
+    success: true,
+    message: `GVE — meilleur canal: ${top?.nameFr ?? 'n/d'} (score ${top?.score ?? 0}). ROI 12 mois projeté: ${Math.round(plan.summary.roi * 100)} %.`,
+    details: {
+      recommendedChannels: plan.recommendedChannelIds,
+      topChannel: top?.channelId,
+      topScore: top?.score,
+      projectedSessions12m: plan.summary.sessionsAtHorizon,
+      projectedRevenue12mCad: plan.summary.cumulativeRevenueCad,
+      blendedCac: plan.summary.blendedCac,
+      paidBenchmarkCac: plan.summary.paidBenchmarkCac,
+      nextAction: nextAction?.titleFr,
+      integrity: plan.integrityCharter,
+    },
+    timestamp: new Date().toISOString(),
+  };
+}
+
 export function runInternalCronJob(
   job: string,
   opts: { geminiConfigured?: boolean } = {}
@@ -86,6 +129,9 @@ export function runInternalCronJob(
     case 'elite-hunter':
     case 'marketing-hunter':
       return runMarketingHunterStub();
+    case 'gve-scan':
+    case 'gve':
+      return runGveScan();
     default:
       return {
         job: normalized,

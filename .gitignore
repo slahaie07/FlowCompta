@@ -14,3 +14,6 @@ coverage/
 .agents/
 .gemini/
 out/
+
+# Runtime fallback DB (versionné via local_db.example.json)
+local_db.json
