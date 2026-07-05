@@ -388,6 +388,26 @@ Renvoie uniquement le texte final corrig\xE9 pour le client.`,
     description: "Prospection B2B automatis\xE9e (cron).",
     visibility: "internal",
     systemPrompt: `Tu r\xE9diges des messages d'approche B2B ultra-personnalis\xE9s pour ComptaFlow (tenue de livres & fiscalit\xE9 Canada). Ton conseiller de confiance, 4 phrases max.`
+  },
+  "growth-strategist": {
+    id: "growth-strategist",
+    intent: "SALES",
+    name: "Strat\xE8ge croissance (GVE)",
+    description: "Moteur de croissance organique \u2014 briefs de contenu et plans de canaux l\xE9gitimes (interne).",
+    visibility: "internal",
+    systemPrompt: `Tu es le strat\xE8ge de croissance ComptaFlow, cerveau \xE9ditorial du GVE (Growth & Visibility Engine).
+
+\xC0 partir d'un canal recommand\xE9 et d'une niche, tu produis des briefs d'action concrets et 100 % l\xE9gitimes : titres d'articles SEO r\xE9pondant \xE0 de vraies questions, angles de publication LinkedIn, plans d'infolettre, id\xE9es de partenariats.
+
+R\xE8gles strictes et non n\xE9gociables:
+- JAMAIS de faux comptes, d'identit\xE9s synth\xE9tiques, d'imitation ni de contournement de protections anti-robot.
+- JAMAIS de faux avis, de spam ou de manipulation d'engagement.
+- Toute participation \xE0 une communaut\xE9 se fait depuis un compte r\xE9el, avec divulgation de l'affiliation et dans le respect des r\xE8gles de la plateforme.
+- Respect de la LCAP (anti-pourriel canadienne) : consentement, d\xE9sabonnement, aucune liste achet\xE9e.
+- La valeur d'abord : contenu utile, exact, relu par un CPA quand il touche la fiscalit\xE9.
+
+Ton expert, orient\xE9 action, 4\u20136 puces maximum par brief.`,
+    temperature: 0.4
   }
 };
 var INTENT_TO_AGENT = {
@@ -1218,12 +1238,471 @@ async function runAgentOrchestrator(input, options = {}) {
   };
 }
 
+// src/lib/gve/channels.ts
+var REVENUE_ATTRIBUTION = 0.4;
+var GROWTH_CHANNELS = [
+  {
+    id: "seo-blog",
+    category: "content-seo",
+    nameFr: "Contenu SEO evergreen",
+    nameEn: "Evergreen SEO content",
+    costModel: "organic",
+    baseReachPerMonth: 1800,
+    monthlyCostCad: 0,
+    conversionModifier: 1.15,
+    rampUpMonths: 6,
+    effortHoursPerWeek: 6,
+    fitTags: ["comptabilit\xE9", "saas", "services", "b2b", "finance", "juridique"],
+    complianceNotes: "Articles utiles r\xE9pondant \xE0 de vraies questions. Aucune ferme de contenu, aucun bourrage de mots-cl\xE9s."
+  },
+  {
+    id: "local-seo-gbp",
+    category: "local-seo",
+    nameFr: "Fiche Google Business & SEO local",
+    nameEn: "Google Business Profile & local SEO",
+    costModel: "organic",
+    baseReachPerMonth: 1200,
+    monthlyCostCad: 0,
+    conversionModifier: 1.6,
+    rampUpMonths: 3,
+    effortHoursPerWeek: 2,
+    fitTags: ["comptabilit\xE9", "services", "commerce", "sant\xE9", "local"],
+    complianceNotes: "Fiche v\xE9rifi\xE9e r\xE9elle, vrais avis de vrais clients. Jamais de faux avis (interdit et ill\xE9gal)."
+  },
+  {
+    id: "community-answers",
+    category: "community",
+    nameFr: "R\xE9ponses expertes en communaut\xE9",
+    nameEn: "Expert community answers",
+    costModel: "organic",
+    baseReachPerMonth: 900,
+    monthlyCostCad: 0,
+    conversionModifier: 1.1,
+    rampUpMonths: 4,
+    effortHoursPerWeek: 3,
+    fitTags: ["saas", "b2b", "finance", "comptabilit\xE9", "tech"],
+    complianceNotes: "Compte r\xE9el unique, divulgation claire de l'affiliation, valeur d'abord. Respect strict des r\xE8gles de chaque communaut\xE9."
+  },
+  {
+    id: "referral-program",
+    category: "referral",
+    nameFr: "Programme de parrainage client",
+    nameEn: "Customer referral program",
+    costModel: "low-cost",
+    baseReachPerMonth: 700,
+    monthlyCostCad: 150,
+    conversionModifier: 2.2,
+    rampUpMonths: 3,
+    effortHoursPerWeek: 1,
+    fitTags: ["comptabilit\xE9", "services", "saas", "b2b"],
+    complianceNotes: "Incitatifs transparents, opt-in explicite, conforme \xE0 la LCAP (loi anti-pourriel canadienne)."
+  },
+  {
+    id: "email-nurture",
+    category: "email",
+    nameFr: "Infolettre & s\xE9quences de valeur",
+    nameEn: "Newsletter & value sequences",
+    costModel: "low-cost",
+    baseReachPerMonth: 600,
+    monthlyCostCad: 60,
+    conversionModifier: 1.8,
+    rampUpMonths: 4,
+    effortHoursPerWeek: 2,
+    fitTags: ["saas", "b2b", "services", "comptabilit\xE9", "e-commerce"],
+    complianceNotes: "Consentement LCAP obligatoire, d\xE9sabonnement en un clic, aucune liste achet\xE9e."
+  },
+  {
+    id: "linkedin-organic",
+    category: "social-organic",
+    nameFr: "Autorit\xE9 organique LinkedIn",
+    nameEn: "Organic LinkedIn authority",
+    costModel: "organic",
+    baseReachPerMonth: 1100,
+    monthlyCostCad: 0,
+    conversionModifier: 1.05,
+    rampUpMonths: 5,
+    effortHoursPerWeek: 3,
+    fitTags: ["b2b", "saas", "comptabilit\xE9", "consulting", "finance"],
+    complianceNotes: "Publication depuis des profils r\xE9els de l'\xE9quipe. Aucune automatisation d'engagement ni faux compte."
+  },
+  {
+    id: "partnerships",
+    category: "partnerships",
+    nameFr: "Partenariats & co-marketing",
+    nameEn: "Partnerships & co-marketing",
+    costModel: "low-cost",
+    baseReachPerMonth: 800,
+    monthlyCostCad: 100,
+    conversionModifier: 1.9,
+    rampUpMonths: 4,
+    effortHoursPerWeek: 2,
+    fitTags: ["saas", "b2b", "comptabilit\xE9", "services", "fintech"],
+    complianceNotes: "Accords r\xE9els et divulgu\xE9s avec des partenaires compl\xE9mentaires (banques, cabinets juridiques, logiciels)."
+  },
+  {
+    id: "digital-pr",
+    category: "pr",
+    nameFr: "Relations presse & citations",
+    nameEn: "Digital PR & citations",
+    costModel: "low-cost",
+    baseReachPerMonth: 1400,
+    monthlyCostCad: 120,
+    conversionModifier: 0.9,
+    rampUpMonths: 6,
+    effortHoursPerWeek: 2,
+    fitTags: ["saas", "fintech", "b2b", "comptabilit\xE9", "finance"],
+    complianceNotes: "Angles \xE9ditoriaux authentiques, donn\xE9es originales, aucune publication mensong\xE8re."
+  }
+];
+var CHANNEL_INDEX = Object.fromEntries(
+  GROWTH_CHANNELS.map((c) => [c.id, c])
+);
+function getChannel(id) {
+  return CHANNEL_INDEX[id];
+}
+function listChannels() {
+  return [...GROWTH_CHANNELS];
+}
+
+// src/lib/gve/scoring.ts
+var PROVINCE_REACH_WEIGHT = {
+  ON: 1.35,
+  QC: 1,
+  BC: 0.82,
+  AB: 0.76,
+  MB: 0.45,
+  SK: 0.42,
+  NS: 0.38,
+  NB: 0.34,
+  NL: 0.28,
+  PE: 0.18,
+  YT: 0.12,
+  NT: 0.12,
+  NU: 0.1
+};
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+function nicheFit(channel, niche) {
+  const needle = niche.toLowerCase();
+  const matches = channel.fitTags.filter(
+    (tag) => needle.includes(tag) || tag.includes(needle)
+  ).length;
+  if (channel.fitTags.length === 0) return 1;
+  const ratio = matches / channel.fitTags.length;
+  return clamp(0.6 + ratio * 1.4, 0.6, 1.3);
+}
+function reachAtMaturity(channel, target) {
+  const provinceWeight = PROVINCE_REACH_WEIGHT[target.province] ?? 0.5;
+  const fit = nicheFit(channel, target.niche);
+  const effortScale = clamp(target.teamCapacityHoursPerWeek / 12, 0.35, 1.4);
+  return Math.round(channel.baseReachPerMonth * provinceWeight * fit * effortScale);
+}
+function confidenceFor(channel, target) {
+  const trafficSignal = clamp(target.currentMonthlySessions / 3e3, 0, 1);
+  const rampSignal = clamp(1 - (channel.rampUpMonths - 3) / 9, 0.4, 1);
+  const dataSignal = target.avgDealValueCad > 0 && target.conversionRatePct > 0 ? 1 : 0.7;
+  return clamp(0.45 + 0.25 * trafficSignal + 0.2 * rampSignal + 0.1 * dataSignal, 0.3, 0.98);
+}
+function monthlyRevenueAtMaturity(channel, target) {
+  const reach = reachAtMaturity(channel, target);
+  const effectiveConversion = target.conversionRatePct / 100 * channel.conversionModifier;
+  const customers = reach * effectiveConversion * REVENUE_ATTRIBUTION;
+  return Math.round(customers * target.avgDealValueCad);
+}
+function scoreChannel(channel, target) {
+  const reach = reachAtMaturity(channel, target);
+  const revenue = monthlyRevenueAtMaturity(channel, target);
+  const confidence = confidenceFor(channel, target);
+  const reachNorm = Math.log10(reach + 10) / 4;
+  const impactNorm = Math.log10(revenue + 10) / 6;
+  const effortNorm = clamp(channel.effortHoursPerWeek / 6, 0.5, 1.8);
+  const raw = reachNorm * impactNorm * confidence / effortNorm;
+  const score = Math.round(clamp(raw * 80, 0, 100) * 10) / 10;
+  return {
+    channelId: channel.id,
+    category: channel.category,
+    nameFr: channel.nameFr,
+    nameEn: channel.nameEn,
+    reachAtMaturity: reach,
+    monthlyRevenueAtMaturity: revenue,
+    confidence: Math.round(confidence * 100) / 100,
+    effortHoursPerWeek: channel.effortHoursPerWeek,
+    monthlyCostCad: channel.monthlyCostCad,
+    score,
+    rank: 0
+  };
+}
+function scoreAllChannels(target) {
+  const scored = GROWTH_CHANNELS.map((channel) => scoreChannel(channel, target));
+  scored.sort((a, b) => b.score - a.score);
+  scored.forEach((opportunity, index) => {
+    opportunity.rank = index + 1;
+  });
+  return scored;
+}
+function selectChannelsWithinCapacity(opportunities, target) {
+  let remainingHours = target.teamCapacityHoursPerWeek;
+  let remainingBudget = target.monthlyBudgetCad;
+  const selected = [];
+  for (const opportunity of opportunities) {
+    if (opportunity.effortHoursPerWeek <= remainingHours && opportunity.monthlyCostCad <= remainingBudget) {
+      selected.push(opportunity.channelId);
+      remainingHours -= opportunity.effortHoursPerWeek;
+      remainingBudget -= opportunity.monthlyCostCad;
+    }
+    if (remainingHours <= 0) break;
+  }
+  if (selected.length === 0 && opportunities.length > 0) {
+    selected.push(opportunities[0].channelId);
+  }
+  return selected;
+}
+
+// src/lib/gve/projection.ts
+var PAID_BENCHMARK_CAC = {
+  comptabilit\u00E9: 280,
+  finance: 320,
+  saas: 240,
+  b2b: 300,
+  "e-commerce": 45,
+  services: 160,
+  fintech: 350,
+  default: 200
+};
+function paidBenchmarkCac(niche) {
+  const key = niche.toLowerCase();
+  const match = Object.keys(PAID_BENCHMARK_CAC).find(
+    (n) => n !== "default" && (key.includes(n) || n.includes(key))
+  );
+  return PAID_BENCHMARK_CAC[match ?? "default"];
+}
+function maturityFactor(rampUpMonths, month) {
+  if (month <= 0) return 0;
+  const k = Math.log(10) / Math.max(1, rampUpMonths);
+  return 1 - Math.exp(-k * month);
+}
+var INTERNAL_HOURLY_RATE_CAD = 35;
+function channelMonthlyCost(channel) {
+  const laborCost = channel.effortHoursPerWeek * 4.33 * INTERNAL_HOURLY_RATE_CAD;
+  return channel.monthlyCostCad + laborCost;
+}
+function projectGrowth(target, channelIds, horizonMonths = 12) {
+  const channels = channelIds.map((id) => getChannel(id)).filter((c) => Boolean(c));
+  const series = [];
+  let cumulativeRevenue = 0;
+  let runningSessions = target.currentMonthlySessions;
+  let totalCost = 0;
+  for (let month = 1; month <= horizonMonths; month += 1) {
+    let incrementalSessions = 0;
+    let incrementalRevenue = 0;
+    for (const channel of channels) {
+      const maturedReach = reachAtMaturity(channel, target) * maturityFactor(channel.rampUpMonths, month);
+      const previousReach = reachAtMaturity(channel, target) * maturityFactor(channel.rampUpMonths, month - 1);
+      const monthlyGain = Math.max(0, maturedReach - previousReach);
+      incrementalSessions += monthlyGain;
+      const effectiveConversion = target.conversionRatePct / 100 * channel.conversionModifier;
+      incrementalRevenue += maturedReach * effectiveConversion * REVENUE_ATTRIBUTION * target.avgDealValueCad;
+      if (month === 1) {
+        totalCost += channelMonthlyCost(channel) * horizonMonths;
+      }
+    }
+    runningSessions += incrementalSessions;
+    cumulativeRevenue += incrementalRevenue;
+    series.push({
+      month,
+      incrementalSessions: Math.round(incrementalSessions),
+      totalSessions: Math.round(runningSessions),
+      incrementalRevenueCad: Math.round(incrementalRevenue),
+      cumulativeRevenueCad: Math.round(cumulativeRevenue)
+    });
+  }
+  const last = series[series.length - 1];
+  const sessionsAtHorizon = last ? last.totalSessions : target.currentMonthlySessions;
+  const cumulativeRevenueCad = last ? last.cumulativeRevenueCad : 0;
+  const customersAcquired = target.avgDealValueCad > 0 ? cumulativeRevenueCad / target.avgDealValueCad : 0;
+  const blendedCac = customersAcquired > 0 ? Math.round(totalCost / customersAcquired) : 0;
+  const roi = totalCost > 0 ? Math.round((cumulativeRevenueCad - totalCost) / totalCost * 100) / 100 : 0;
+  const summary = {
+    horizonMonths,
+    sessionsAtHorizon,
+    cumulativeRevenueCad,
+    totalCostCad: Math.round(totalCost),
+    blendedCac,
+    roi,
+    paidBenchmarkCac: paidBenchmarkCac(target.niche)
+  };
+  return { series, summary };
+}
+
+// src/lib/gve/playbook.ts
+var CHANNEL_PLAYBOOKS = {
+  "seo-blog": [
+    {
+      titleFr: "Publier 1 article de fond r\xE9pondant \xE0 une vraie question client",
+      cadence: "weekly",
+      effortHours: 4,
+      kpi: "Positions mots-cl\xE9s / trafic organique",
+      integrityNote: "Contenu original et exact, relu par un CPA. Aucun contenu g\xE9n\xE9r\xE9 en masse sans valeur."
+    },
+    {
+      titleFr: "Mettre \xE0 jour un ancien article pour pr\xE9server son positionnement",
+      cadence: "biweekly",
+      effortHours: 2,
+      kpi: "R\xE9tention des positions Top 10",
+      integrityNote: "Actualisation factuelle (taux, dates) \u2014 pas de manipulation."
+    }
+  ],
+  "local-seo-gbp": [
+    {
+      titleFr: "Solliciter un avis Google aupr\xE8s d'un client r\xE9ellement satisfait",
+      cadence: "weekly",
+      effortHours: 1,
+      kpi: "Nombre et note moyenne des avis authentiques",
+      integrityNote: "Uniquement de vrais clients. Aucun faux avis (ill\xE9gal et interdit par Google)."
+    },
+    {
+      titleFr: "Publier une actualit\xE9/offre sur la fiche Google Business",
+      cadence: "weekly",
+      effortHours: 1,
+      kpi: "Vues et clics de la fiche",
+      integrityNote: "Informations exactes sur des services r\xE9ellement offerts."
+    }
+  ],
+  "community-answers": [
+    {
+      titleFr: "R\xE9pondre \xE0 3 questions pertinentes avec expertise et divulgation",
+      cadence: "weekly",
+      effortHours: 2,
+      kpi: "Trafic r\xE9f\xE9rent qualifi\xE9",
+      integrityNote: "Un seul compte r\xE9el, affiliation divulgu\xE9e, respect des r\xE8gles de la communaut\xE9. Jamais de faux comptes."
+    }
+  ],
+  "referral-program": [
+    {
+      titleFr: "Relancer les clients satisfaits pour activer le parrainage",
+      cadence: "monthly",
+      effortHours: 2,
+      kpi: "Taux de parrainage / clients r\xE9f\xE9r\xE9s",
+      integrityNote: "Incitatif transparent, consentement LCAP, opt-in explicite."
+    }
+  ],
+  "email-nurture": [
+    {
+      titleFr: "Envoyer une infolettre de valeur (\xE9ch\xE9ances fiscales, conseils)",
+      cadence: "biweekly",
+      effortHours: 2,
+      kpi: "Taux d'ouverture / clics / conversions",
+      integrityNote: "Liste opt-in uniquement, d\xE9sabonnement en un clic, conforme LCAP."
+    }
+  ],
+  "linkedin-organic": [
+    {
+      titleFr: "Publier 2 posts d'autorit\xE9 depuis le profil r\xE9el de l'\xE9quipe",
+      cadence: "weekly",
+      effortHours: 2,
+      kpi: "Port\xE9e / visites de profil / demandes",
+      integrityNote: "Publications humaines depuis de vrais profils. Aucune automatisation d'engagement."
+    }
+  ],
+  partnerships: [
+    {
+      titleFr: "Initier 1 partenariat de co-marketing avec un acteur compl\xE9mentaire",
+      cadence: "monthly",
+      effortHours: 3,
+      kpi: "Leads issus des partenariats",
+      integrityNote: "Accords r\xE9els et divulgu\xE9s (banques, cabinets juridiques, \xE9diteurs logiciels)."
+    }
+  ],
+  "digital-pr": [
+    {
+      titleFr: "Proposer un angle \xE9ditorial ou une donn\xE9e originale \xE0 un m\xE9dia",
+      cadence: "monthly",
+      effortHours: 3,
+      kpi: "Citations / backlinks de qualit\xE9",
+      integrityNote: "Donn\xE9es v\xE9ridiques et sourc\xE9es. Aucune fausse d\xE9claration."
+    }
+  ]
+};
+function priorityFromScore(score) {
+  if (score >= 55) return "critique";
+  if (score >= 35) return "haute";
+  return "moyenne";
+}
+function buildPlaybook(recommendedChannelIds, opportunities) {
+  const scoreByChannel = new Map(opportunities.map((o) => [o.channelId, o.score]));
+  const items = [];
+  recommendedChannelIds.forEach((channelId) => {
+    const templates = CHANNEL_PLAYBOOKS[channelId] ?? [];
+    const priority = priorityFromScore(scoreByChannel.get(channelId) ?? 0);
+    templates.forEach((template, index) => {
+      items.push({
+        id: `${channelId}-${index + 1}`,
+        channelId,
+        titleFr: template.titleFr,
+        cadence: template.cadence,
+        priority,
+        effortHours: template.effortHours,
+        kpi: template.kpi,
+        integrityNote: template.integrityNote
+      });
+    });
+  });
+  const order = { critique: 0, haute: 1, moyenne: 2 };
+  items.sort((a, b) => order[a.priority] - order[b.priority]);
+  return items;
+}
+
+// src/lib/gve/engine.ts
+var INTEGRITY_CHARTER = "Le GVE ne cr\xE9e aucun faux compte, n'imite aucune identit\xE9, ne contourne aucune protection anti-robot et n'automatise aucune publication trompeuse. Il priorise, projette et r\xE9dige des briefs pour des actions de croissance authentiques ex\xE9cut\xE9es par des humains ou via des API officielles, avec divulgation et dans le respect des conditions de chaque plateforme et de la LCAP.";
+var DEFAULTS = {
+  language: "fr",
+  monthlyBudgetCad: 0,
+  currentMonthlySessions: 0,
+  avgDealValueCad: 1200,
+  conversionRatePct: 1.2,
+  teamCapacityHoursPerWeek: 10
+};
+function normalizeTarget(input) {
+  const merged = { ...DEFAULTS, ...input };
+  return {
+    name: merged.name?.trim() || "Cible sans nom",
+    url: merged.url?.trim() || void 0,
+    niche: merged.niche?.trim() || "services",
+    province: merged.province || "QC",
+    language: merged.language === "en" ? "en" : "fr",
+    monthlyBudgetCad: Math.max(0, Number(merged.monthlyBudgetCad) || 0),
+    currentMonthlySessions: Math.max(0, Number(merged.currentMonthlySessions) || 0),
+    avgDealValueCad: Math.max(1, Number(merged.avgDealValueCad) || 1200),
+    conversionRatePct: Math.min(100, Math.max(0.01, Number(merged.conversionRatePct) || 2)),
+    teamCapacityHoursPerWeek: Math.max(0, Number(merged.teamCapacityHoursPerWeek) || 10)
+  };
+}
+function buildGrowthPlan(input, horizonMonths = 12) {
+  const target = normalizeTarget(input);
+  const opportunities = scoreAllChannels(target);
+  const recommendedChannelIds = selectChannelsWithinCapacity(opportunities, target);
+  const { series, summary } = projectGrowth(target, recommendedChannelIds, horizonMonths);
+  const playbook = buildPlaybook(recommendedChannelIds, opportunities);
+  return {
+    target,
+    generatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    opportunities,
+    recommendedChannelIds,
+    projection: series,
+    summary,
+    playbook,
+    integrityCharter: INTEGRITY_CHARTER
+  };
+}
+
 // api/internal-jobs.ts
 var INTERNAL_CRON_JOBS = [
   "agent-health",
   "reconciliation",
   "elite-hunter",
-  "marketing-hunter"
+  "marketing-hunter",
+  "gve-scan"
 ];
 function runAgentHealthCheck(geminiConfigured) {
   const routed = listAgents({ internal: false });
@@ -1268,6 +1747,39 @@ function runMarketingHunterStub() {
     timestamp: (/* @__PURE__ */ new Date()).toISOString()
   };
 }
+function runGveScan() {
+  const plan = buildGrowthPlan({
+    name: "ComptaFlow",
+    url: "https://compta-flow.net",
+    niche: "comptabilit\xE9",
+    province: "QC",
+    language: "fr",
+    monthlyBudgetCad: 300,
+    currentMonthlySessions: 1500,
+    avgDealValueCad: 1800,
+    conversionRatePct: 2.5,
+    teamCapacityHoursPerWeek: 12
+  });
+  const top = plan.opportunities[0];
+  const nextAction = plan.playbook[0];
+  return {
+    job: "gve-scan",
+    success: true,
+    message: `GVE \u2014 meilleur canal: ${top?.nameFr ?? "n/d"} (score ${top?.score ?? 0}). ROI 12 mois projet\xE9: ${Math.round(plan.summary.roi * 100)} %.`,
+    details: {
+      recommendedChannels: plan.recommendedChannelIds,
+      topChannel: top?.channelId,
+      topScore: top?.score,
+      projectedSessions12m: plan.summary.sessionsAtHorizon,
+      projectedRevenue12mCad: plan.summary.cumulativeRevenueCad,
+      blendedCac: plan.summary.blendedCac,
+      paidBenchmarkCac: plan.summary.paidBenchmarkCac,
+      nextAction: nextAction?.titleFr,
+      integrity: plan.integrityCharter
+    },
+    timestamp: (/* @__PURE__ */ new Date()).toISOString()
+  };
+}
 function runInternalCronJob(job, opts = {}) {
   const normalized = job.toLowerCase().replace(/_/g, "-");
   switch (normalized) {
@@ -1279,6 +1791,9 @@ function runInternalCronJob(job, opts = {}) {
     case "elite-hunter":
     case "marketing-hunter":
       return runMarketingHunterStub();
+    case "gve-scan":
+    case "gve":
+      return runGveScan();
     default:
       return {
         job: normalized,
@@ -2719,6 +3234,44 @@ app.get("/api/cron/weekly-report", async (req, res) => {
     botLog("WEEKLY_REPORT_CRON_ERROR", "System", error.message);
     res.status(500).json({ error: error.message });
   }
+});
+app.get("/api/gve/channels", (_req, res) => {
+  res.setHeader("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=86400");
+  res.json({ channels: listChannels() });
+});
+app.post("/api/gve/plan", rateLimiter(30, 6e4), (req, res) => {
+  const body = req.body || {};
+  const horizon = Math.min(36, Math.max(3, parseInt(String(body.horizonMonths ?? 12), 10) || 12));
+  try {
+    const plan = buildGrowthPlan(
+      {
+        name: typeof body.name === "string" ? body.name.slice(0, 120) : void 0,
+        url: typeof body.url === "string" ? body.url.slice(0, 300) : void 0,
+        niche: typeof body.niche === "string" ? body.niche.slice(0, 80) : void 0,
+        province: body.province ? normalizeProvinceCode(String(body.province)) : void 0,
+        language: body.language === "en" ? "en" : "fr",
+        monthlyBudgetCad: Number(body.monthlyBudgetCad),
+        currentMonthlySessions: Number(body.currentMonthlySessions),
+        avgDealValueCad: Number(body.avgDealValueCad),
+        conversionRatePct: Number(body.conversionRatePct),
+        teamCapacityHoursPerWeek: Number(body.teamCapacityHoursPerWeek)
+      },
+      horizon
+    );
+    botLog("GVE_PLAN", plan.target.niche, `Plan g\xE9n\xE9r\xE9 \u2014 ${plan.recommendedChannelIds.length} canaux, ROI ${Math.round(plan.summary.roi * 100)} %`);
+    res.json(plan);
+  } catch (error) {
+    botLog("GVE_PLAN_ERROR", "System", error.message);
+    res.status(500).json({ error: "Erreur lors de la g\xE9n\xE9ration du plan de croissance." });
+  }
+});
+app.get("/api/cron/gve-scan", (req, res) => {
+  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (process.env.NODE_ENV === "production") return res.status(401).json({ error: "Unauthorized" });
+  }
+  const result = runGveScan();
+  botLog("GVE_SCAN_CRON", "System", result.message);
+  res.json(result);
 });
 app.get("/api/cron/agent-health", async (req, res) => {
   if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
