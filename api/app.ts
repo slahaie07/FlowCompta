@@ -785,7 +785,7 @@ app.post('/api/webhook/onboarding-complete', async (req, res) => {
       const targetEmails = Array.from(new Set([
         COMPANY_OUTLOOK_EMAIL,
         PLATFORM_SUPPORT_EMAIL,
-        's.lahaie07@gmail.com'
+        'compta-flow@outlook.com'
       ])).filter(Boolean);
 
       for (const targetEmail of targetEmails) {

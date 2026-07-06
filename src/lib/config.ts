@@ -53,12 +53,12 @@ export const CONFIG = {
   APP: {
     NAME: 'Comptaflow',
     VERSION: '1.0.0-PROD',
-    SUPER_ADMIN_EMAILS: ['admin@compta-flow.net', 's.lahaie07@gmail.com'],
+    SUPER_ADMIN_EMAILS: ['admin@compta-flow.net', 'compta-flow@outlook.com'],
     SUB_ADMIN_EMAILS: ['comptable@compta-flow.net', 'partenaire@compta-flow.net'],
     SUPPORT_EMAIL: 'compta-flow@outlook.com',
     SITE_URL: 'https://compta-flow.net',
     /** Destinataire par défaut des virements Interac plateforme (distinct des comptes auth admin). */
-    INTERAC_EMAIL: 'comptaflow.officiel@gmail.com',
+    INTERAC_EMAIL: 'compta-flow@outlook.com',
   }
 };
 

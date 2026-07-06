@@ -20,7 +20,7 @@ services:
       # Variables lues par les workflows ($env.*)
       - COMPTAFLOW_ADMIN_SECRET=${COMPTAFLOW_ADMIN_SECRET:-}
       - COMPTAFLOW_API_URL=${COMPTAFLOW_API_URL:-https://compta-flow.net}
-      - COMPTAFLOW_ALERT_EMAIL=${COMPTAFLOW_ALERT_EMAIL:-comptaflow.officiel@gmail.com}
+      - COMPTAFLOW_ALERT_EMAIL=${COMPTAFLOW_ALERT_EMAIL:-compta-flow@outlook.com}
     volumes:
       - n8n_data:/home/node/.n8n
 
