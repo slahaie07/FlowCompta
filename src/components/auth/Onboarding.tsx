@@ -254,7 +254,7 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
               <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-12">
                 <div className="text-center space-y-4 max-w-2xl mx-auto">
                   <span className="text-gold text-xs font-bold tracking-[0.4em] uppercase">
-                    {selectedLang === 'en' ? 'CO-FOUNDERS & CPAS' : 'CO-FONDATEURS & CPAS'}
+                    {selectedLang === 'en' ? 'OUR TEAM' : 'NOTRE ÉQUIPE'}
                   </span>
                   <h2 className="text-4xl md:text-5xl font-serif text-ivoire tracking-tight italic">
                     {selectedLang === 'en' ? 'Choose your reference' : 'Choisissez votre expert de'} <span className="text-gold">{selectedLang === 'en' ? 'expert' : 'référence'}</span>
@@ -270,38 +270,20 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
                       id: 'samuel',
                       email: 's.lahaie07@gmail.com',
                       name: 'Samuel Lahaie',
-                      role: 'Fondateur / Senior CPA',
-                      roleEn: 'Founder / Senior CPA',
+                      role: 'Fondateur',
+                      roleEn: 'Founder',
                       desc: 'Samuel est le visionnaire derrière Compta-Flow. Avec plus d\'une décennie d\'expérience en restructuration d\'entreprises et stratégies fiscales complexes, il guide les entreprises vers l\'efficacité financière.',
                       descEn: 'Samuel is the visionary behind Compta-Flow. With over a decade of experience in corporate restructuring and high-net-worth tax strategy, he guides businesses toward financial efficiency.'
-                    },
-                    {
-                      id: 'eya',
-                      email: 'eya-cpa@outlook.com',
-                      name: 'Eya',
-                      role: 'Fiscaliste / CPA Indépendante',
-                      roleEn: 'Tax Specialist / Independent CPA',
-                      desc: 'Eya est une CPA indépendante spécialisée dans les normes fiscales internationales et la conformité multi-juridictionnelle. Elle est l\'experte privilégiée pour les opérations transfrontalières.',
-                      descEn: 'Eya is an independent CPA specializing in international tax norms and dual-jurisdiction compliance. She is the expert of choice for cross-border operations and multilingue setups.'
                     },
                     {
                       id: 'sylvie',
                       email: 'viviee28@hotmail.com',
                       name: 'Sylvie Charette-Clément',
-                      role: 'Partenaire CPA / Tenue de livres',
-                      roleEn: 'CPA Partner / Bookkeeping',
+                      role: 'Tenue de livres',
+                      roleEn: 'Bookkeeping',
                       desc: 'Sylvie apporte une rigueur absolue à la tenue de livres et aux systèmes de paie. Spécialisée dans les entreprises locales, elle assure une comptabilité quotidienne impeccable.',
                       descEn: 'Sylvie brings rigorous attention to detail to bookkeeping and payroll systems. She specializes in local businesses, ensuring flawless day-to-day accounts.'
                     },
-                    {
-                      id: 'stephanie',
-                      email: 'stephanie@comptaflow.com',
-                      name: 'Stéphanie Laplante',
-                      role: 'Partenaire CPA / Fiscalité PME',
-                      roleEn: 'CPA Partner / SME Tax Strategy',
-                      desc: 'Stéphanie se spécialise dans l\'optimisation fiscale et l\'accompagnement des startups québécoises. Elle aide à structurer la croissance des PME en maximisant les crédits d\'impôt.',
-                      descEn: 'Stephanie specializes in tax optimization and support for Quebec startups. She helps structure SME growth by maximizing tax credits.'
-                    }
                   ].map((expert) => {
                     const isSelected = data.selectedExpertEmail === expert.email;
                     return (
