@@ -529,7 +529,7 @@ export const i18n = {
         steps: {
           mandate: { title: "Mandat & profil", desc: "Signez votre mandat et complétez votre profil (province, entreprise)." },
           documents: { title: "Dépôt des documents", desc: "Téléversez les pièces requises dans votre coffre-fort sécurisé." },
-          cpaReview: { title: "Revue CPA", desc: "Votre comptable valide les informations et répond à vos questions." },
+          cpaReview: { title: "Revue comptable", desc: "Votre comptable valide les informations et répond à vos questions." },
           delivery: { title: "Clôture & facturation", desc: "Réception du livrable et règlement des honoraires." }
         },
         docs: { signedMandate: "Mandat signé" },
@@ -1443,7 +1443,7 @@ export const i18n = {
         steps: {
           mandate: { title: "Mandate & profile", desc: "Sign your mandate and complete your profile (province, business)." },
           documents: { title: "Document upload", desc: "Upload required files to your secure vault." },
-          cpaReview: { title: "CPA review", desc: "Your bookkeeper validates information and answers questions." },
+          cpaReview: { title: "Accounting review", desc: "Your bookkeeper validates information and answers questions." },
           delivery: { title: "Closure & billing", desc: "Receive deliverables and settle fees." }
         },
         docs: { signedMandate: "Signed mandate" },
@@ -2237,7 +2237,7 @@ export const i18n = {
         steps: {
           mandate: { title: "التفويض والملف", desc: "وقِّع تفويضك وأكمل ملفك (المقاطعة، الشركة)." },
           documents: { title: "رفع المستندات", desc: "حمِّل الملفات المطلوبة إلى خزنتك الآمنة." },
-          cpaReview: { title: "مراجعة CPA", desc: "يتحقق محاسبك من المعلومات ويجيب على أسئلتك." },
+          cpaReview: { title: "مراجعة محاسبية", desc: "يتحقق محاسبك من المعلومات ويجيب على أسئلتك." },
           delivery: { title: "الإغلاق والفوترة", desc: "استلام التسليمات وتسوية الأتعاب." }
         },
         docs: { signedMandate: "تفويض موقَّع" },
