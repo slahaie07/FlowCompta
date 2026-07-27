@@ -283,7 +283,7 @@ export function Landing() {
                     </div>
                     <div className="text-left space-y-1">
                       <div className="text-xs font-bold text-ivoire flex items-center gap-1.5">
-                        <span>Sylvie CPA</span>
+                        <span>Sylvie</span>
                         <span className="w-1.5 h-1.5 rounded-full bg-gold" />
                         <span className="text-[9px] text-gold uppercase tracking-wider font-mono">Conseillère</span>
                       </div>
