@@ -7,9 +7,9 @@ Comptaflow est un cabinet comptable de nouvelle génération basé au Québec, f
 ## 🏛️ L'Écosystème Comptaflow
 Le projet est structuré autour de quatre piliers fondamentaux :
 - **🚀 Portail Client** : Interface haute couture pour l'onboarding, le dépôt de documents et le suivi en temps réel.
-- **🛡️ Console Admin** : Cockpit de pilotage pour le CPA (gestion des mandats, facturation, messagerie).
+- **🛡️ Console Admin** : Cockpit de pilotage pour l'équipe (gestion des mandats, facturation, messagerie).
 - **🔐 Coffre-fort** : Stockage chiffré AES-256 conforme à la Loi 25.
-- **💬 Flux Direct** : Messagerie instantanée CPA-Client via Supabase Realtime.
+- **💬 Flux Direct** : Messagerie instantanée Client-Conseiller via Supabase Realtime.
 
 ## 🛠️ Stack Technique (Elite)
 - **Frontend** : React 19, Vite, Tailwind CSS, Framer Motion.
