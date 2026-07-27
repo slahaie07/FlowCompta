@@ -535,7 +535,7 @@ export function Landing() {
             <button onClick={() => navigate('/legal')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">{t('footer.legal')}</button>
             <button onClick={() => navigate('/cookies')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">Cookies</button>
             <button onClick={() => navigate('/calculateur-taxes')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em] text-gold/90">{lang === 'en' ? 'Tax Calculator' : 'Calculateur de taxes'}</button>
-            <a href="/admin" className="hover:text-gold transition-colors">{t('footer.admin')}</a>
+            <a href="/login" className="hover:text-gold transition-colors">{t('footer.admin')}</a>
           </div>
         </div>
       </footer>
