@@ -363,7 +363,7 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Colonne Gauche: Dépôt et Mandat */}
         <div className="lg:col-span-7 space-y-8">
-          {/* Radar Fiscal Prédictif (AI/Tax Integration) */}
+          {/* Radar Fiscal Prédictif & Sécurité Fiscale */}
           {userData.id ? <TaxPredictor userId={userData.id} /> : null}
 
           {/* Dépôt Direct */}

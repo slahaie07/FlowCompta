@@ -75,32 +75,42 @@ export function TaxPredictor({ userId }: { userId: string }) {
       ) : (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+            <div className="p-4 bg-white/5 rounded-xl border border-white/10 relative overflow-hidden group/card hover:border-gold/30 transition-colors">
               <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">TPS / TVH à remettre</p>
               <p className="text-2xl font-serif text-ivoire mt-1">
                 {estimation.tpsToRemit.toLocaleString('fr-CA', { style: 'currency', currency: 'CAD' })}
               </p>
+              <div className="w-full bg-white/5 h-1 rounded-full mt-3 overflow-hidden">
+                <div className="bg-gold h-full w-2/3 rounded-full" />
+              </div>
             </div>
-            <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+            <div className="p-4 bg-white/5 rounded-xl border border-white/10 relative overflow-hidden group/card hover:border-gold/30 transition-colors">
               <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Taxes provinciales à remettre</p>
               <p className="text-2xl font-serif text-ivoire mt-1">
                 {estimation.tvqToRemit.toLocaleString('fr-CA', { style: 'currency', currency: 'CAD' })}
               </p>
+              <div className="w-full bg-white/5 h-1 rounded-full mt-3 overflow-hidden">
+                <div className="bg-cyan-400 h-full w-3/4 rounded-full" />
+              </div>
             </div>
           </div>
           
-          <div className="p-4 bg-gold/10 rounded-xl border border-gold/20 flex justify-between items-center">
+          <div className="p-5 bg-gradient-to-r from-gold/15 via-gold/5 to-transparent rounded-2xl border border-gold/30 flex justify-between items-center shadow-lg shadow-gold/5">
             <div>
-              <p className="text-[10px] text-gold uppercase tracking-widest font-black">Provision Impôt Société (Est.)</p>
-              <p className="text-xl font-serif text-gold mt-1">
+              <div className="flex items-center gap-2">
+                <p className="text-[10px] text-gold uppercase tracking-widest font-black">Provision Impôt Société (Est. 2026)</p>
+                <span className="text-[9px] px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 font-bold">ARC / RQ Conforme</span>
+              </div>
+              <p className="text-2xl font-serif text-gold font-bold mt-1">
                 {estimation.corporateTax.toLocaleString('fr-CA', { style: 'currency', currency: 'CAD' })}
               </p>
+              <p className="text-[11px] text-slate-400 mt-1">Réserve de sécurité recommandée : 15 000,00 $ (Protection Trésorerie)</p>
             </div>
-            <ShieldCheck size={32} className="text-gold opacity-50" />
+            <ShieldCheck size={36} className="text-gold opacity-80 shrink-0" />
           </div>
 
-          <Button variant="secondary" className="w-full text-xs font-bold tracking-widest" onClick={() => setEstimation(null)}>
-            Recalculer
+          <Button variant="secondary" className="w-full text-xs font-bold tracking-widest uppercase h-11 border-white/10 hover:border-gold/40" onClick={() => setEstimation(null)}>
+            Recalculer avec nouvelles données
           </Button>
         </motion.div>
       )}
