@@ -457,7 +457,7 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
             </p>
           </div>
           <Badge variant="gold" className="bg-gold/10 text-gold border-gold/20 py-1.5 px-4 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-            <Sparkles size={12} className="text-gold animate-pulse shrink-0" /> IA CO-PILOTE ACTIVÉE
+            <Sparkles size={12} className="text-gold animate-pulse shrink-0" /> CO-PILOTE OPÉRATIONNEL ACTIVÉ
           </Badge>
         </div>
 
@@ -695,7 +695,7 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
             </div>
             
             <p className="text-xs text-slate-400 leading-relaxed">
-              Le moteur d'intelligence artificielle de Dext a extrait la transaction suivante. Veuillez valider les détails avant l'injection automatique dans QuickBooks/Wave.
+              Le module d'extraction certifiée Dext a extrait la transaction suivante. Veuillez valider les détails avant l'injection automatique dans QuickBooks/Wave.
             </p>
 
             <div className="bg-white/5 border border-white/5 p-5 rounded-2xl space-y-4">

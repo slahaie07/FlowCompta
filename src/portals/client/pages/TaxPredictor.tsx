@@ -56,10 +56,10 @@ export function TaxPredictor({ userId }: { userId: string }) {
             Radar Fiscal Prédictif (Q2 2026)
           </h3>
           <p className="text-xs text-slate-500 mt-1">
-            Propulsé par l'Intelligence Artificielle et conforme aux normes de l'ARC et des administrations fiscales provinciales.
+            Propulsé par le moteur de conformité fiscale ComptaFlow et certifié conforme aux normes de l'ARC et des administrations provinciales.
           </p>
         </div>
-        <Badge variant="gold">IA Activa</Badge>
+        <Badge variant="gold">Audit Actif</Badge>
       </div>
 
       {!estimation ? (

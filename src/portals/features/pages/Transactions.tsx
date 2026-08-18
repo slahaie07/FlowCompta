@@ -267,11 +267,11 @@ function TransactionRow({ t }: { t: Transaction, key?: any }) {
               ) : t.status === 'reconciled' ? (
                 <Badge variant="success" className="bg-green-500/10 text-green-400 border-green-500/20 py-1.5 px-3 font-black uppercase text-[8px] tracking-widest gap-1.5"><CheckCircle2 size={10}/> Rapproché</Badge>
               ) : (
-                <Badge variant="default" className="bg-gold/5 text-gold border-gold/10 py-1.5 px-3 font-black uppercase text-[8px] tracking-widest gap-1.5"><Clock size={10}/> Analyse IA</Badge>
+                <Badge variant="default" className="bg-gold/5 text-gold border-gold/10 py-1.5 px-3 font-black uppercase text-[8px] tracking-widest gap-1.5"><Clock size={10}/> Analyse Automatisée</Badge>
               )}
            </div>
            {t.aiConfidence !== undefined && (
-             <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden" title={`Confiance IA: ${(t.aiConfidence*100).toFixed(0)}%`}>
+             <div className="w-24 h-1 bg-white/5 rounded-full overflow-hidden" title={`Indice de correspondance: ${(t.aiConfidence*100).toFixed(0)}%`}>
                 <motion.div initial={{ width: 0 }} animate={{ width: `${t.aiConfidence * 100}%` }} className={`h-full ${t.aiConfidence > 0.95 ? 'bg-green-500' : 'bg-gold'}`} />
              </div>
            )}

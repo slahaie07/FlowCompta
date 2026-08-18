@@ -113,7 +113,7 @@ export function Vault({ isLoading: dashboardLoading }: { isLoading: boolean }) {
         <h3 className="text-3xl font-serif text-ivoire mb-3 italic font-bold">Portail de Dépôt Sécurisé</h3>
         <p className="text-sm text-slate-500 mb-10 text-center max-w-md font-medium leading-relaxed">
           Déposez vos pièces justificatives brutes. <br/>
-          Notre IA procède à l'extraction et au scellage numérique AES-256.
+          Notre système sécurisé procède à l'extraction certifiée et au scellage numérique AES-256.
         </p>
         <label className="cursor-pointer relative z-10">
            <Button variant="gold" className="px-16 h-16 uppercase tracking-[0.2em] font-black text-xs rounded-2xl shadow-glow group-hover:scale-105 transition-transform" asChild><span>Initier Téléversement</span></Button>
@@ -147,7 +147,7 @@ export function Vault({ isLoading: dashboardLoading }: { isLoading: boolean }) {
                                 <span className="text-ivoire font-bold text-base group-hover:text-gold transition-colors">{doc.fileName}</span>
                                 {doc.metadata?.type && (
                                   <span className="text-[9px] text-gold font-black uppercase tracking-[0.2em] mt-1.5 px-2 py-0.5 bg-gold/10 rounded-md w-fit">
-                                    SYNTHÈSE IA : {doc.metadata.type} {doc.metadata.montant_total ? `— ${doc.metadata.montant_total}$` : ''}
+                                    SYNTHÈSE : {doc.metadata.type} {doc.metadata.montant_total ? `— ${doc.metadata.montant_total}$` : ''}
                                   </span>
                                 )}
                               </div>

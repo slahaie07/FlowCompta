@@ -42,7 +42,7 @@ const SERVICES_FR = [
   { icon: '👥', title: 'Paie & T4', desc: 'Calcul des retenues, remises ARC, feuillets T4 / Relevé 1' },
   { icon: '📋', title: 'États financiers', desc: 'Bilan, compte de résultat et flux de trésorerie' },
   { icon: '⚙️', title: 'Configuration logiciel', desc: 'QuickBooks, Sage, Wave — mise en place et formation' },
-  { icon: '🤖', title: 'IA + Expert humain', desc: 'Automatisation intelligente validée par un comptable attitré' },
+  { icon: '⚖️', title: 'Comptable Dédié & Automatisation', desc: 'Processus automatisés et sécurisés, validés par votre comptable attitré' },
 ];
 
 const SERVICES_EN = [
@@ -51,7 +51,7 @@ const SERVICES_EN = [
   { icon: '👥', title: 'Payroll & T4', desc: 'Deduction calculations, CRA remittances, T4 slips' },
   { icon: '📋', title: 'Financial Statements', desc: 'Balance sheet, income statement and cash flow' },
   { icon: '⚙️', title: 'Software Setup', desc: 'QuickBooks, Sage, Wave — setup and training' },
-  { icon: '🤖', title: 'AI + Human Expert', desc: 'Intelligent automation validated by a dedicated accountant' },
+  { icon: '⚖️', title: 'Dedicated CPA & Automation', desc: 'Secure automated workflows validated by your dedicated accountant' },
 ];
 
 const TRUST_FR = ['🆓 Ouverture gratuite', '🔒 Données au Canada', '⚡ Portail 24/7', '✅ PIPEDA conforme'];

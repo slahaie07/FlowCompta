@@ -17,7 +17,7 @@ const SERVICES_FR = [
   { icon: '👥', title: 'Paie & T4', desc: 'Retenues, remises ARC, feuillets T4 / Relevé 1' },
   { icon: '📋', title: 'États financiers', desc: 'Bilan, compte de résultat, flux de trésorerie' },
   { icon: '⚙️', title: 'Configuration logiciel', desc: 'QuickBooks, Sage, Wave — mise en place incluse' },
-  { icon: '🤖', title: 'IA + Expert humain', desc: 'Automatisation intelligente validée par un comptable' },
+  { icon: '⚖️', title: 'Comptable Dédié & Automatisation', desc: 'Processus automatisés et sécurisés, validés par votre comptable attitré' },
 ];
 
 const SERVICES_EN = [
@@ -26,7 +26,7 @@ const SERVICES_EN = [
   { icon: '👥', title: 'Payroll & T4', desc: 'Deductions, CRA remittances, T4 slips' },
   { icon: '📋', title: 'Financial Statements', desc: 'Balance sheet, income statement, cash flow' },
   { icon: '⚙️', title: 'Software Setup', desc: 'QuickBooks, Sage, Wave — setup included' },
-  { icon: '🤖', title: 'AI + Human Expert', desc: 'Intelligent automation validated by an accountant' },
+  { icon: '⚖️', title: 'Dedicated CPA & Automation', desc: 'Secure automated workflows validated by your dedicated accountant' },
 ];
 
 export function CityLanding({ city }: Props) {
