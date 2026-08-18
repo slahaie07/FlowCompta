@@ -18,7 +18,7 @@ interface AuthProps {
   mockLogin?: (email: string, role: 'super_admin' | 'sub_admin' | 'client') => void;
 }
 
-type AuthView = 'choice' | 'login' | 'register';
+type AuthView = 'choice' | 'login' | 'register' | 'forgot';
 
 export function Auth({ onAuthentication, mockLogin }: AuthProps) {
   const navigate = useNavigate();
@@ -98,6 +98,25 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
     }
 
     try {
+      if (view === 'forgot') {
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+          redirectTo: getAuthRedirectUrl(nextPath),
+        });
+
+        if (resetError) {
+          const mapped = mapSupabaseAuthError(resetError, lang);
+          throw new Error(mapped.message);
+        }
+
+        toast.success(
+          lang === 'en'
+            ? 'Password reset email sent! Please check your inbox.'
+            : 'Courriel de réinitialisation envoyé ! Vérifiez votre boîte de réception.'
+        );
+        setView('login');
+        return;
+      }
+
       if (view === 'register') {
         if (!fullNameInput.trim()) {
           throw new Error(lang === 'en' ? 'Please enter your full name.' : 'Veuillez saisir votre nom complet.');
@@ -217,16 +236,24 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
 
               <div className="flex flex-col items-center text-center space-y-6 pt-6">
                 <div className="w-14 h-14 rounded-2xl bg-gold text-noir flex items-center justify-center shadow-lg shadow-gold/10">
-                  {view === 'login' ? <LogIn size={26} /> : <UserPlus size={26} />}
+                  {view === 'login' ? <LogIn size={26} /> : view === 'forgot' ? <RefreshCw size={26} /> : <UserPlus size={26} />}
                 </div>
 
                 <div className="w-full space-y-6">
                   <div className="space-y-2">
                     <h2 className="text-3xl font-serif text-ivoire tracking-tight italic leading-tight">
-                      {view === 'login' ? t('auth.loginTitle') : t('auth.registerTitle')}
+                      {view === 'login'
+                        ? t('auth.loginTitle')
+                        : view === 'forgot'
+                          ? (lang === 'en' ? 'Password Recovery' : 'Récupération de mot de passe')
+                          : t('auth.registerTitle')}
                     </h2>
                     <p className="text-slate-500 text-xs uppercase tracking-[0.2em] font-black">
-                      {view === 'login' ? t('auth.loginSubtitle') : t('auth.registerSubtitle')}
+                      {view === 'login'
+                        ? t('auth.loginSubtitle')
+                        : view === 'forgot'
+                          ? (lang === 'en' ? 'Secure reset link via email' : 'Lien sécurisé envoyé par courriel')
+                          : t('auth.registerSubtitle')}
                     </p>
                   </div>
 
@@ -282,18 +309,38 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                       className="bg-noir border-white/5 focus:border-gold/50"
                     />
 
-                    <Input
-                      type="password"
-                      label={t('auth.password')}
-                      placeholder="••••••••"
-                      icon={<Key size={18} className="text-gold/40" />}
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                      autoComplete={view === 'login' ? 'current-password' : 'new-password'}
-                      className="bg-noir border-white/5 focus:border-gold/50"
-                    />
+                    {view !== 'forgot' && (
+                      <>
+                        <Input
+                          type="password"
+                          label={t('auth.password')}
+                          placeholder="••••••••"
+                          icon={<Key size={18} className="text-gold/40" />}
+                          value={password}
+                          onChange={e => setPassword(e.target.value)}
+                          required
+                          minLength={6}
+                          autoComplete={view === 'login' ? 'current-password' : 'new-password'}
+                          className="bg-noir border-white/5 focus:border-gold/50"
+                        />
+
+                        {view === 'login' && (
+                          <div className="text-right -mt-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setView('forgot');
+                                setError('');
+                                setEmailNotConfirmed(false);
+                              }}
+                              className="text-[11px] text-slate-400 hover:text-gold transition-colors font-medium cursor-pointer"
+                            >
+                              {lang === 'en' ? 'Forgot password?' : 'Mot de passe oublié ?'}
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    )}
 
                     <Button
                       type="submit"
@@ -301,22 +348,41 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                       className="w-full h-16 gap-3 font-bold uppercase tracking-[0.2em] shadow-gold/20 mt-4 cursor-pointer"
                       isLoading={isLoading}
                     >
-                      {view === 'login' ? t('auth.submitLogin') : t('auth.submitRegister')} <ArrowRight size={20}/>
+                      {view === 'login'
+                        ? t('auth.submitLogin')
+                        : view === 'forgot'
+                          ? (lang === 'en' ? 'Send reset link' : 'Envoyer le lien de réinitialisation')
+                          : t('auth.submitRegister')}{' '}
+                      <ArrowRight size={20}/>
                     </Button>
                   </form>
 
                   <div className="pt-4 text-center">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setView(view === 'login' ? 'register' : 'login');
-                        setError('');
-                        setEmailNotConfirmed(false);
-                      }}
-                      className="text-[10px] text-slate-500 hover:text-gold uppercase tracking-widest font-black transition-colors cursor-pointer"
-                    >
-                      {view === 'login' ? t('auth.switchToRegister') : t('auth.switchToLogin')}
-                    </button>
+                    {view === 'forgot' ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setView('login');
+                          setError('');
+                          setEmailNotConfirmed(false);
+                        }}
+                        className="text-[10px] text-slate-500 hover:text-gold uppercase tracking-widest font-black transition-colors cursor-pointer"
+                      >
+                        {lang === 'en' ? 'Back to sign in' : 'Retour à la connexion'}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setView(view === 'login' ? 'register' : 'login');
+                          setError('');
+                          setEmailNotConfirmed(false);
+                        }}
+                        className="text-[10px] text-slate-500 hover:text-gold uppercase tracking-widest font-black transition-colors cursor-pointer"
+                      >
+                        {view === 'login' ? t('auth.switchToRegister') : t('auth.switchToLogin')}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

@@ -199,15 +199,19 @@
     }
     </script>
 
-    <!-- Tracking Pixel (GA4 / GTM Server-Side Ready) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <!-- Tracking Pixel (GA4 / GTM Server-Side Ready - Loi 25 Compliant) -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-XXXXXXXXXX', {
-        'anonymize_ip': true // Loi 25 Compliance
-      });
+      const GA_ID = window.__GA_ID__ || '';
+      if (GA_ID && GA_ID !== 'G-XXXXXXXXXX') {
+        const gaScript = document.createElement('script');
+        gaScript.async = true;
+        gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+        document.head.appendChild(gaScript);
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', GA_ID, { 'anonymize_ip': true });
+      }
     </script>
 
     <!-- Font preloading for LCP performance -->
