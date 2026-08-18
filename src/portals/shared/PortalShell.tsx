@@ -13,6 +13,7 @@ import { getPortalNav, isPathAllowedForRole } from '../config';
 import { getPortalBasePath, getActiveSegment } from '../config/paths';
 import type { PortalShellProps, PortalRole, PortalRouteContext } from '../types';
 import { supabase } from '../../lib/supabase';
+import { ThreeDMatrixAmbiance } from '../../components/ui/ThreeDMatrixAmbiance';
 
 interface PortalShellComponentProps extends PortalShellProps {
   routeContext: Omit<PortalRouteContext, keyof PortalShellProps | 'isVaultUnlocked' | 'setIsVaultUnlocked' | 'setShowMandateSigning'>;
@@ -79,6 +80,7 @@ export function PortalShell({
 
   return (
     <div className="min-h-screen flex bg-noir relative overflow-hidden w-full">
+      <ThreeDMatrixAmbiance />
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-gold/5 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-gold/5 rounded-full blur-[120px]" />

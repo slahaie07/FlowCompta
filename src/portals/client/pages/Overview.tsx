@@ -327,6 +327,47 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
 
       <ServiceSelector userData={userData} onSaved={onRefreshProfile} />
 
+      {/* 2026 Neo-Cyber Mission Control & Fast Action Hub */}
+      <motion.div 
+        initial={{ opacity: 0, y: 15 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        className="p-6 rounded-3xl bg-gradient-to-r from-[#0d121f]/90 via-[#070a12]/90 to-[#0d121f]/90 border border-gold/25 backdrop-blur-2xl shadow-[0_10px_35px_rgba(0,0,0,0.7)] flex flex-col md:flex-row justify-between items-center gap-6"
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gold/15 border border-gold/30 flex items-center justify-center text-gold shadow-[0_0_20px_rgba(212,175,55,0.25)] shrink-0">
+            <ShieldCheck size={26} />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-cyan-400">Écosystème Actif 2026</span>
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-ping" />
+            </div>
+            <h3 className="text-base font-bold text-ivoire font-serif tracking-wide mt-0.5">
+              Protection Fiscale & Trésorerie Sécurisée
+            </h3>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <Button 
+            variant="gold" 
+            size="sm" 
+            className="text-[11px] font-black uppercase tracking-wider h-10 px-5 shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:scale-105 transition-transform"
+            onClick={triggerFileInput}
+          >
+            ⚡ Déposer un Document
+          </Button>
+          <Button 
+            variant="secondary" 
+            size="sm" 
+            className="text-[11px] font-bold uppercase tracking-wider h-10 px-4 border-white/15 hover:border-gold/40 text-slate-300"
+            onClick={() => portalNavigate('messaging')}
+          >
+            💬 Contacter mon CPA
+          </Button>
+        </div>
+      </motion.div>
+
       {/* Bento Grid Simplifié */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <Card className="p-8 space-y-4 premium-border-gold relative overflow-hidden group" glow="gold">
