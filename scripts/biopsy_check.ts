@@ -45,10 +45,11 @@ async function checkDatabaseProfiles() {
       auth: { persistSession: false }
     });
     
-    console.log('Authenticating as Samuel L. (Super Admin)...');
+    console.log('Authenticating as Super Admin...');
+    if (!process.env.BIOPSY_ADMIN_PASSWORD) { console.error('BIOPSY_ADMIN_PASSWORD manquant dans l\'environnement.'); return; }
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email: 's.lahaie07@gmail.com',
-      password: 'admin1234'
+      password: process.env.BIOPSY_ADMIN_PASSWORD ?? ''
     });
 
     if (authError) {
