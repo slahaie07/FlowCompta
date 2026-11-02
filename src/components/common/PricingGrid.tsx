@@ -116,6 +116,40 @@ export function PricingGrid() {
       popular: true
     },
     {
+      name: lang === 'en' ? 'Micro — Bookkeeping' : lang === 'ar' ? 'ميكرو — مسك الدفاتر' : 'Micro — Tenue de livres',
+      price: lang === 'en' ? '$149.99' : '149.99 $',
+      period: lang === 'en' ? '/ month' : lang === 'ar' ? '/ شهر' : '/ mois',
+      desc: lang === 'en'
+        ? 'For very small businesses: up to 30 transactions per month, quarterly deliverables.'
+        : lang === 'ar'
+        ? 'للشركات الصغيرة جدًا: حتى 30 معاملة شهريًا، تسليمات فصلية.'
+        : 'Pour les très petites entreprises : jusqu’à 30 transactions par mois, livrables trimestriels.',
+      features: lang === 'en'
+        ? [
+            'Up to 30 transactions / month',
+            'Quarterly bank reconciliations',
+            'GST/QST (HST) report filings',
+            'Quarterly summary',
+            'Email support included'
+          ]
+        : lang === 'ar'
+        ? [
+            'حتى 30 معاملة / شهر',
+            'مطابقات بنكية فصلية',
+            'تقديم تقارير الضرائب',
+            'ملخص فصلي',
+            'دعم عبر البريد الإلكتروني مشمول'
+          ]
+        : [
+            'Jusqu’à 30 transactions / mois',
+            'Conciliations bancaires trimestrielles',
+            'Production des rapports de taxes',
+            'Sommaire trimestriel',
+            'Support courriel inclus'
+          ],
+      popular: false
+    },
+    {
       name: lang === 'en' ? 'Bookkeeping & Taxes' : lang === 'ar' ? 'مسك الدفاتر والضرائب' : 'Tenue de livres & Taxes',
       price: lang === 'en' ? '$249.99' : '249.99 $',
       period: lang === 'en' ? '/ month' : lang === 'ar' ? '/ شهر' : '/ mois',
@@ -126,10 +160,10 @@ export function PricingGrid() {
         : 'Pour les PME et entreprises individuelles souhaitant déléguer leur gestion mensuelle.',
       features: lang === 'en'
         ? [
-            'Simplified submission on Dext (photos)',
+            'Send your receipts by photo or email',
             'Monthly bank reconciliation',
             'GST & HST report filings',
-            'Quarterly financial statements',
+            'Monthly summary and tax filings',
             'Priority support by SMS/Email'
           ]
         : lang === 'ar'
@@ -141,10 +175,10 @@ export function PricingGrid() {
             'دعم ذو أولوية عبر الرسائل القصيرة/البريد الإلكتروني'
           ]
         : [
-            'Saisie simplifiée sur Dext (photos)',
+            'Envoi de vos pièces par photo ou courriel',
             'Conciliation bancaire mensuelle',
             'Production des rapports de TPS & TVQ',
-            'États financiers trimestriels',
+            'Sommaire mensuel et rapports de taxes',
             'Support prioritaire par SMS/Courriel'
           ],
       popular: false
@@ -252,7 +286,7 @@ export function PricingGrid() {
             </p>
           </div>
           <a
-            href="mailto:compta-flow@outlook.com"
+            href="mailto:contact@compta-flow.net"
             className="px-6 py-4 rounded-2xl border border-gold/30 bg-gold/5 text-xs font-bold uppercase tracking-widest text-gold hover:bg-gold/10 hover:border-gold/60 transition-all duration-300 shrink-0"
           >
             {lang === 'en' ? 'Contact' : lang === 'ar' ? 'اتصل بـ' : 'Contacter'} compta-flow@outlook.com

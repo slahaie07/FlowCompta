@@ -67,6 +67,8 @@ export function Landing() {
 
           <div className="hidden md:flex items-center gap-8">
             <a href="#services" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.services')}</a>
+            <button onClick={() => navigate('/tarifs')} className="text-sm font-medium text-silver hover:text-gold transition-colors">{lang === 'fr' ? 'Tarifs' : 'Pricing'}</button>
+            <button onClick={() => navigate('/ressources')} className="text-sm font-medium text-silver hover:text-gold transition-colors">{lang === 'fr' ? 'Ressources' : 'Resources'}</button>
             <button onClick={() => navigate('/estimate')} className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.getEstimate')}</button>
             <a href="#processus" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.processus')}</a>
             <a href="#faq" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.faq')}</a>
@@ -139,6 +141,19 @@ export function Landing() {
 
       {/* Hero Section */}
       <header className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+        {/* Bandeau saisonnier — fin d'année */}
+        <div className="relative z-10 max-w-5xl mx-auto px-6 mb-12">
+          <div className="bg-gold text-noir rounded-2xl px-6 py-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-center shadow-[0_16px_48px_rgba(212,175,55,0.25)]">
+            <span className="text-sm font-bold">
+              {lang === 'fr'
+                ? 'Fin d’année 2026 : faites fermer vos livres avant le 31 décembre — rattrapage dès 75 $/mois, feuillets T4 et RL-1 offerts la 1re année aux clients tenue de livres.'
+                : 'Year-end 2026: get your books closed before December 31 — catch-up from $75/month, T4 & RL-1 slips included in year 1 for bookkeeping clients.'}
+            </span>
+            <button onClick={() => navigate('/estimate')} className="text-sm font-black underline underline-offset-4 hover:opacity-70 transition-opacity">
+              {lang === 'fr' ? 'Estimer mon forfait →' : 'Estimate my package →'}
+            </button>
+          </div>
+        </div>
         <div className="absolute left-6 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-2 items-center opacity-30">
           <div className="w-[1px] h-32 bg-gradient-to-b from-transparent to-gold" />
           <span className="rotate-180 [writing-mode:vertical-lr] text-[10px] tracking-[0.6em] uppercase font-bold text-slate-500">
@@ -163,6 +178,11 @@ export function Landing() {
               <p className="text-silver text-lg font-light max-w-lg leading-relaxed">
                 {t('hero.subtitle')}
               </p>
+              <div className="flex flex-wrap gap-3 text-[11px] font-bold uppercase tracking-widest text-gold/90">
+                <span className="border border-gold/30 rounded-full px-4 py-2">{lang === 'fr' ? 'Réponse écrite sous 4 h ouvrables' : 'Written reply within 4 business hours'}</span>
+                <span className="border border-gold/30 rounded-full px-4 py-2">{lang === 'fr' ? '100 % en ligne, partout au Canada' : '100% online, across Canada'}</span>
+                <span className="border border-gold/30 rounded-full px-4 py-2">{lang === 'fr' ? 'Prix fixes, sans surprise' : 'Fixed prices, no surprises'}</span>
+              </div>
               <div className="flex flex-wrap gap-4">
                 <Button variant="gold" size="lg" onClick={goToSignup} className="px-10 py-7 text-lg group">
                   {t('hero.cta')} <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
@@ -380,6 +400,22 @@ export function Landing() {
       </section>
 
       {/* FAQ */}
+      {/* Confiance — aperçu, page complète à /confiance */}
+      <section className="py-24 bg-surface relative overflow-hidden">
+        <div className="max-w-5xl mx-auto px-6 text-center space-y-6">
+          <span className="text-gold text-xs font-black tracking-[0.4em] uppercase">{lang === 'fr' ? 'Confiance et sécurité' : 'Trust & Security'}</span>
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-ivoire">{lang === 'fr' ? 'Vos documents restent protégés' : 'Your documents stay protected'}</h2>
+          <p className="text-silver font-light leading-relaxed max-w-3xl mx-auto">
+            {lang === 'fr'
+              ? 'Un dossier d’échange sécurisé pour chaque client, un engagement de confidentialité signé par chaque membre de l’équipe, et un accès limité aux seuls dossiers assignés. Nous ne demandons jamais votre NAS à l’inscription — seulement lorsqu’un mandat l’exige réellement.'
+              : 'A secure exchange folder for every client, a signed confidentiality agreement for every team member, and access limited to assigned files only. We never ask for your SIN at sign-up — only when a mandate actually requires it.'}
+          </p>
+          <Button variant="secondary" onClick={() => navigate('/confiance')} className="glass-button border-gold/20">
+            {lang === 'fr' ? 'Voir comment on protège vos données' : 'See how we protect your data'}
+          </Button>
+        </div>
+      </section>
+
       <section id="faq" className="py-32">
         <div className="max-w-3xl mx-auto px-6 space-y-16">
           <div className="text-center space-y-4">
@@ -515,27 +551,55 @@ export function Landing() {
 
       {/* Footer */}
       <footer className="py-20 border-t border-gold/20 bg-noir">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-10">
-          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
-            <div className="w-8 h-8 border border-gold rounded-full flex items-center justify-center text-gold font-serif font-bold text-sm">C</div>
-            <span className="text-xl font-serif font-bold tracking-tight">Compta<em className="text-gold not-italic">flow</em></span>
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 border border-gold rounded-full flex items-center justify-center text-gold font-serif font-bold text-sm">C</div>
+                <span className="text-xl font-serif font-bold tracking-tight">Compta<em className="text-gold not-italic">flow</em></span>
+              </div>
+              <p className="text-sm text-silver/80 font-light leading-relaxed">
+                {lang === 'fr' ? 'Tenue de livres et impôts, 100 % en ligne, partout au Canada. Pas un cabinet de CPA.' : 'Bookkeeping and taxes, 100% online, across Canada. Not a CPA firm.'}
+              </p>
+              <p className="text-sm text-silver/80 font-light">
+                <a href={`mailto:${CONFIG.APP.SUPPORT_EMAIL}`} className="text-gold/90 hover:text-gold transition-colors">{CONFIG.APP.SUPPORT_EMAIL}</a>
+                <br />
+                <a href="tel:+18736552473" className="hover:text-gold transition-colors">873-655-2473</a>
+                <br />
+                {lang === 'fr' ? 'Lun–ven, 9 h à 17 h (HE) · Réponse écrite sous 4 h ouvrables' : 'Mon–Fri, 9 a.m.–5 p.m. (ET) · Written reply within 4 business hours'}
+              </p>
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold">{lang === 'fr' ? 'Services' : 'Services'}</h3>
+              <ul className="space-y-3 text-sm text-silver/85 font-light">
+                <li><a href="/tarifs" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Tarifs et forfaits' : 'Pricing & packages'}</a></li>
+                <li><a href="/estimate" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Estimation gratuite' : 'Free estimate'}</a></li>
+                <li><a href="/calculateur-taxes" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Calculateur de taxes' : 'Tax calculator'}</a></li>
+                <li><a href="/ressources" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Ressources et guides' : 'Resources & guides'}</a></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold">{lang === 'fr' ? 'Démarrer' : 'Get started'}</h3>
+              <ul className="space-y-3 text-sm text-silver/85 font-light">
+                <li><a href={CONFIG.APP.INTAKE_FORM_URL} target="_blank" rel="noreferrer" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Fiche nouveau client (2 min)' : 'New client form (2 min)'}</a></li>
+                <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSfwVqeQNjcgGwNtcmjoKzNE2jPdYsvCGAP2B8Bw_MHiSkUUug/viewform" target="_blank" rel="noreferrer" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Pré-inscription impôts 2027' : '2027 tax season pre-registration'}</a></li>
+                <li><a href="/confiance" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Confiance et sécurité' : 'Trust & security'}</a></li>
+                <li><a href="/login" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Connexion client' : 'Client login'}</a></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold">{lang === 'fr' ? 'Légal' : 'Legal'}</h3>
+              <ul className="space-y-3 text-sm text-silver/85 font-light">
+                <li><a href="/privacy" className="hover:text-gold transition-colors">{t('footer.privacy')}</a></li>
+                <li><a href="/terms" className="hover:text-gold transition-colors">{t('footer.terms')}</a></li>
+                <li><a href="/legal" className="hover:text-gold transition-colors">{t('footer.legal')}</a></li>
+                <li><a href="/cookies" className="hover:text-gold transition-colors">Cookies</a></li>
+              </ul>
+            </div>
           </div>
-          <div className="flex flex-col md:flex-row items-center gap-8 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
+          <div className="mt-14 pt-8 border-t border-gold/10 flex flex-col md:flex-row justify-between gap-4 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
             <span>{t('footer.copyright')}</span>
             <span>{t('footer.taxDisclaimer')}</span>
-            <a
-              href={`mailto:${CONFIG.APP.SUPPORT_EMAIL}`}
-              className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em] text-gold/80 hover:text-gold"
-              title={t('footer.contactHint')}
-            >
-              {t('footer.contact')} · {CONFIG.APP.SUPPORT_EMAIL}
-            </a>
-            <button onClick={() => navigate('/privacy')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">{t('footer.privacy')}</button>
-            <button onClick={() => navigate('/terms')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">{t('footer.terms')}</button>
-            <button onClick={() => navigate('/legal')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">{t('footer.legal')}</button>
-            <button onClick={() => navigate('/cookies')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em]">Cookies</button>
-            <button onClick={() => navigate('/calculateur-taxes')} className="hover:text-gold transition-colors font-bold uppercase tracking-[0.2em] text-gold/90">{lang === 'en' ? 'Tax Calculator' : 'Calculateur de taxes'}</button>
-            <a href="/login" className="hover:text-gold transition-colors">{t('footer.admin')}</a>
           </div>
         </div>
       </footer>

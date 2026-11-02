@@ -408,7 +408,7 @@ export function PricingQuestionnaire({
                       </a>
                     </Button>
                     <Button variant="secondary" className="flex-1 h-12" asChild>
-                      <a href={buildQuoteMailto(result, answers, t, lang)}>
+                      <a href={CONFIG.APP.INTAKE_FORM_URL} target="_blank" rel="noreferrer">
                         {t('pricingQuestionnaire.cta.requestQuote')} <Mail size={16} className="ml-2 inline" />
                       </a>
                     </Button>
