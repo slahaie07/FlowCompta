@@ -375,7 +375,7 @@ export function SuperAdminPortalShell({
   // Vault unlocking action
   const handleUnlockVault = (e: React.FormEvent) => {
     e.preventDefault();
-    if (vaultPassword === 'admin1234') {
+    if (vaultPassword === (import.meta.env.VITE_VAULT_UNLOCK_CODE as string) /* Verrou d'écran seulement — la vraie barrière est l'authentification Supabase + RLS. Code défini dans Vercel (VITE_VAULT_UNLOCK_CODE), jamais dans le code. */) {
       setIsVaultUnlocked(true);
       toast.success('Accès autorisé au Coffre-fort global.');
       setVaultPassword('');
