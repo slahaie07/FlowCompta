@@ -5,6 +5,15 @@ export type VolumeBand = 'low' | 'medium' | 'high';
 export type EmployeeBand = 'none' | 'small' | 'medium';
 export type ProfileType = 'personal' | 'business' | 'sme';
 export type UrgencyLevel = 'standard' | 'priority';
+export type TransactionsBand =
+  | 't0_30'
+  | 't31_75'
+  | 't76_150'
+  | 't151_200'
+  | 't201_300'
+  | 't301_450'
+  | 't451_plus';
+export type LateMonthsBand = 'm1_6' | 'm7_12' | 'm13_plus';
 
 export interface PricingQuestionnaireAnswers {
   serviceId: ServiceId;
@@ -14,6 +23,10 @@ export interface PricingQuestionnaireAnswers {
   employeeBand: EmployeeBand;
   urgency: UrgencyLevel;
   addOns: ServiceId[];
+  /** Nombre de transactions mensuelles (forfaits de tenue de livres) */
+  transactionsBand?: TransactionsBand;
+  /** Mois de retard (rattrapage comptable) */
+  lateMonthsBand?: LateMonthsBand;
 }
 
 export interface PricingBreakdownLine {
@@ -32,22 +45,28 @@ export interface PricingEstimateResult {
   breakdown: PricingBreakdownLine[];
 }
 
-const VOLUME_MULTIPLIER: Record<VolumeBand, number> = {
-  low: 0.85,
-  medium: 1,
-  high: 1.3,
+/** Grille Compta-Flow — taux horaire ($/h) */
+export const HOURLY_RATE = 35;
+
+/** Grille Compta-Flow — forfaits mensuels selon les transactions (livres mensuels) */
+export const MONTHLY_LADDER: Record<TransactionsBand, number> = {
+  t0_30: 249.99,
+  t31_75: 249.99,
+  t76_150: 349.99,
+  t151_200: 449.99,
+  t201_300: 599.99,
+  t301_450: 799.99,
+  t451_plus: 999.99,
 };
 
+/** Grille Compta-Flow — forfait Micro (0 à 30 transactions, livrables trimestriels) */
+export const MICRO_PRICE = 149.99;
+
+/** Heures indicatives d'un mandat horaire selon le volume déclaré */
 const HOURLY_HOURS: Record<VolumeBand, number> = {
   low: 3,
   medium: 6,
   high: 12,
-};
-
-const EMPLOYEE_MULTIPLIER: Record<EmployeeBand, number> = {
-  none: 1,
-  small: 1,
-  medium: 1.45,
 };
 
 const EMPLOYEE_COUNT: Record<EmployeeBand, number> = {
@@ -56,113 +75,141 @@ const EMPLOYEE_COUNT: Record<EmployeeBand, number> = {
   medium: 10,
 };
 
-const PROFILE_MULTIPLIER: Record<ProfileType, number> = {
-  personal: 0.9,
-  business: 1,
-  sme: 1.2,
+/** Grille Compta-Flow — rattrapage : tarif par mois de retard et mois typiques par bande */
+const CATCH_UP_RATE: Record<LateMonthsBand, number> = {
+  m1_6: 75,
+  m7_12: 65,
+  m13_plus: 60,
+};
+const CATCH_UP_MONTHS: Record<LateMonthsBand, number> = {
+  m1_6: 3,
+  m7_12: 9,
+  m13_plus: 15,
 };
 
+/** Grille Compta-Flow — express ≤ 5 jours ouvrables : +25 % */
 const URGENCY_MULTIPLIER: Record<UrgencyLevel, number> = {
   standard: 1,
-  priority: 1.15,
+  priority: 1.25,
 };
 
 function getServiceBaseFee(serviceId: ServiceId): number {
   const service = SERVICE_CATALOG.find((s) => s.id === serviceId);
-  return service?.estimateFee ?? 60;
-}
-
-function getServiceCategory(serviceId: ServiceId) {
-  return SERVICE_CATALOG.find((s) => s.id === serviceId)?.category ?? 'alacarte';
+  return service?.estimateFee ?? HOURLY_RATE;
 }
 
 function roundAmount(value: number): number {
-  return Math.round(value);
+  return Math.round(value * 100) / 100;
 }
 
-function applyRange(typical: number, spread = 0.12): { min: number; max: number; typical: number } {
-  const min = roundAmount(typical * (1 - spread));
-  const max = roundAmount(typical * (1 + spread));
-  return { min, max, typical: roundAmount(typical) };
+function applyRange(
+  typical: number,
+  fixed: boolean,
+  spread = 0.12
+): { min: number; max: number; typical: number } {
+  const t = roundAmount(typical);
+  if (fixed) return { min: t, max: t, typical: t };
+  return {
+    min: roundAmount(t * (1 - spread)),
+    max: roundAmount(t * (1 + spread)),
+    typical: t,
+  };
+}
+
+interface ServiceFee {
+  amount: number;
+  billingUnit: BillingUnit;
+  /** true = prix ferme de la grille (aucune fourchette) */
+  fixed: boolean;
+  breakdown: PricingBreakdownLine[];
+}
+
+/** Prix d'un service selon la grille officielle, sans compléments ni urgence. */
+function computeServiceFee(
+  serviceId: ServiceId,
+  answers: PricingQuestionnaireAnswers
+): ServiceFee {
+  const base = getServiceBaseFee(serviceId);
+  const breakdown: PricingBreakdownLine[] = [{ labelKey: 'base', amount: base }];
+
+  switch (serviceId) {
+    case 'hourlyBookkeeping': {
+      const hours = HOURLY_HOURS[answers.volumeBand];
+      breakdown.push({ labelKey: 'hours', amount: hours });
+      return { amount: HOURLY_RATE * hours, billingUnit: 'hourly', fixed: false, breakdown };
+    }
+    case 'monthlyMicro':
+    case 'monthlySmall':
+    case 'monthlySme': {
+      const band = answers.transactionsBand ?? 't31_75';
+      const amount =
+        serviceId === 'monthlyMicro' && band === 't0_30'
+          ? MICRO_PRICE
+          : MONTHLY_LADDER[band];
+      breakdown.push({ labelKey: 'transactions', amount });
+      return { amount, billingUnit: 'monthly', fixed: true, breakdown };
+    }
+    case 'gstQst':
+      return { amount: 75, billingUnit: 'perDeclaration', fixed: true, breakdown };
+    case 'payroll': {
+      const count = EMPLOYEE_COUNT[answers.employeeBand];
+      breakdown.push({ labelKey: 'employees', amount: count });
+      return { amount: 49 + 12 * count, billingUnit: 'monthly', fixed: true, breakdown };
+    }
+    case 't4Releve1': {
+      const count = EMPLOYEE_COUNT[answers.employeeBand];
+      breakdown.push({ labelKey: 't4Employees', amount: count });
+      return { amount: 15 * count, billingUnit: 'oneTime', fixed: true, breakdown };
+    }
+    case 'catchUp': {
+      const band = answers.lateMonthsBand ?? 'm1_6';
+      const rate = CATCH_UP_RATE[band];
+      const months = CATCH_UP_MONTHS[band];
+      breakdown.push({ labelKey: 'lateMonths', amount: months });
+      breakdown.push({ labelKey: 'lateRate', amount: rate });
+      return { amount: rate * months, billingUnit: 'oneTime', fixed: false, breakdown };
+    }
+    case 'softwareSetup':
+      return { amount: 199, billingUnit: 'oneTime', fixed: true, breakdown };
+    case 'taxHelpAutonomous':
+      return { amount: 199.99, billingUnit: 'oneTime', fixed: true, breakdown };
+    default:
+      return { amount: base, billingUnit: 'oneTime', fixed: true, breakdown };
+  }
 }
 
 function computeCoreEstimate(answers: PricingQuestionnaireAnswers): {
   typical: number;
   billingUnit: BillingUnit;
+  fixed: boolean;
   breakdown: PricingBreakdownLine[];
 } {
-  const base = getServiceBaseFee(answers.serviceId);
-  const category = getServiceCategory(answers.serviceId);
-  const profileMul = PROFILE_MULTIPLIER[answers.profileType];
-  const volumeMul = VOLUME_MULTIPLIER[answers.volumeBand];
-  const breakdown: PricingBreakdownLine[] = [
-    { labelKey: 'base', amount: base },
-  ];
-
-  let typical = base;
-  let billingUnit: BillingUnit = 'oneTime';
-
-  if (category === 'hourly' || answers.serviceId === 'catchUp') {
-    const hours = HOURLY_HOURS[answers.volumeBand];
-    typical = base * hours * profileMul;
-    billingUnit = 'hourly';
-    breakdown.push({ labelKey: 'hours', amount: hours });
-    breakdown.push({ labelKey: 'profile', amount: profileMul });
-  } else if (category === 'monthly') {
-    typical = base * volumeMul * profileMul;
-    billingUnit = 'monthly';
-    breakdown.push({ labelKey: 'volume', amount: volumeMul });
-    breakdown.push({ labelKey: 'profile', amount: profileMul });
-  } else {
-    switch (answers.serviceId) {
-      case 'gstQst':
-        typical = base * (answers.volumeBand === 'high' ? 1.25 : answers.volumeBand === 'medium' ? 1.1 : 1);
-        billingUnit = 'perDeclaration';
-        break;
-      case 'payroll':
-        typical = base * EMPLOYEE_MULTIPLIER[answers.employeeBand] * profileMul;
-        billingUnit = 'monthly';
-        breakdown.push({ labelKey: 'employees', amount: EMPLOYEE_MULTIPLIER[answers.employeeBand] });
-        break;
-      case 't4Releve1': {
-        const count = EMPLOYEE_COUNT[answers.employeeBand];
-        typical = 50 + 25 * count;
-        billingUnit = 'oneTime';
-        breakdown.push({ labelKey: 't4Employees', amount: count });
-        break;
-      }
-      case 'softwareSetup':
-      case 'taxHelpAutonomous':
-        typical = base * profileMul;
-        billingUnit = 'oneTime';
-        breakdown.push({ labelKey: 'profile', amount: profileMul });
-        break;
-      default:
-        typical = base * volumeMul * profileMul;
-        billingUnit = 'oneTime';
-    }
-  }
+  const core = computeServiceFee(answers.serviceId, answers);
+  let typical = core.amount;
+  const breakdown = [...core.breakdown];
 
   if (answers.urgency === 'priority') {
     typical *= URGENCY_MULTIPLIER.priority;
     breakdown.push({ labelKey: 'urgency', amount: URGENCY_MULTIPLIER.priority });
   }
 
+  let allFixed = core.fixed;
   for (const addOnId of answers.addOns) {
     if (addOnId === answers.serviceId) continue;
-    const addOnFee = getServiceBaseFee(addOnId);
-    typical += addOnFee;
-    breakdown.push({ labelKey: `addon.${addOnId}`, amount: addOnFee });
+    const addOn = computeServiceFee(addOnId, answers);
+    typical += addOn.amount;
+    allFixed = allFixed && addOn.fixed;
+    breakdown.push({ labelKey: `addon.${addOnId}`, amount: addOn.amount });
   }
 
-  return { typical, billingUnit, breakdown };
+  return { typical, billingUnit: core.billingUnit, fixed: allFixed, breakdown };
 }
 
 export function calculatePricingEstimate(
   answers: PricingQuestionnaireAnswers
 ): PricingEstimateResult {
-  const { typical, billingUnit, breakdown } = computeCoreEstimate(answers);
-  const { min, max, typical: amountTypical } = applyRange(typical);
+  const { typical, billingUnit, fixed, breakdown } = computeCoreEstimate(answers);
+  const { min, max, typical: amountTypical } = applyRange(typical, fixed);
 
   return {
     serviceId: answers.serviceId,

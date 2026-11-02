@@ -338,6 +338,8 @@ export const i18n = {
         province: "Dans quelle province opérez-vous ?",
         profile: "Quel est votre profil ?",
         volume: "Quel est votre volume d'activité mensuel ?",
+        transactions: "Combien de transactions traitez-vous par mois ?",
+        lateMonths: "Depuis combien de mois votre comptabilité est-elle en retard ?",
         employees: "Combien d'employés avez-vous ?",
         addons: "Souhaitez-vous ajouter des services complémentaires ?",
         urgency: "Quel est votre délai souhaité ?"
@@ -352,6 +354,20 @@ export const i18n = {
         medium: { title: "Modéré", desc: "20 à 100 transactions / mois." },
         high: { title: "Élevé", desc: "Plus de 100 transactions / mois." }
       },
+      transactions: {
+        t0_30: { title: "0 à 30 transactions", desc: "Micro (trimestriel) ou Essentiel (mensuel)." },
+        t31_75: { title: "31 à 75 transactions", desc: "Forfait Essentiel." },
+        t76_150: { title: "76 à 150 transactions", desc: "Forfait Essentiel étendu." },
+        t151_200: { title: "151 à 200 transactions", desc: "Forfait Croissance." },
+        t201_300: { title: "201 à 300 transactions", desc: "Forfait Croissance étendu." },
+        t301_450: { title: "301 à 450 transactions", desc: "Volume élevé." },
+        t451_plus: { title: "451 transactions et plus", desc: "Base + 1,50 $ par transaction supplémentaire." }
+      },
+      lateMonths: {
+        m1_6: { title: "1 à 6 mois de retard", desc: "75 $ par mois de retard." },
+        m7_12: { title: "7 à 12 mois de retard", desc: "65 $ par mois de retard." },
+        m13_plus: { title: "13 mois et plus", desc: "60 $ par mois de retard (minimum 900 $)." }
+      },
       employees: {
         none: { title: "Aucun employé", desc: "Travailleur autonome sans paie." },
         small: { title: "1 à 5 employés", desc: "Petite équipe à gérer." },
@@ -359,7 +375,7 @@ export const i18n = {
       },
       urgency: {
         standard: { title: "Délai normal", desc: "Ouverture de dossier sous 5 à 10 jours ouvrables." },
-        priority: { title: "Prioritaire", desc: "Besoin sous 2 semaines (+15 % indicatif)." }
+        priority: { title: "Prioritaire", desc: "Traitement express sous 5 jours ouvrables (+25 %)." }
       },
       provinces: {
         QC: "Québec", ON: "Ontario", BC: "Colombie-Britannique", AB: "Alberta",
@@ -1252,6 +1268,8 @@ export const i18n = {
         province: "Which province do you operate in?",
         profile: "What is your profile?",
         volume: "What is your monthly activity volume?",
+        transactions: "How many transactions do you process per month?",
+        lateMonths: "How many months is your bookkeeping behind?",
         employees: "How many employees do you have?",
         addons: "Would you like complementary services?",
         urgency: "What timeline do you need?"
@@ -1266,6 +1284,20 @@ export const i18n = {
         medium: { title: "Moderate", desc: "20 to 100 transactions / month." },
         high: { title: "High", desc: "More than 100 transactions / month." }
       },
+      transactions: {
+        t0_30: { title: "0 to 30 transactions", desc: "Micro (quarterly) or Essential (monthly)." },
+        t31_75: { title: "31 to 75 transactions", desc: "Essential package." },
+        t76_150: { title: "76 to 150 transactions", desc: "Extended Essential package." },
+        t151_200: { title: "151 to 200 transactions", desc: "Growth package." },
+        t201_300: { title: "201 to 300 transactions", desc: "Extended Growth package." },
+        t301_450: { title: "301 to 450 transactions", desc: "High volume." },
+        t451_plus: { title: "451 transactions and up", desc: "Base + $1.50 per additional transaction." }
+      },
+      lateMonths: {
+        m1_6: { title: "1 to 6 months behind", desc: "$75 per late month." },
+        m7_12: { title: "7 to 12 months behind", desc: "$65 per late month." },
+        m13_plus: { title: "13 months or more", desc: "$60 per late month ($900 minimum)." }
+      },
       employees: {
         none: { title: "No employees", desc: "Self-employed without payroll." },
         small: { title: "1 to 5 employees", desc: "Small team to manage." },
@@ -1273,7 +1305,7 @@ export const i18n = {
       },
       urgency: {
         standard: { title: "Standard timeline", desc: "File opening within 5–10 business days." },
-        priority: { title: "Priority", desc: "Needed within 2 weeks (+15% indicative)." }
+        priority: { title: "Priority", desc: "Express handling within 5 business days (+25%)." }
       },
       provinces: {
         QC: "Quebec", ON: "Ontario", BC: "British Columbia", AB: "Alberta",
@@ -1869,12 +1901,6 @@ export const i18n = {
       gl_name: "مسك الدفاتر",
       gl_desc: "التصنيف الشهري للمعاملات والتسويات.",
       gl_price: "249,99 $",
-      inv_name: "إدارة المخزون",
-      inv_desc: "متابعة المخزون وتكلفة البضائع المباعة.",
-      inv_price: "179 $",
-      cfo_name: "التمويل المالي للشركات",
-      cfo_desc: "خدمات المدير المالي الخارجي الميزانيات والخطط.",
-      cfo_price: "499 $",
       categories: {
         hourly: { title: "1. Tarif horaire", subtitle: "Mandats ponctuels." },
         monthly: { title: "2. Forfaits mensuels", subtitle: "Tenue de livres." },
@@ -2127,6 +2153,8 @@ export const i18n = {
         province: "في أي مقاطعة تعمل؟",
         profile: "ما هو ملفك؟",
         volume: "ما حجم نشاطك الشهري؟",
+        transactions: "كم عدد المعاملات التي تعالجها شهريًا؟",
+        lateMonths: "منذ كم شهر تأخرت محاسبتك؟",
         employees: "كم عدد الموظفين لديك؟",
         addons: "هل تريد خدمات إضافية؟",
         urgency: "ما المهلة المطلوبة؟"
@@ -2141,6 +2169,20 @@ export const i18n = {
         medium: { title: "متوسط", desc: "20 إلى 100 معاملة / شهر." },
         high: { title: "مرتفع", desc: "أكثر من 100 معاملة / شهر." }
       },
+      transactions: {
+        t0_30: { title: "من 0 إلى 30 معاملة", desc: "باقة مصغرة (فصلية) أو أساسية (شهرية)." },
+        t31_75: { title: "من 31 إلى 75 معاملة", desc: "الباقة الأساسية." },
+        t76_150: { title: "من 76 إلى 150 معاملة", desc: "الباقة الأساسية الموسعة." },
+        t151_200: { title: "من 151 إلى 200 معاملة", desc: "باقة النمو." },
+        t201_300: { title: "من 201 إلى 300 معاملة", desc: "باقة النمو الموسعة." },
+        t301_450: { title: "من 301 إلى 450 معاملة", desc: "حجم مرتفع." },
+        t451_plus: { title: "أكثر من 451 معاملة", desc: "قاعدة + 1.50 دولار لكل معاملة إضافية." }
+      },
+      lateMonths: {
+        m1_6: { title: "من 1 إلى 6 أشهر تأخير", desc: "75 دولارًا عن كل شهر تأخير." },
+        m7_12: { title: "من 7 إلى 12 شهر تأخير", desc: "65 دولارًا عن كل شهر تأخير." },
+        m13_plus: { title: "أكثر من 13 شهرًا", desc: "60 دولارًا عن كل شهر تأخير (900 دولار كحد أدنى)." }
+      },
       employees: {
         none: { title: "بدون موظفين", desc: "مستقل بدون رواتب." },
         small: { title: "1 إلى 5 موظفين", desc: "فريق صغير." },
@@ -2148,7 +2190,7 @@ export const i18n = {
       },
       urgency: {
         standard: { title: "مهلة عادية", desc: "فتح الملف خلال 5–10 أيام عمل." },
-        priority: { title: "أولوية", desc: "مطلوب خلال أسبوعين (+15٪ تقديري)." }
+        priority: { title: "أولوية", desc: "معالجة سريعة خلال 5 أيام عمل (+25٪)." }
       },
       provinces: {
         QC: "كébec", ON: "أونتاريو", BC: "كolumbia-Britannique", AB: "أAlberta",
