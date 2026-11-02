@@ -53,14 +53,14 @@ npm run promotion:check
 npm run seed:admins:dry-run
 
 # Seed admins — live (mot de passe via variable d'environnement)
-$env:SEED_ADMIN_PASSWORD = "admin1234"
+$env:SEED_ADMIN_PASSWORD = "[MOT DE PASSE CONSERVÉ AU COFFRE — NE JAMAIS ÉCRIRE ICI]"
 npm run seed:admins
 
 # Alternative : mot de passe en argument (toutes plateformes)
-npm run seed:admins -- --password=admin1234
+npm run seed:admins -- --password=[MOT DE PASSE CONSERVÉ AU COFFRE — NE JAMAIS ÉCRIRE ICI]
 
 # Alternative : cross-env (npm script portable)
-npx cross-env SEED_ADMIN_PASSWORD=admin1234 npm run seed:admins
+npx cross-env SEED_ADMIN_PASSWORD=[MOT DE PASSE CONSERVÉ AU COFFRE — NE JAMAIS ÉCRIRE ICI] npm run seed:admins
 
 # Agents CLI (interne)
 npm run agents:list
@@ -83,9 +83,9 @@ Ou placez les secrets dans `.env.local` (chargé automatiquement par `dotenv` da
 
 ```bash
 npm run seed:admins:dry-run
-SEED_ADMIN_PASSWORD=admin1234 npm run seed:admins
-npm run seed:admins -- --password=admin1234
-npx cross-env SEED_ADMIN_PASSWORD=admin1234 npm run seed:admins
+SEED_ADMIN_PASSWORD=[MOT DE PASSE CONSERVÉ AU COFFRE — NE JAMAIS ÉCRIRE ICI] npm run seed:admins
+npm run seed:admins -- --password=[MOT DE PASSE CONSERVÉ AU COFFRE — NE JAMAIS ÉCRIRE ICI]
+npx cross-env SEED_ADMIN_PASSWORD=[MOT DE PASSE CONSERVÉ AU COFFRE — NE JAMAIS ÉCRIRE ICI] npm run seed:admins
 ```
 
 ## Scripts shell bash (CI / infra Canada uniquement)
