@@ -36,7 +36,7 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
     employeeCount: '1-5',
     province: 'QC',
     language: 'fr',
-    selectedExpertEmail: 's.lahaie07@gmail.com', // Samuel par défaut
+    selectedExpertEmail: 's.lahaie07@gmail.com', // Compta-Flow par défaut
   });
 
   const stepLabels = [
@@ -269,20 +269,20 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
                     {
                       id: 'samuel',
                       email: 's.lahaie07@gmail.com',
-                      name: 'Samuel Lahaie',
-                      role: 'Fondateur',
-                      roleEn: 'Founder',
-                      desc: 'Samuel est le visionnaire derrière Compta-Flow. Avec plus d\'une décennie d\'expérience en restructuration d\'entreprises et stratégies fiscales complexes, il guide les entreprises vers l\'efficacité financière.',
-                      descEn: 'Samuel is the visionary behind Compta-Flow. With over a decade of experience in corporate restructuring and high-net-worth tax strategy, he guides businesses toward financial efficiency.'
+                      name: 'Compta-Flow — Direction',
+                      role: 'Direction',
+                      roleEn: 'Management',
+                      desc: 'Votre dossier est pris en charge par la direction de Compta-Flow : tenue de livres, impôts et suivi de votre entreprise, entièrement en ligne.',
+                      descEn: 'Your file is handled by Compta-Flow management: bookkeeping, taxes and follow-up for your business, fully online.'
                     },
                     {
                       id: 'sylvie',
                       email: 'viviee28@hotmail.com',
-                      name: 'Sylvie Charette-Clément',
+                      name: 'Compta-Flow — Tenue de livres',
                       role: 'Tenue de livres',
                       roleEn: 'Bookkeeping',
-                      desc: 'Sylvie apporte une rigueur absolue à la tenue de livres et aux systèmes de paie. Spécialisée dans les entreprises locales, elle assure une comptabilité quotidienne impeccable.',
-                      descEn: 'Sylvie brings rigorous attention to detail to bookkeeping and payroll systems. She specializes in local businesses, ensuring flawless day-to-day accounts.'
+                      desc: 'Notre équipe de tenue de livres assure votre comptabilité quotidienne, vos conciliations et votre paie avec rigueur, entièrement en ligne.',
+                      descEn: 'Our bookkeeping team handles your day-to-day accounting, reconciliations and payroll with care, fully online.'
                     },
                   ].map((expert) => {
                     const isSelected = data.selectedExpertEmail === expert.email;
