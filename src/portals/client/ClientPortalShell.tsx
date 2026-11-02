@@ -70,7 +70,7 @@ export function ClientPortalShell({
 
   // Chat message state
   const [chatMessages, setChatMessages] = useState([
-    { sender: 'Cabinet', text: 'Bonjour! Je suis Sylvie, votre comptable assignée. J\'ai bien reçu vos reçus Dext de ce mois-ci. Pouvez-vous signer votre mandat électronique d\'autorisation?', time: '11:20' }
+    { sender: 'Cabinet', text: 'Bonjour! Je suis votre personne attitrée à l'équipe Compta-Flow. J\'ai bien reçu vos reçus Dext de ce mois-ci. Pouvez-vous signer votre mandat électronique d\'autorisation?', time: '11:20' }
   ]);
   const [newMsg, setNewMsg] = useState('');
 
@@ -497,7 +497,7 @@ export function ClientPortalShell({
                   <div className="space-y-1">
                     <h4 className="text-xs text-slate-400 uppercase font-black tracking-wider">Prochain Rendez-vous</h4>
                     <p className="text-sm font-bold text-slate-800">Rencontre Conseil Mensuelle</p>
-                    <p className="text-xs text-slate-500">Mardi, 30 Juin 2026 à 10:00 avec Sylvie Charette-Clément</p>
+                    <p className="text-xs text-slate-500">Mardi, 30 Juin 2026 à 10:00 avec l'équipe Compta-Flow</p>
                   </div>
                 </div>
 
@@ -509,7 +509,7 @@ export function ClientPortalShell({
                   <div className="space-y-1">
                     <h4 className="text-xs text-slate-400 uppercase font-black tracking-wider">Messagerie Directe</h4>
                     <p className="text-sm font-bold text-slate-800">Discuter avec votre comptable</p>
-                    <p className="text-xs text-slate-500">Discuter en ligne avec Sylvie</p>
+                    <p className="text-xs text-slate-500">Discuter en ligne avec votre équipe</p>
                   </div>
                 </div>
 
@@ -588,7 +588,7 @@ export function ClientPortalShell({
                   <div className="relative">
                     <div className="absolute -left-[30px] top-0 w-4.5 h-4.5 bg-emerald-500 rounded-full border-4 border-white flex items-center justify-center text-white" />
                     <span className="text-[10px] text-slate-400 block font-bold">Aujourd'hui à 11:20</span>
-                    <p className="text-slate-800 font-bold mt-1">La comptable Sylvie a importé vos factures mensuelles Dext.</p>
+                    <p className="text-slate-800 font-bold mt-1">Votre équipe Compta-Flow a importé vos factures mensuelles Dext.</p>
                   </div>
 
                   <div className="relative">
@@ -677,7 +677,7 @@ export function ClientPortalShell({
             <div className="space-y-8 animate-fadeIn">
               <div>
                 <h2 className="text-xl font-serif font-bold text-[#0F1E36]">Messagerie Directe</h2>
-                <p className="text-xs text-slate-500 mt-1">Échangez de manière confidentielle avec Sylvie, votre comptable assignée</p>
+                <p className="text-xs text-slate-500 mt-1">Échangez de manière confidentielle avec votre équipe Compta-Flow attitrée</p>
               </div>
 
               {/* Chat frame */}
@@ -687,7 +687,7 @@ export function ClientPortalShell({
                 <div className="px-6 py-4 bg-[#0F1E36] text-white flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-emerald-400" />
                   <div>
-                    <span className="text-xs font-black uppercase tracking-wider block">Sylvie Charette-Clément</span>
+                    <span className="text-xs font-black uppercase tracking-wider block">Équipe Compta-Flow</span>
                     <span className="text-[9px] text-slate-300">Comptable Cabinet CF</span>
                   </div>
                 </div>
