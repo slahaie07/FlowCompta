@@ -330,7 +330,7 @@ export const i18n = {
       subtitle: "Répondez à quelques questions pour obtenir une fourchette indicative en dollars canadiens.",
       progress: "Question {current} sur {total}",
       showEstimate: "Voir mon estimation",
-      disclaimer: "Estimation indicative seulement — devis final par votre CPA après analyse du dossier.",
+      disclaimer: "Estimation indicative seulement — devis final par Compta-Flow après analyse du dossier.",
       skipVolume: "Volume non applicable pour ce service.",
       noAddons: "Aucun complément suggéré pour ce mandat.",
       q: {
@@ -524,7 +524,7 @@ export const i18n = {
       markIncomplete: "Marquer incomplet",
       goToStep: "Aller à cette étape",
       estimatedDays: "Délai indicatif : {days} jours ouvrables",
-      cpaNote: "Chaque étape est validée par un CPA du réseau ComptaFlow. Les calculs fiscaux et comptables sont revus avant tout livrable.",
+      cpaNote: "Chaque étape est validée par l'équipe Compta-Flow. Les calculs fiscaux et comptables sont revus avant tout livrable.",
       common: {
         steps: {
           mandate: { title: "Mandat & profil", desc: "Signez votre mandat et complétez votre profil (province, entreprise)." },
@@ -536,7 +536,7 @@ export const i18n = {
         fields: {
           profileComplete: "Profil complété",
           province: "Province fiscale confirmée",
-          questionsAnswered: "Questions du CPA répondues",
+          questionsAnswered: "Questions de révision répondues",
           invoiceSettled: "Honoraires réglés"
         }
       },
@@ -565,7 +565,7 @@ export const i18n = {
         t2125Support: "Revenus et dépenses d'entreprise (T2125)",
         incomeSlips: "Relevés T4/Relevé 1 reçus",
         expenseSummary: "Sommaire des dépenses",
-        organizedPackage: "Dossier structuré pour votre CPA"
+        organizedPackage: "Dossier structuré pour votre comptable"
       },
       fields: {
         periodRange: "Période visée",
@@ -638,7 +638,7 @@ export const i18n = {
       taxHelpAutonomous: {
         steps: {
           organize: { title: "Organisation fiscale", desc: "Structurez vos revenus et dépenses autonomes." },
-          handoff: { title: "Transmission CPA", desc: "Dossier prêt pour votre déclaration." }
+          handoff: { title: "Transmission impôts", desc: "Dossier prêt pour votre déclaration." }
         }
       }
     },
@@ -1244,7 +1244,7 @@ export const i18n = {
       subtitle: "Answer a few questions to get an indicative range in Canadian dollars.",
       progress: "Question {current} of {total}",
       showEstimate: "See my estimate",
-      disclaimer: "Indicative estimate only — final quote by your CPA after file review.",
+      disclaimer: "Indicative estimate only — final quote by Compta-Flow after file review.",
       skipVolume: "Volume not applicable for this service.",
       noAddons: "No suggested add-ons for this mandate.",
       q: {
@@ -1438,7 +1438,7 @@ export const i18n = {
       markIncomplete: "Mark incomplete",
       goToStep: "Go to this step",
       estimatedDays: "Estimated timeline: {days} business days",
-      cpaNote: "Each step is validated by a CPA in the ComptaFlow network. Tax and accounting calculations are reviewed before any deliverable.",
+      cpaNote: "Each step is validated by the Compta-Flow team. Tax and accounting calculations are reviewed before any deliverable.",
       common: {
         steps: {
           mandate: { title: "Mandate & profile", desc: "Sign your mandate and complete your profile (province, business)." },
@@ -1450,7 +1450,7 @@ export const i18n = {
         fields: {
           profileComplete: "Profile complete",
           province: "Tax province confirmed",
-          questionsAnswered: "CPA questions answered",
+          questionsAnswered: "Review questions answered",
           invoiceSettled: "Fees settled"
         }
       },
@@ -1479,7 +1479,7 @@ export const i18n = {
         t2125Support: "Business income & expenses (T2125)",
         incomeSlips: "T4/RL-1 slips received",
         expenseSummary: "Expense summary",
-        organizedPackage: "Organized package for your CPA"
+        organizedPackage: "Organized package for your accountant"
       },
       fields: {
         periodRange: "Period covered",
@@ -1548,7 +1548,7 @@ export const i18n = {
       taxHelpAutonomous: {
         steps: {
           organize: { title: "Tax organization", desc: "Structure self-employment income and expenses." },
-          handoff: { title: "CPA handoff", desc: "File ready for your tax return." }
+          handoff: { title: "Tax handoff", desc: "File ready for your tax return." }
         }
       }
     },
@@ -2232,7 +2232,7 @@ export const i18n = {
       markIncomplete: "وضع علامة غير مكتمل",
       goToStep: "الانتقال إلى هذه الخطوة",
       estimatedDays: "المدة التقديرية: {days} أيام عمل",
-      cpaNote: "كل خطوة يتحقق منها CPA في شبكة ComptaFlow. تُراجع الحسابات والضرائب قبل أي تسليم.",
+      cpaNote: "كل خطوة يتحقق منها فريق Compta-Flow. تُراجع الحسابات والضرائب قبل أي تسليم.",
       common: {
         steps: {
           mandate: { title: "التفويض والملف", desc: "وقِّع تفويضك وأكمل ملفك (المقاطعة، الشركة)." },
@@ -2244,7 +2244,7 @@ export const i18n = {
         fields: {
           profileComplete: "الملف مكتمل",
           province: "المقاطعة الضريبية مؤكَّدة",
-          questionsAnswered: "أسئلة CPA مُجابة",
+          questionsAnswered: "أسئلة المراجعة مُجابة",
           invoiceSettled: "الأتعاب مسدَّدة"
         }
       },
@@ -2273,7 +2273,7 @@ export const i18n = {
         t2125Support: "إيرادات ومصروفات الأعمال (T2125)",
         incomeSlips: "نماذج T4/Relevé 1 المستلمة",
         expenseSummary: "ملخص المصروفات",
-        organizedPackage: "حزمة منظَّمة لمحاسبك CPA"
+        organizedPackage: "حزمة منظَّمة لمحاسبك"
       },
       fields: {
         periodRange: "الفترة المشمولة",
@@ -2347,7 +2347,7 @@ export const i18n = {
       taxHelpAutonomous: {
         steps: {
           organize: { title: "التنظيم الضريبي", desc: "نظِّم إيرادات ومصروفات العمل المستقل." },
-          handoff: { title: "التسليم لـ CPA", desc: "الملف جاهز لإقرارك الضريبي." }
+          handoff: { title: "تسليم الضرائب", desc: "الملف جاهز لإقرارك الضريبي." }
         }
       }
     },

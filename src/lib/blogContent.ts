@@ -383,7 +383,7 @@ Choisir le bon logiciel comptable peut transformer la gestion de votre PME. Voic
 - Paie canadienne très complète (T4, ROE, DAS)
 - Rapports financiers très détaillés
 - Version bureau + accès cloud
-- Connu et accepté par les CPA canadiens
+- Connu et accepté partout au Canada
 - Support téléphonique dédié 24/7
 
 **Limites :**
