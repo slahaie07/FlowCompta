@@ -25,7 +25,6 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
   const { stats, loading } = useAdminHub();
 
   // Région fiscale active : Canada (l'ancienne bascule Tunisie, réservée à un compte retiré, a été enlevée)
-  const taxRegion: 'CA' | 'TN' = 'CA';
 
   // Co-Pilot production queue state
   const [dbServices, setDbServices] = useState<any[]>([]);
@@ -232,12 +231,10 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
   const [calcPayroll, setCalcPayroll] = useState<boolean>(false);
 
 
-  // Exchange rate: 1 CAD = 2.25 TND
-  const exchangeRate = 2.25;
-  const currencySymbol = taxRegion === 'TN' ? ' TND' : ' $';
+  const currencySymbol = ' $';
 
   const formatMoney = (val: number) => {
-    const converted = taxRegion === 'TN' ? val * exchangeRate : val;
+    const converted = val;
     return converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + currencySymbol;
   };
 
@@ -358,7 +355,7 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
         <Card className="p-8 space-y-6 premium-border-gold relative overflow-hidden group" glow="gold">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-gold/10 transition-colors" />
           <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] relative z-10">
-            <TrendingUp size={16} className="text-gold" /> {taxRegion === 'TN' ? "Chiffre d'affaires brut" : t('adminHub.grossRevenue')}
+            <TrendingUp size={16} className="text-gold" /> {t('adminHub.grossRevenue')}
           </div>
           <p className="text-3xl font-serif font-bold text-ivoire relative z-10">{formatMoney(stats.totalRevenue || 0)}</p>
           <div className="flex items-center gap-2 relative z-10">
@@ -370,22 +367,22 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
         <Card className="p-8 space-y-6 glass-card relative overflow-hidden group" glow="gold">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-gold/10 transition-colors" />
           <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] relative z-10">
-            <TrendingUp size={16} className="text-amber-500" /> {taxRegion === 'TN' ? "Impôt estimé (15 %)" : t('adminHub.networkFees')}
+            <TrendingUp size={16} className="text-amber-500" /> {t('adminHub.networkFees')}
           </div>
-          <p className="text-3xl font-serif font-bold text-amber-500 relative z-10">{formatMoney((stats.totalRevenue || 0) * (taxRegion === 'TN' ? 0.15 : 0.05))}</p>
+          <p className="text-3xl font-serif font-bold text-amber-500 relative z-10">{formatMoney((stats.totalRevenue || 0) * 0.05)}</p>
           <div className="flex items-center gap-2 relative z-10">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{taxRegion === 'TN' ? "Taux impôt Tunisie" : t('adminHub.networkRoyalty')}</span>
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">{t('adminHub.networkRoyalty')}</span>
           </div>
         </Card>
 
         <Card className="p-8 space-y-6 glass-card relative overflow-hidden group" glow="sapphire">
           <div className="absolute top-0 right-0 w-32 h-32 bg-sapphire/5 blur-3xl rounded-full -mr-16 -mt-16 group-hover:bg-sapphire/10 transition-colors" />
           <div className="flex items-center gap-3 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] relative z-10">
-            <TrendingUp size={16} className="text-sapphire-light" /> {taxRegion === 'TN' ? "Revenu net estimé" : t('adminHub.netRevenue')}
+            <TrendingUp size={16} className="text-sapphire-light" /> {t('adminHub.netRevenue')}
           </div>
-          <p className="text-3xl font-serif font-bold text-gold relative z-10">{formatMoney((stats.totalRevenue || 0) * (taxRegion === 'TN' ? 0.85 : 0.95))}</p>
+          <p className="text-3xl font-serif font-bold text-gold relative z-10">{formatMoney((stats.totalRevenue || 0) * 0.95)}</p>
           <div className="flex items-center gap-2 relative z-10">
-            <Badge variant="info" className="bg-sapphire/10 text-sapphire-light border-sapphire/20 font-black">{taxRegion === 'TN' ? "Net disponible" : t('adminHub.netCollected')}</Badge>
+            <Badge variant="info" className="bg-sapphire/10 text-sapphire-light border-sapphire/20 font-black">{t('adminHub.netCollected')}</Badge>
           </div>
         </Card>
         
