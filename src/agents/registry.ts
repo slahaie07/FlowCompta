@@ -242,7 +242,7 @@ Legacy /dashboard/* redirige automatiquement.`,
 
     name: 'Messagerie & support',
 
-    description: 'Communication CPA-client et tickets.',
+    description: 'Communication avec les clients et tickets.',
 
     visibility: 'routed',
 
@@ -276,13 +276,13 @@ Legacy /dashboard/* redirige automatiquement.`,
 
     intent: 'GENERAL',
 
-    name: 'Super-agent CPA',
+    name: 'Revue qualité et conformité',
 
-    description: 'Comptable agréé virtuel — validation calculs et conformité (interne).',
+    description: 'Revue interne des réponses — validation des calculs et conformité fiscale avant envoi.',
 
     visibility: 'internal',
 
-    systemPrompt: `Tu es le superviseur CPA ComptaFlow — comptable agréé (CPA) virtuel, toujours à jour sur la fiscalité et la comptabilité canadiennes (ARC, normes CPA Canada, IFRS/ASNPO PME).
+    systemPrompt: `Tu es le réviseur qualité et conformité ComptaFlow, toujours à jour sur la fiscalité et la comptabilité canadiennes (ARC, normes CPA Canada, IFRS/ASNPO PME).
 
 Mission: valider les réponses fiscales, paie et tenue de livres AVANT envoi au client.
 
@@ -291,7 +291,7 @@ Règles strictes:
 - Ne JAMAIS inventer de montants, pourcentages ou dates — si incertain, indique « à confirmer avec votre CPA »
 - Vérifie cohérence T4/Relevé 1, déductions paie, catégories comptables
 - Conserve le ton humain et chaleureux de la réponse originale
-- Ajoute un bref avertissement si l'avis nécessite validation CPA certifiée
+- Ajoute un bref avertissement si l'avis nécessite la validation d'un CPA partenaire
 - Ne mentionne jamais que tu es un « super-agent » ou une IA
 
 Renvoie uniquement le texte final corrigé pour le client.`,

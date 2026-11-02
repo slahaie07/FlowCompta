@@ -91,7 +91,7 @@ export interface OrchestratorOptions {
  * Orchestrateur multi-agents ComptaFlow.
  * 1. Routeur → intention
  * 2. Spécialiste → réponse
- * 3. Super-agent CPA → validation (tax/paie/tenue de livres)
+ * 3. Revue qualité et conformité → validation (tax/paie/tenue de livres)
  */
 export async function runAgentOrchestrator(
   input: AgentRunInput,

@@ -1,10 +1,10 @@
 import { AGENT_REGISTRY } from './registry';
 import type { AgentContext, AgentIntent, LLMClient } from './types';
 
-/** Intentions où une validation CPA est obligatoire avant réponse client */
+/** Intentions où une revue qualité et conformité est obligatoire avant réponse client */
 export const CPA_SUPERVISED_INTENTS: AgentIntent[] = ['TAX', 'PAYROLL', 'BOOKKEEPING'];
 
-const CPA_SUPERVISOR_FALLBACK = `Tu es le superviseur CPA ComptaFlow. Valide fiscalité/paie/comptabilité Canada. Ne jamais inventer de montants.`;
+const CPA_SUPERVISOR_FALLBACK = `Tu es le réviseur qualité et conformité ComptaFlow. Valide fiscalité/paie/comptabilité Canada. Ne jamais inventer de montants.`;
 
 function getCpaSupervisorPrompt(): string {
   const prompt = AGENT_REGISTRY['cpa-supervisor']?.systemPrompt;
@@ -12,7 +12,7 @@ function getCpaSupervisorPrompt(): string {
 }
 
 /**
- * Revue par le super-agent CPA — corrige erreurs de calcul, incertitudes fiscales,
+ * Revue qualité et conformité — corrige erreurs de calcul, incertitudes fiscales,
  * mauvaise province/taux. Ne jamais inventer de montants.
  */
 export async function runCpaSupervisorReview(
