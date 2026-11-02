@@ -53,8 +53,8 @@ export function TaxCalculator() {
       case 'MB': return { tps: 5, prov: 7, label: 'TVP' };
       case 'NB':
       case 'NL':
-      case 'NS':
       case 'PE': return { tps: 0, prov: 15, label: 'TVH' };
+      case 'NS': return { tps: 0, prov: 14, label: 'TVH' };
       default: return { tps: 5, prov: 0, label: '' };
     }
   };
