@@ -56,26 +56,25 @@ export function SuperAdminPortalShell({
 
   // Notifications state
   const [notifications, setNotifications] = useState([
-    { id: 1, title: 'Cabinet Eya actif', message: 'Eya a validé 3 T4 d\'étudiants en Ontario', time: 'Il y a 10 min', unread: true },
-    { id: 2, title: 'Nouveau cabinet provisionné', message: 'Stéphanie Laplante a complété sa première clôture mensuelle', time: 'Il y a 2h', unread: true },
+    { id: 1, title: 'Activité de Simon', message: 'Simon Gagné a validé 3 T4 d\'étudiants en Ontario', time: 'Il y a 10 min', unread: true },
+    { id: 2, title: 'Nouveau cabinet provisionné', message: 'Sylvie Charette a complété sa première clôture mensuelle', time: 'Il y a 2h', unread: true },
     { id: 3, title: 'Abonnement réseau reçu', message: 'Paiement Stripe reçu pour compta-flow.net SaaS', time: 'Il y a 4h', unread: false }
   ]);
   const [showNotifications, setShowNotifications] = useState(false);
 
   // Sub-admins List (Cabinets)
   const [subAdmins, setSubAdmins] = useState([
-    { id: '1', name: 'Sylvie Charette-Clément', email: 'viviee28@hotmail.com', clientsCount: 8, status: 'Actif', load: 'Optimale' },
-    { id: '2', name: 'Eya', email: 'eya-cpa@outlook.com', clientsCount: 12, status: 'Actif', load: 'Maximale' },
-    { id: '3', name: 'Stéphanie Laplante', email: 'stephanie@comptaflow.com', clientsCount: 5, status: 'Actif', load: 'Modérée' }
+    { id: '1', name: 'Sylvie Charette', email: 'viviee28@hotmail.com', clientsCount: 8, status: 'Actif', load: 'Optimale' },
+    { id: '2', name: 'Simon Gagné', email: 'simon.gagne0088@gmail.com', clientsCount: 12, status: 'Actif', load: 'Maximale' },
   ]);
 
   // Clients network tab state
   const [clientSearch, setClientSearch] = useState('');
   const [clientsList, setClientsList] = useState<any[]>([
-    { id: 'c1', name: 'Stéphanie Laplante', company: 'Laplante Design Inc.', email: 'stephanie@comptaflow.com', assignedTo: 'Stéphanie Laplante', status: 'Actif' },
-    { id: 'c2', name: 'Antoine Tremblay', company: 'Particulier', email: 'antoine.tremblay@gmail.com', assignedTo: 'Eya', status: 'Actif' },
-    { id: 'c3', name: 'Sébastien Roy', company: 'Roy Rénovation', email: 's.roy@renovroy.ca', assignedTo: 'Sylvie Charette-Clément', status: 'Actif' },
-    { id: 'c4', name: 'Marie-Claude Coté', company: 'Coté Conseil Inc.', email: 'mccote@conseilcote.ca', assignedTo: 'Sylvie Charette-Clément', status: 'Actif' }
+    { id: 'c1', name: 'Marie Tremblay', company: 'Tremblay Design Inc.', email: 'marie@tremblaydesign.ca', assignedTo: 'Sylvie Charette', status: 'Actif' },
+    { id: 'c2', name: 'Antoine Tremblay', company: 'Particulier', email: 'antoine.tremblay@gmail.com', assignedTo: 'Simon Gagné', status: 'Actif' },
+    { id: 'c3', name: 'Sébastien Roy', company: 'Roy Rénovation', email: 's.roy@renovroy.ca', assignedTo: 'Sylvie Charette', status: 'Actif' },
+    { id: 'c4', name: 'Marie-Claude Coté', company: 'Coté Conseil Inc.', email: 'mccote@conseilcote.ca', assignedTo: 'Sylvie Charette', status: 'Actif' }
   ]);
 
   // Sticky notes state
@@ -109,19 +108,15 @@ export function SuperAdminPortalShell({
   const [marginPrice, setMarginPrice] = useState<number>(100);
 
   // Team Chat state
-  const [activeChatMember, setActiveChatMember] = useState<string>('Sylvie Charette-Clément');
+  const [activeChatMember, setActiveChatMember] = useState<string>('Sylvie Charette');
   const [chatMessages, setChatMessages] = useState<Record<string, Array<{ sender: string; text: string; time: string }>>>({
-    'Sylvie Charette-Clément': [
-      { sender: 'Sylvie Charette-Clément', text: 'Bonjour Samuel, la synchronisation Stripe sur compta-flow.net fonctionne à merveille.', time: '11:05' },
+    'Sylvie Charette': [
+      { sender: 'Sylvie Charette', text: 'Bonjour Samuel, la synchronisation Stripe sur compta-flow.net fonctionne à merveille.', time: '11:05' },
       { sender: 'Owner', text: 'Excellent! N\'hésite pas à me remonter s\'il y a la moindre lenteur sur les webhooks de prod.', time: '11:15' }
     ],
-    'Eya': [
-      { sender: 'Eya', text: 'Bonjour, j\'ai affecté Antoine Tremblay à mon cabinet de support Ontario.', time: 'Hier' },
+    'Simon Gagné': [
+      { sender: 'Simon Gagné', text: 'Bonjour, j\'ai affecté Antoine Tremblay à mon dossier de support Ontario.', time: 'Hier' },
       { sender: 'Owner', text: 'Parfait, le calculateur fiscal canadien s\'adaptera automatiquement aux taxes de l\'Ontario (HST 13%).', time: 'Hier' }
-    ],
-    'Stéphanie Laplante': [
-      { sender: 'Stéphanie Laplante', text: 'Merci pour la configuration de mon compte de cabinet, je vois bien tous mes dossiers.', time: 'Hier' },
-      { sender: 'Owner', text: 'De rien Stéphanie, bon début de traitement sur le panel !', time: 'Hier' }
     ]
   });
   const [newChatMessage, setNewChatMessage] = useState('');
@@ -240,7 +235,7 @@ export function SuperAdminPortalShell({
       const initialNotes: StickyNoteItem[] = [
         { id: '1', text: 'Vérifier la performance du webhook Stripe de dépôt.', color: 'blue', createdAt: new Date().toISOString() },
         { id: '2', text: 'Valider la conformité Loi 25 sur les fichiers du Coffre-fort.', color: 'green', createdAt: new Date().toISOString() },
-        { id: '3', text: 'Provisionner un nouveau cabinet si la charge d\'Eya dépasse 15 clients.', color: 'yellow', createdAt: new Date().toISOString() }
+        { id: '3', text: 'Provisionner un nouveau cabinet si la charge de Simon dépasse 15 clients.', color: 'yellow', createdAt: new Date().toISOString() }
       ];
       setNotes(initialNotes);
       localStorage.setItem(`comptaflow_super_notes_${userData?.id || 'default'}`, JSON.stringify(initialNotes));
@@ -657,13 +652,13 @@ export function SuperAdminPortalShell({
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Cabinets Actifs</p>
-                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">3 Partenaires</h3>
+                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">2 Partenaires</h3>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold">
                       <Shield size={20} />
                     </div>
                   </div>
-                  <p className="text-xs text-slate-400 mt-4">Sylvie, Eya, Stéphanie Laplante</p>
+                  <p className="text-xs text-slate-400 mt-4">Sylvie Charette, Simon Gagné</p>
                 </div>
 
                 <div className="glass-card p-6 rounded-2xl">
@@ -862,21 +857,21 @@ export function SuperAdminPortalShell({
                   <tbody className="divide-y divide-white/5 text-xs font-semibold">
                     <tr className="hover:bg-white/1">
                       <td className="p-5 text-slate-400">24 Juin 2026</td>
-                      <td className="p-5 font-bold">Stéphanie Laplante</td>
-                      <td className="p-5">Stéphanie Laplante</td>
+                      <td className="p-5 font-bold">Sylvie Charette</td>
+                      <td className="p-5">Marie Tremblay</td>
                       <td className="p-5 text-gold">199.00 $</td>
                       <td className="p-5"><span className="text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded bg-emerald-500/5 uppercase font-bold text-[9px]">Payé</span></td>
                     </tr>
                     <tr className="hover:bg-white/1">
                       <td className="p-5 text-slate-400">23 Juin 2026</td>
-                      <td className="p-5 font-bold">Eya</td>
+                      <td className="p-5 font-bold">Simon Gagné</td>
                       <td className="p-5">Antoine Tremblay</td>
                       <td className="p-5 text-gold">49.00 $</td>
                       <td className="p-5"><span className="text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded bg-emerald-500/5 uppercase font-bold text-[9px]">Payé</span></td>
                     </tr>
                     <tr className="hover:bg-white/1">
                       <td className="p-5 text-slate-400">22 Juin 2026</td>
-                      <td className="p-5 font-bold">Sylvie Charette-Clément</td>
+                      <td className="p-5 font-bold">Sylvie Charette</td>
                       <td className="p-5">Sébastien Roy</td>
                       <td className="p-5 text-gold">325.00 $</td>
                       <td className="p-5"><span className="text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded bg-emerald-500/5 uppercase font-bold text-[9px]">Payé</span></td>
@@ -969,7 +964,7 @@ export function SuperAdminPortalShell({
               <div className="grid grid-cols-1 md:grid-cols-4 gap-8 h-[500px]">
                 {/* Teammates List */}
                 <div className="glass-card p-4 rounded-3xl overflow-y-auto space-y-2 md:col-span-1">
-                  {['Sylvie Charette-Clément', 'Eya', 'Stéphanie Laplante'].map(name => (
+                  {['Sylvie Charette', 'Simon Gagné'].map(name => (
                     <button
                       key={name}
                       type="button"
