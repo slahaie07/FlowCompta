@@ -58,52 +58,52 @@ export const i18n = {
         hourlyBookkeeping: {
           name: "Commis comptable / Tenue de livres",
           desc: "Service de commis comptable pour saisie, classement, conciliation et support administratif. Selon votre expérience et la complexité du mandat.",
-          price: "45 $ – 75 $ / h"
+          price: "35 $ / h"
         },
         monthlyMicro: {
           name: "Micro-entreprise ou travailleur autonome",
           desc: "Très peu de transactions, pas d'employés. Tenue de livres légère et suivi fiscal de base.",
-          price: "150 $ – 250 $ / mois"
+          price: "149,99 $ / mois"
         },
         monthlySmall: {
           name: "Petite entreprise",
           desc: "Volume moyen de factures, conciliation bancaire régulière et rapports mensuels.",
-          price: "300 $ – 500 $ / mois"
+          price: "249,99 $ – 599,99 $ / mois"
         },
         monthlySme: {
           name: "PME avec gestion de la paie",
           desc: "Volume plus élevé, paie pour quelques employés et tenue de livres complète.",
-          price: "500 $ – 800 $+ / mois"
+          price: "599,99 $ – 999,99 $+ / mois"
         },
         gstQst: {
           name: "Déclaration des taxes (TPS/TVH/TVP)",
           desc: "Préparation et transmission de vos déclarations de taxes — mensuelle ou trimestrielle.",
-          price: "35 $ – 60 $ / décl."
+          price: "75 $ / décl."
         },
         payroll: {
           name: "Traitement de la paie (1 à 5 employés)",
           desc: "Calcul des salaires, déductions à la source et conformité paie pour une petite équipe.",
-          price: "50 $ – 80 $ / mois"
+          price: "49 $ + 12 $ / employé / mois"
         },
         t4Releve1: {
           name: "Feuillets fiscaux (T4 / Relevé 1)",
           desc: "Préparation des feuillets de fin d'année pour vos employés.",
-          price: "50 $ + 25 $ / employé"
+          price: "15 $ / employé / an"
         },
         catchUp: {
           name: "Comptabilité en retard",
           desc: "Mise à jour d'une tenue de livres en retard — facturé au tarif horaire selon le volume.",
-          price: "50 $ – 70 $ / h"
+          price: "60 $ – 75 $ / mois de retard"
         },
         softwareSetup: {
           name: "Configuration logiciel (QuickBooks, Sage…)",
           desc: "Installation, paramétrage et formation initiale pour les nouveaux clients.",
-          price: "150 $ – 300 $"
+          price: "199 $"
         },
         taxHelpAutonomous: {
           name: "Aide impôt travailleur autonome",
           desc: "Rassembler et structurer vos chiffres avant transmission à votre comptable.",
-          price: "150 $ – 300 $"
+          price: "199 $"
         }
       }
     },
@@ -170,7 +170,7 @@ export const i18n = {
       tagline: "Article V — Questions fréquentes",
       title: "Avant de nous confier vos chiffres.",
       q1: "Comment fonctionne le tarif horaire ?",
-      a1: "Pour les mandats ponctuels ou les remplacements, nous facturons entre 45 $ et 75 $ de l'heure selon la complexité. Un devis vous est fourni avant tout travail.",
+      a1: "Pour les mandats ponctuels ou les remplacements, nous facturons 35 $ de l'heure. Un devis vous est fourni avant tout travail.",
       q2: "Quel forfait mensuel me convient ?",
       a2: "Micro-entreprise (150–250 $/mois) pour peu de transactions sans employés ; Petite entreprise (300–500 $/mois) pour un volume moyen ; PME avec paie (500–800 $+/mois) pour les dossiers plus exigeants.",
       q3: "Mes documents sont-ils en sécurité ?",
@@ -972,52 +972,52 @@ export const i18n = {
         hourlyBookkeeping: {
           name: "Bookkeeping clerk / Bookkeeping",
           desc: "Data entry, classification, reconciliation and admin support. Rate varies by complexity and experience.",
-          price: "$45 – $75 / hr"
+          price: "$35 / hr"
         },
         monthlyMicro: {
           name: "Micro-business or self-employed",
           desc: "Very few transactions, no employees. Light bookkeeping and basic tax tracking.",
-          price: "$150 – $250 / mo"
+          price: "$149.99 / mo"
         },
         monthlySmall: {
           name: "Small business",
           desc: "Average invoice volume, regular bank reconciliation and monthly reports.",
-          price: "$300 – $500 / mo"
+          price: "$249.99 – $599.99 / mo"
         },
         monthlySme: {
           name: "SME with payroll",
           desc: "Higher volume, payroll for a few employees and full bookkeeping.",
-          price: "$500 – $800+ / mo"
+          price: "$599.99 – $999.99+ / mo"
         },
         gstQst: {
           name: "Tax returns (GST/QST)",
           desc: "Preparation and filing of your sales tax returns — monthly or quarterly.",
-          price: "$35 – $60 / filing"
+          price: "$75 / filing"
         },
         payroll: {
           name: "Payroll processing (1–5 employees)",
           desc: "Salary calculations, source deductions and payroll compliance for a small team.",
-          price: "$50 – $80 / mo"
+          price: "$49 + $12 / employee / mo"
         },
         t4Releve1: {
           name: "Tax slips (T4 / Relevé 1)",
           desc: "Year-end slip preparation for your employees.",
-          price: "$50 + $25 / employee"
+          price: "$15 / employee / year"
         },
         catchUp: {
           name: "Catch-up bookkeeping",
           desc: "Updating overdue books — billed at hourly rate based on volume.",
-          price: "$50 – $70 / hr"
+          price: "$60 – $75 / late month"
         },
         softwareSetup: {
           name: "Software setup (QuickBooks, Sage…)",
           desc: "Installation, configuration and initial training for new clients.",
-          price: "$150 – $300"
+          price: "$199"
         },
         taxHelpAutonomous: {
           name: "Self-employed tax prep help",
           desc: "Gather and organize your numbers before sending to your accountant.",
-          price: "$150 – $300"
+          price: "$199"
         }
       }
     },
@@ -1084,7 +1084,7 @@ export const i18n = {
       tagline: "Article V — FAQ",
       title: "Before trusting us with your numbers.",
       q1: "How does hourly billing work?",
-      a1: "For one-off mandates or replacements, we bill $45–$75 per hour depending on complexity. A quote is provided before any work begins.",
+      a1: "For one-off mandates or replacements, we bill $35 per hour. A quote is provided before any work begins.",
       q2: "Which monthly package is right for me?",
       a2: "Micro-business ($150–$250/mo) for few transactions without employees; Small business ($300–$500/mo) for average volume; SME with payroll ($500–$800+/mo) for demanding files.",
       q3: "Are my documents secure?",
@@ -1859,16 +1859,16 @@ export const i18n = {
       perMandate: "صافي لكل تفويض",
       t1_name: "ضريبة T1 - شخصي",
       t1_desc: "إقرار ضريبي كامل وتحسين الائتمانات.",
-      t1_price: "89 $",
+      t1_price: "89,99 $",
       ta_name: "ضريبة T2125 - مستقل",
       ta_desc: "الدخل التجاري والنفقات المسموح بها.",
-      ta_price: "199 $",
+      ta_price: "199,99 $",
       t2_name: "ضريبة T2 - شركات",
       t2_desc: "الإقرارات الضريبية الفيدرالية والإقليمية.",
-      t2_price: "749 $",
+      t2_price: "1 199 $",
       gl_name: "مسك الدفاتر",
       gl_desc: "التصنيف الشهري للمعاملات والتسويات.",
-      gl_price: "249 $",
+      gl_price: "249,99 $",
       inv_name: "إدارة المخزون",
       inv_desc: "متابعة المخزون وتكلفة البضائع المباعة.",
       inv_price: "179 $",
@@ -1881,16 +1881,16 @@ export const i18n = {
         alacarte: { title: "3. À la carte", subtitle: "Services précis." }
       },
       items: {
-        hourlyBookkeeping: { name: "Tenue de livres / h", desc: "Commis comptable.", price: "45–75 $ / h" },
-        monthlyMicro: { name: "Micro-entreprise", desc: "Peu de transactions.", price: "150–250 $ / mois" },
-        monthlySmall: { name: "Petite entreprise", desc: "Volume moyen.", price: "300–500 $ / mois" },
-        monthlySme: { name: "PME + paie", desc: "Plusieurs employés.", price: "500–800+ $ / mois" },
-        gstQst: { name: "Taxes (TPS/TVH/TVP)", desc: "Déclarations fédérales et provinciales.", price: "35–60 $ / décl." },
-        payroll: { name: "Paie (1–5 emp.)", desc: "Traitement paie.", price: "50–80 $ / mois" },
-        t4Releve1: { name: "T4 / Relevé 1", desc: "Feuillets fin d'année.", price: "50 $ + 25 $ / emp." },
-        catchUp: { name: "Compta en retard", desc: "Mise à jour.", price: "50–70 $ / h" },
-        softwareSetup: { name: "Config. logiciel", desc: "QuickBooks, Sage.", price: "150–300 $" },
-        taxHelpAutonomous: { name: "Aide impôt autonome", desc: "Rassembler chiffres.", price: "150–300 $" }
+        hourlyBookkeeping: { name: "Tenue de livres / h", desc: "Commis comptable.", price: "35 $ / h" },
+        monthlyMicro: { name: "Micro-entreprise", desc: "Peu de transactions.", price: "149,99 $ / mois" },
+        monthlySmall: { name: "Petite entreprise", desc: "Volume moyen.", price: "249,99 $ – 599,99 $ / mois" },
+        monthlySme: { name: "PME + paie", desc: "Plusieurs employés.", price: "599,99 $ – 999,99 $+ / mois" },
+        gstQst: { name: "Taxes (TPS/TVH/TVP)", desc: "Déclarations fédérales et provinciales.", price: "75 $ / décl." },
+        payroll: { name: "Paie (1–5 emp.)", desc: "Traitement paie.", price: "49 $ + 12 $ / employé / mois" },
+        t4Releve1: { name: "T4 / Relevé 1", desc: "Feuillets fin d'année.", price: "15 $ / employé / an" },
+        catchUp: { name: "Compta en retard", desc: "Mise à jour.", price: "60 $ – 75 $ / mois de retard" },
+        softwareSetup: { name: "Config. logiciel", desc: "QuickBooks, Sage.", price: "199 $" },
+        taxHelpAutonomous: { name: "Aide impôt autonome", desc: "Rassembler chiffres.", price: "199 $" }
       },
       perHour: "À l'heure",
       perMonth: "Par mois",

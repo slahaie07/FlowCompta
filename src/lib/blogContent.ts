@@ -52,7 +52,7 @@ Le système fiscal canadien est complexe : **13 régimes de taxes différents** 
 
 Méfiez-vous des offres « à partir de X $ » qui cachent des frais supplémentaires. Un bon comptable en ligne vous fournit une grille tarifaire claire avec le nombre de transactions inclus, les frais de paie et les extras éventuels.
 
-Chez ComptaFlow : tenue de livres dès **150 $/mois** pour micro-entreprises, ou **45–75 $/h** pour les mandats ponctuels. Ouverture de dossier gratuite.
+Chez ComptaFlow : tenue de livres dès **149,99 $/mois** pour micro-entreprises, ou **35 $/h** pour les mandats ponctuels. Ouverture de dossier : 149 $, offerte aux 10 premiers clients.
 
 ### 5. Accès bilingue (français et anglais)
 
@@ -99,7 +99,7 @@ Canada has **13 different tax regimes** by province. Your online accountant must
 
 ### 4. Transparent pricing with no surprises
 
-Avoid "starting from X$" offers that hide extra fees. ComptaFlow: bookkeeping from **$150/month** for micro-businesses, or **$45–75/hr** for one-time mandates. Free file opening.
+Avoid "starting from X$" offers that hide extra fees. ComptaFlow: bookkeeping from **$149.99/month** for micro-businesses, or **$35/hr** for one-time mandates. Setup fee: $149, free for the first 10 clients.
 
 ### 5. Bilingual access (French and English)
 
