@@ -58,7 +58,11 @@ const OptionButton: FC<{
 
 function buildQuestionSteps(serviceId: ServiceId): number[] {
   const steps = [0, 1, 2];
-  if (!['softwareSetup', 'taxHelpAutonomous', 't4Releve1'].includes(serviceId)) {
+  if (['monthlyMicro', 'monthlySmall', 'monthlySme'].includes(serviceId)) {
+    steps.push(6);
+  } else if (serviceId === 'catchUp') {
+    steps.push(7);
+  } else if (!['softwareSetup', 'taxHelpAutonomous', 't4Releve1'].includes(serviceId)) {
     steps.push(3);
   }
   if (['payroll', 't4Releve1', 'monthlySme'].includes(serviceId)) {
@@ -131,6 +135,8 @@ export function PricingQuestionnaire({
     setVolumeBand,
     setEmployeeBand,
     setUrgency,
+    setTransactionsBand,
+    setLateMonthsBand,
     toggleAddOn,
     reset,
   } = usePricingEstimate(initialServiceId);
@@ -141,6 +147,8 @@ export function PricingQuestionnaire({
   const progress = step === 'result' ? 100 : Math.round(((stepIndex + 1) / totalSteps) * 100);
   const showEmployeeStep = questionSteps.includes(4);
   const showVolumeStep = questionSteps.includes(3);
+  const showTransactionsStep = questionSteps.includes(6);
+  const showLateMonthsStep = questionSteps.includes(7);
   const isLastQuestion = step !== 'result' && stepIndex === totalSteps - 1;
 
   const handleNext = () => {
@@ -268,6 +276,30 @@ export function PricingQuestionnaire({
                 <OptionButton key={id} selected={answers.volumeBand === id} onClick={() => setVolumeBand(id)}>
                   <span className="font-medium">{t(`pricingQuestionnaire.volume.${id}.title`)}</span>
                   <span className="block text-xs mt-1 opacity-70">{t(`pricingQuestionnaire.volume.${id}.desc`)}</span>
+                </OptionButton>
+              ))}
+            </motion.div>
+          )}
+
+          {step === 6 && showTransactionsStep && (
+            <motion.div key="q-transactions" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-4">
+              <h3 className="font-serif text-xl text-ivoire">{t('pricingQuestionnaire.q.transactions')}</h3>
+              {(['t0_30', 't31_75', 't76_150', 't151_200', 't201_300', 't301_450', 't451_plus'] as const).map((id) => (
+                <OptionButton key={id} selected={answers.transactionsBand === id} onClick={() => setTransactionsBand(id)}>
+                  <span className="font-medium">{t(`pricingQuestionnaire.transactions.${id}.title`)}</span>
+                  <span className="block text-xs mt-1 opacity-70">{t(`pricingQuestionnaire.transactions.${id}.desc`)}</span>
+                </OptionButton>
+              ))}
+            </motion.div>
+          )}
+
+          {step === 7 && showLateMonthsStep && (
+            <motion.div key="q-late" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-4">
+              <h3 className="font-serif text-xl text-ivoire">{t('pricingQuestionnaire.q.lateMonths')}</h3>
+              {(['m1_6', 'm7_12', 'm13_plus'] as const).map((id) => (
+                <OptionButton key={id} selected={answers.lateMonthsBand === id} onClick={() => setLateMonthsBand(id)}>
+                  <span className="font-medium">{t(`pricingQuestionnaire.lateMonths.${id}.title`)}</span>
+                  <span className="block text-xs mt-1 opacity-70">{t(`pricingQuestionnaire.lateMonths.${id}.desc`)}</span>
                 </OptionButton>
               ))}
             </motion.div>
