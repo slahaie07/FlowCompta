@@ -92,6 +92,16 @@ function isInternalAgentRequest(req: express.Request): boolean {
   return false;
 }
 
+/** Garde cron durcie (vague D) : refuse par défaut si CRON_SECRET absent, comparaison à temps constant. */
+function isCronRequest(req: express.Request): boolean {
+  const secret = process.env.CRON_SECRET;
+  if (!secret) return false;
+  const auth = req.headers.authorization ?? '';
+  const a = Buffer.from(auth);
+  const b = Buffer.from(`Bearer ${secret}`);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
 /** Escapes HTML-significant characters to prevent injection into email/SMS templates built from user input. */
 function escapeHtml(value: unknown): string {
   return String(value ?? '')
@@ -547,9 +557,7 @@ app.post('/api/intelligence/analyze', rateLimiter(30, 60000), async (req, res) =
 
 // --- ELITE HUNTER (NATIVE CRON JOB) ---
 app.get('/api/cron/elite-hunter', async (req, res) => {
-  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
-    if (process.env.NODE_ENV === 'production') return res.status(401).json({ error: "Unauthorized" });
-  }
+  if (!isCronRequest(req)) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
     botLog('ELITE_HUNTER_CRON', 'System', 'Démarrage de la chasse aux prospects B2B...');
@@ -603,9 +611,7 @@ Industrie: ${mockLead.industry}`;
 
 // --- RAPPORT HEBDOMADAIRE (NATIVE CRON JOB — nouveaux clients & services) ---
 app.get('/api/cron/weekly-report', async (req, res) => {
-  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
-    if (process.env.NODE_ENV === 'production') return res.status(401).json({ error: 'Unauthorized' });
-  }
+  if (!isCronRequest(req)) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
     if (!serviceRoleKey) {
@@ -672,9 +678,7 @@ app.get('/api/cron/weekly-report', async (req, res) => {
 
 // --- INTERNAL CRON (ADMIN_SECRET / X-ComptaFlow-Internal) ---
 app.get('/api/cron/agent-health', async (req, res) => {
-  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
-    if (process.env.NODE_ENV === 'production') return res.status(401).json({ error: 'Unauthorized' });
-  }
+  if (!isCronRequest(req)) return res.status(401).json({ error: 'Unauthorized' });
   const geminiLive = !!(geminiKey && geminiKey !== 'mock_gemini_api_key' && !geminiKey.startsWith('mock_'));
   const result = runInternalCronJob('agent-health', { geminiConfigured: geminiLive });
   botLog('CRON_AGENT_HEALTH', 'System', result.message);
@@ -724,7 +728,6 @@ app.post('/api/webhook/onboarding-complete', async (req, res) => {
     language,
     companyName,
     neq,
-    nas,
     initialProfileType,
     selectedExpertEmail
   } = req.body || {};
@@ -774,7 +777,6 @@ app.post('/api/webhook/onboarding-complete', async (req, res) => {
             <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Type de profil :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(initialProfileType) || 'Individuel'}</td></tr>
             <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Nom entreprise :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(companyName) || 'N/A'}</td></tr>
             <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Numéro NEQ :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(neq) || 'N/A'}</td></tr>
-            <tr><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Numéro NAS :</td><td style="padding:8px;border:1px solid #ddd;">${nas ? 'Fourni (Sécurisé)' : 'N/A'}</td></tr>
             <tr style="background:#f9f9f9;"><td style="padding:8px;font-weight:bold;border:1px solid #ddd;">Comptable référé :</td><td style="padding:8px;border:1px solid #ddd;">${escapeHtml(selectedExpertEmail) || 'Aucun'}</td></tr>
           </table>
           <p style="margin-top:20px;"><a href="${portalUrl}" style="display:inline-block;background:#D4AF37;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;font-weight:bold;">Accéder au portail client</a></p>
@@ -1655,7 +1657,12 @@ async function checkPartnerDirectoryExposure(): Promise<'restricted' | 'exposed'
 }
 
 // --- HEALTH CHECK (monitoring / stress tests) ---
-app.get('/api/health', async (_req, res) => {
+app.get('/api/health', async (req, res) => {
+  // Vague D : réponse publique minimale. La posture détaillée (clés, projet,
+  // exposition du répertoire) n'est renvoyée qu'aux requêtes internes authentifiées.
+  if (!isInternalAgentRequest(req)) {
+    return res.json({ status: 'ok', service: 'ComptaFlow', timestamp: new Date().toISOString() });
+  }
   const geminiLive = !!(geminiKey && geminiKey !== 'mock_gemini_api_key' && !geminiKey.startsWith('mock_'));
   const partnerDirectory = await checkPartnerDirectoryExposure();
   res.json({
@@ -1749,6 +1756,7 @@ const BLOG_SLUGS = [
   'quickbooks-sage-wave-comparaison-canada',
   'paie-t4-guide-employeurs-canada',
   'demarrer-entreprise-canada-obligations-comptables',
+  'exemple-mois-tenue-livres-plombier-autonome',
 ];
 
 app.get('/sitemap.xml', (_req, res) => {
@@ -1757,22 +1765,23 @@ app.get('/sitemap.xml', (_req, res) => {
 
   interface SitemapEntry { path: string; priority: string; changefreq: string; lastmod?: string }
   const pages: SitemapEntry[] = [
-    { path: '/', priority: '1.0', changefreq: 'daily', lastmod: today },
-    { path: '/estimate', priority: '0.9', changefreq: 'weekly', lastmod: today },
-    { path: '/calculateur-taxes', priority: '0.9', changefreq: 'monthly', lastmod: today },
-    { path: '/ressources', priority: '0.8', changefreq: 'weekly', lastmod: today },
+    { path: '/', priority: '1.0', changefreq: 'daily' },
+    { path: '/estimate', priority: '0.9', changefreq: 'weekly' },
+    { path: '/tarifs', priority: '0.9', changefreq: 'monthly' },
+    { path: '/confiance', priority: '0.7', changefreq: 'monthly' },
+    { path: '/calculateur-taxes', priority: '0.9', changefreq: 'monthly' },
+    { path: '/ressources', priority: '0.8', changefreq: 'weekly' },
     { path: '/login', priority: '0.6', changefreq: 'monthly' },
-    { path: '/showcase', priority: '0.4', changefreq: 'monthly' },
     { path: '/privacy', priority: '0.3', changefreq: 'yearly' },
     { path: '/terms', priority: '0.3', changefreq: 'yearly' },
     { path: '/legal', priority: '0.3', changefreq: 'yearly' },
     { path: '/cookies', priority: '0.3', changefreq: 'yearly' },
     // Province pages — high priority
-    ...Object.values(CANADA_REGIONS).map((r) => ({ path: `/ca/${r.seoSlug}`, priority: '0.9', changefreq: 'monthly', lastmod: today })),
+    ...Object.values(CANADA_REGIONS).map((r) => ({ path: `/ca/${r.seoSlug}`, priority: '0.9', changefreq: 'monthly' })),
     // City pages — high priority
-    ...CITY_SLUGS.map((s) => ({ path: `/ca/${s}`, priority: '0.85', changefreq: 'monthly', lastmod: today })),
+    ...CITY_SLUGS.map((s) => ({ path: `/ca/${s}`, priority: '0.85', changefreq: 'monthly' })),
     // Blog articles
-    ...BLOG_SLUGS.map((s) => ({ path: `/ressources/${s}`, priority: '0.8', changefreq: 'monthly', lastmod: today })),
+    ...BLOG_SLUGS.map((s) => ({ path: `/ressources/${s}`, priority: '0.8', changefreq: 'monthly' })),
   ];
 
   const urls = pages.map((p) => {
