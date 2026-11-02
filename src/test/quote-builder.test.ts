@@ -1,37 +1,46 @@
 import { describe, it, expect } from 'vitest';
 import { calculateCanadianTaxes } from '../lib/financeUtils';
+import { calculatePricingEstimate } from '../lib/pricingEstimator';
 import { getClientEmailTemplate, getAgentEmailTemplate, getAdminEmailTemplate, getAccountConfirmedEmailTemplate } from '../../api/lib/emailTemplates';
 
-describe('Premium Quote Builder & Emails (Canva Style)', () => {
-  it('calcule correctement les tarifs de la tenue de livres avec volume et incorporation', () => {
-    // Cas 1: 50 transactions, incorporé
-    // Base: 150$, transactions supp: (50-30)*0.50 = 10$, incorporation: 75$ => Subtotal = 235$
-    let base = 150.00;
-    const transactions = 50;
-    if (transactions > 30) base += (transactions - 30) * 0.50;
-    base += 75.00; // inc
+describe('Estimateur réel et gabarits courriel', () => {
+  it('calcule le forfait Micro selon la grille, taxes QC incluses', () => {
+    const estimate = calculatePricingEstimate({
+      serviceId: 'monthlyMicro',
+      province: 'QC',
+      profileType: 'personal',
+      volumeBand: 'low',
+      employeeBand: 'none',
+      urgency: 'standard',
+      addOns: [],
+      transactionsBand: 't0_30',
+      lateMonthsBand: 'm1_6',
+    });
+    expect(estimate.amountTypical).toBe(149.99);
 
-    expect(base).toBe(235.00);
-
-    const taxes = calculateCanadianTaxes(base, 'QC');
-    expect(taxes.subtotal).toBe(235.00);
-    expect(taxes.tps).toBe(11.75); // 5%
-    expect(taxes.tvq).toBe(23.44); // 9.975% rounded
-    expect(taxes.total).toBe(270.19); // 235 + 11.75 + 23.44
+    const taxes = calculateCanadianTaxes(estimate.amountTypical, 'QC');
+    expect(taxes.subtotal).toBe(149.99);
+    expect(taxes.tps).toBeCloseTo(7.5, 2); // 5 %
+    expect(taxes.tvq).toBeCloseTo(14.96, 2); // 9,975 %
+    expect(taxes.total).toBeCloseTo(172.45, 2);
   });
 
-  it('calcule correctement les tarifs des impôts avec feuillets et crypto', () => {
-    // Cas 2: 5 feuillets, crypto
-    // Base: 120$, feuillets supp: (5-2)*10 = 30$, crypto: 50$ => Subtotal = 200$
-    let base = 120.00;
-    const slips = 5;
-    if (slips > 2) base += (slips - 2) * 10;
-    base += 50.00; // crypto
+  it('calcule la paie selon la grille (49 $ + 12 $/employé), TVH Ontario incluse', () => {
+    const estimate = calculatePricingEstimate({
+      serviceId: 'payroll',
+      province: 'ON',
+      profileType: 'business',
+      volumeBand: 'medium',
+      employeeBand: 'medium',
+      urgency: 'standard',
+      addOns: [],
+      transactionsBand: 't31_75',
+      lateMonthsBand: 'm1_6',
+    });
+    expect(estimate.amountTypical).toBe(169); // 49 + 12 x 10
 
-    expect(base).toBe(200.00);
-
-    const taxes = calculateCanadianTaxes(base, 'QC');
-    expect(taxes.total).toBe(229.95); // 200 + 10 (TPS) + 19.95 (TVQ)
+    const taxes = calculateCanadianTaxes(estimate.amountTypical, 'ON');
+    expect(taxes.total).toBeCloseTo(190.97, 2); // TVH 13 %
   });
 
   it('produit les templates HTML Or & Noir avec les données réelles', () => {
