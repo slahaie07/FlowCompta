@@ -56,7 +56,7 @@ export function SubAdminPortalShell({
 
   // Notifications state
   const [notifications, setNotifications] = useState([
-    { id: 1, title: 'Nouveau reçu Dext', message: 'Stéphanie Laplante a téléversé un reçu de 172.46 $', time: 'Il y a 5 min', unread: true },
+    { id: 1, title: 'Nouveau reçu Dext', message: 'Marie Tremblay a téléversé un reçu de 172.46 $', time: 'Il y a 5 min', unread: true },
     { id: 2, title: 'Dépôt Stripe validé', message: 'Sébastien Roy a payé le dépôt de 325.00 $ pour Le Rattrapage', time: 'Il y a 1h', unread: true },
     { id: 3, title: 'Formulaire étudiant reçu', message: 'Antoine Tremblay a complété son onboarding', time: 'Il y a 3h', unread: false }
   ]);
@@ -122,18 +122,18 @@ export function SubAdminPortalShell({
   const [marginPrice, setMarginPrice] = useState<number>(100);
 
   // Team Chat state
-  const [activeChatMember, setActiveChatMember] = useState<string>('Stéphanie Laplante');
+  const [activeChatMember, setActiveChatMember] = useState<string>('Marie Tremblay');
   const [chatMessages, setChatMessages] = useState<Record<string, Array<{ sender: string; text: string; time: string }>>>({
-    'Stéphanie Laplante': [
-      { sender: 'Stéphanie Laplante', text: 'Bonjour, j\'ai déposé mes derniers reçus Bureau en Gros dans mon Dext. Pouvez-vous valider la TPS/TVQ?', time: '14:23' },
-      { sender: 'Cabinet', text: 'Bonjour Stéphanie! Oui, je vois les reçus. Je procède à l\'intégration fiscale dans votre portail dès maintenant.', time: '14:30' }
+    'Marie Tremblay': [
+      { sender: 'Marie Tremblay', text: 'Bonjour, j\'ai déposé mes derniers reçus Bureau en Gros dans mon Dext. Pouvez-vous valider la TPS/TVQ?', time: '14:23' },
+      { sender: 'Cabinet', text: 'Bonjour Marie! Oui, je vois les reçus. Je procède à l\'intégration fiscale dans votre portail dès maintenant.', time: '14:30' }
     ],
-    'Sylvie Charette-Clément': [
-      { sender: 'Sylvie Charette-Clément', text: 'Bonjour, as-tu fini d\'analyser les dossiers de rattrapage de Sébastien Roy?', time: '09:15' },
+    'Sylvie Charette': [
+      { sender: 'Sylvie Charette', text: 'Bonjour, as-tu fini d\'analyser les dossiers de rattrapage de Sébastien Roy?', time: '09:15' },
       { sender: 'Cabinet', text: 'Presque, il manque les relevés Stripe du mois de mars, je viens de lui envoyer une relance.', time: '09:40' }
     ],
-    'Eya': [
-      { sender: 'Eya', text: 'Le client Antoine Tremblay demande s\'il peut avoir son remboursement d\'impôt étudiant par virement Interac direct.', time: 'Hier' },
+    'Karim Haddad': [
+      { sender: 'Karim Haddad', text: 'Le client Antoine Tremblay demande s\'il peut avoir son remboursement d\'impôt étudiant par virement Interac direct.', time: 'Hier' },
       { sender: 'Cabinet', text: 'Oui, son onboarding montre un profil Ontario valide, on peut faire le virement Interac dès la validation de sa T4.', time: 'Hier' }
     ]
   });
@@ -144,8 +144,8 @@ export function SubAdminPortalShell({
   const [newPassword, setNewPassword] = useState('');
   const [employeePermissions, setEmployeePermissions] = useState({
     sylvie: { read: true, write: true, delete: false },
-    eya: { read: true, write: true, delete: false },
-    stephanie: { read: true, write: false, delete: false }
+    karim: { read: true, write: true, delete: false },
+    marie: { read: true, write: false, delete: false }
   });
 
   // Load live data from Supabase
@@ -227,7 +227,7 @@ export function SubAdminPortalShell({
       const initialNotes: StickyNoteItem[] = [
         { id: '1', text: 'Appeler Sébastien Roy pour ses relevés Stripe manquants.', color: 'yellow', createdAt: new Date().toISOString() },
         { id: '2', text: 'Vérifier la déclaration T4 Ontario d\'Antoine Tremblay.', color: 'green', createdAt: new Date().toISOString() },
-        { id: '3', text: 'Préparer la réunion mensuelle de Stéphanie Laplante le 30 juin.', color: 'pink', createdAt: new Date().toISOString() }
+        { id: '3', text: 'Préparer la réunion mensuelle de Marie Tremblay le 30 juin.', color: 'pink', createdAt: new Date().toISOString() }
       ];
       setNotes(initialNotes);
       localStorage.setItem(`comptaflow_notes_${userData?.id || 'default'}`, JSON.stringify(initialNotes));
@@ -440,9 +440,9 @@ export function SubAdminPortalShell({
     // Simulate auto reply after 1.5 seconds
     setTimeout(() => {
       const mockReplies: Record<string, string> = {
-        'Stéphanie Laplante': 'Merci pour votre réponse rapide! J\'attends la confirmation de déclaration dans mon dossier.',
-        'Sylvie Charette-Clément': 'Parfait, tiens-moi au courant dès que Roy t\'envoie ça.',
-        'Eya': 'Super, je m\'occupe de lui faire signer le mandat électronique.'
+        'Marie Tremblay': 'Merci pour votre réponse rapide! J\'attends la confirmation de déclaration dans mon dossier.',
+        'Sylvie Charette': 'Parfait, tiens-moi au courant dès que Roy t\'envoie ça.',
+        'Karim Haddad': 'Super, je m\'occupe de lui faire signer le mandat électronique.'
       };
       
       const responseText = mockReplies[activeChatMember] || 'Merci pour l\'information.';
@@ -802,14 +802,14 @@ export function SubAdminPortalShell({
                     })
                   ) : (
                     <>
-                      {/* Stéphanie Row */}
+                      {/* Marie Row */}
                       <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-gold/20 transition-all">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold text-ivoire">Stéphanie Laplante</span>
+                            <span className="text-sm font-bold text-ivoire">Marie Tremblay</span>
                             <span className="text-[10px] px-2 py-0.5 border border-gold/30 text-gold rounded-full uppercase tracking-wider font-semibold">Forfaits Mensuels</span>
                           </div>
-                          <p className="text-xs text-slate-500 mt-1">Laplante Design Inc. • QC • 14 Reçus Dext OCR</p>
+                          <p className="text-xs text-slate-500 mt-1">Tremblay Design Inc. • QC • 14 Reçus Dext OCR</p>
                         </div>
                         <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
                           <div className="text-right">
@@ -976,7 +976,7 @@ export function SubAdminPortalShell({
                           value={newClientName}
                           onChange={(e) => setNewClientName(e.target.value)}
                           className="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-xs outline-none focus:border-gold transition-colors text-ivoire font-bold"
-                          placeholder="ex: Stéphanie Laplante"
+                          placeholder="ex: Marie Tremblay"
                         />
                       </div>
                       <div>
@@ -987,7 +987,7 @@ export function SubAdminPortalShell({
                           value={newClientEmail}
                           onChange={(e) => setNewClientEmail(e.target.value)}
                           className="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-xs outline-none focus:border-gold transition-colors text-ivoire font-bold"
-                          placeholder="ex: stephanie@comptaflow.com"
+                          placeholder="ex: marie.tremblay@exemple.ca"
                         />
                       </div>
                       <div>
@@ -997,7 +997,7 @@ export function SubAdminPortalShell({
                           value={newClientCompany}
                           onChange={(e) => setNewClientCompany(e.target.value)}
                           className="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-xs outline-none focus:border-gold transition-colors text-ivoire font-bold"
-                          placeholder="ex: Laplante Design Inc."
+                          placeholder="ex: Tremblay Design Inc."
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
@@ -1098,7 +1098,7 @@ export function SubAdminPortalShell({
                     <tr className="hover:bg-white/1">
                       <td className="p-5 text-slate-400 font-semibold">22 Juin 2026</td>
                       <td className="p-5 font-bold">
-                        Facture Honoraires - Stéphanie Laplante
+                        Facture Honoraires - Marie Tremblay
                         <span className="text-[10px] text-slate-500 block">Forfaits Mensuels (Tenue de livres Juin)</span>
                       </td>
                       <td className="p-5 text-emerald-400 font-bold">Entrée</td>
@@ -1147,7 +1147,7 @@ export function SubAdminPortalShell({
                   <h3 className="text-sm font-bold text-ivoire mt-4">Tenue de Livres Mensuelle</h3>
                   <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-semibold">Dossier : Dext & Banque</p>
                   <div className="border-t border-white/5 mt-4 pt-4 flex justify-between items-center">
-                    <span className="text-[10px] text-slate-400 font-medium">Stéphanie Laplante</span>
+                    <span className="text-[10px] text-slate-400 font-medium">Marie Tremblay</span>
                     <ChevronRight size={14} className="text-slate-500 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
@@ -1287,7 +1287,7 @@ export function SubAdminPortalShell({
 
                     <div className="p-3 bg-amber-500/10 border-l-2 border-amber-500 rounded-r-xl">
                       <span className="text-[10px] text-slate-400 block font-bold">02 Juillet 2026</span>
-                      <span className="text-xs font-bold text-ivoire block">Revue Stéphanie Laplante</span>
+                      <span className="text-xs font-bold text-ivoire block">Revue Marie Tremblay</span>
                     </div>
 
                     <div className="p-3 bg-blue-500/10 border-l-2 border-blue-500 rounded-r-xl">
@@ -1348,7 +1348,7 @@ export function SubAdminPortalShell({
                 <div className="glass-card p-4 rounded-3xl space-y-4 md:col-span-1 overflow-y-auto">
                   <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 mb-4 px-2">Collaborateurs</h3>
                   <div className="space-y-2">
-                    {['Stéphanie Laplante', 'Sylvie Charette-Clément', 'Eya'].map(member => (
+                    {['Marie Tremblay', 'Sylvie Charette', 'Karim Haddad'].map(member => (
                       <button
                         key={member}
                         type="button"
@@ -1736,8 +1736,8 @@ export function SubAdminPortalShell({
                       </h4>
                       <div className="space-y-3 text-xs">
                         <div className="flex justify-between p-2 bg-white/2 rounded">
-                          <span className="font-bold text-slate-400">Stéphanie Laplante :</span>
-                          <span className="font-mono">stephanie@dext.cc (Dext Auto-link)</span>
+                          <span className="font-bold text-slate-400">Marie Tremblay :</span>
+                          <span className="font-mono">marie.tremblay@dext.cc (Dext Auto-link)</span>
                         </div>
                         <div className="flex justify-between p-2 bg-white/2 rounded">
                           <span className="font-bold text-slate-400">Sébastien Roy :</span>
@@ -1846,15 +1846,15 @@ export function SubAdminPortalShell({
                   
                   <div className="space-y-3 text-xs font-bold">
                     <div className="flex justify-between items-center">
-                      <span>Sylvie Charette-Clément</span>
+                      <span>Sylvie Charette</span>
                       <span className="text-[10px] text-emerald-400 font-bold">Accès Écrit/Lecture</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span>Eya</span>
+                      <span>Karim Haddad</span>
                       <span className="text-[10px] text-emerald-400 font-bold">Accès Écrit/Lecture</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span>Stéphanie Laplante</span>
+                      <span>Marie Tremblay</span>
                       <span className="text-[10px] text-amber-400 font-bold">Accès Lecture seule</span>
                     </div>
                   </div>
