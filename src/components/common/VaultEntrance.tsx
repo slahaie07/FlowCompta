@@ -127,7 +127,7 @@ export function VaultEntrance({
                 <span className="text-gold italic">ComptaFlow.</span>
               </h2>
               <p className="text-slate-500 uppercase tracking-[0.25em] text-[9px] font-bold">
-                {isEn ? 'High-End Digital CPA Workspace' : 'Cabinet Comptable Numérique de Pointe'}
+                {isEn ? 'High-End Digital Bookkeeping Workspace' : 'Tenue de livres numérique de pointe'}
               </p>
             </div>
 
@@ -282,7 +282,7 @@ export function VaultEntrance({
                   <div className="space-y-2">
                     <h3 className="text-2xl font-serif text-ivoire">{isEn ? 'Existing Client' : 'Déjà Client'}</h3>
                     <p className="text-xs text-slate-400 font-light leading-relaxed max-w-xs mx-auto">
-                      {isEn ? 'Access your financial dashboards, upload receipts, and chat live with your assigned CPA.' : 'Accédez à vos tableaux de bord financiers, déposez vos reçus et discutez en direct avec votre CPA attitré.'}
+                      {isEn ? 'Access your financial dashboards, upload receipts, and chat live with your bookkeeping team.' : 'Accédez à vos tableaux de bord financiers, déposez vos reçus et discutez en direct avec votre équipe de tenue de livres.'}
                     </p>
                   </div>
                 </div>
@@ -329,7 +329,7 @@ export function VaultEntrance({
               <div className="text-center max-w-md mx-auto space-y-2">
                 <h3 className="text-xl font-serif text-ivoire">{isEn ? 'Clear pricing with no surprises.' : 'Une tarification claire et sans surprise.'}</h3>
                 <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">
-                  {isEn ? 'Certified CPA Firm & State-of-the-Art Technology' : 'Cabinet Comptable Agrée & Technologie de pointe'}
+                  {isEn ? 'Bookkeeping Service & State-of-the-Art Technology' : 'Service de tenue de livres & technologie de pointe'}
                 </p>
               </div>
 
@@ -365,8 +365,8 @@ export function VaultEntrance({
                   </div>
                   <p className="text-xs text-slate-300 font-light leading-relaxed">
                     {isEn
-                      ? 'A turn-key CPA service tailored for your business, coupled with our 24/7 secure cloud platform.'
-                      : 'Un service CPA clé en main adapté à votre entreprise, couplé à notre plateforme cloud sécurisée accessible 24h/24.'}
+                      ? 'A turn-key bookkeeping service tailored for your business, coupled with our 24/7 secure cloud platform.'
+                      : 'Un service de tenue de livres clé en main adapté à votre entreprise, couplé à notre plateforme cloud sécurisée accessible 24h/24.'}
                   </p>
                 </div>
 

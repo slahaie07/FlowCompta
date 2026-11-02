@@ -31,7 +31,7 @@ const PROVINCE_FAQ: Record<string, { q: string; a: string }[]> = {
 };
 
 const DEFAULT_FAQ = [
-  { q: 'Combien coûte la tenue de livres avec ComptaFlow ?', a: 'La tenue de livres mensuelle démarre à 150 $ pour les micro-entreprises, de 300 $ à 500 $ pour les petites entreprises. Les mandats ponctuels sont facturés 45–75 $/h. Ouverture de dossier gratuite.' },
+  { q: 'Combien coûte la tenue de livres avec ComptaFlow ?', a: 'La tenue de livres mensuelle démarre à 149,99 $ pour les micro-entreprises et va de 249,99 $ à 999,99 $ selon le volume pour les PME. Les mandats ponctuels sont facturés 35 $/h. Ouverture de dossier : 149 $, offerte aux 10 premiers clients.' },
   { q: 'Puis-je accéder à mon dossier à tout moment ?', a: 'Oui. Votre portail client est accessible 24h/24, 7j/7, depuis n\'importe quel appareil. Consultez vos états financiers, téléversez des documents et suivez vos mandats en temps réel.' },
   { q: 'Mes données sont-elles hébergées au Canada ?', a: 'Absolument. Toutes vos données sont hébergées dans des serveurs canadiens (région ca-central-1), conformément à la loi PIPEDA et à la Loi 25 pour les clients québécois.' },
 ];
@@ -51,11 +51,11 @@ const SERVICES_EN = [
   { icon: '👥', title: 'Payroll & T4', desc: 'Deduction calculations, CRA remittances, T4 slips' },
   { icon: '📋', title: 'Financial Statements', desc: 'Balance sheet, income statement and cash flow' },
   { icon: '⚙️', title: 'Software Setup', desc: 'QuickBooks, Sage, Wave — setup and training' },
-  { icon: '⚖️', title: 'Dedicated CPA & Automation', desc: 'Secure automated workflows validated by your dedicated accountant' },
+  { icon: '⚖️', title: 'Dedicated Accountant & Automation', desc: 'Secure automated workflows validated by your dedicated accountant' },
 ];
 
-const TRUST_FR = ['🆓 Ouverture gratuite', '🔒 Données au Canada', '⚡ Portail 24/7', '✅ PIPEDA conforme'];
-const TRUST_EN = ['🆓 Free file opening', '🔒 Canadian data hosting', '⚡ 24/7 portal', '✅ PIPEDA compliant'];
+const TRUST_FR = ['💼 Ouverture 149 $ — offerte aux 10 premiers clients', '🔒 Données au Canada', '⚡ Portail 24/7', '✅ PIPEDA conforme'];
+const TRUST_EN = ['💼 Setup $149 — free for the first 10 clients', '🔒 Canadian data hosting', '⚡ 24/7 portal', '✅ PIPEDA compliant'];
 
 export function RegionalLanding() {
   const { slug } = useParams<{ slug: string }>();
@@ -76,7 +76,7 @@ function ProvinceLanding({ slug }: { slug?: string }) {
 
   const titleFr = `Tenue de livres en ligne — ${region.nameFr} | ComptaFlow`;
   const titleEn = `Online Bookkeeping — ${region.nameEn} | ComptaFlow`;
-  const descFr = `ComptaFlow : comptabilité et tenue de livres pour entrepreneurs de ${region.nameFr}. ${region.taxLabelFr}, paie, T4. Portail client sécurisé, données au Canada. Ouverture gratuite.`;
+  const descFr = `ComptaFlow : comptabilité et tenue de livres pour entrepreneurs de ${region.nameFr}. ${region.taxLabelFr}, paie, T4. Portail client sécurisé, données au Canada. Ouverture 149 $, offerte aux 10 premiers clients.`;
   const descEn = `ComptaFlow: accounting and bookkeeping for ${region.nameEn} entrepreneurs. ${region.taxLabelEn} filings, payroll, T4. Secure client portal, Canadian data. Free account opening.`;
 
   usePageMeta({
@@ -233,9 +233,9 @@ function ProvinceLanding({ slug }: { slug?: string }) {
           </h2>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { label: isFr ? 'Horaire' : 'Hourly', price: '45–75$', unit: isFr ? '/h' : '/hr', desc: isFr ? 'Mandats ponctuels, saisie, conciliation' : 'One-time mandates, data entry, reconciliation' },
-              { label: isFr ? 'Micro-entreprise' : 'Micro-business', price: '150–250$', unit: isFr ? '/mois' : '/month', desc: isFr ? 'Volume faible, sans employé' : 'Low volume, no employees', highlight: true },
-              { label: isFr ? 'PME' : 'SMB', price: '300–800$+', unit: isFr ? '/mois' : '/month', desc: isFr ? 'Volume élevé, paie, états financiers' : 'High volume, payroll, financial statements' },
+              { label: isFr ? 'Horaire' : 'Hourly', price: '35$', unit: isFr ? '/h' : '/hr', desc: isFr ? 'Mandats ponctuels, saisie, conciliation' : 'One-time mandates, data entry, reconciliation' },
+              { label: isFr ? 'Micro-entreprise' : 'Micro-business', price: '149,99$', unit: isFr ? '/mois' : '/month', desc: isFr ? 'Volume faible, sans employé' : 'Low volume, no employees', highlight: true },
+              { label: isFr ? 'PME' : 'SMB', price: '249,99–999,99$+', unit: isFr ? '/mois' : '/month', desc: isFr ? 'Volume élevé, paie, états financiers' : 'High volume, payroll, financial statements' },
             ].map((p) => (
               <div key={p.label} className={`p-6 rounded-2xl border ${p.highlight ? 'border-gold/40 bg-gold/5' : 'border-white/10 bg-white/[0.02]'}`}>
                 <p className="text-xs font-bold uppercase tracking-widest text-gold mb-1">{p.label}</p>
@@ -245,7 +245,7 @@ function ProvinceLanding({ slug }: { slug?: string }) {
             ))}
           </div>
           <p className="text-xs text-silver/50 mt-4 text-center">
-            {isFr ? '* Tous les tarifs sont hors taxes. Ouverture de dossier gratuite.' : '* All prices are before taxes. Free file opening.'}
+            {isFr ? '* Tous les tarifs sont hors taxes. Ouverture de dossier : 149 $, offerte aux 10 premiers clients.' : '* All prices are before taxes. Setup fee: $149, free for the first 10 clients.'}
           </p>
         </div>
       </section>
@@ -278,7 +278,7 @@ function ProvinceLanding({ slug }: { slug?: string }) {
             {isFr ? `Prêt pour ${region.nameFr} ?` : `Ready for ${region.nameEn}?`}
           </h2>
           <p className="text-silver mb-8">
-            {isFr ? 'Ouverture gratuite · Aucun engagement · Données au Canada' : 'Free opening · No commitment · Canadian data'}
+            {isFr ? 'Ouverture 149 $, offerte aux 10 premiers clients · Aucun engagement · Données au Canada' : 'Setup $149, free for the first 10 clients · No commitment · Canadian data'}
           </p>
           <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="gold" size="lg">
             {isFr ? 'Ouvrir mon dossier →' : 'Open My File →'}

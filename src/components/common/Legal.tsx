@@ -48,7 +48,7 @@ export function Legal() {
               </div>
               <div className="flex justify-between border-b border-white/5 pb-2">
                 <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Directeur de la publication :</span>
-                <span className="text-ivoire font-medium">Sébastien Lahaie</span>
+                <span className="text-ivoire font-medium">Compta-Flow</span>
               </div>
               <div className="flex justify-between border-b border-white/5 pb-2">
                 <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Numéro d'entreprise :</span>

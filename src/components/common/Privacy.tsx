@@ -109,7 +109,7 @@ export function Privacy() {
             <div className="p-6 rounded-xl bg-white/[0.02] border border-gold/10 space-y-2 mt-4 text-sm font-light">
               <div className="flex justify-between border-b border-white/5 pb-2">
                 <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Responsable :</span>
-                <span className="text-ivoire font-medium">Sébastien Lahaie</span>
+                <span className="text-ivoire font-medium">Compta-Flow (direction)</span>
               </div>
               <div className="flex justify-between border-b border-white/5 pb-2">
                 <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Titre :</span>

@@ -38,16 +38,16 @@ export function Landing() {
   const tickerItems =
     lang === 'en'
       ? [
-          'Hourly bookkeeping $45–75/hr',
-          'Monthly packages from $150/mo',
+          'Hourly bookkeeping $35/hr',
+          'Monthly packages from $149.99/mo',
           'GST/HST/PST filings',
           'Payroll 1–5 employees',
           'QuickBooks & Sage setup',
           'Encrypted vault',
         ]
       : [
-          'Tenue de livres 45–75 $/h',
-          'Forfaits dès 150 $/mois',
+          'Tenue de livres 35 $/h',
+          'Forfaits dès 149,99 $/mois',
           'Déclarations taxes (TPS/TVH/TVP)',
           'Paie 1 à 5 employés',
           'Config. QuickBooks & Sage',
@@ -276,16 +276,16 @@ export function Landing() {
                     </span>
                   </div>
 
-                  {/* CPA Notification */}
+                  {/* Notification équipe */}
                   <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 flex items-start gap-3">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-gold flex items-center justify-center text-[10px] font-bold text-white shrink-0 shadow-md">
-                      SC
+                      CF
                     </div>
                     <div className="text-left space-y-1">
                       <div className="text-xs font-bold text-ivoire flex items-center gap-1.5">
-                        <span>Sylvie</span>
+                        <span>Équipe Compta-Flow</span>
                         <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-                        <span className="text-[9px] text-gold uppercase tracking-wider font-mono">Conseillère</span>
+                        <span className="text-[9px] text-gold uppercase tracking-wider font-mono">Tenue de livres</span>
                       </div>
                       <p className="text-[10px] text-slate-400 leading-relaxed">
                         {lang === 'en'

@@ -26,7 +26,7 @@ const SERVICES_EN = [
   { icon: '👥', title: 'Payroll & T4', desc: 'Deductions, CRA remittances, T4 slips' },
   { icon: '📋', title: 'Financial Statements', desc: 'Balance sheet, income statement, cash flow' },
   { icon: '⚙️', title: 'Software Setup', desc: 'QuickBooks, Sage, Wave — setup included' },
-  { icon: '⚖️', title: 'Dedicated CPA & Automation', desc: 'Secure automated workflows validated by your dedicated accountant' },
+  { icon: '⚖️', title: 'Dedicated Accountant & Automation', desc: 'Secure automated workflows validated by your dedicated accountant' },
 ];
 
 export function CityLanding({ city }: Props) {
@@ -41,7 +41,7 @@ export function CityLanding({ city }: Props) {
 
   const titleFr = `Comptabilité en ligne ${city.nameFr} | ComptaFlow`;
   const titleEn = `Online Accounting ${city.nameEn} | ComptaFlow`;
-  const descFr = `ComptaFlow : tenue de livres, ${city.taxNoteFr} et paie pour entrepreneurs de ${city.nameFr} (${city.provinceNameFr}). Portail client sécurisé, données au Canada. Ouverture gratuite.`;
+  const descFr = `ComptaFlow : tenue de livres, ${city.taxNoteFr} et paie pour entrepreneurs de ${city.nameFr} (${city.provinceNameFr}). Portail client sécurisé, données au Canada. Ouverture 149 $, offerte aux 10 premiers clients.`;
   const descEn = `ComptaFlow: bookkeeping, ${city.taxNoteEn} filings and payroll for ${city.nameEn} (${city.provinceNameEn}) entrepreneurs. Secure portal, Canadian data. Free account opening.`;
 
   usePageMeta({
@@ -78,8 +78,8 @@ export function CityLanding({ city }: Props) {
     {
       q: isFr ? 'Combien coûte la tenue de livres ?' : 'How much does bookkeeping cost?',
       a: isFr
-        ? 'La tenue de livres mensuelle démarre à 150 $/mois pour les micro-entreprises et les mandats ponctuels sont facturés entre 45 $ et 75 $/h. Ouverture de dossier 100 % gratuite.'
-        : 'Monthly bookkeeping starts at $150/month for micro-businesses. One-time mandates are billed $45–$75/hr. File opening is 100% free.',
+        ? 'La tenue de livres mensuelle démarre à 149,99 $/mois pour les micro-entreprises et les mandats ponctuels sont facturés 35 $/h. Ouverture de dossier : 149 $, offerte aux 10 premiers clients.'
+        : 'Monthly bookkeeping starts at $149.99/month for micro-businesses. One-time mandates are billed $35/hr. Setup fee: $149, free for the first 10 clients.',
     },
   ];
 
@@ -159,7 +159,7 @@ export function CityLanding({ city }: Props) {
 
           <div className="flex flex-wrap gap-2 mb-8">
             {[
-              isFr ? '🆓 Ouverture gratuite' : '🆓 Free file opening',
+              isFr ? '💼 Ouverture 149 $ — offerte aux 10 premiers clients' : '💼 Setup $149 — free for the first 10 clients',
               taxNote,
               isFr ? '🔒 Données au Canada' : '🔒 Canadian data',
               isFr ? '⚡ Portail 24/7' : '⚡ 24/7 portal',
@@ -259,7 +259,7 @@ export function CityLanding({ city }: Props) {
             {isFr ? `Commencez à ${city.nameFr} dès aujourd'hui` : `Start in ${city.nameEn} Today`}
           </h2>
           <p className="text-silver mb-8">
-            {isFr ? 'Ouverture gratuite · Aucun engagement · Données au Canada' : 'Free opening · No commitment · Canadian data'}
+            {isFr ? 'Ouverture 149 $, offerte aux 10 premiers clients · Aucun engagement · Données au Canada' : 'Setup $149, free for the first 10 clients · No commitment · Canadian data'}
           </p>
           <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="gold" size="lg">
             {isFr ? 'Ouvrir mon dossier →' : 'Open My File →'}
