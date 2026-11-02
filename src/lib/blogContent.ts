@@ -651,6 +651,65 @@ Au moins 30 jours avant votre fin d'exercice, rassemblez :
 **[Open my ComptaFlow file (free) →](/login?next=/onboarding&register=1)**
     `,
   },
+  {
+    slug: 'exemple-mois-tenue-livres-plombier-autonome',
+    titleFr: 'Un mois de tenue de livres, concrètement : l’exemple d’un plombier autonome',
+    titleEn: 'One Month of Bookkeeping, Concretely: A Self-Employed Plumber Example',
+    excerptFr: 'Exemple type et transparent : 85 transactions, un forfait à 349,99 $/mois, et des livres fermés le 5 du mois suivant. Voici comment ça se passe, semaine par semaine.',
+    excerptEn: 'A transparent sample case: 85 transactions, a $349.99/month package, and books closed by the 5th of the following month. Here is how it works, week by week.',
+    dateIso: '2026-11-02',
+    readingMin: 5,
+    category: 'comptabilite',
+    keywordsFr: ['exemple tenue de livres', 'prix tenue de livres PME', 'plombier travailleur autonome comptabilité'],
+    bodyFr: `
+## Un exemple type, en toute transparence
+
+Ce qui suit est un **exemple type** construit sur des chiffres réalistes — ce n’est pas un client réel, et nous ne publierons jamais les chiffres d’un client sans son accord écrit. Il sert à montrer, concrètement, ce qu’un mois de tenue de livres contient.
+
+**Le profil** : un plombier travailleur autonome au Québec, environ 85 transactions par mois (factures clients, fournisseurs de matériaux, essence, un véhicule, inscription TPS/TVQ). Sur la grille Compta-Flow, c’est le forfait à **349,99 $/mois** (76 à 150 transactions).
+
+### Semaine 1 — les pièces arrivent
+Le client photographie ses factures au fil des jours et les dépose dans son dossier d’échange sécurisé. Aucun déplacement, aucune enveloppe de reçus à la fin du mois.
+
+### Semaine 2 — saisie et conciliations
+Chaque pièce est saisie et classée (matériaux par chantier, véhicule, bureau à domicile), puis les comptes bancaire et de carte sont conciliés : chaque dollar est expliqué, rien n’est « à peu près » classé.
+
+### Semaine 3 — taxes et suivi
+Le rapport de taxes du trimestre avance en arrière-plan : les crédits de taxe sur intrants sont déjà repérés au fil des saisies. Le client reçoit un court sommaire : encaissements, dépenses par catégorie, taxes à remettre estimées.
+
+### Début du mois suivant — livres fermés
+Au plus tard le 5, le mois est fermé. Le client sait où il en est, ce qu’il doit au fisc et ce qu’il peut se verser — avant même que son relevé de banque arrive.
+
+### Ce que ça change en fin d’année
+Des livres fermés chaque mois, c’est une déclaration T2125 qui se prépare en heures plutôt qu’en semaines, sans rattrapage coûteux — et sans surprise en avril.
+
+**Vous voulez le même rythme pour votre entreprise ?** Estimez votre forfait en une minute sur compta-flow.net/estimate : prix fixe, sans surprise, et réponse écrite sous 4 heures ouvrables.
+`,
+    bodyEn: `
+## A sample case, fully transparent
+
+What follows is a **sample case** built on realistic numbers — it is not a real client, and we will never publish a client's figures without written consent. It shows, concretely, what one month of bookkeeping contains.
+
+**The profile**: a self-employed plumber in Québec, about 85 transactions per month (client invoices, material suppliers, fuel, one vehicle, GST/QST registered). On the Compta-Flow grid, that is the **$349.99/month** package (76–150 transactions).
+
+### Week 1 — receipts come in
+The client photographs invoices as they arrive and drops them into a secure exchange folder. No driving around, no shoebox of receipts at month-end.
+
+### Week 2 — entry and reconciliations
+Every receipt is entered and categorized (materials by job, vehicle, home office), then bank and card accounts are reconciled: every dollar explained.
+
+### Week 3 — taxes and follow-up
+The quarterly tax report moves forward in the background: input tax credits are already flagged during entry. The client receives a short summary: collections, expenses by category, estimated taxes payable.
+
+### Early the next month — books closed
+By the 5th at the latest, the month is closed. The client knows where they stand, what they owe, and what they can pay themselves.
+
+### What it changes at year-end
+Books closed every month mean a T2125 that takes hours instead of weeks — no costly catch-up, no April surprises.
+
+**Want the same rhythm for your business?** Estimate your package in one minute at compta-flow.net/estimate: fixed price, no surprises, written reply within 4 business hours.
+`,
+  },
 ];
 
 export function getArticle(slug: string): BlogArticle | undefined {

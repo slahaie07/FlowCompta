@@ -16,22 +16,16 @@ export const SEED_ADMIN_ACCOUNTS: SeedAccount[] = [
     label: 'Super Admin',
   },
   {
+    email: 'simon.gagne0088@gmail.com',
+    role: 'sub_admin',
+    fullName: 'Simon Gagné',
+    label: 'Équipe Compta-Flow — Saisie de factures',
+  },
+  {
     email: 'viviee28@hotmail.com',
     role: 'sub_admin',
-    fullName: 'Sylvie Charette-Clément',
-    label: 'Partenaire Cabinet',
-  },
-  {
-    email: 'eya-cpa@outlook.com',
-    role: 'sub_admin',
-    fullName: 'Eya',
-    label: 'Partenaire Cabinet (Support Arabe)',
-  },
-  {
-    email: 'stephanie@comptaflow.com',
-    role: 'sub_admin',
-    fullName: 'Stéphanie Laplante',
-    label: 'Partenaire Cabinet',
+    fullName: 'Sylvie Charette',
+    label: 'Équipe Compta-Flow — Production comptable',
   },
 ];
 
