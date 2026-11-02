@@ -7,7 +7,9 @@ import {
   type PricingEstimateResult,
   type PricingQuestionnaireAnswers,
   type EmployeeBand,
+  type LateMonthsBand,
   type ProfileType,
+  type TransactionsBand,
   type UrgencyLevel,
   type VolumeBand,
 } from '../lib/pricingEstimator';
@@ -22,9 +24,11 @@ const DEFAULT_ANSWERS: PricingQuestionnaireAnswers = {
   employeeBand: 'none',
   urgency: 'standard',
   addOns: [],
+  transactionsBand: 't31_75',
+  lateMonthsBand: 'm1_6',
 };
 
-export type PricingStep = 0 | 1 | 2 | 3 | 4 | 5 | 'result';
+export type PricingStep = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 'result';
 
 export function usePricingEstimate(initialServiceId?: ServiceId) {
   const stored = loadPricingAnswers();
@@ -59,6 +63,8 @@ export function usePricingEstimate(initialServiceId?: ServiceId) {
   const setVolumeBand = (volumeBand: VolumeBand) => update({ volumeBand });
   const setEmployeeBand = (employeeBand: EmployeeBand) => update({ employeeBand });
   const setUrgency = (urgency: UrgencyLevel) => update({ urgency });
+  const setTransactionsBand = (transactionsBand: TransactionsBand) => update({ transactionsBand });
+  const setLateMonthsBand = (lateMonthsBand: LateMonthsBand) => update({ lateMonthsBand });
 
   const toggleAddOn = (addOnId: ServiceId) => {
     setAnswers((prev) => {
@@ -107,6 +113,8 @@ export function usePricingEstimate(initialServiceId?: ServiceId) {
     setVolumeBand,
     setEmployeeBand,
     setUrgency,
+    setTransactionsBand,
+    setLateMonthsBand,
     toggleAddOn,
     nextStep,
     prevStep,
