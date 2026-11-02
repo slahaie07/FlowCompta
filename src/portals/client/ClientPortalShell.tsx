@@ -70,7 +70,7 @@ export function ClientPortalShell({
 
   // Chat message state
   const [chatMessages, setChatMessages] = useState([
-    { sender: 'Cabinet', text: 'Bonjour! Je suis votre personne attitrée à l'équipe Compta-Flow. J\'ai bien reçu vos reçus Dext de ce mois-ci. Pouvez-vous signer votre mandat électronique d\'autorisation?', time: '11:20' }
+    { sender: 'Cabinet', text: 'Bonjour! Je suis votre personne attitrée à l’équipe Compta-Flow. J\'ai bien reçu vos reçus Dext de ce mois-ci. Pouvez-vous signer votre mandat électronique d\'autorisation?', time: '11:20' }
   ]);
   const [newMsg, setNewMsg] = useState('');
 
