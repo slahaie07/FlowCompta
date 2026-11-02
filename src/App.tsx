@@ -18,6 +18,8 @@ import { Cookies } from './components/common/Cookies';
 import { RegionalLanding } from './components/common/RegionalLanding';
 import { BlogListPage, BlogArticlePage } from './components/common/BlogPage';
 import { EstimatePage } from './components/common/EstimatePage';
+import { TarifsPage } from './components/common/TarifsPage';
+import { ConfiancePage } from './components/common/ConfiancePage';
 import { TaxCalculator } from './components/common/TaxCalculator';
 import { LegalCookieBanner } from './components/common/LegalCookieBanner';
 import { OrganicLoader } from './components/ui/OrganicLoader';
@@ -115,7 +117,6 @@ function AppContent() {
       company_name: data.companyName || null,
       email: data.email || user.email,
       neq: data.neq || null,
-      nas: data.nas || null,
       initial_profile_type: data.initialProfileType,
       active_mode: data.activeMode,
       preferred_language: data.language || 'fr',
@@ -146,8 +147,7 @@ function AppContent() {
           selectedExpertEmail: selectedExpertEmail,
           companyName: data.companyName || null,
           neq: data.neq || null,
-          nas: data.nas || null,
-          initialProfileType: data.initialProfileType || 'personal',
+              initialProfileType: data.initialProfileType || 'personal',
         }),
       });
     } catch {
@@ -203,6 +203,8 @@ function AppContent() {
       <Route path="/ressources/:slug" element={<BlogArticlePage />} />
       <Route path="/resources" element={<Navigate to="/ressources" replace />} />
       <Route path="/estimate" element={<EstimatePage />} />
+      <Route path="/tarifs" element={<TarifsPage />} />
+      <Route path="/confiance" element={<ConfiancePage />} />
       <Route path="/calculateur-taxes" element={<TaxCalculator />} />
       <Route path="/tax-calculator" element={<Navigate to="/calculateur-taxes" replace />} />
       <Route path="/showcase" element={<Showcase />} />
