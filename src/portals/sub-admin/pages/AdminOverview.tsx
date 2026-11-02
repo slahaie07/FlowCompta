@@ -1073,7 +1073,7 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
                   </div>
                   <div className="p-4 bg-white/5 border border-white/5 rounded-xl hover:border-gold/20 transition-all space-y-2">
                     <label htmlFor="calcCatchUpHours" className="text-xs font-semibold text-ivoire block select-none">
-                      Heures de retard (60 $/h)
+                      Heures de retard (35 $/h)
                     </label>
                     <input
                       type="number"
