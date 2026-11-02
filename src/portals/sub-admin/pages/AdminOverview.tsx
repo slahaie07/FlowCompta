@@ -24,8 +24,8 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
   const { t, lang } = useLanguage();
   const { stats, loading } = useAdminHub();
 
-  // Eya's currency/tax region toggle
-  const [taxRegion, setTaxRegion] = useState<'CA' | 'TN'>('CA');
+  // Région fiscale active : Canada (l'ancienne bascule Tunisie, réservée à un compte retiré, a été enlevée)
+  const taxRegion: 'CA' | 'TN' = 'CA';
 
   // Co-Pilot production queue state
   const [dbServices, setDbServices] = useState<any[]>([]);
@@ -83,9 +83,9 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
     const defaultMocks = [
       {
         id: 'mock-1',
-        client_name: 'Stéphanie Laplante',
-        company_name: 'Laplante Design Inc.',
-        email: 'stephanie@comptaflow.com',
+        client_name: 'Sylvie Charette',
+        company_name: 'Charette Services Inc.',
+        email: 'viviee28@hotmail.com',
         service_type: 'monthly_bookkeeping',
         status: 'En traitement',
         created_at: new Date(Date.now() - 36 * 3600000).toISOString(),
@@ -231,7 +231,6 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
   const [calcSoftwareSetup, setCalcSoftwareSetup] = useState<boolean>(false);
   const [calcPayroll, setCalcPayroll] = useState<boolean>(false);
 
-  const isEya = userData?.email === 'eya-cpa@outlook.com' || userData?.fullName?.includes('Eya') || userData?.displayName?.includes('Eya');
 
   // Exchange rate: 1 CAD = 2.25 TND
   const exchangeRate = 2.25;
@@ -315,40 +314,6 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
         <Badge variant="gold" className="bg-gold/10 text-gold border-gold/20 py-2 px-6 text-xs font-black uppercase tracking-[0.3em] mb-2">{t('adminHub.badge')}</Badge>
       </header>
 
-      {/* Bouton Bascule "Canada / Tunisie" (Spécifique pour Eya) */}
-      {isEya && (
-        <div className="flex items-center justify-between gap-6 rounded-2xl border border-gold/20 bg-gold/[0.02] p-6 max-w-xl shadow-[0_0_30px_rgba(212,175,55,0.05)]">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-2xl">
-              {taxRegion === 'CA' ? '🇨🇦' : '🇹🇳'}
-            </div>
-            <div>
-              <p className="font-bold text-ivoire uppercase tracking-wider text-sm">Zone Fiscale Active (Eya)</p>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Basculez instantanément les normes comptables, les taxes et la devise de référence.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className={`text-[10px] font-black uppercase tracking-widest ${taxRegion === 'CA' ? 'text-gold' : 'text-slate-500'}`}>Canada</span>
-            <button
-              type="button"
-              onClick={() => {
-                setTaxRegion(prev => prev === 'CA' ? 'TN' : 'CA');
-                toast.info(taxRegion === 'CA' ? "Passage aux normes comptables tunisiennes (TND)" : "Retour aux normes canadiennes (CAD)");
-              }}
-              className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gold/30 bg-gold/20"
-            >
-              <span
-                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-gold shadow ring-0 transition duration-200 ease-in-out ${
-                  taxRegion === 'TN' ? 'translate-x-5' : 'translate-x-0'
-                }`}
-              />
-            </button>
-            <span className={`text-[10px] font-black uppercase tracking-widest ${taxRegion === 'TN' ? 'text-gold' : 'text-slate-500'}`}>Tunisie</span>
-          </div>
-        </div>
-      )}
 
       {stats.pendingInteracValidations > 0 && (
         <Link
