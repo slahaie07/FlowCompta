@@ -216,10 +216,15 @@ Total: ${formatCAD(results.total)}`;
                     ? 'L\'Ontario applique une TVH unique et harmonisée de 13 % (qui combine les portions fédérale et provinciale).'
                     : 'Ontario applies a single 13% Harmonized Sales Tax (HST) which combines the federal and provincial portions.'
                 )}
-                {['NB', 'NL', 'NS', 'PE'].includes(selectedProvince) && (
+                {['NB', 'NL', 'PE'].includes(selectedProvince) && (
                   isFr
                     ? 'Cette province applique une TVH unique et harmonisée de 15 %.'
                     : 'This province applies a single 15% Harmonized Sales Tax (HST).'
+                )}
+                {selectedProvince === 'NS' && (
+                  isFr
+                    ? 'La Nouvelle-Écosse applique une TVH unique et harmonisée de 14 % (taux en vigueur depuis le 1er avril 2025).'
+                    : 'Nova Scotia applies a single 14% Harmonized Sales Tax (HST) (rate in effect since April 1, 2025).'
                 )}
                 {['BC', 'SK', 'MB'].includes(selectedProvince) && (
                   isFr
