@@ -31,7 +31,6 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
     companyName: '',
     email: initialEmail || '',
     neq: '',
-    nas: '',
     incomeBracket: '100k-500k',
     employeeCount: '1-5',
     province: 'QC',
@@ -245,7 +244,6 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
                       <Input label={tr('onboarding.neq')} placeholder="116XXXXXXX" maxLength={10} value={data.neq} onChange={(e) => setData({ ...data, neq: e.target.value })} required />
                     </>
                   )}
-                  <Input label={tr('onboarding.nas')} placeholder="000 000 000" value={data.nas} onChange={(e) => setData({ ...data, nas: e.target.value })} />
                 </div>
               </motion.div>
             )}
