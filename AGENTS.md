@@ -2,7 +2,7 @@
 
 > **Confidentiel** — Ne pas documenter côté client, UI publique ou marketing. Les utilisateurs voient uniquement « l'assistant ComptaFlow » (personas humaines).
 
-Architecture modulaire : routeur → spécialiste → revue CPA (si applicable), intégrée à l'API support, au CLI et aux skills Cursor.
+Architecture modulaire : routeur → spécialiste → revue qualité (si applicable), intégrée à l'API support, au CLI et aux skills Cursor.
 
 ## Vue d'ensemble
 
@@ -16,7 +16,7 @@ Architecture modulaire : routeur → spécialiste → revue CPA (si applicable),
          ▼                 ▼                 ▼
     tax, payroll     billing, bookkeeping    portal, procedure-guide, …
          │                 │                 │
-         └──────────── CPA superviseur ──────┘  (TAX, PAYROLL, BOOKKEEPING)
+         └──────────── Réviseur qualité ──────┘  (TAX, PAYROLL, BOOKKEEPING)
          … internes: document-vision, reconciliation, devops
 ```
 
@@ -24,7 +24,7 @@ Architecture modulaire : routeur → spécialiste → revue CPA (si applicable),
 
 1. **Routeur** — classifie l'intention (`gemini-client.ts` → schéma JSON)
 2. **Spécialiste** — réponse avec persona humaine (`personas.ts`) + contexte procédural si `metadata.serviceId`
-3. **Super-agent CPA** — validation interne pour `TAX`, `PAYROLL`, `BOOKKEEPING` (`cpa-review.ts`) — jamais exposé au client
+3. **Revue qualité et conformité** — validation interne pour `TAX`, `PAYROLL`, `BOOKKEEPING` (`cpa-review.ts`) — jamais exposé au client
 
 ## Agents routés (support client — invisible pour l'utilisateur)
 
@@ -48,7 +48,7 @@ Architecture modulaire : routeur → spécialiste → revue CPA (si applicable),
 | Agent | ID | Rôle |
 |-------|-----|------|
 | Routeur | `router` | Classification intent |
-| **Super-agent CPA** | **`cpa-supervisor`** | **Revue CPA post-spécialiste (TAX/paie/tenue de livres)** |
+| **Revue qualité et conformité** | **`cpa-supervisor`** | **Revue qualité post-spécialiste (TAX/paie/tenue de livres)** |
 | Vision | `document-vision` | OCR documents |
 | Rapprochement | `reconciliation` | Interac ↔ factures |
 | Cabinet | `firm-ops` | Portail sub_admin |
@@ -59,7 +59,7 @@ Architecture modulaire : routeur → spécialiste → revue CPA (si applicable),
 | KYC | `kyc-review` | Revue profils |
 | Elite Hunter | `marketing-hunter` | Prospection B2B (cron) |
 
-### Super-agent CPA (`cpa-supervisor`)
+### Revue qualité et conformité (`cpa-supervisor`)
 
 - **Fichier** : `src/agents/cpa-review.ts` + définition dans `registry.ts`
 - **Déclenché** : automatiquement après tax, payroll, bookkeeping (`CPA_SUPERVISED_INTENTS`)

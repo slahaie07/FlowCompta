@@ -20,11 +20,9 @@
     <meta name="geo.placename" content="Canada" />
     <meta name="language" content="French" />
     <link rel="canonical" href="https://compta-flow.net/" />
-    <link rel="alternate" hreflang="fr-CA" href="https://compta-flow.net/" />
-    <link rel="alternate" hreflang="en-CA" href="https://compta-flow.net/" />
     <link rel="alternate" hreflang="x-default" href="https://compta-flow.net/" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%230A0A0A' stroke='%23D4AF37' stroke-width='3'/%3E%3Ctext x='32' y='42' font-size='30' font-family='Georgia' fill='%23D4AF37' text-anchor='middle'%3EC%3C/text%3E%3C/svg%3E" />
-    <link rel="apple-touch-icon" href="https://compta-flow.net/marketing/general/promo-cabinet-cpa.png" />
+    <link rel="apple-touch-icon" href="https://compta-flow.net/og-comptaflow.png" />
 
     <!-- Open Graph / Facebook / LinkedIn -->
     <meta property="og:type" content="website" />
@@ -34,8 +32,8 @@
     <meta property="og:url" content="https://compta-flow.net/" />
     <meta property="og:title" content="ComptaFlow — La comptabilité qui coule de source" />
     <meta property="og:description" content="Portail client premium, équipe dédiée, conformité PIPEDA et Loi 25. Tenue de livres, taxes et paie pour entrepreneurs canadiens. Ouverture de dossier : 149 $, offerte aux 10 premiers clients." />
-    <meta property="og:image" content="https://compta-flow.net/marketing/general/promo-cabinet-cpa.png" />
-    <meta property="og:image:secure_url" content="https://compta-flow.net/marketing/general/promo-cabinet-cpa.png" />
+    <meta property="og:image" content="https://compta-flow.net/og-comptaflow.png" />
+    <meta property="og:image:secure_url" content="https://compta-flow.net/og-comptaflow.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="628" />
@@ -47,7 +45,7 @@
     <meta name="twitter:url" content="https://compta-flow.net/" />
     <meta name="twitter:title" content="ComptaFlow — La comptabilité qui coule de source" />
     <meta name="twitter:description" content="Portail client 24/7, coffre-fort chiffré, paiement Interac. Comptabilité premium pour entrepreneurs canadiens." />
-    <meta name="twitter:image" content="https://compta-flow.net/marketing/general/promo-cabinet-cpa.png" />
+    <meta name="twitter:image" content="https://compta-flow.net/og-comptaflow.png" />
     <meta name="twitter:image:alt" content="ComptaFlow — Comptabilité premium Canada" />
 
     <!-- Structured data (Organization + WebSite + ProfessionalService) -->
@@ -62,12 +60,16 @@
           "url": "https://compta-flow.net",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://compta-flow.net/marketing/general/promo-cabinet-cpa.png",
+            "url": "https://compta-flow.net/og-comptaflow.png",
             "width": 1200,
             "height": 628
           },
           "description": "Plateforme comptable premium pour entrepreneurs au Canada : tenue de livres, déclarations fiscales, paie et portail client sécurisé.",
           "email": "contact@compta-flow.net",
+          "sameAs": [
+            "https://www.facebook.com/profile.php?id=61591453943172",
+            "https://www.linkedin.com/company/compta-flow"
+          ],
           "areaServed": {
             "@type": "Country",
             "name": "Canada"
@@ -89,7 +91,7 @@
           "@id": "https://compta-flow.net/#service",
           "name": "ComptaFlow",
           "url": "https://compta-flow.net",
-          "image": "https://compta-flow.net/marketing/general/promo-cabinet-cpa.png",
+          "image": "https://compta-flow.net/og-comptaflow.png",
           "description": "Services comptables pour PME et entrepreneurs : tenue de livres horaire ou forfaitaire, TPS/TVQ/TVH, paie, T4/Relevé 1, configuration logiciel comptable.",
           "email": "contact@compta-flow.net",
           "priceRange": "$$",
@@ -199,20 +201,7 @@
     }
     </script>
 
-    <!-- Tracking Pixel (GA4 / GTM Server-Side Ready - Loi 25 Compliant) -->
-    <script>
-      const GA_ID = window.__GA_ID__ || '';
-      if (GA_ID && GA_ID !== 'G-XXXXXXXXXX') {
-        const gaScript = document.createElement('script');
-        gaScript.async = true;
-        gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
-        document.head.appendChild(gaScript);
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', GA_ID, { 'anonymize_ip': true });
-      }
-    </script>
+    <!-- GA4 : à brancher quand un identifiant de mesure existera (chargeur retiré, vague B). -->
 
     <!-- Font preloading for LCP performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
