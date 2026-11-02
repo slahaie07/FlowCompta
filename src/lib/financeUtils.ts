@@ -42,10 +42,13 @@ export function calculateCanadianTaxes(amount: number, province: ProvinceCode = 
       break;
     case 'NB':
     case 'NL':
-    case 'NS':
     case 'PE':
       tpsRate = 0;
       tvhRate = 0.15;
+      break;
+    case 'NS':
+      tpsRate = 0;
+      tvhRate = 0.14;
       break;
     case 'BC':
       tvqRate = 0.07;
@@ -84,9 +87,10 @@ export function getTaxSubtitle(province: ProvinceCode, lang: 'fr' | 'en' = 'fr')
       return fr ? 'TVH (13 %)' : 'HST (13%)';
     case 'NB':
     case 'NL':
-    case 'NS':
     case 'PE':
       return fr ? 'TVH (15 %)' : 'HST (15%)';
+    case 'NS':
+      return fr ? 'TVH (14 %)' : 'HST (14%)';
     case 'BC':
       return fr ? 'TPS (5 %) + TVP C.-B. (7 %)' : 'GST (5%) + BC PST (7%)';
     case 'SK':
@@ -107,7 +111,7 @@ export function getTaxDisplayLines(
   const lines: TaxDisplayLine[] = [];
 
   if (result.tvh > 0) {
-    const rate = province === 'ON' ? '13' : '15';
+    const rate = province === 'ON' ? '13' : province === 'NS' ? '14' : '15';
     lines.push({
       label: fr ? `TVH harmonisée (${rate} %)` : `Harmonized HST (${rate}%)`,
       amount: result.tvh,
