@@ -43,6 +43,12 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks(id) {
             if (id.includes('node_modules')) {
+              // xlsx (SheetJS) n’est utilisé que par une page paresseuse de
+              // l’espace admin : ne pas le forcer dans un paquet fournisseur
+              // chargé dès la page d’accueil — le laisser suivre son morceau.
+              if (id.includes('xlsx')) {
+                return undefined;
+              }
               if (id.includes('@supabase')) {
                 return 'vendor-db';
               }
