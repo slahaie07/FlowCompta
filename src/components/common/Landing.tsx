@@ -45,14 +45,31 @@ export function Landing() {
         ];
 
   useEffect(() => {
+    // Défilement d'ancre inter-pages : SiteHeader stocke la section visée dans
+    // sessionStorage avant de naviguer vers l'accueil. On réessaie jusqu'à ce
+    // que la section soit réellement rendue (montage parfois différé juste
+    // après la navigation) et on ne consomme la cible qu'après un défilement
+    // réussi — l'ancien essai unique à 150 ms, clé supprimée d'avance et
+    // échec silencieux (?.), se perdait sans aucun recours.
     const target = sessionStorage.getItem('comptaflow-scroll-target');
-    if (target) {
-      sessionStorage.removeItem('comptaflow-scroll-target');
-      const timer = setTimeout(() => {
-        document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' });
-      }, 150);
-      return () => clearTimeout(timer);
-    }
+    if (!target) return;
+    let attempts = 0;
+    const maxAttempts = 25; // ~2,5 s de réessais
+    const tryScroll = () => {
+      attempts += 1;
+      const el = document.getElementById(target);
+      if (el) {
+        sessionStorage.removeItem('comptaflow-scroll-target');
+        window.clearInterval(interval);
+        el.scrollIntoView({ behavior: 'smooth' });
+      } else if (attempts >= maxAttempts) {
+        sessionStorage.removeItem('comptaflow-scroll-target');
+        window.clearInterval(interval);
+      }
+    };
+    const interval = window.setInterval(tryScroll, 100);
+    tryScroll();
+    return () => window.clearInterval(interval);
   }, []);
 
   return (

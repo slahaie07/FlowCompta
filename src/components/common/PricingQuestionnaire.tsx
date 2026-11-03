@@ -393,23 +393,23 @@ export function PricingQuestionnaire({
 
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
                 {onContinue && (
-                  <Button variant="gold" className="flex-1 h-12 whitespace-nowrap" onClick={() => onContinue(result.serviceId)}>
+                  <Button variant="gold" className="flex-1 h-12 whitespace-nowrap gap-2" onClick={() => onContinue(result.serviceId)}>
                     {variant === 'staff'
                       ? pricingKey(t, variant, 'cta.invoices')
-                      : t('pricingQuestionnaire.cta.continue')}{' '}
-                    <ArrowRight size={16} className="ml-2" />
+                      : t('pricingQuestionnaire.cta.continue')}
+                    <ArrowRight size={16} className="shrink-0" />
                   </Button>
                 )}
                 {showSignupCta && variant === 'client' && (
                   <>
                     <Button variant="gold" className="flex-1 h-12 whitespace-nowrap" asChild>
-                      <a href="/login?next=/onboarding&register=1">
-                        {t('pricingQuestionnaire.cta.signup')} <ArrowRight size={16} className="ml-2" />
+                      <a href="/login?next=/onboarding&register=1" className="flex items-center justify-center gap-2 whitespace-nowrap">
+                        {t('pricingQuestionnaire.cta.signup')} <ArrowRight size={16} className="shrink-0" />
                       </a>
                     </Button>
                     <Button variant="secondary" className="flex-1 h-12 whitespace-nowrap" asChild>
-                      <a href={CONFIG.APP.INTAKE_FORM_URL} target="_blank" rel="noreferrer">
-                        {t('pricingQuestionnaire.cta.requestQuote')} <Mail size={16} className="ml-2 inline" />
+                      <a href={CONFIG.APP.INTAKE_FORM_URL} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 whitespace-nowrap">
+                        {t('pricingQuestionnaire.cta.requestQuote')} <Mail size={16} className="shrink-0" />
                       </a>
                     </Button>
                   </>
