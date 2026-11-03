@@ -109,7 +109,7 @@ export function generateSubscriptionReportEmail(userData: UserData, amount: numb
           <div class="total-box">
             <div class="label">Montant du premier versement</div>
             <div style="font-size: 28px; font-weight: bold; color: #D4AF37;">${amount.toLocaleString()} $ CAD</div>
-            <div style="font-size: 10px; color: #666;">(Incluant frais d'ouverture de 60$)</div>
+            <div style="font-size: 10px; color: #666;">(Incluant frais d'ouverture de 149 $)</div>
           </div>
         </div>
         <div class="footer">

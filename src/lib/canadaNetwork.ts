@@ -34,11 +34,10 @@ export const SITE = {
   domain: 'compta-flow.net',
   url: 'https://compta-flow.net',
   supportEmail: SUPPORT_EMAIL,
-  privacyEmail: 'privacy@compta-flow.net',
+  privacyEmail: SUPPORT_EMAIL,
   dataRegion: 'ca-central-1',
   publisher: 'ComptaFlow',
-  neq: '2276543210',
-  publisherCity: 'Québec, QC, Canada',
+  publisherCity: 'Gatineau, QC, Canada',
 } as const;
 
 export const CANADIAN_REGIONS: Record<ProvinceCode, CanadianRegion> = {

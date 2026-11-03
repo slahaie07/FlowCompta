@@ -34,17 +34,18 @@ export const CONFIG = {
   // Paiements — Interac e-Transfer uniquement (aucune carte / PayPal)
   PAYMENT_METHOD: 'interac' as const,
 
-  // Paramètres Métier
+  // Paramètres Métier — prix d'entrée de la grille officielle, alignés sur servicesCatalog.ts
+  // (les forfaits mensuels varient ensuite selon l'échelle de transactions de pricingEstimator.ts)
   FEES: {
     SETUP: 149.00,
     HOURLY_BOOKKEEPING: 35.00,
     MONTHLY_MICRO: 149.99,
-    MONTHLY_SMALL: 349.99,
-    MONTHLY_SME: 599.99,
+    MONTHLY_SMALL: 249.99,
+    MONTHLY_SME: 449.99,
     GST_QST: 75.00,
     PAYROLL: 49.00,
     T4_RELEVE1: 15.00,
-    CATCH_UP: 60.00,
+    CATCH_UP: 75.00,
     SOFTWARE_SETUP: 199.00,
     TAX_HELP_AUTONOMOUS: 199.99,
   },

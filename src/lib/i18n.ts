@@ -92,7 +92,7 @@ export const i18n = {
         },
         catchUp: {
           name: "Comptabilité en retard",
-          desc: "Mise à jour d'une tenue de livres en retard — facturé au tarif horaire selon le volume.",
+          desc: "Mise à jour d'une tenue de livres en retard — facturé par mois de retard : 75 $/mois (1 à 6 mois), 65 $/mois (7 à 12 mois), 60 $/mois (13 mois et plus, minimum 900 $).",
           price: "60 $ – 75 $ / mois de retard"
         },
         softwareSetup: {
@@ -103,7 +103,7 @@ export const i18n = {
         taxHelpAutonomous: {
           name: "Aide impôt travailleur autonome",
           desc: "Rassembler et structurer vos chiffres avant transmission à votre comptable.",
-          price: "199 $"
+          price: "199,99 $"
         }
       }
     },
@@ -142,9 +142,9 @@ export const i18n = {
       peace: "Tranquillité d'esprit",
       total: "Totale",
       
-      stat1Val: "24",
+      stat1Val: "4",
       stat1Unit: "h",
-      stat1Desc: "Délai de réponse garanti, jours ouvrables",
+      stat1Desc: "Réponse écrite sous 4 h ouvrables",
       stat2Val: "100",
       stat2Unit: "%",
       stat2Desc: "En ligne — du paiement au livrable final",
@@ -172,7 +172,7 @@ export const i18n = {
       q1: "Comment fonctionne le tarif horaire ?",
       a1: "Pour les mandats ponctuels ou les remplacements, nous facturons 35 $ de l'heure. Un devis vous est fourni avant tout travail.",
       q2: "Quel forfait mensuel me convient ?",
-      a2: "Micro-entreprise (150–250 $/mois) pour peu de transactions sans employés ; Petite entreprise (300–500 $/mois) pour un volume moyen ; PME avec paie (500–800 $+/mois) pour les dossiers plus exigeants.",
+      a2: "Nos forfaits dépendent de votre nombre de transactions mensuelles. Le forfait Micro est à 149,99 $/mois (0 à 30 transactions, livrables trimestriels). Les forfaits mensuels sont à 249,99 $/mois (31 à 75 transactions), 349,99 $/mois (76 à 150), 449,99 $/mois (151 à 200), 599,99 $/mois (201 à 300), 799,99 $/mois (301 à 450) et 999,99 $/mois et plus (451 transactions et plus). La paie est en sus : 49 $/mois + 12 $ par employé. Pour les très petits dossiers, le service à l’heure est offert à 35 $/h. Grille complète : /tarifs — ou obtenez votre prix exact en une minute avec l’estimateur : /estimate.",
       q3: "Mes documents sont-ils en sécurité ?",
       a3: "Oui. Vos fichiers sont transmis chiffrés (TLS) et stockés dans une base de données hébergée au Canada, accessible uniquement par vous et votre préparateur comptable.",
       q4: "Les prix affichés incluent-ils les taxes ?",
@@ -490,7 +490,7 @@ export const i18n = {
       subtitle: "Votre préparateur à portée de clic",
       formTitle: "Envoyer un message formel",
       sentTitle: "Message acheminé avec succès !",
-      sentDesc: "Votre message a été préparé dans votre courriel — envoyez-le à contact@compta-flow.net. Réponse sous 24 h ouvrables.",
+      sentDesc: "Votre message a été préparé dans votre courriel — envoyez-le à contact@compta-flow.net. Réponse écrite sous 4 h ouvrables.",
       subject: "Objet de la demande",
       subjectPlaceholder: "ex: Question sur ma déclaration de taxes…",
       message: "Message détaillé",
@@ -594,6 +594,7 @@ export const i18n = {
         provincialTaxAccount: "Compte taxe provinciale (TVQ/TVP)",
         reportingPeriod: "Période de déclaration",
         payFrequency: "Fréquence de paie",
+        paySchedule: "Calendrier de paie",
         provinceWork: "Province de travail des employés",
         taxYear: "Année fiscale",
         monthsBehind: "Nombre de mois en retard",
@@ -1022,7 +1023,7 @@ export const i18n = {
         },
         catchUp: {
           name: "Catch-up bookkeeping",
-          desc: "Updating overdue books — billed at hourly rate based on volume.",
+          desc: "Updating overdue books — billed per month of delay: $75/month (1 to 6 months), $65/month (7 to 12 months), $60/month (13 months and up, $900 minimum).",
           price: "$60 – $75 / late month"
         },
         softwareSetup: {
@@ -1033,7 +1034,7 @@ export const i18n = {
         taxHelpAutonomous: {
           name: "Self-employed tax prep help",
           desc: "Gather and organize your numbers before sending to your accountant.",
-          price: "$199"
+          price: "$199.99"
         }
       }
     },
@@ -1072,9 +1073,9 @@ export const i18n = {
       peace: "Peace of Mind",
       total: "Total",
       
-      stat1Val: "24",
+      stat1Val: "4",
       stat1Unit: "h",
-      stat1Desc: "Guaranteed response time, business days",
+      stat1Desc: "Written reply within 4 business hours",
       stat2Val: "100",
       stat2Unit: "%",
       stat2Desc: "Online — from payment to final deliverables",
@@ -1102,7 +1103,7 @@ export const i18n = {
       q1: "How does hourly billing work?",
       a1: "For one-off mandates or replacements, we bill $35 per hour. A quote is provided before any work begins.",
       q2: "Which monthly package is right for me?",
-      a2: "Micro-business ($150–$250/mo) for few transactions without employees; Small business ($300–$500/mo) for average volume; SME with payroll ($500–$800+/mo) for demanding files.",
+      a2: "Our packages are based on your monthly transaction volume. The Micro package is $149.99/month (0 to 30 transactions, quarterly deliverables). Monthly packages are $249.99/month (31 to 75 transactions), $349.99/month (76 to 150), $449.99/month (151 to 200), $599.99/month (201 to 300), $799.99/month (301 to 450) and $999.99/month and up (451 transactions and up). Payroll is extra: $49/month + $12 per employee. For very small files, hourly service is available at $35/hr. Full grid: /tarifs — or get your exact price in one minute with the estimator: /estimate.",
       q3: "Are my documents secure?",
       a3: "Yes. Files are encrypted in transit (TLS) and stored in a Canadian-hosted database, accessible only by you and your bookkeeper.",
       q4: "Do displayed prices include taxes?",
@@ -1524,6 +1525,7 @@ export const i18n = {
         provincialTaxAccount: "Provincial tax account (QST/PST)",
         reportingPeriod: "Reporting period",
         payFrequency: "Pay frequency",
+        paySchedule: "Pay schedule",
         provinceWork: "Employees' work province",
         taxYear: "Tax year",
         monthsBehind: "Months behind",
@@ -1916,7 +1918,7 @@ export const i18n = {
         t4Releve1: { name: "T4 / Relevé 1", desc: "Feuillets fin d'année.", price: "15 $ / employé / an" },
         catchUp: { name: "Compta en retard", desc: "Mise à jour.", price: "60 $ – 75 $ / mois de retard" },
         softwareSetup: { name: "Config. logiciel", desc: "QuickBooks, Sage.", price: "199 $" },
-        taxHelpAutonomous: { name: "Aide impôt autonome", desc: "Rassembler chiffres.", price: "199 $" }
+        taxHelpAutonomous: { name: "Aide impôt autonome", desc: "Rassembler chiffres.", price: "199,99 $" }
       },
       perHour: "À l'heure",
       perMonth: "Par mois",
@@ -1954,9 +1956,9 @@ export const i18n = {
       item4Val: "1,847.00 $",
       peace: "راحة البال",
       total: "الإجمالي",
-      stat1Val: "24",
+      stat1Val: "4",
       stat1Unit: "ساعة",
-      stat1Desc: "وقت استجابة مضمون، أيام العمل",
+      stat1Desc: "ردّ مكتوب خلال 4 ساعات عمل",
       stat2Val: "100",
       stat2Unit: "%",
       stat2Desc: "عبر الإنترنت — من الدفع إلى التسليم النهائي",
@@ -2224,7 +2226,7 @@ export const i18n = {
       subtitle: "محاسبك على بعد نقرة",
       formTitle: "إرسال رسالة رسمية",
       sentTitle: "تم إرسال الرسالة بنجاح!",
-      sentDesc: "تم تجهيز رسالتك في تطبيق البريد — أرسلها إلى contact@compta-flow.net. الرد خلال 24 ساعة عمل.",
+      sentDesc: "تم تجهيز رسالتك في تطبيق البريد — أرسلها إلى contact@compta-flow.net. ردّ مكتوب خلال 4 ساعات عمل.",
       subject: "موضوع الطلب",
       subjectPlaceholder: "مثال: سؤال حول إقرار TPS…",
       message: "رسالة مفصلة",

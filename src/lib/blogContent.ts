@@ -44,7 +44,7 @@ Un bon portail offre : téléversement chiffré, historique des accès, signatur
 
 Le système fiscal canadien est complexe : **13 régimes de taxes différents** selon les provinces. Votre comptable en ligne doit maîtriser :
 - TPS 5 % + TVQ 9,975 % (Québec)
-- TVH 13 % (Ontario, Nouveau-Brunswick, Nouvelle-Écosse)
+- TVH 13 % (Ontario), 15 % (Nouveau-Brunswick, Île-du-Prince-Édouard, Terre-Neuve-et-Labrador) et 14 % (Nouvelle-Écosse, depuis le 1er avril 2025)
 - TPS 5 % + TVP/PST (Colombie-Britannique, Saskatchewan, Manitoba)
 - TPS 5 % seulement (Alberta, Territoires)
 
@@ -72,7 +72,7 @@ L'IA peut automatiser le classement, mais vous avez besoin d'un expert humain po
 
 Choisir un comptable en ligne au Canada, c'est avant tout choisir un **partenaire de confiance** qui comprend les réalités fiscales de votre province et protège vos données selon la loi canadienne.
 
-**[Ouvrez votre dossier gratuitement chez ComptaFlow →](/login?next=/onboarding&register=1)**
+**[Ouvrir mon dossier chez ComptaFlow — ouverture de dossier : 149 $, offerte aux 10 premiers clients →](/login?next=/onboarding&register=1)**
     `,
     bodyEn: `
 ## The 7 Criteria for Choosing Your Online Accountant in Canada
@@ -93,13 +93,13 @@ Your supporting documents must travel through an encrypted channel. A good porta
 
 Canada has **13 different tax regimes** by province. Your online accountant must master:
 - GST 5% + QST 9.975% (Quebec)
-- HST 13% (Ontario, New Brunswick, Nova Scotia)
+- HST 13% (Ontario), 15% (New Brunswick, Prince Edward Island, Newfoundland and Labrador) and 14% (Nova Scotia, since April 1, 2025)
 - GST 5% + PST (British Columbia, Saskatchewan, Manitoba)
 - GST 5% only (Alberta, Territories)
 
 ### 4. Transparent pricing with no surprises
 
-Avoid "starting from X$" offers that hide extra fees. ComptaFlow: bookkeeping from **$149.99/month** for micro-businesses, or **$35/hr** for one-time mandates. Setup fee: $149, free for the first 10 clients.
+Avoid "starting from X$" offers that hide extra fees. ComptaFlow: bookkeeping from **$149.99/month** for micro-businesses, or **$35/hr** for one-time mandates. File opening: $149, waived for the first 10 clients.
 
 ### 5. Bilingual access (French and English)
 
@@ -115,7 +115,7 @@ AI can automate sorting, but you need a human expert to interpret your financial
 
 ---
 
-**[Open your file for free with ComptaFlow →](/login?next=/onboarding&register=1)**
+**[Open my file with ComptaFlow — file opening: $149, waived for our first 10 clients →](/login?next=/onboarding&register=1)**
     `,
   },
   {
@@ -140,22 +140,22 @@ Vous **devez** vous inscrire à la TPS/TVH si vos revenus taxables dépassent **
 ### Les différents régimes provinciaux
 
 **Québec (TPS 5 % + TVQ 9,975 %)**
-En plus de la TPS fédérale, le Québec impose la TVQ (Taxe de vente du Québec). Vous devez faire deux déclarations distinctes : l'une à l'ARC (Agence du revenu du Canada) et l'autre à Revenu Québec. Le taux combiné est de 14,975 %.
+En plus de la TPS fédérale, le Québec impose la TVQ (Taxe de vente du Québec). Au Québec, la TPS et la TVQ se déclarent généralement ensemble auprès de Revenu Québec, qui administre les deux taxes. Le taux combiné est de 14,975 %.
 
 **Ontario (TVH 13 %)**
 L'Ontario a harmonisé sa taxe provinciale avec la TPS fédérale pour créer la TVH (Taxe de vente harmonisée). Une seule déclaration à l'ARC. Taux : 13 %.
 
 **Colombie-Britannique (TPS 5 % + TVP 7 %)**
-La C.-B. n'a pas harmonisé sa taxe. Vous produisez la TPS à l'ARC et la TVP (Provincial Sales Tax) séparément au gouvernement provincial. Le taux TVP varie selon les biens/services.
+La C.-B. n'a pas harmonisé sa taxe. Vous produisez la TPS à l'ARC et la TVP (Provincial Sales Tax) séparément au gouvernement provincial. Le taux général de la TVP est de 7 % (certains biens, comme l'alcool, sont taxés à un taux différent).
 
 **Alberta (TPS 5 % seulement)**
 L'Alberta est la seule province sans taxe de vente provinciale, ce qui simplifie la comptabilité. Une seule déclaration TPS à l'ARC.
 
-**Atlantique (TVH 15 %)**
-Nouveau-Brunswick, Nouvelle-Écosse, Île-du-Prince-Édouard et Terre-Neuve ont tous un taux TVH de 15 % harmonisé avec le fédéral.
+**Atlantique (TVH 15 %, sauf la Nouvelle-Écosse à 14 %)**
+Le Nouveau-Brunswick, l'Île-du-Prince-Édouard et Terre-Neuve-et-Labrador ont un taux TVH de 15 %, harmonisé avec le fédéral. La Nouvelle-Écosse fait exception : son taux TVH est passé à 14 % le 1er avril 2025.
 
 **Prairies (TPS 5 % + TVP provinciale)**
-Saskatchewan (PST 6 %), Manitoba (PST 7 %) ont leur propre taxe provinciale distincte.
+La Saskatchewan (TVP 6 %) et le Manitoba (TVD 7 %) ont leur propre taxe provinciale distincte.
 
 ### Fréquence de production
 
@@ -189,7 +189,7 @@ You **must** register for GST/HST if your taxable revenues exceed **$30,000 over
 ### Provincial Tax Regimes
 
 **Quebec (GST 5% + QST 9.975%)**
-Two separate returns: one to CRA, one to Revenu Quebec. Combined rate: 14.975%.
+In Quebec, GST and QST are generally filed together with Revenu Québec, which administers both taxes. Combined rate: 14.975%.
 
 **Ontario (HST 13%)**
 Harmonized — single return to CRA at 13%.
@@ -200,8 +200,8 @@ Not harmonized — GST to CRA, PST separately to provincial government.
 **Alberta (GST 5% only)**
 Alberta has no provincial sales tax — simplest tax environment in Canada.
 
-**Atlantic (HST 15%)**
-New Brunswick, Nova Scotia, PEI, and Newfoundland all have 15% HST.
+**Atlantic (HST 15%, except Nova Scotia at 14%)**
+New Brunswick, PEI, and Newfoundland and Labrador have 15% HST. Nova Scotia is the exception: its HST rate dropped to 14% on April 1, 2025.
 
 ### Filing Frequency
 
@@ -279,7 +279,7 @@ Ou laissez ComptaFlow gérer vos livres pendant que vous vous concentrez sur vos
 
 ---
 
-**[Démarrer avec ComptaFlow — Ouverture gratuite →](/login?next=/onboarding&register=1)**
+**[Démarrer avec ComptaFlow — ouverture de dossier : 149 $, offerte aux 10 premiers clients →](/login?next=/onboarding&register=1)**
     `,
     bodyEn: `
 ## Bookkeeping for Self-Employed Canadians
@@ -312,7 +312,7 @@ If your net tax exceeds **$3,000/year**, you must pay **quarterly installments**
 
 ---
 
-**[Start with ComptaFlow — Free file opening →](/login?next=/onboarding&register=1)**
+**[Start with ComptaFlow — file opening: $149, waived for our first 10 clients →](/login?next=/onboarding&register=1)**
     `,
   },
   {
@@ -353,7 +353,7 @@ Choisir le bon logiciel comptable peut transformer la gestion de votre PME. Voic
 
 ### QuickBooks Online — Le leader incontesté pour PME
 
-**Prix :** Simple Start 22 $/mois · Essentiel 38 $/mois · Plus 54 $/mois · Avancé 99 $/mois
+**Prix :** Simple Start 30 $/mois · Essentiel 70 $/mois · Plus 110 $/mois · Avancé 220 $/mois (prix sujets à changement — vérifiez chez Intuit)
 
 **Points forts :**
 - Synchronisation automatique avec 600+ institutions financières canadiennes
@@ -376,7 +376,7 @@ Choisir le bon logiciel comptable peut transformer la gestion de votre PME. Voic
 
 ### Sage 50cloud — Robustesse pour entreprises établies
 
-**Prix :** Pro 59,95 $/mois · Comptabilité 79,95 $/mois · Premium 114,95 $/mois
+**Prix :** Sage 50 Cloud Pro 142,25 $/mois · Premium 199,58 $/mois (autres paliers offerts ; prix sujets à changement — vérifiez chez Sage)
 
 **Points forts :**
 - Puissant pour la gestion d'inventaire et la fabrication
@@ -421,13 +421,13 @@ Chez ComptaFlow, nos experts maîtrisent les trois plateformes. Nous pouvons con
 
 ### QuickBooks Online — The SMB Leader
 
-**Price**: Simple Start $22/month · Essentials $38/month · Plus $54/month
+**Price**: Simple Start $30/month · Essentials $70/month · Plus $110/month · Advanced $220/month (prices subject to change — check with Intuit)
 
 **Best for**: SMBs 1–50 employees with moderate to high transaction volume
 
 ### Sage 50cloud — Robustness for Established Businesses
 
-**Price**: Pro $59.95/month · Accounting $79.95/month · Premium $114.95/month
+**Price**: Sage 50 Cloud Pro $142.25/month · Premium $199.58/month (other tiers available; prices subject to change — check with Sage)
 
 **Best for**: Established SMBs, distribution, manufacturing, 50+ daily transactions
 
@@ -463,15 +463,17 @@ Calculé selon les tables de retenues de l'ARC et (pour le Québec) de Revenu Qu
 **2. Cotisations au RPC/RRQ**
 - **RPC** (Régime de pensions du Canada) — hors Québec
 - **RRQ** (Régime de rentes du Québec) — Québec seulement
-- Taux 2026 : 5,95 % pour l'employé + 5,95 % pour l'employeur (sur le salaire entre 3 500 $ et 68 500 $)
+- **RPC** — taux 2026 : 5,95 % pour l'employé + 5,95 % pour l'employeur (sur le salaire entre 3 500 $ et 74 600 $)
+- **RRQ** — taux 2026 : 6,30 % pour l'employé + 6,30 % pour l'employeur (sur le salaire entre 3 500 $ et 74 600 $)
+- Sur la tranche de salaire entre 74 600 $ et 85 000 $, une deuxième cotisation supplémentaire (RPC2 au fédéral, volet supplémentaire du RRQ au Québec) de 4,00 % s'ajoute, pour l'employé comme pour l'employeur
 
 **3. Cotisations à l'AE (Assurance-emploi)**
-- Taux 2026 : 1,66 % pour l'employé, 2,32 % pour l'employeur (hors Québec)
-- Au Québec : 1,31 % (employé) + 1,834 % (employeur) — taux réduit car RQAP distinct
+- Taux 2026 : 1,63 % pour l'employé, 2,28 % pour l'employeur (hors Québec), sur la rémunération assurable jusqu'à 68 900 $
+- Au Québec : 1,30 % (employé) + 1,82 % (employeur) — taux réduits, car le RQAP couvre les prestations parentales
 
 ### Le RQAP au Québec
 
-Le Régime québécois d'assurance parentale (RQAP) remplace une partie de l'AE pour les congés de maternité/paternité. Taux 2026 : 0,494 % employé + 0,692 % employeur.
+Le Régime québécois d'assurance parentale (RQAP) remplace une partie de l'AE pour les congés de maternité/paternité. Taux 2026 : 0,430 % employé + 0,602 % employeur, sur un revenu assurable maximal de 103 000 $.
 
 ### Remises à l'ARC
 
@@ -500,7 +502,7 @@ Avant d'émettre votre premier chèque, enregistrez-vous comme employeur auprès
 
 ---
 
-Confier la paie à ComptaFlow, c'est l'assurance que chaque remise est faite à temps et que vos T4 sont produits sans erreur.
+Confier la paie à ComptaFlow, c'est compter sur un suivi rigoureux de vos échéances de remises et sur des T4 préparés avec soin, puis vérifiés avant l'envoi.
 
 **[Déléguer ma paie à ComptaFlow →](/estimate)**
     `,
@@ -514,12 +516,13 @@ Every paycheque must include three deductions:
 **1. Income Tax** — based on CRA withholding tables and province
 
 **2. CPP/QPP Contributions**
-- CPP (outside Quebec) or QPP (Quebec)
-- 2026 rate: 5.95% employee + 5.95% employer (on earnings $3,500–$68,500)
+- CPP (outside Quebec): 2026 rate of 5.95% employee + 5.95% employer (on earnings $3,500–$74,600)
+- QPP (Quebec): 2026 rate of 6.30% employee + 6.30% employer (on earnings $3,500–$74,600)
+- On earnings between $74,600 and $85,000, a second additional contribution (CPP2 federally, QPP additional plan in Quebec) of 4.00% applies to both employee and employer
 
 **3. EI Premiums**
-- 2026: 1.66% employee, 2.32% employer (outside Quebec)
-- Quebec: reduced rates due to QPIP (parental insurance)
+- 2026: 1.63% employee, 2.28% employer (outside Quebec), on insurable earnings up to $68,900
+- Quebec: 1.30% employee, 1.82% employer — reduced rates because QPIP covers parental benefits
 
 ### T4 and Relevé 1 Slips
 
@@ -534,7 +537,7 @@ Every paycheque must include three deductions:
 
 ---
 
-Delegating payroll to ComptaFlow means every remittance is on time and T4s are produced without error.
+Delegating payroll to ComptaFlow means careful tracking of your remittance deadlines and T4s prepared with care, then reviewed before filing.
 
 **[Delegate my payroll to ComptaFlow →](/estimate)**
     `,
@@ -584,7 +587,7 @@ Enregistrez-vous comme employeur auprès de l'ARC avant le premier chèque de pa
 Obligatoire dès que vous incorporez. Fortement recommandé même en entreprise individuelle.
 
 **Choisir votre logiciel comptable**
-Wave (gratuit), QuickBooks Simple Start (22 $/mois) ou déléguer à ComptaFlow.
+Wave (gratuit), QuickBooks Simple Start (30 $/mois) ou déléguer à ComptaFlow.
 
 **Établir votre exercice financier**
 Les sociétés par actions peuvent choisir n'importe quelle date de fin d'exercice (12 mois). Les entreprises individuelles suivent l'année civile (31 décembre).
@@ -618,7 +621,7 @@ Au moins 30 jours avant votre fin d'exercice, rassemblez :
 
 **Ne remettez pas à plus tard.** Les erreurs comptables accumulées sur 3 ans coûtent 5× plus cher à corriger qu'un suivi mensuel. Commencez avec les bonnes habitudes dès le premier jour.
 
-**[Ouvrir mon dossier chez ComptaFlow (gratuit) →](/login?next=/onboarding&register=1)**
+**[Ouvrir mon dossier chez ComptaFlow — ouverture de dossier : 149 $, offerte aux 10 premiers clients →](/login?next=/onboarding&register=1)**
     `,
     bodyEn: `
 ## Starting a Business in Canada: The Complete Accounting Checklist
@@ -641,14 +644,14 @@ Au moins 30 jours avant votre fin d'exercice, rassemblez :
 ### Month 1 — Set Up Accounting
 
 - Open a **dedicated business bank account**
-- Choose accounting software: Wave (free), QuickBooks ($22/month), or delegate to ComptaFlow
+- Choose accounting software: Wave (free), QuickBooks (from $30/month), or delegate to ComptaFlow
 - Establish your **fiscal year end** (corporations can choose any 12-month period)
 
 ### The Most Important Advice
 
 **Don't delay.** Accounting errors accumulated over 3 years cost 5× more to fix than monthly tracking. Start with good habits from day one.
 
-**[Open my ComptaFlow file (free) →](/login?next=/onboarding&register=1)**
+**[Open my ComptaFlow file — file opening: $149, waived for our first 10 clients →](/login?next=/onboarding&register=1)**
     `,
   },
   {
@@ -833,6 +836,175 @@ Rebuilding eight months of bookkeeping is not doing the same month eight times: 
 ## Estimate your package in one minute
 
 **Want your exact price, not a range?** The online estimator gives it to you in one minute, from your transaction count: https://compta-flow.net/estimate — fixed price, no surprises, and a written reply within 4 business hours.
+`,
+  },
+  {
+    slug: 't4-rl1-guide-simple-fevrier',
+    titleFr: 'T4 et RL-1 : le guide simple pour être prêt en février',
+    titleEn: 'T4 and RL-1 Slips: The Simple Guide to Being Ready in February',
+    excerptFr: 'Chaque février, les employeurs doivent produire les feuillets T4 et les relevés 1 de l’année écoulée. Quoi rassembler, les erreurs qui coûtent le plus de temps, et comment arriver à la fin février avec des feuillets exacts.',
+    excerptEn: 'Every February, employers have to issue T4 and RL-1 slips for the previous year. Names, SINs, totals that tie to your remittances: here is what to gather, the mistakes that cost the most time, and how to have everything ready before the end-of-February deadline — without the last-minute scramble.',
+    dateIso: '2026-11-03',
+    readingMin: 6,
+    category: 'paie',
+    keywordsFr: ['T4 RL-1 février', 'feuillets T4 employeur', 'relevé 1 Québec', 'paie fin année'],
+    bodyFr: `
+## Les dates qui comptent
+
+Pour les feuillets de l'année 2026, la date à encercler est la **fin février 2027** : les T4 et les RL-1 doivent être transmis aux gouvernements et remis à chaque employé **au plus tard le 28 février 2027**.
+
+Un point de prudence : lorsque la date limite tombe une fin de semaine ou un jour férié, elle est généralement reportée au jour ouvrable suivant. Vérifiez la règle applicable à votre situation avant de compter sur ce report — le plus simple reste de viser quelques jours d'avance et de ne jamais dépendre du tout dernier jour.
+
+En pratique, voici le calendrier que nous recommandons :
+
+- **Janvier :** on rassemble les informations et on rapproche les totaux de paie de l'année.
+- **Début février :** on prépare les feuillets et on vérifie chaque montant.
+- **Mi-février :** on transmet et on remet les feuillets aux employés, avec une marge de sécurité.
+
+## Ce qu'il faut rassembler
+
+### 1. Les coordonnées et les NAS à jour
+
+Pour chaque personne payée durant l'année — y compris celles qui ont quitté l'entreprise en cours d'année :
+
+- nom complet, tel qu'il figure sur les documents officiels ;
+- adresse postale actuelle (c'est celle qui servira à l'envoi du feuillet) ;
+- numéro d'assurance sociale (NAS).
+
+C'est l'étape qui bloque le plus souvent en février : un employé parti au printemps dont l'adresse n'est plus bonne, un NAS noté de travers en début d'année. Un court message à vos anciens employés en janvier règle la plupart de ces cas en quelques minutes.
+
+### 2. Les totaux de paie, rapprochés des remises
+
+Avant de produire le moindre feuillet, les totaux de l'année doivent balancer :
+
+- salaires bruts versés à chaque employé ;
+- retenues effectuées : impôt fédéral et provincial, cotisations au RPC/RRQ, à l'assurance-emploi et au RQAP selon votre province ;
+- **total des remises envoyées durant l'année aux gouvernements**.
+
+Le point clé : la somme des retenues déclarées sur les feuillets doit correspondre à ce qui a réellement été remis pendant l'année. Un écart, même petit, se repère tout de suite lorsqu'on le cherche en janvier — et se corrige beaucoup plus facilement à ce moment-là qu'après la transmission.
+
+### 3. Les avantages imposables
+
+Ce sont les montants les plus souvent oubliés, parce qu'ils ne passent pas par la paie régulière :
+
+- véhicule fourni par l'entreprise et utilisé à des fins personnelles ;
+- logement ou allocations de logement ;
+- primes d'assurance payées par l'employeur (certaines sont imposables, d'autres non) ;
+- cadeaux et récompenses au-delà des seuils permis ;
+- prêts à taux réduit consentis à un employé.
+
+Chaque avantage imposable doit être ajouté au revenu de l'employé sur ses feuillets. Si vous n'êtes pas certain du traitement d'un avantage, notez-le et posez la question avant février : c'est exactement le genre de détail qu'on préfère traiter à tête reposée.
+
+## Les erreurs fréquentes — et comment les éviter
+
+**Les adresses périmées.** Un feuillet envoyé à une ancienne adresse, c'est un employé qui ne reçoit pas son document — et des démarches ensuite pour le réémettre. Solution : valider toutes les adresses en janvier, anciens employés inclus.
+
+**Les avantages oubliés.** Un véhicule d'entreprise, une prime d'assurance : si l'avantage n'a jamais été ajouté au revenu, les feuillets sont inexacts et une correction (feuillets modifiés) devient nécessaire. Solution : tenir une courte liste des avantages offerts, revue une fois par année.
+
+**Les totaux qui ne balancent pas.** Feuillets d'un côté, remises de l'autre : si les deux ne correspondent pas, les gouvernements le remarqueront. Solution : rapprocher les totaux avant de produire les feuillets, jamais après.
+
+**Attendre la dernière semaine.** Regrouper la collecte des informations, les vérifications et la transmission dans les derniers jours de février, c'est là que les erreurs se glissent. Solution : commencer en janvier, quand il reste du temps pour corriger calmement.
+
+## Comment Compta-Flow prend ça en charge
+
+Si la paie et les feuillets ne sont pas votre tasse de thé, c'est un service que nous offrons à longueur d'année, 100 % en ligne, partout au Canada :
+
+- **Paie : 49 $ par mois + 12 $ par employé par mois.** La paie est traitée chaque période et les retenues sont calculées et suivies au fur et à mesure — ce qui fait qu'en février, les totaux sont déjà en ordre.
+- **Feuillets T4 et RL-1 : 15 $ par employé, par année.** Et ils sont **offerts la première année** aux clients dont nous tenons les livres.
+
+Le principe est simple : lorsque la paie est tenue proprement chaque mois, les feuillets de février deviennent une formalité de vérification plutôt qu'un projet de rattrapage. Nous restons un service de tenue de livres et de paie — pour les questions qui exigent un avis professionnel réservé, nous vous orienterons vers la bonne ressource.
+
+## Par où commencer
+
+Vous avez des employés et la fin février approche ? Deux gestes prennent quelques minutes :
+
+1. Rassemblez la liste de vos employés de l'année, avec les adresses actuelles.
+2. Estimez votre forfait en une minute, paie incluse, et voyez exactement ce que ça coûterait de nous confier la tenue de livres et la paie :
+
+👉 **https://compta-flow.net/estimate**
+
+Vous préférez écrire d'abord ? Écrivez-nous à **contact@compta-flow.net** : nous répondons par écrit sous 4 heures ouvrables, avec les prochaines étapes en langage clair.
+
+*Renseignement général seulement — ce texte n'est pas un conseil fiscal. Les règles de production des feuillets peuvent varier selon votre situation ; vérifiez les dates et les exigences applicables à votre entreprise.*
+`,
+    bodyEn: `
+## The dates that matter
+
+For 2026 slips, the date to circle is the **end of February 2027**: T4 slips (and RL-1 slips in Quebec) must be filed with the governments and given to each employee **no later than February 28, 2027**.
+
+One caution: when the deadline falls on a weekend or holiday, it is generally moved to the next business day. Check the rule that applies to your situation before relying on that move — simplest is to aim a few days early and never depend on the very last day.
+
+In practice, here is the calendar we recommend:
+
+- **January:** gather the information and reconcile the year's payroll totals.
+- **Early February:** prepare the slips and check every amount.
+- **Mid-February:** file and hand the slips to employees, with a safety margin.
+
+## What to gather
+
+### 1. Up-to-date contact details and SINs
+
+For everyone paid during the year — including people who left the business mid-year:
+
+- full name, as it appears on official documents;
+- current mailing address (the one the slip will be sent to);
+- Social Insurance Number (SIN).
+
+This is the step that most often blocks February: an employee who left in spring whose address is no longer valid, a SIN written down wrong at the start of the year. A short message to former employees in January settles most of these cases in minutes.
+
+### 2. Payroll totals, reconciled to remittances
+
+Before producing a single slip, the year's totals must tie out:
+
+- gross wages paid to each employee;
+- deductions taken: federal and provincial tax, CPP/QPP, Employment Insurance and QPIP contributions, depending on your province;
+- **total remittances sent to the governments during the year**.
+
+The key point: the total deductions reported on the slips must match what was actually remitted during the year. Even a small difference is easy to spot when you look for it in January — and much easier to fix then than after filing.
+
+### 3. Taxable benefits
+
+These are the amounts most often forgotten, because they do not go through regular payroll:
+
+- a company vehicle used for personal purposes;
+- housing or housing allowances;
+- employer-paid insurance premiums (some are taxable, others are not);
+- gifts and awards above the permitted thresholds;
+- low-interest loans made to an employee.
+
+Every taxable benefit must be added to the employee's income on their slips. If you are unsure how a benefit is treated, note it and ask before February: exactly the kind of detail best handled with a clear head.
+
+## Common mistakes — and how to avoid them
+
+**Outdated addresses.** A slip sent to an old address means an employee who never receives their document — and extra steps to reissue it. Fix: validate every address in January, former employees included.
+
+**Forgotten benefits.** A company vehicle, an insurance premium: if the benefit was never added to income, the slips are wrong and amended slips become necessary. Fix: keep a short list of benefits offered, reviewed once a year.
+
+**Totals that do not tie out.** Slips on one side, remittances on the other: if the two do not match, the governments will notice. Fix: reconcile totals before producing the slips, never after.
+
+**Waiting until the last week.** Packing information gathering, checks and filing into the last days of February is where errors creep in. Fix: start in January, when there is still time to correct calmly.
+
+## How Compta-Flow handles this
+
+If payroll and slips are not your cup of tea, this is a service we offer year-round, 100% online, anywhere in Canada:
+
+- **Payroll: $49 per month + $12 per employee per month.** Payroll is processed each period and deductions are calculated and tracked as they go — so that by February, the totals are already in order.
+- **T4 and RL-1 slips: $15 per employee, per year.** And they are **free in the first year** for clients whose books we keep.
+
+The principle is simple: when payroll is kept clean every month, February slips become a verification formality rather than a catch-up project. We remain a bookkeeping and payroll service — for questions requiring reserved professional advice, we will point you to the right resource.
+
+## Where to start
+
+You have employees and late February is approaching? Two steps take a few minutes:
+
+1. Gather your list of the year's employees, with current addresses.
+2. Estimate your package in one minute, payroll included, and see exactly what it would cost to entrust us with your bookkeeping and payroll:
+
+👉 **https://compta-flow.net/estimate**
+
+Prefer to write first? Write to us at **contact@compta-flow.net**: we reply in writing within 4 business hours, with the next steps in plain language.
+
+*General information only — this text is not tax advice. Slip filing rules can vary with your situation; check the dates and requirements that apply to your business.*
 `,
   },
 ];
