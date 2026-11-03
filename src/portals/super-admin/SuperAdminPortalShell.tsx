@@ -58,7 +58,7 @@ export function SuperAdminPortalShell({
   const [showNotifications, setShowNotifications] = useState(false);
 
   // Sub-admins List (Cabinets)
-  const [subAdmins, setSubAdmins] = useState([
+  const [subAdmins, setSubAdmins] = useState<Array<{ id: string; name: string; email: string; role: string; status: string; clientsCount?: number; load?: string }>>([
     { id: '1', name: 'Sylvie Charette', email: 'viviee28@hotmail.com', role: 'Production comptable', status: 'Actif' },
     { id: '2', name: 'Simon Gagné', email: 'simon.gagne0088@gmail.com', role: 'Saisie de factures', status: 'Actif' },
   ]);
@@ -170,6 +170,7 @@ export function SuperAdminPortalShell({
             id: sa.id,
             name: sa.full_name || sa.display_name || 'Cabinet',
             email: sa.email || '',
+            role: 'Collaborateur',
             clientsCount: count,
             status: sa.status === 'active' ? 'Actif' : 'Inactif',
             load: loadStr
