@@ -40,6 +40,10 @@
 }
 
 @layer base {
+  html, body {
+    overflow-anchor: none;
+  }
+
   body {
     background-color: var(--color-midnight);
     color: var(--color-silver);
