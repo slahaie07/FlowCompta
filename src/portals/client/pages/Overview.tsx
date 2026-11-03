@@ -363,7 +363,7 @@ export function Overview({ userData, isLoading: authLoading, currentMode, onSign
             className="text-[11px] font-bold uppercase tracking-wider h-10 px-4 border-white/15 hover:border-gold/40 text-slate-300"
             onClick={() => portalNavigate('messaging')}
           >
-            💬 Contacter mon CPA
+            💬 {t('portal.overview.contactCpa')}
           </Button>
         </div>
       </motion.div>
