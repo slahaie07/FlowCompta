@@ -745,15 +745,13 @@ Rien de tout cela n’est facturé en cachette : chaque extra est chiffré avant
 
 ## La grille, sans détour
 
-| Transactions par mois | Forfait | Prix |
-|---|---|---|
-| 0 à 30 | Micro — livrables trimestriels | 149,99 $/mois |
-| 31 à 75 | Mensuel | 249,99 $/mois |
-| 76 à 150 | Mensuel | 349,99 $/mois |
-| 151 à 200 | Mensuel | 449,99 $/mois |
-| 201 à 300 | Mensuel | 599,99 $/mois |
-| 301 à 450 | Mensuel | 799,99 $/mois |
-| 451 et plus | Mensuel | 999,99 $/mois et plus |
+- **0 à 30 transactions** — forfait Micro : **149,99 $/mois** (livrables trimestriels)
+- **31 à 75 transactions** — forfait Mensuel : **249,99 $/mois**
+- **76 à 150 transactions** — forfait Mensuel : **349,99 $/mois**
+- **151 à 200 transactions** — forfait Mensuel : **449,99 $/mois**
+- **201 à 300 transactions** — forfait Mensuel : **599,99 $/mois**
+- **301 à 450 transactions** — forfait Mensuel : **799,99 $/mois**
+- **451 transactions et plus** — forfait Mensuel : **999,99 $/mois et plus**
 
 À cela s’ajoutent deux avantages de départ : le **frais d’ouverture de dossier de 149 $ est offert aux 10 premiers clients**, et les **feuillets T4/RL-1 sont offerts la première année** aux clients de tenue de livres qui ont des employés. Et pour un très petit dossier — quelques heures par mois tout au plus — l’option à l’heure à **35 $/h** peut coûter moins cher qu’un forfait.
 
@@ -804,15 +802,13 @@ None of this is billed in secret: every extra is priced before work starts.
 
 ## The grid, plainly
 
-| Transactions per month | Package | Price |
-|---|---|---|
-| 0 to 30 | Micro — quarterly deliverables | $149.99/month |
-| 31 to 75 | Monthly | $249.99/month |
-| 76 to 150 | Monthly | $349.99/month |
-| 151 to 200 | Monthly | $449.99/month |
-| 201 to 300 | Monthly | $599.99/month |
-| 301 to 450 | Monthly | $799.99/month |
-| 451 and up | Monthly | $999.99/month and up |
+- **0 to 30 transactions** — Micro package: **$149.99/month** (quarterly deliverables)
+- **31 to 75 transactions** — Monthly package: **$249.99/month**
+- **76 to 150 transactions** — Monthly package: **$349.99/month**
+- **151 to 200 transactions** — Monthly package: **$449.99/month**
+- **201 to 300 transactions** — Monthly package: **$599.99/month**
+- **301 to 450 transactions** — Monthly package: **$799.99/month**
+- **451 transactions and up** — Monthly package: **$999.99/month and up**
 
 Two launch advantages come on top: the **$149 account-opening fee is offered to the first 10 clients**, and **T4/RL-1 slips are offered for the first year** to bookkeeping clients with employees. And for a very small file — a few hours a month at most — the hourly option at **$35/hr** can cost less than a package.
 
