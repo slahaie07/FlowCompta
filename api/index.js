@@ -535,17 +535,18 @@ var CONFIG = {
   },
   // Paiements — Interac e-Transfer uniquement (aucune carte / PayPal)
   PAYMENT_METHOD: "interac",
-  // Paramètres Métier
+  // Paramètres Métier — prix d'entrée de la grille officielle, alignés sur servicesCatalog.ts
+  // (les forfaits mensuels varient ensuite selon l'échelle de transactions de pricingEstimator.ts)
   FEES: {
     SETUP: 149,
     HOURLY_BOOKKEEPING: 35,
     MONTHLY_MICRO: 149.99,
-    MONTHLY_SMALL: 349.99,
-    MONTHLY_SME: 599.99,
+    MONTHLY_SMALL: 249.99,
+    MONTHLY_SME: 449.99,
     GST_QST: 75,
     PAYROLL: 49,
     T4_RELEVE1: 15,
-    CATCH_UP: 60,
+    CATCH_UP: 75,
     SOFTWARE_SETUP: 199,
     TAX_HELP_AUTONOMOUS: 199.99
   },
@@ -2049,6 +2050,10 @@ var formatCAD = (amount) => {
     style: "currency",
     currency: "CAD"
   }).format(amount);
+};
+var moneyFormatters = {
+  fr: new Intl.NumberFormat("fr-CA", { style: "currency", currency: "CAD" }),
+  en: new Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD" })
 };
 
 // src/lib/canadaNetwork.ts
@@ -3566,7 +3571,7 @@ app.get("/api/network/legal", (req, res) => {
     patterns: [
       { id: "cookie_consent", route: "/cookies", required: true },
       { id: "privacy_policy", route: "/privacy", required: true },
-      { id: "terms_of_service", route: "/terms", required: true },
+      { id: "terms_of_service", route: "/legal", required: true },
       { id: "legal_notice", route: "/legal", required: true },
       { id: "data_residency", required: true, dataRegion: "ca-central-1" },
       { id: "cpa_disclaimer", required: true }
@@ -3628,7 +3633,8 @@ var BLOG_SLUGS = [
   "paie-t4-guide-employeurs-canada",
   "demarrer-entreprise-canada-obligations-comptables",
   "exemple-mois-tenue-livres-plombier-autonome",
-  "prix-tenue-de-livres-quebec-forfait-mensuel"
+  "prix-tenue-de-livres-quebec-forfait-mensuel",
+  "t4-rl1-guide-simple-fevrier"
 ];
 app.get("/sitemap.xml", (_req, res) => {
   const base = "https://compta-flow.net";
@@ -3642,7 +3648,6 @@ app.get("/sitemap.xml", (_req, res) => {
     { path: "/ressources", priority: "0.8", changefreq: "weekly" },
     { path: "/login", priority: "0.6", changefreq: "monthly" },
     { path: "/privacy", priority: "0.3", changefreq: "yearly" },
-    { path: "/terms", priority: "0.3", changefreq: "yearly" },
     { path: "/legal", priority: "0.3", changefreq: "yearly" },
     { path: "/cookies", priority: "0.3", changefreq: "yearly" },
     // Province pages — high priority

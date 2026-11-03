@@ -1719,7 +1719,7 @@ app.get('/api/network/legal', (req, res) => {
     patterns: [
       { id: 'cookie_consent', route: '/cookies', required: true },
       { id: 'privacy_policy', route: '/privacy', required: true },
-      { id: 'terms_of_service', route: '/terms', required: true },
+      { id: 'terms_of_service', route: '/legal', required: true },
       { id: 'legal_notice', route: '/legal', required: true },
       { id: 'data_residency', required: true, dataRegion: 'ca-central-1' },
       { id: 'cpa_disclaimer', required: true },
@@ -1758,6 +1758,7 @@ const BLOG_SLUGS = [
   'demarrer-entreprise-canada-obligations-comptables',
   'exemple-mois-tenue-livres-plombier-autonome',
   'prix-tenue-de-livres-quebec-forfait-mensuel',
+  't4-rl1-guide-simple-fevrier',
 ];
 
 app.get('/sitemap.xml', (_req, res) => {
@@ -1774,7 +1775,6 @@ app.get('/sitemap.xml', (_req, res) => {
     { path: '/ressources', priority: '0.8', changefreq: 'weekly' },
     { path: '/login', priority: '0.6', changefreq: 'monthly' },
     { path: '/privacy', priority: '0.3', changefreq: 'yearly' },
-    { path: '/terms', priority: '0.3', changefreq: 'yearly' },
     { path: '/legal', priority: '0.3', changefreq: 'yearly' },
     { path: '/cookies', priority: '0.3', changefreq: 'yearly' },
     // Province pages — high priority
