@@ -1,26 +1,12 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, HashRouter, Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { UserData } from './types';
 
-import { Auth } from './components/common/Auth';
 import { Landing } from './components/common/Landing';
-import { Onboarding } from './components/auth/Onboarding';
-import { AuthCallback } from './components/auth/AuthCallback';
 import { getOAuthDisplayName } from './lib/authOAuth';
-import { SuccessScreen } from './components/SuccessScreen';
-import { PortalDashboard, getPortalHomePath, LegacyDashboardRedirect } from './portals';
+import { getPortalHomePath } from './portals/config/paths';
+import { LegacyDashboardRedirect } from './portals/shared/LegacyDashboardRedirect';
 import { LegacyPortalSlugRedirect } from './portals/shared/LegacyPortalSlugRedirect';
-import { Privacy } from './components/common/Privacy';
-import { Showcase } from './components/common/Showcase';
-import { Terms } from './components/common/Terms';
-import { Legal } from './components/common/Legal';
-import { Cookies } from './components/common/Cookies';
-import { RegionalLanding } from './components/common/RegionalLanding';
-import { BlogListPage, BlogArticlePage } from './components/common/BlogPage';
-import { EstimatePage } from './components/common/EstimatePage';
-import { TarifsPage } from './components/common/TarifsPage';
-import { ConfiancePage } from './components/common/ConfiancePage';
-import { TaxCalculator } from './components/common/TaxCalculator';
 import { LegalCookieBanner } from './components/common/LegalCookieBanner';
 import { OrganicLoader } from './components/ui/OrganicLoader';
 import { CanadaNetworkProvider } from './context/CanadaNetworkProvider';
@@ -32,6 +18,62 @@ import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { supabase } from './lib/supabase';
 import { createEmptyUserNeeds } from './lib/servicesCatalog';
 import type { PortalRole } from './portals/types';
+
+// ——— Chargement paresseux (découpage de code) ———
+// Seule la page d’accueil publique (Landing, importée ci-dessus) part dans le
+// paquet initial. Tout le reste — espaces connectés, portails, pages
+// secondaires — est découpé en morceaux séparés que Vite/Rollup émet
+// automatiquement et que le navigateur ne télécharge que lorsque la route
+// correspondante est visitée. Les aides légères des portails (chemins,
+// redirections d’alias) sont importées depuis leurs modules directs pour ne
+// pas tirer tout le graphe des portails dans le paquet public.
+const Auth = lazy(() => import('./components/common/Auth').then((m) => ({ default: m.Auth })));
+const Onboarding = lazy(() =>
+  import('./components/auth/Onboarding').then((m) => ({ default: m.Onboarding }))
+);
+const AuthCallback = lazy(() =>
+  import('./components/auth/AuthCallback').then((m) => ({ default: m.AuthCallback }))
+);
+const SuccessScreen = lazy(() =>
+  import('./components/SuccessScreen').then((m) => ({ default: m.SuccessScreen }))
+);
+const PortalDashboard = lazy(() => import('./portals'));
+const Privacy = lazy(() => import('./components/common/Privacy').then((m) => ({ default: m.Privacy })));
+const Showcase = lazy(() =>
+  import('./components/common/Showcase').then((m) => ({ default: m.Showcase }))
+);
+const Legal = lazy(() => import('./components/common/Legal').then((m) => ({ default: m.Legal })));
+const Cookies = lazy(() => import('./components/common/Cookies').then((m) => ({ default: m.Cookies })));
+const RegionalLanding = lazy(() =>
+  import('./components/common/RegionalLanding').then((m) => ({ default: m.RegionalLanding }))
+);
+const BlogListPage = lazy(() =>
+  import('./components/common/BlogPage').then((m) => ({ default: m.BlogListPage }))
+);
+const BlogArticlePage = lazy(() =>
+  import('./components/common/BlogPage').then((m) => ({ default: m.BlogArticlePage }))
+);
+const EstimatePage = lazy(() =>
+  import('./components/common/EstimatePage').then((m) => ({ default: m.EstimatePage }))
+);
+const TarifsPage = lazy(() =>
+  import('./components/common/TarifsPage').then((m) => ({ default: m.TarifsPage }))
+);
+const ConfiancePage = lazy(() =>
+  import('./components/common/ConfiancePage').then((m) => ({ default: m.ConfiancePage }))
+);
+const TaxCalculator = lazy(() =>
+  import('./components/common/TaxCalculator').then((m) => ({ default: m.TaxCalculator }))
+);
+
+function RouteFallback() {
+  return (
+    <div className="min-h-screen bg-noir text-ivoire flex flex-col items-center justify-center gap-8">
+      <OrganicLoader label="FLOW" size="md" />
+      <p className="text-slate-500 font-serif italic text-lg animate-pulse">Chargement...</p>
+    </div>
+  );
+}
 
 function PortalHomeRedirect({ userData }: { userData: UserData }) {
   const role = (userData.role ?? 'client') as PortalRole;
@@ -128,7 +170,7 @@ function AppContent() {
     });
 
     if (error) {
-      toast.error('Erreur lors de la création du profil : ' + error.message);
+      toast.error('La création de votre profil a échoué. Veuillez réessayer. / Your profile could not be created. Please try again.');
       throw error;
     }
 
@@ -192,10 +234,13 @@ function AppContent() {
 
   return (
     <>
+    <Suspense fallback={<RouteFallback />}>
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/privacy" element={<Privacy />} />
-      <Route path="/terms" element={<Terms />} />
+      {/* /terms : l’ancienne page fantôme (prix périmés, doublon de /legal) est
+          retirée du routage ; les anciens liens redirigent vers /legal, à jour. */}
+      <Route path="/terms" element={<Navigate to="/legal" replace />} />
       <Route path="/legal" element={<Legal />} />
       <Route path="/cookies" element={<Cookies />} />
       <Route path="/ca/:slug" element={<RegionalLanding />} />
@@ -292,6 +337,7 @@ function AppContent() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
     <LegalCookieBanner />
     </>
   );
