@@ -3,5 +3,9 @@ Allow: /
 Disallow: /portal/
 Disallow: /dashboard/
 Disallow: /api/
+Disallow: /showcase
+Disallow: /onboarding
+Disallow: /success
+Disallow: /auth/
 
 Sitemap: https://compta-flow.net/sitemap.xml
