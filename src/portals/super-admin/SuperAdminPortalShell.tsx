@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Users, Receipt, FolderOpen, BarChart3, Calendar as CalendarIcon, 
   MessageSquare, Tags, Calculator, StickyNote as StickyIcon, Lock, Settings as SettingsIcon,
-  Bell, Sun, Cloud, Plus, Search, Trash2, LockOpen, Key, Check, CheckCircle2, 
+  Bell, Plus, Search, Trash2, LockOpen, Key, Check, CheckCircle2, 
   AlertTriangle, TrendingUp, LogOut, Send, Eye, Edit3, Filter, Shield, 
   DollarSign, ChevronRight, Download, RefreshCw, X, FileText, LockKeyhole, Landmark
 } from 'lucide-react';
@@ -52,30 +52,20 @@ export function SuperAdminPortalShell({
   
   // Date & Weather simulation
   const [dateStr, setDateStr] = useState<string>('');
-  const [weather, setWeather] = useState({ city: 'Ottawa', temp: 21, icon: '🌤️', text: 'Partiellement nuageux' });
 
   // Notifications state
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'Activité de Simon', message: 'Simon Gagné a validé 3 T4 d\'étudiants en Ontario', time: 'Il y a 10 min', unread: true },
-    { id: 2, title: 'Nouveau cabinet provisionné', message: 'Sylvie Charette a complété sa première clôture mensuelle', time: 'Il y a 2h', unread: true },
-    { id: 3, title: 'Abonnement réseau reçu', message: 'Paiement Stripe reçu pour compta-flow.net SaaS', time: 'Il y a 4h', unread: false }
-  ]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
 
   // Sub-admins List (Cabinets)
   const [subAdmins, setSubAdmins] = useState([
-    { id: '1', name: 'Sylvie Charette', email: 'viviee28@hotmail.com', clientsCount: 8, status: 'Actif', load: 'Optimale' },
-    { id: '2', name: 'Simon Gagné', email: 'simon.gagne0088@gmail.com', clientsCount: 12, status: 'Actif', load: 'Maximale' },
+    { id: '1', name: 'Sylvie Charette', email: 'viviee28@hotmail.com', role: 'Production comptable', status: 'Actif' },
+    { id: '2', name: 'Simon Gagné', email: 'simon.gagne0088@gmail.com', role: 'Saisie de factures', status: 'Actif' },
   ]);
 
   // Clients network tab state
   const [clientSearch, setClientSearch] = useState('');
-  const [clientsList, setClientsList] = useState<any[]>([
-    { id: 'c1', name: 'Marie Tremblay', company: 'Tremblay Design Inc.', email: 'marie@tremblaydesign.ca', assignedTo: 'Sylvie Charette', status: 'Actif' },
-    { id: 'c2', name: 'Antoine Tremblay', company: 'Particulier', email: 'antoine.tremblay@gmail.com', assignedTo: 'Simon Gagné', status: 'Actif' },
-    { id: 'c3', name: 'Sébastien Roy', company: 'Roy Rénovation', email: 's.roy@renovroy.ca', assignedTo: 'Sylvie Charette', status: 'Actif' },
-    { id: 'c4', name: 'Marie-Claude Coté', company: 'Coté Conseil Inc.', email: 'mccote@conseilcote.ca', assignedTo: 'Sylvie Charette', status: 'Actif' }
-  ]);
+  const [clientsList, setClientsList] = useState<any[]>([]);
 
   // Sticky notes state
   const [notes, setNotes] = useState<StickyNoteItem[]>([]);
@@ -92,10 +82,10 @@ export function SuperAdminPortalShell({
 
   // Services catalog state
   const [services, setServices] = useState<ServiceItem[]>([
-    { id: '1', name: 'Forfaits Mensuels', description: 'Tenue de livres mensuelle complète avec Dext et support régulier.', price: 199, period: 'mois', category: 'Tenue de livres' },
+    { id: '1', name: 'Forfaits Mensuels', description: 'Tenue de livres mensuelle complète, dépôt de pièces par photo ou courriel et support régulier.', price: 199, period: 'mois', category: 'Tenue de livres' },
     { id: '2', name: 'L\'Étudiant', description: 'Déclaration d\'impôt simplifiée pour étudiants admissibles.', price: 49, period: 'unique', category: 'Impôts' },
     { id: '3', name: 'Le Rattrapage', description: 'Mise à jour de tenue de livres en retard, tarif par mois rétroactif.', price: 99, period: 'mois', category: 'Tenue de livres' },
-    { id: '4', name: 'Le Setup Onboarding', description: 'Configuration initiale de Supabase, Stripe, et raccordement bancaire.', price: 299, period: 'unique', category: 'Configuration' },
+    { id: '4', name: 'Le Setup Onboarding', description: 'Configuration initiale du dossier client, des outils comptables et du raccordement bancaire.', price: 299, period: 'unique', category: 'Configuration' },
     { id: '5', name: 'Impôts Personnels', description: 'Déclaration de revenus personnelle standard avec crédits canadiens.', price: 99, period: 'unique', category: 'Impôts' }
   ]);
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
@@ -110,14 +100,8 @@ export function SuperAdminPortalShell({
   // Team Chat state
   const [activeChatMember, setActiveChatMember] = useState<string>('Sylvie Charette');
   const [chatMessages, setChatMessages] = useState<Record<string, Array<{ sender: string; text: string; time: string }>>>({
-    'Sylvie Charette': [
-      { sender: 'Sylvie Charette', text: 'Bonjour Samuel, la synchronisation Stripe sur compta-flow.net fonctionne à merveille.', time: '11:05' },
-      { sender: 'Owner', text: 'Excellent! N\'hésite pas à me remonter s\'il y a la moindre lenteur sur les webhooks de prod.', time: '11:15' }
-    ],
-    'Simon Gagné': [
-      { sender: 'Simon Gagné', text: 'Bonjour, j\'ai affecté Antoine Tremblay à mon dossier de support Ontario.', time: 'Hier' },
-      { sender: 'Owner', text: 'Parfait, le calculateur fiscal canadien s\'adaptera automatiquement aux taxes de l\'Ontario (HST 13%).', time: 'Hier' }
-    ]
+    'Sylvie Charette': [],
+    'Simon Gagné': []
   });
   const [newChatMessage, setNewChatMessage] = useState('');
 
@@ -224,21 +208,10 @@ export function SuperAdminPortalShell({
     }).format(new Date());
     setDateStr(date.charAt(0).toUpperCase() + date.slice(1));
 
-    // Ottawa Weather simulation (Canada Capital)
-    setWeather({ city: 'Ottawa', temp: 20, icon: '🌤️', text: 'Nuageux' });
-
     // Load Sticky Notes from LocalStorage
     const savedNotes = localStorage.getItem(`comptaflow_super_notes_${userData?.id || 'default'}`);
     if (savedNotes) {
       setNotes(JSON.parse(savedNotes));
-    } else {
-      const initialNotes: StickyNoteItem[] = [
-        { id: '1', text: 'Vérifier la performance du webhook Stripe de dépôt.', color: 'blue', createdAt: new Date().toISOString() },
-        { id: '2', text: 'Valider la conformité Loi 25 sur les fichiers du Coffre-fort.', color: 'green', createdAt: new Date().toISOString() },
-        { id: '3', text: 'Provisionner un nouveau cabinet si la charge de Simon dépasse 15 clients.', color: 'yellow', createdAt: new Date().toISOString() }
-      ];
-      setNotes(initialNotes);
-      localStorage.setItem(`comptaflow_super_notes_${userData?.id || 'default'}`, JSON.stringify(initialNotes));
     }
 
     loadLiveData();
@@ -247,7 +220,7 @@ export function SuperAdminPortalShell({
   // Sidebar item configuration
   const menuItems = [
     { id: 'dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
-    { id: 'cabinets', label: 'Gestion des Cabinets', icon: Shield },
+    { id: 'cabinets', label: 'Gestion de l\'équipe', icon: Shield },
     { id: 'clients', label: 'Clients Réseau', icon: Users },
     { id: 'transactions', label: 'Suivi des Transactions', icon: Receipt },
     { id: 'documents', label: 'Documents et Formulaires', icon: FolderOpen },
@@ -410,20 +383,7 @@ export function SuperAdminPortalShell({
 
     setNewChatMessage('');
     
-    // Simulate auto reply after 1.5 seconds
-    setTimeout(() => {
-      const responseText = 'Parfait Samuel, je m\'occupe de valider cela dans mes dossiers actifs.';
-      setChatMessages(prev => {
-        const memberMessages = prev[activeChatMember] || [];
-        return {
-          ...prev,
-          [activeChatMember]: [
-            ...memberMessages,
-            { sender: activeChatMember, text: responseText, time: new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' }) }
-          ]
-        };
-      });
-    }, 1500);
+    // Aucune réponse automatique simulée : les messages restent tels qu'écrits.
   };
 
   // Calculators helper
@@ -487,7 +447,7 @@ export function SuperAdminPortalShell({
       </div>
 
       {/* 🧭 SIDEBAR - MENU LATÉRAL */}
-      <nav className="w-80 h-screen bg-[#060606] border-r border-white/5 flex flex-col z-30 shrink-0 select-none">
+      <nav className="w-80 h-screen bg-[#060606] border-r border-white/5 hidden lg:flex flex-col z-30 shrink-0 select-none">
         {/* Brand Header */}
         <div className="p-8 flex items-center justify-between">
           <div className="flex items-center gap-4 text-left">
@@ -558,27 +518,22 @@ export function SuperAdminPortalShell({
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative z-10 w-full">
         
         {/* 📋 HEADER - BARRE D'EN-TÊTE */}
-        <header className="h-20 bg-noir/50 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-10 shrink-0">
+        <header className="h-20 bg-noir/50 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 md:px-10 shrink-0">
           
           {/* Header Left: Greeting */}
           <div className="flex flex-col">
             <h1 className="text-xl font-serif font-bold text-ivoire">
               Bonjour, <span className={`${activeTheme.accent} ${activeTheme.textGlow}`}>{userData?.fullName || 'Samuel Lahaie'}</span>
             </h1>
-            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Panneau de Contrôle Réseau</p>
+            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Panneau de contrôle — Équipe</p>
           </div>
 
-          {/* Header Right: Date, Weather, Notifications */}
+          {/* Header Right: Date, Notifications */}
           <div className="flex items-center gap-6">
             
-            {/* Elegant Date/Weather Widget */}
-            <div className="flex items-center gap-4 px-4 py-2 bg-white/5 border border-white/5 rounded-2xl text-xs font-medium">
-              <span className="text-slate-400 border-r border-white/10 pr-4">{dateStr}</span>
-              <div className="flex items-center gap-1.5 text-ivoire">
-                <span>{weather.icon}</span>
-                <span className="font-bold">{weather.city}</span>
-                <span className="text-gold font-bold">{weather.temp}°C</span>
-              </div>
+            {/* Date Widget */}
+            <div className="hidden sm:flex items-center gap-4 px-4 py-2 bg-white/5 border border-white/5 rounded-2xl text-xs font-medium">
+              <span className="text-slate-400">{dateStr}</span>
             </div>
 
             {/* Notification Bell */}
@@ -598,7 +553,7 @@ export function SuperAdminPortalShell({
               {showNotifications && (
                 <div className="absolute right-0 mt-3 w-80 glass-card rounded-2xl z-50 p-4 border border-white/10 shadow-2xl">
                   <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/5">
-                    <h3 className="text-xs font-black uppercase tracking-wider">Alertes Réseau</h3>
+                    <h3 className="text-xs font-black uppercase tracking-wider">Notifications</h3>
                     <button 
                       onClick={() => setNotifications(prev => prev.map(n => ({ ...n, unread: false })))}
                       className="text-[10px] text-gold hover:underline"
@@ -607,6 +562,9 @@ export function SuperAdminPortalShell({
                     </button>
                   </div>
                   <div className="space-y-3">
+                    {notifications.length === 0 && (
+                      <p className="text-[11px] text-slate-500 text-center py-3">Aucune notification pour le moment.</p>
+                    )}
                     {notifications.map(n => (
                       <div key={n.id} className={`p-2.5 rounded-xl transition-colors ${n.unread ? 'bg-gold/10' : 'bg-white/5'}`}>
                         <div className="flex justify-between items-start">
@@ -624,7 +582,28 @@ export function SuperAdminPortalShell({
         </header>
 
         {/* 📦 CONTENT ZONE */}
-        <main className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        {/* Navigation mobile (barre d'onglets horizontale) */}
+        <div className="lg:hidden bg-[#0a0a0a] border-b border-white/5 px-3 py-2 flex gap-2 overflow-x-auto custom-scrollbar shrink-0">
+          {menuItems.map((item) => {
+            const IconComp = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveTab(item.id)}
+                className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition-colors min-h-[44px] ${
+                  isActive ? 'bg-gold/15 text-gold border border-gold/30' : 'bg-white/5 text-slate-400 border border-transparent'
+                }`}
+              >
+                <IconComp size={14} />
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
           
           {/* ============================================================
               1. TABLEAU DE BORD (SUPER OVERVIEW)
@@ -638,21 +617,21 @@ export function SuperAdminPortalShell({
                 <div className="glass-card p-6 rounded-2xl">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Revenus Réseau (ARR)</p>
-                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">248 900.00 $</h3>
+                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Équipe Compta-Flow</p>
+                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">{subAdmins.length + 1} personnes</h3>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold">
                       <TrendingUp size={20} />
                     </div>
                   </div>
-                  <p className="text-xs text-emerald-400 mt-4 font-bold">+18.5% croissance annuelle</p>
+                  <p className="text-xs text-slate-400 mt-4">Samuel Lahaie (super-admin) et {subAdmins.length} collaborateurs</p>
                 </div>
 
                 <div className="glass-card p-6 rounded-2xl">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Cabinets Actifs</p>
-                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">2 Partenaires</h3>
+                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Collaborateurs actifs</p>
+                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">{subAdmins.length} Collaborateurs</h3>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold">
                       <Shield size={20} />
@@ -664,27 +643,27 @@ export function SuperAdminPortalShell({
                 <div className="glass-card p-6 rounded-2xl">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Clients Totaux</p>
-                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">25 Clients</h3>
+                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Clients suivis ici</p>
+                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">{clientsList.length} Clients</h3>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold">
                       <Users size={20} />
                     </div>
                   </div>
-                  <p className="text-xs text-emerald-400 mt-4 font-bold">100% de complétion Loi 25</p>
+                  <p className="text-xs text-slate-400 mt-4">Dossiers affichés dans l'onglet Clients</p>
                 </div>
 
                 <div className="glass-card p-6 rounded-2xl">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Taux de Rétention</p>
-                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">99.2%</h3>
+                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Dossiers actifs</p>
+                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">{clientsList.filter(c => c.status === 'Actif').length}</h3>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold">
                       <CheckCircle2 size={20} />
                     </div>
                   </div>
-                  <p className="text-xs text-slate-400 mt-4">Objectif réseau : 98%</p>
+                  <p className="text-xs text-slate-400 mt-4">Sur {clientsList.length} dossiers au total</p>
                 </div>
 
               </div>
@@ -692,7 +671,7 @@ export function SuperAdminPortalShell({
               {/* Sub-admins overview widget */}
               <div className="glass-card p-8 rounded-3xl">
                 <h2 className="text-lg font-serif font-bold text-ivoire mb-6 flex items-center gap-2">
-                  <Landmark size={20} className="text-gold" /> Performance et Charge des Cabinets
+                  <Landmark size={20} className="text-gold" /> Équipe Compta-Flow — rôles et statut
                 </h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -703,14 +682,12 @@ export function SuperAdminPortalShell({
                         <span className="text-[10px] text-slate-500">{sub.email}</span>
                       </div>
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-400">Clients affectés :</span>
-                        <span className="font-bold text-gold">{sub.clientsCount}</span>
+                        <span className="text-slate-400">Rôle :</span>
+                        <span className="font-bold text-gold">{sub.role}</span>
                       </div>
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-400">Charge de travail :</span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          sub.load === 'Maximale' ? 'bg-red-500/10 text-red-400' : sub.load === 'Modérée' ? 'bg-blue-500/10 text-blue-400' : 'bg-emerald-500/10 text-emerald-400'
-                        }`}>{sub.load}</span>
+                        <span className="text-slate-400">Statut :</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400">{sub.status}</span>
                       </div>
                     </div>
                   ))}
@@ -727,19 +704,19 @@ export function SuperAdminPortalShell({
             <div className="space-y-8 animate-fadeIn">
               <div className="flex justify-between items-center">
                 <div>
-                  <h2 className="text-xl font-serif font-bold text-ivoire">Gestion des Cabinets (Sub-admins)</h2>
-                  <p className="text-xs text-slate-500 mt-1">Supervision des accès et assignation de dossiers des 3 comptables</p>
+                  <h2 className="text-xl font-serif font-bold text-ivoire">Gestion de l'équipe (Sub-admins)</h2>
+                  <p className="text-xs text-slate-500 mt-1">Supervision des accès et de l'assignation des dossiers de l'équipe</p>
                 </div>
               </div>
 
-              <div className="glass-card rounded-3xl overflow-hidden">
+              <div className="glass-card rounded-3xl overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-white/5 bg-white/2">
-                      <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Comptable / Cabinet</th>
+                      <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Collaborateur</th>
                       <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Courriel</th>
-                      <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Clients</th>
-                      <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Charge</th>
+                      <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Rôle</th>
+                      <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Statut</th>
                       <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider text-right">Actions</th>
                     </tr>
                   </thead>
@@ -755,11 +732,9 @@ export function SuperAdminPortalShell({
                           </div>
                         </td>
                         <td className="p-5 text-slate-400">{sub.email}</td>
-                        <td className="p-5 font-bold text-gold">{sub.clientsCount} clients</td>
+                        <td className="p-5 font-bold text-gold">{sub.role}</td>
                         <td className="p-5">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            sub.load === 'Maximale' ? 'bg-red-500/10 text-red-400' : 'bg-emerald-500/10 text-emerald-400'
-                          }`}>{sub.load}</span>
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400">{sub.status}</span>
                         </td>
                         <td className="p-5 text-right">
                           <button type="button" className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] uppercase font-bold text-slate-300">
@@ -784,7 +759,7 @@ export function SuperAdminPortalShell({
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
                   <input
                     type="text"
-                    placeholder="Rechercher dans tout le réseau..."
+                    placeholder="Rechercher un client..."
                     value={clientSearch}
                     onChange={(e) => setClientSearch(e.target.value)}
                     className="w-full bg-white/5 border border-white/5 rounded-2xl pl-12 pr-4 py-3 text-xs outline-none focus:border-gold font-bold text-ivoire"
@@ -792,18 +767,23 @@ export function SuperAdminPortalShell({
                 </div>
               </div>
 
-              <div className="glass-card rounded-3xl overflow-hidden">
+              <div className="glass-card rounded-3xl overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-white/5 bg-white/2">
                       <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Client</th>
                       <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Entreprise</th>
-                      <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Cabinet Assigné</th>
+                      <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Assigné à</th>
                       <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Courriel</th>
                       <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider text-right">Réassigner</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 text-xs font-semibold">
+                    {clientsList.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="p-8 text-center text-slate-500">Aucun dossier client pour le moment.</td>
+                      </tr>
+                    )}
                     {clientsList
                       .filter(c => c.name.toLowerCase().includes(clientSearch.toLowerCase()) || c.company.toLowerCase().includes(clientSearch.toLowerCase()))
                       .map(c => (
@@ -838,43 +818,25 @@ export function SuperAdminPortalShell({
             <div className="space-y-8 animate-fadeIn">
               <div className="flex justify-between items-center">
                 <div>
-                  <h2 className="text-xl font-serif font-bold text-ivoire">Transactions Globales Réseau</h2>
-                  <p className="text-xs text-slate-500 mt-1">Audit des paiements de tous les cabinets canadiens</p>
+                  <h2 className="text-xl font-serif font-bold text-ivoire">Suivi des Transactions</h2>
+                  <p className="text-xs text-slate-500 mt-1">Suivi des paiements et des dépôts de l'équipe</p>
                 </div>
               </div>
 
-              <div className="glass-card rounded-3xl overflow-hidden">
+              <div className="glass-card rounded-3xl overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-white/5 bg-white/2">
                       <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Date</th>
-                      <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Cabinet</th>
+                      <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Collaborateur</th>
                       <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Client</th>
                       <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Montant</th>
                       <th className="p-5 text-xs text-slate-500 uppercase font-black tracking-wider">Statut</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 text-xs font-semibold">
-                    <tr className="hover:bg-white/1">
-                      <td className="p-5 text-slate-400">24 Juin 2026</td>
-                      <td className="p-5 font-bold">Sylvie Charette</td>
-                      <td className="p-5">Marie Tremblay</td>
-                      <td className="p-5 text-gold">199.00 $</td>
-                      <td className="p-5"><span className="text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded bg-emerald-500/5 uppercase font-bold text-[9px]">Payé</span></td>
-                    </tr>
-                    <tr className="hover:bg-white/1">
-                      <td className="p-5 text-slate-400">23 Juin 2026</td>
-                      <td className="p-5 font-bold">Simon Gagné</td>
-                      <td className="p-5">Antoine Tremblay</td>
-                      <td className="p-5 text-gold">49.00 $</td>
-                      <td className="p-5"><span className="text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded bg-emerald-500/5 uppercase font-bold text-[9px]">Payé</span></td>
-                    </tr>
-                    <tr className="hover:bg-white/1">
-                      <td className="p-5 text-slate-400">22 Juin 2026</td>
-                      <td className="p-5 font-bold">Sylvie Charette</td>
-                      <td className="p-5">Sébastien Roy</td>
-                      <td className="p-5 text-gold">325.00 $</td>
-                      <td className="p-5"><span className="text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded bg-emerald-500/5 uppercase font-bold text-[9px]">Payé</span></td>
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-slate-500">Aucune transaction à afficher pour le moment.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -888,20 +850,20 @@ export function SuperAdminPortalShell({
           {activeTab === 'documents' && (
             <div className="space-y-8 animate-fadeIn">
               <div>
-                <h2 className="text-xl font-serif font-bold text-ivoire">Coffre de Documents Global</h2>
-                <p className="text-xs text-slate-500 mt-1">Visualisation et stockage des mandats de tous les cabinets associés</p>
+                <h2 className="text-xl font-serif font-bold text-ivoire">Documents et mandats</h2>
+                <p className="text-xs text-slate-500 mt-1">Stockage des mandats et des déclarations des dossiers clients</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="glass-card p-6 rounded-2xl hover:border-gold/30 cursor-pointer">
                   <FolderOpen size={36} className="text-gold mb-4" />
-                  <span className="text-xs font-bold block">Mandats de Cabinet</span>
-                  <p className="text-[10px] text-slate-500 mt-1">3 fichiers signés</p>
+                  <span className="text-xs font-bold block">Mandats signés</span>
+                  <p className="text-[10px] text-slate-500 mt-1">Contrats de service clients</p>
                 </div>
                 <div className="glass-card p-6 rounded-2xl hover:border-gold/30 cursor-pointer">
                   <FolderOpen size={36} className="text-gold mb-4" />
-                  <span className="text-xs font-bold block">Déclarations T2 Générales</span>
-                  <p className="text-[10px] text-slate-500 mt-1">12 fichiers archivés</p>
+                  <span className="text-xs font-bold block">Déclarations de sociétés (T2)</span>
+                  <p className="text-[10px] text-slate-500 mt-1">Archives fiscales</p>
                 </div>
               </div>
             </div>
@@ -914,15 +876,15 @@ export function SuperAdminPortalShell({
             <div className="space-y-8 animate-fadeIn">
               <div>
                 <h2 className="text-xl font-serif font-bold text-ivoire">Outils d'Analyse Réseau</h2>
-                <p className="text-xs text-slate-500 mt-1">Consolidation fiscale du cabinet national Compta-Flow</p>
+                <p className="text-xs text-slate-500 mt-1">Consolidation fiscale de l'ensemble des dossiers Compta-Flow</p>
               </div>
 
               <div className="glass-card p-8 rounded-3xl space-y-6">
-                <h3 className="text-sm font-bold text-ivoire uppercase border-b border-white/5 pb-2">TPS / TVQ Consolide Canada</h3>
-                <p className="text-xs text-slate-400">Cliquez pour compiler tous les rapports de taxes collectés par vos 3 cabinets.</p>
+                <h3 className="text-sm font-bold text-ivoire uppercase border-b border-white/5 pb-2">TPS / TVQ consolidées — Canada</h3>
+                <p className="text-xs text-slate-400">Cliquez pour compiler les rapports de taxes de l'ensemble de vos dossiers clients.</p>
                 <button
                   onClick={() => {
-                    toast.success('Rapport annuel consolidé exporté.');
+                    toast.info('La génération automatique de rapports n\'est pas encore active dans cet espace.');
                   }}
                   type="button"
                   className="px-6 py-3 bg-gold text-noir text-xs font-black uppercase tracking-wider rounded-xl hover:bg-gold-light"
@@ -939,14 +901,14 @@ export function SuperAdminPortalShell({
           {activeTab === 'calendar' && (
             <div className="space-y-8 animate-fadeIn">
               <div>
-                <h2 className="text-xl font-serif font-bold text-ivoire">Calendrier Réseau National</h2>
+                <h2 className="text-xl font-serif font-bold text-ivoire">Calendrier de l'équipe</h2>
                 <p className="text-xs text-slate-500 mt-1">Jalons des déclarations de revenus provinciales et fédérales au Canada</p>
               </div>
 
               <div className="glass-card p-6 rounded-3xl text-center py-20 text-slate-500">
                 <CalendarIcon size={48} className="mx-auto text-slate-600 mb-4" />
-                <span className="text-xs font-bold text-ivoire block">Calendrier de Réseau Actif</span>
-                <span className="text-[10px] text-slate-600 block mt-1">Prochaine date de remise : 30 Juin 2026 (TPS/TVQ Québec)</span>
+                <span className="text-xs font-bold text-ivoire block">Calendrier de l'équipe</span>
+                <span className="text-[10px] text-slate-600 block mt-1">Les dates de remise de vos dossiers apparaîtront ici.</span>
               </div>
             </div>
           )}
@@ -957,8 +919,8 @@ export function SuperAdminPortalShell({
           {activeTab === 'messaging' && (
             <div className="space-y-8 animate-fadeIn">
               <div>
-                <h2 className="text-xl font-serif font-bold text-ivoire">Messagerie Réseau</h2>
-                <p className="text-xs text-slate-500 mt-1">Communication directe avec vos administrateurs et comptables associés</p>
+                <h2 className="text-xl font-serif font-bold text-ivoire">Messagerie d'équipe</h2>
+                <p className="text-xs text-slate-500 mt-1">Communication directe avec les collaborateurs de l'équipe</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-8 h-[500px]">
@@ -984,6 +946,12 @@ export function SuperAdminPortalShell({
                   <h4 className="text-xs font-black uppercase tracking-wider text-ivoire border-b border-white/5 pb-2">{activeChatMember}</h4>
                   
                   <div className="flex-1 overflow-y-auto py-4 space-y-3 text-xs custom-scrollbar">
+                    {(chatMessages[activeChatMember] || []).length === 0 && (
+                      <div className="text-center text-slate-500 py-10">
+                        <p className="font-bold text-slate-400">Aucun message pour le moment</p>
+                        <p className="mt-1">Écrivez le premier message à ce collaborateur.</p>
+                      </div>
+                    )}
                     {(chatMessages[activeChatMember] || []).map((msg, i) => (
                       <div key={i} className={`flex flex-col ${msg.sender === 'Owner' ? 'items-end' : 'items-start'}`}>
                         <div className={`p-3 rounded-2xl max-w-md ${
@@ -1117,25 +1085,28 @@ export function SuperAdminPortalShell({
           {activeTab === 'notes' && (
             <div className="space-y-8 animate-fadeIn">
               <div>
-                <h2 className="text-xl font-serif font-bold text-ivoire">Notes Réseau</h2>
-                <p className="text-xs text-slate-500 mt-1">Notes collantes partagées ou privées pour le suivi réseau</p>
+                <h2 className="text-xl font-serif font-bold text-ivoire">Notes de l'équipe</h2>
+                <p className="text-xs text-slate-500 mt-1">Notes collantes pour le suivi de l'équipe</p>
               </div>
 
               <form onSubmit={handleAddNote} className="glass-card p-6 rounded-2xl flex flex-col md:flex-row gap-4 items-end">
                 <div className="flex-1 w-full">
-                  <label className="text-[10px] text-slate-500 uppercase font-black tracking-wider block mb-2">Contenu de la note réseau</label>
+                  <label className="text-[10px] text-slate-500 uppercase font-black tracking-wider block mb-2">Contenu de la note</label>
                   <input
                     type="text"
                     required
                     value={newNoteText}
                     onChange={(e) => setNewNoteText(e.target.value)}
-                    placeholder="ex: Mettre à jour la clé API Stripe..."
+                    placeholder="ex : Relancer un dossier en attente…"
                     className="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-xs outline-none focus:border-gold text-ivoire font-bold"
                   />
                 </div>
                 <button type="submit" className="px-6 py-3 bg-gold text-noir text-xs font-black uppercase tracking-wider rounded-xl">Ajouter</button>
               </form>
 
+              {notes.length === 0 && (
+                <p className="text-xs text-slate-500">Aucune note pour le moment. Écrivez votre premier rappel ci-dessus.</p>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {notes.map(note => {
                   const colorClasses = {
@@ -1164,8 +1135,8 @@ export function SuperAdminPortalShell({
           {activeTab === 'vault' && (
             <div className="space-y-8 animate-fadeIn">
               <div>
-                <h2 className="text-xl font-serif font-bold text-ivoire">Coffre-fort Réseau Global</h2>
-                <p className="text-xs text-slate-500 mt-1">Accès sécurisé à l'infrastructure d'hébergement, aux clés de production et identifiants Stripe</p>
+                <h2 className="text-xl font-serif font-bold text-ivoire">Coffre-fort de l'entreprise</h2>
+                <p className="text-xs text-slate-500 mt-1">Accès restreint aux informations sensibles de l'entreprise</p>
               </div>
 
               {!isVaultUnlocked ? (
@@ -1180,12 +1151,13 @@ export function SuperAdminPortalShell({
               ) : (
                 <div className="space-y-6">
                   <div className="flex justify-between items-center p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl">
-                    <span className="text-xs font-bold flex items-center gap-2"><LockOpen size={16} /> Clés secrètes déchiffrées</span>
+                    <span className="text-xs font-bold flex items-center gap-2"><LockOpen size={16} /> Session déverrouillée</span>
                     <button type="button" onClick={() => setIsVaultUnlocked(false)} className="text-xs font-bold hover:underline">Verrouiller</button>
                   </div>
-                  <div className="glass-card p-6 rounded-2xl space-y-3 font-mono text-xs">
-                    <div className="p-2 bg-white/2 rounded"><span>SUPABASE_SERVICE_ROLE_KEY :</span> <span className="text-amber-400">sb_service_role_Platform_Secret...••••••••</span></div>
-                    <div className="p-2 bg-white/2 rounded"><span>STRIPE_WEBHOOK_SECRET :</span> <span className="text-amber-400">whsec_ca_central_51A8f...••••••••</span></div>
+                  <div className="glass-card p-6 rounded-2xl space-y-3 text-xs text-center">
+                    <p className="text-slate-400 leading-relaxed">
+                      Aucune clé n'est conservée dans cet espace. Les secrets de production restent dans le coffre-fort sécurisé de l'entreprise — jamais affichés dans l'interface.
+                    </p>
                   </div>
                 </div>
               )}
@@ -1199,12 +1171,12 @@ export function SuperAdminPortalShell({
             <div className="space-y-8 animate-fadeIn">
               <div>
                 <h2 className="text-xl font-serif font-bold text-ivoire">Configuration Système</h2>
-                <p className="text-xs text-slate-500 mt-1">Préférences du réseau compta-flow.net et autorisations globales</p>
+                <p className="text-xs text-slate-500 mt-1">Préférences de l'espace et autorisations globales</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="glass-card p-8 rounded-3xl space-y-4">
-                  <h3 className="text-sm font-bold text-ivoire uppercase border-b border-white/5 pb-2">Couleur Réseau</h3>
+                  <h3 className="text-sm font-bold text-ivoire uppercase border-b border-white/5 pb-2">Couleur de l'espace</h3>
                   <div className="flex gap-4">
                     {['gold', 'emerald', 'sapphire'].map(color => (
                       <button
