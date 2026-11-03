@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Home, Shield, FolderOpen, MessageSquare, CreditCard, Tags, FileText, 
-  HelpCircle, ChevronDown, Send, Paperclip, Clock, Sun, Cloud, Check, 
-  Trash2, AlertCircle, Play, FileCheck, ArrowRight, DollarSign, PenTool, X, LogOut, Calendar as CalendarIcon, Search
+  HelpCircle, ChevronDown, Send, Paperclip, Clock, Check, 
+  Trash2, AlertCircle, Play, FileCheck, ArrowRight, DollarSign, PenTool, X, LogOut, Search
 } from 'lucide-react';
 import { EliteSignature } from '../../components/ui/EliteSignature';
 import { generateContract } from '../../lib/contractEngine';
 import { toast } from 'sonner';
 import { supabase } from '../../lib/supabase';
+import { useDocuments } from '../../hooks/useDocuments';
 
 interface ClientPortalShellProps {
   userData: any;
@@ -35,7 +36,6 @@ export function ClientPortalShell({
   // Time & Weather state
   const [currentTime, setCurrentTime] = useState<string>('');
   const [dateStr, setDateStr] = useState<string>('');
-  const [weather, setWeather] = useState({ city: 'Montréal', temp: 22, icon: '☀️' });
 
   // Accordion state for FAQ
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
@@ -48,11 +48,8 @@ export function ClientPortalShell({
   // Client notes
   const [notes, setNotes] = useState<string>('');
 
-  // Invoices list state
-  const [invoices, setInvoices] = useState([
-    { id: 'inv-1', desc: 'Tenue de livres mensuelle - Juin 2026', amount: 199.00, status: 'À payer', date: '24 Juin 2026' },
-    { id: 'inv-2', desc: 'Déclaration d\'impôt étudiant - 2025', amount: 49.00, status: 'Payé', date: '10 Mai 2026' }
-  ]);
+  // Invoices list state — vide au départ, rempli par les vraies données (loadLiveData)
+  const [invoices, setInvoices] = useState<any[]>([]);
   const [showPaymentModal, setShowPaymentModal] = useState<any | null>(null);
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
@@ -60,18 +57,16 @@ export function ClientPortalShell({
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   // Documents/Vault list state
-  const [clientDocuments, setClientDocuments] = useState<Array<{ id: string; name: string; size: string; date: string }>>([
-    { id: 'doc-1', name: 'Facture_Bureau_En_Gros_Juin.pdf', size: '142 KB', date: 'Hier' },
-    { id: 'doc-2', name: 'T4_Revenu_Canada_2025.pdf', size: '890 KB', date: '18 Juin 2026' }
-  ]);
+  const [clientDocuments, setClientDocuments] = useState<Array<{ id: string; name: string; size: string; date: string }>>([]);
+
+  // Vrai flux de dépôt : octets → bucket privé « vault », chemin → table « documents »
+  const { uploadDocument } = useDocuments();
 
   // Tax rates from DB
   const [taxRates, setTaxRates] = useState<any[]>([]);
 
-  // Chat message state
-  const [chatMessages, setChatMessages] = useState([
-    { sender: 'Cabinet', text: 'Bonjour! Je suis votre personne attitrée à l’équipe Compta-Flow. J\'ai bien reçu vos reçus Dext de ce mois-ci. Pouvez-vous signer votre mandat électronique d\'autorisation?', time: '11:20' }
-  ]);
+  // Chat message state — aucun message pré-rempli : la conversation démarre vide
+  const [chatMessages, setChatMessages] = useState<Array<{ sender: string; text: string; time: string }>>([]);
   const [newMsg, setNewMsg] = useState('');
 
   // Calculator state
@@ -148,7 +143,7 @@ export function ClientPortalShell({
     }
   };
 
-  // Update clock & weather
+  // Update clock
   useEffect(() => {
     // Check if mandate is signed in localStorage
     if (localStorage.getItem(`comptaflow_mandate_signed_${userData?.id}`)) {
@@ -230,40 +225,28 @@ export function ClientPortalShell({
     }
   };
 
-  // File upload with DB insertion
+  // File upload — vrai flux via useDocuments : les octets partent dans le bucket
+  // privé « vault » et le chemin est inscrit dans la table « documents »
+  // (même flux que Vault.tsx et les autres écrans). Aucune URL fabriquée,
+  // aucun faux enregistrement local en cas d'échec : le hook signale l'erreur.
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0] && userData?.id) {
-      const file = e.target.files[0];
-      try {
-        const newDoc = {
-          client_id: userData.id,
-          file_name: file.name,
-          file_size: (file.size / 1024).toFixed(0) + ' KB',
-          url: `https://unvyxfxlzhnutpugjxhe.supabase.co/storage/v1/object/public/documents/${file.name}`,
-          upload_date: Date.now(),
-          status: 'secure',
-          category: 'general',
-          source: 'client'
-        };
-        const { error } = await supabase
-          .from('documents_uploades')
-          .insert(newDoc);
-          
-        if (error) throw error;
-        
-        toast.success(`Fichier ${file.name} téléversé avec succès.`);
-        loadLiveData();
-      } catch (err: any) {
-        console.warn("Database doc upload failed, saving locally.", err);
-        const newDoc = {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !userData?.id) return;
+
+    const success = await uploadDocument(file, 'general');
+    if (success) {
+      // Le document est réellement stocké (bucket vault + table documents) :
+      // on le montre tout de suite dans la liste de l'écran.
+      setClientDocuments(prev => [
+        {
           id: 'doc-' + Date.now(),
           name: file.name,
           size: (file.size / 1024).toFixed(0) + ' KB',
-          date: 'À l\'instant'
-        };
-        setClientDocuments(prev => [newDoc, ...prev]);
-        toast.warning(`Mode hors-ligne : Fichier enregistré temporairement.`);
-      }
+          date: new Date().toLocaleDateString('fr-CA')
+        },
+        ...prev
+      ]);
     }
   };
 
@@ -293,14 +276,7 @@ export function ClientPortalShell({
       { sender: 'Client', text: newMsg, time: new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' }) }
     ]);
     setNewMsg('');
-
-    // Simulated reply
-    setTimeout(() => {
-      setChatMessages(prev => [
-        ...prev,
-        { sender: 'Cabinet', text: 'Merci pour votre réponse, j\'ai mis à jour votre dossier.', time: new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' }) }
-      ]);
-    }, 2000);
+    // Aucune réponse automatique simulée : l'équipe répond par écrit sous 4 h ouvrables.
   };
 
   // Notes saver with DB sync
@@ -330,9 +306,9 @@ export function ClientPortalShell({
 
   // FAQ entries
   const faqEntries = [
-    { q: 'Comment soumettre mes reçus via Dext?', a: 'Vous pouvez utiliser l\'application mobile Dext en prenant une photo de vos reçus, ou envoyer vos factures PDF par courriel à votre adresse de soumission dédiée (ex: client@dext.cc). Les documents s\'importeront automatiquement.' },
-    { q: 'Quels sont les délais pour soumettre mes documents d\'impôts?', a: 'Pour les déclarations personnelles de 2025, la date limite de soumission est le 30 Avril 2026. Pour les travailleurs autonomes, vous avez jusqu\'au 15 Juin 2026.' },
-    { q: 'Comment fonctionne la facturation Compta-Flow?', a: 'La facturation s\'effectue de façon mensuelle automatique ou par mandat de service unique. Vous pouvez régler vos factures directement par carte bancaire de manière sécurisée dans l\'onglet "Factures et Paiements".' }
+    { q: 'Comment soumettre mes reçus et mes pièces?', a: 'Prenez vos reçus en photo ou numérisez-les, puis déposez-les dans votre coffre-fort documentaire (onglet « Coffre-fort Documentaire »). Vous pouvez aussi nous les faire parvenir par courriel à contact@compta-flow.net. Nous vous écrivons dès qu\'il manque une pièce.' },
+    { q: 'Quels sont les délais pour transmettre mes documents d\'impôts?', a: 'Pour une déclaration de particulier (T1), la date limite de production est le 30 avril. Pour les travailleurs autonomes, la production va jusqu\'au 15 juin, mais tout solde dû doit être payé au plus tard le 30 avril. Déposez vos feuillets tôt dans le coffre-fort : plus ils arrivent tôt, plus la préparation est rapide.' },
+    { q: 'Comment fonctionne la facturation Compta-Flow?', a: 'Votre forfait mensuel est facturé au prix fixe convenu, taxes applicables en sus. Les paiements se font par virement Interac à compta-flow@outlook.com. Pour un mandat d\'impôts seulement, un acompte de 50 % est demandé à la signature et le solde doit être reçu avant la transmission de la déclaration.' }
   ];
 
   const filteredFaq = faqEntries.filter(
@@ -385,11 +361,11 @@ export function ClientPortalShell({
   return (
     <div className="min-h-screen flex bg-slate-50 text-slate-900 font-sans relative w-full">
       {/* 🧭 LEFT SIDEBAR - COLONNE DE GAUCHE */}
-      <nav className="w-72 h-screen bg-[#0F1E36] border-r border-slate-200 flex flex-col z-30 shrink-0 select-none text-white">
+      <nav className="w-72 h-screen bg-[#16324F] border-r border-slate-200 hidden lg:flex flex-col z-30 shrink-0 select-none text-white">
         
         {/* Brand/Logo */}
         <div className="p-8 border-b border-white/5 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-amber-400 flex items-center justify-center text-[#0F1E36] font-bold shadow-md">
+          <div className="w-8 h-8 rounded-lg bg-amber-400 flex items-center justify-center text-[#16324F] font-bold shadow-md">
             CF
           </div>
           <div>
@@ -445,8 +421,8 @@ export function ClientPortalShell({
         <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-10 shrink-0 shadow-sm">
           {/* Header Left: Greeting */}
           <div className="flex flex-col">
-            <h1 className="text-lg font-serif font-black text-[#0F1E36]">
-              Bonjour, <span className="text-[#0F1E36] font-bold">{userData?.fullName || userData?.displayName || 'Client'}</span>
+            <h1 className="text-lg font-serif font-black text-[#16324F]">
+              Bonjour, <span className="text-[#16324F] font-bold">{userData?.fullName || userData?.displayName || 'Client'}</span>
             </h1>
             <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Votre espace comptable sécurisé</p>
           </div>
@@ -459,17 +435,33 @@ export function ClientPortalShell({
                 <Clock size={14} className="text-slate-400" />
                 <span>{currentTime}</span>
               </div>
-              <div className="flex items-center gap-1 border-l border-slate-200 pl-4">
-                <span>{weather.icon}</span>
-                <span>{weather.city}</span>
-                <span className="text-slate-900 font-bold">{weather.temp}°C</span>
-              </div>
             </div>
           </div>
         </header>
 
+        {/* Navigation mobile (barre d'onglets horizontale) */}
+        <div className="lg:hidden bg-white border-b border-slate-200 px-3 py-2 flex gap-2 overflow-x-auto custom-scrollbar shrink-0">
+          {menuItems.map((item) => {
+            const IconComp = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveTab(item.id as any)}
+                className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition-colors min-h-[44px] ${
+                  isActive ? 'bg-[#16324F] text-white' : 'bg-slate-100 text-slate-600'
+                }`}
+              >
+                <IconComp size={14} />
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+
         {/* 📦 CONTENT ZONE */}
-        <main className="flex-1 overflow-y-auto p-10 custom-scrollbar max-w-6xl mx-auto w-full">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10 custom-scrollbar max-w-6xl mx-auto w-full">
           
           {/* ============================================================
               1. ACCUEIL (TABLEAU DE BORD CLIENT)
@@ -477,11 +469,11 @@ export function ClientPortalShell({
           {activeTab === 'home' && (
             <div className="space-y-8 animate-fadeIn">
               {/* Warm Welcome Banner */}
-              <div className="p-8 bg-gradient-to-r from-[#0F1E36] to-[#1a345a] text-white rounded-3xl shadow-lg relative overflow-hidden">
+              <div className="p-8 bg-gradient-to-r from-[#16324F] to-[#1a345a] text-white rounded-3xl shadow-lg relative overflow-hidden">
                 <div className="relative z-10 space-y-2">
                   <h2 className="text-2xl font-serif font-bold">Bienvenue dans votre Espace Partenaire</h2>
                   <p className="text-slate-300 text-xs max-w-xl">
-                    Nous suivons et mettons à jour vos dossiers de taxes et comptabilité en temps réel. Accédez à vos documents et communiquez directement avec votre comptable.
+                    Nous suivons et mettons à jour vos dossiers de taxes et de comptabilité. Accédez à vos documents et communiquez directement avec votre équipe Compta-Flow — tout se fait par écrit, au même endroit.
                   </p>
                 </div>
               </div>
@@ -489,15 +481,15 @@ export function ClientPortalShell({
               {/* Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 
-                {/* Next Appointment Card */}
-                <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm flex items-start gap-4">
+                {/* Next Step Card — service 100 % en ligne, par écrit */}
+                <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm flex items-start gap-4 cursor-pointer hover:border-slate-300 transition-colors" onClick={() => setActiveTab('vault')}>
                   <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600">
-                    <CalendarIcon size={20} />
+                    <FolderOpen size={20} />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="text-xs text-slate-400 uppercase font-black tracking-wider">Prochain Rendez-vous</h4>
-                    <p className="text-sm font-bold text-slate-800">Rencontre Conseil Mensuelle</p>
-                    <p className="text-xs text-slate-500">Mardi, 30 Juin 2026 à 10:00 avec l'équipe Compta-Flow</p>
+                    <h4 className="text-xs text-slate-400 uppercase font-black tracking-wider">Prochaine Étape</h4>
+                    <p className="text-sm font-bold text-slate-800">Déposez vos documents du mois</p>
+                    <p className="text-xs text-slate-500">Reçus, relevés et feuillets : tout passe par votre coffre-fort. Aucun rendez-vous nécessaire — tout se fait par écrit.</p>
                   </div>
                 </div>
 
@@ -508,8 +500,8 @@ export function ClientPortalShell({
                   </div>
                   <div className="space-y-1">
                     <h4 className="text-xs text-slate-400 uppercase font-black tracking-wider">Messagerie Directe</h4>
-                    <p className="text-sm font-bold text-slate-800">Discuter avec votre comptable</p>
-                    <p className="text-xs text-slate-500">Discuter en ligne avec votre équipe</p>
+                    <p className="text-sm font-bold text-slate-800">Discuter avec votre équipe</p>
+                    <p className="text-xs text-slate-500">Réponse écrite sous 4 h ouvrables</p>
                   </div>
                 </div>
 
@@ -525,7 +517,7 @@ export function ClientPortalShell({
               
               {/* Mémos Intelligents (Alertes douces) */}
               {!isMandateSigned && (
-                <div className="p-6 bg-amber-5 border border-amber-200/50 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="p-6 bg-amber-50 border border-amber-200/50 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div className="flex gap-3">
                     <AlertCircle size={20} className="text-amber-500 shrink-0 mt-0.5" />
                     <div>
@@ -536,73 +528,57 @@ export function ClientPortalShell({
                   <button
                     onClick={() => setShowMandateSigning(true)}
                     type="button"
-                    className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-[#0F1E36] font-bold text-xs uppercase tracking-wider rounded-xl transition-all whitespace-nowrap shadow-sm"
+                    className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-[#16324F] font-bold text-xs uppercase tracking-wider rounded-xl transition-all whitespace-nowrap shadow-sm"
                   >
                     Signer le Mandat
                   </button>
                 </div>
               )}
 
-              {/* Progress Diagrams */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
-                {/* Tax prep progress */}
-                <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm text-center space-y-4">
-                  <h4 className="text-xs text-slate-400 uppercase font-black tracking-wider text-left border-b border-slate-100 pb-2">Préparation des Impôts 2025</h4>
-                  <div className="relative w-36 h-36 mx-auto flex items-center justify-center">
-                    <svg className="w-full h-full transform -rotate-90">
-                      <circle cx="72" cy="72" r="60" className="stroke-slate-100 fill-none" strokeWidth="8" />
-                      <circle cx="72" cy="72" r="60" className="stroke-blue-600 fill-none" strokeWidth="8" strokeDasharray="376.8" strokeDashoffset="94.2" />
-                    </svg>
-                    <div className="absolute flex flex-col items-center">
-                      <span className="text-2xl font-serif font-black text-slate-800">75%</span>
-                      <span className="text-[9px] uppercase tracking-wider text-slate-400">Complété</span>
-                    </div>
+              {/* Parcours client — étapes réelles, aucun avancement inventé */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3">
+                  <div className="w-10 h-10 bg-[#16324F]/5 rounded-xl flex items-center justify-center text-[#16324F]">
+                    <PenTool size={20} />
                   </div>
-                  <p className="text-xs text-slate-500">Validation finale des relevés T4 en cours par votre comptable.</p>
+                  <h4 className="text-xs text-slate-400 uppercase font-black tracking-wider">Étape 1 — Votre mandat</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {isMandateSigned
+                      ? 'Votre mandat est signé. Merci — votre dossier est actif.'
+                      : 'Signez votre mandat de services pour activer votre dossier (alerte ci-dessus).'}
+                  </p>
                 </div>
 
-                {/* Bookkeeping progress */}
-                <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm text-center space-y-4">
-                  <h4 className="text-xs text-slate-400 uppercase font-black tracking-wider text-left border-b border-slate-100 pb-2">Tenue de Livres - Juin 2026</h4>
-                  <div className="relative w-36 h-36 mx-auto flex items-center justify-center">
-                    <svg className="w-full h-full transform -rotate-90">
-                      <circle cx="72" cy="72" r="60" className="stroke-slate-100 fill-none" strokeWidth="8" />
-                      <circle cx="72" cy="72" r="60" className="stroke-emerald-500 fill-none" strokeWidth="8" strokeDasharray="376.8" strokeDashoffset="37.68" />
-                    </svg>
-                    <div className="absolute flex flex-col items-center">
-                      <span className="text-2xl font-serif font-black text-slate-800">90%</span>
-                      <span className="text-[9px] uppercase tracking-wider text-slate-400">Traité</span>
-                    </div>
+                <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3">
+                  <div className="w-10 h-10 bg-[#16324F]/5 rounded-xl flex items-center justify-center text-[#16324F]">
+                    <FolderOpen size={20} />
                   </div>
-                  <p className="text-xs text-slate-500">Vos factures et reçus réconciliés avec vos transactions bancaires.</p>
+                  <h4 className="text-xs text-slate-400 uppercase font-black tracking-wider">Étape 2 — Vos documents</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">Déposez vos reçus, relevés bancaires et feuillets dans le coffre-fort, au fur et à mesure.</p>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('vault')}
+                    className="text-xs font-bold text-[#2A9D8F] hover:underline"
+                  >
+                    Ouvrir le coffre-fort →
+                  </button>
+                </div>
+
+                <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-3">
+                  <div className="w-10 h-10 bg-[#16324F]/5 rounded-xl flex items-center justify-center text-[#16324F]">
+                    <FileCheck size={20} />
+                  </div>
+                  <h4 className="text-xs text-slate-400 uppercase font-black tracking-wider">Étape 3 — Le traitement</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">Conciliations, rapports de taxes et suivis se font ici, par écrit. Une question? L'onglet Messagerie est là pour ça.</p>
                 </div>
 
               </div>
 
-              {/* Timeline (Fil d'activités récentes) */}
-              <div className="p-6 bg-white border border-slate-200 rounded-3xl shadow-sm space-y-6">
+              {/* Activités récentes — état vide honnête tant qu'aucune activité réelle n'est enregistrée */}
+              <div className="p-6 bg-white border border-slate-200 rounded-3xl shadow-sm space-y-4">
                 <h4 className="text-xs text-slate-400 uppercase font-black tracking-wider border-b border-slate-100 pb-2">Activités Récentes</h4>
-                
-                <div className="relative pl-6 border-l border-slate-200 space-y-6 text-xs text-slate-600">
-                  <div className="relative">
-                    <div className="absolute -left-[30px] top-0 w-4.5 h-4.5 bg-emerald-500 rounded-full border-4 border-white flex items-center justify-center text-white" />
-                    <span className="text-[10px] text-slate-400 block font-bold">Aujourd'hui à 11:20</span>
-                    <p className="text-slate-800 font-bold mt-1">Votre équipe Compta-Flow a importé vos factures mensuelles Dext.</p>
-                  </div>
-
-                  <div className="relative">
-                    <div className="absolute -left-[30px] top-0 w-4.5 h-4.5 bg-blue-500 rounded-full border-4 border-white" />
-                    <span className="text-[10px] text-slate-400 block font-bold">Hier à 14:05</span>
-                    <p className="text-slate-800 font-bold mt-1">Nouveau document téléversé : T4_Revenu_Canada_2025.pdf</p>
-                  </div>
-
-                  <div className="relative">
-                    <div className="absolute -left-[30px] top-0 w-4.5 h-4.5 bg-slate-300 rounded-full border-4 border-white" />
-                    <span className="text-[10px] text-slate-400 block font-bold">Lundi, 22 Juin</span>
-                    <p className="text-slate-800 font-bold mt-1">Création de votre dossier client et affectation au cabinet.</p>
-                  </div>
-                </div>
+                <p className="text-xs text-slate-500">Aucune activité pour le moment. Vos dépôts de documents et les suivis de votre équipe apparaîtront ici.</p>
               </div>
 
               {/* Interactive Mandate Sign Modal */}
@@ -622,7 +598,7 @@ export function ClientPortalShell({
           {activeTab === 'vault' && (
             <div className="space-y-8 animate-fadeIn">
               <div>
-                <h2 className="text-xl font-serif font-bold text-[#0F1E36]">Coffre-fort Documentaire</h2>
+                <h2 className="text-xl font-serif font-bold text-[#16324F]">Coffre-fort Documentaire</h2>
                 <p className="text-xs text-slate-500 mt-1">Stockage crypté et sécurisé pour l'échange de pièces comptables</p>
               </div>
 
@@ -641,13 +617,19 @@ export function ClientPortalShell({
               {/* Files list */}
               <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                 <div className="px-6 py-4 bg-slate-50 border-b border-slate-200">
-                  <h4 className="text-xs font-black uppercase text-slate-500 tracking-wider">Fichiers partagés avec votre comptable ({clientDocuments.length})</h4>
+                  <h4 className="text-xs font-black uppercase text-slate-500 tracking-wider">Fichiers partagés avec votre équipe ({clientDocuments.length})</h4>
                 </div>
                 <div className="divide-y divide-slate-100">
+                  {clientDocuments.length === 0 && (
+                    <div className="p-8 text-center">
+                      <p className="text-xs font-bold text-slate-700">Aucun document pour le moment</p>
+                      <p className="text-[11px] text-slate-500 mt-1">Déposez vos reçus, relevés et feuillets dans la zone ci-dessus — ils apparaîtront ici, en sécurité.</p>
+                    </div>
+                  )}
                   {clientDocuments.map(doc => (
                     <div key={doc.id} className="p-4 flex justify-between items-center text-xs">
                       <div className="flex items-center gap-3">
-                        <FileCheck size={18} className="text-[#0F1E36]" />
+                        <FileCheck size={18} className="text-[#16324F]" />
                         <div>
                           <span className="font-bold text-slate-800 block">{doc.name}</span>
                           <span className="text-[10px] text-slate-400">{doc.size}</span>
@@ -676,7 +658,7 @@ export function ClientPortalShell({
           {activeTab === 'messaging' && (
             <div className="space-y-8 animate-fadeIn">
               <div>
-                <h2 className="text-xl font-serif font-bold text-[#0F1E36]">Messagerie Directe</h2>
+                <h2 className="text-xl font-serif font-bold text-[#16324F]">Messagerie Directe</h2>
                 <p className="text-xs text-slate-500 mt-1">Échangez de manière confidentielle avec votre équipe Compta-Flow attitrée</p>
               </div>
 
@@ -684,21 +666,27 @@ export function ClientPortalShell({
               <div className="bg-white border border-slate-200 rounded-3xl h-[500px] flex flex-col justify-between shadow-sm overflow-hidden">
                 
                 {/* Header */}
-                <div className="px-6 py-4 bg-[#0F1E36] text-white flex items-center gap-3">
+                <div className="px-6 py-4 bg-[#16324F] text-white flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-emerald-400" />
                   <div>
                     <span className="text-xs font-black uppercase tracking-wider block">Équipe Compta-Flow</span>
-                    <span className="text-[9px] text-slate-300">Comptable Cabinet CF</span>
+                    <span className="text-[9px] text-slate-300">Votre équipe attitrée — réponse écrite sous 4 h ouvrables</span>
                   </div>
                 </div>
 
                 {/* Messages log */}
                 <div className="flex-1 p-6 overflow-y-auto space-y-4 text-xs custom-scrollbar">
+                  {chatMessages.length === 0 && (
+                    <div className="text-center text-slate-400 py-10">
+                      <p className="font-bold text-slate-500">Aucun message pour le moment</p>
+                      <p className="mt-1">Écrivez-nous ci-dessous — nous répondons par écrit sous 4 h ouvrables.</p>
+                    </div>
+                  )}
                   {chatMessages.map((msg, i) => (
                     <div key={i} className={`flex flex-col ${msg.sender === 'Client' ? 'items-end' : 'items-start'}`}>
                       <div className={`p-3 rounded-2xl max-w-md ${
                         msg.sender === 'Client'
-                          ? 'bg-[#0F1E36] text-white rounded-tr-none'
+                          ? 'bg-[#16324F] text-white rounded-tr-none'
                           : 'bg-slate-100 text-slate-800 rounded-tl-none'
                       }`}>
                         <p>{msg.text}</p>
@@ -722,7 +710,7 @@ export function ClientPortalShell({
                   />
                   <button
                     type="submit"
-                    className="p-3 bg-[#0F1E36] text-white rounded-xl hover:bg-slate-800 transition-colors"
+                    className="p-3 bg-[#16324F] text-white rounded-xl hover:bg-slate-800 transition-colors"
                   >
                     <Send size={16} />
                   </button>
@@ -737,12 +725,12 @@ export function ClientPortalShell({
           {activeTab === 'billing' && (
             <div className="space-y-8 animate-fadeIn">
               <div>
-                <h2 className="text-xl font-serif font-bold text-[#0F1E36]">Factures et Paiements</h2>
-                <p className="text-xs text-slate-500 mt-1">Réglez vos factures Compta-Flow par passerelle de paiement sécurisée</p>
+                <h2 className="text-xl font-serif font-bold text-[#16324F]">Factures et Paiements</h2>
+                <p className="text-xs text-slate-500 mt-1">Vos factures Compta-Flow — paiement par virement Interac à compta-flow@outlook.com</p>
               </div>
 
               {/* Invoices list */}
-              <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+              <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-200">
@@ -754,15 +742,20 @@ export function ClientPortalShell({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-xs">
+                    {invoices.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="p-8 text-center text-slate-500 font-semibold">Aucune facture pour le moment. Vos factures apparaîtront ici dès leur émission.</td>
+                      </tr>
+                    )}
                     {invoices.map(inv => (
                       <tr key={inv.id} className="hover:bg-slate-50/50">
                         <td className="p-5 text-slate-500 font-semibold">{inv.date}</td>
                         <td className="p-5 font-bold text-slate-800">{inv.desc}</td>
-                        <td className="p-5 text-[#0F1E36] font-bold">{inv.amount.toFixed(2)} $</td>
+                        <td className="p-5 text-[#16324F] font-bold">{inv.amount.toFixed(2)} $</td>
                         <td className="p-5">
                           <span className={`inline-flex px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-full border ${
                             inv.status === 'Payé'
-                              ? 'bg-emerald-55 border-emerald-200 text-emerald-600'
+                              ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
                               : 'bg-red-50 border-red-200 text-red-600'
                           }`}>
                             {inv.status}
@@ -773,7 +766,7 @@ export function ClientPortalShell({
                             <button
                               type="button"
                               onClick={() => setShowPaymentModal(inv)}
-                              className="px-4 py-2 bg-[#0F1E36] hover:bg-slate-800 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider"
+                              className="px-4 py-2 bg-[#16324F] hover:bg-slate-800 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider"
                             >
                               Payer maintenant
                             </button>
@@ -795,7 +788,7 @@ export function ClientPortalShell({
                       <X size={20} />
                     </button>
                     
-                    <h3 className="text-sm font-black uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2 mb-4">Paiement Sécurisé Stripe</h3>
+                    <h3 className="text-sm font-black uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2 mb-4">Règlement de la facture</h3>
                     <p className="text-xs text-slate-600 font-semibold mb-6">{showPaymentModal.desc} — <span className="text-emerald-500 font-bold">{showPaymentModal.amount.toFixed(2)} $</span></p>
 
                     <form onSubmit={handlePaymentSubmit} className="space-y-4 text-xs font-bold text-slate-800">
@@ -838,7 +831,7 @@ export function ClientPortalShell({
                       <button
                         type="submit"
                         disabled={isProcessingPayment}
-                        className="w-full py-3 mt-4 bg-emerald-500 hover:bg-emerald-600 text-[#0F1E36] font-black uppercase tracking-wider rounded-xl transition-all shadow"
+                        className="w-full py-3 mt-4 bg-emerald-500 hover:bg-emerald-600 text-[#16324F] font-black uppercase tracking-wider rounded-xl transition-all shadow"
                       >
                         {isProcessingPayment ? 'Traitement...' : 'Confirmer le règlement'}
                       </button>
@@ -855,7 +848,7 @@ export function ClientPortalShell({
           {activeTab === 'catalog' && (
             <div className="space-y-8 animate-fadeIn">
               <div>
-                <h2 className="text-xl font-serif font-bold text-[#0F1E36]">Catalogue des Services</h2>
+                <h2 className="text-xl font-serif font-bold text-[#16324F]">Catalogue des Services</h2>
                 <p className="text-xs text-slate-500 mt-1">Faites évoluer votre forfait ou commandez une mission fiscale ponctuelle</p>
               </div>
 
@@ -866,20 +859,20 @@ export function ClientPortalShell({
                 <div className="bg-white border border-slate-200 p-6 rounded-2xl flex flex-col justify-between hover:shadow-md transition-shadow">
                   <div>
                     <span className="text-[10px] text-blue-600 font-bold border border-blue-200 px-2 py-0.5 rounded-full uppercase">Forfait Mensuel</span>
-                    <h3 className="text-sm font-bold text-[#0F1E36] mt-4">Tenue de Livres complète</h3>
-                    <p className="text-xs text-slate-500 mt-2">Dext inclus, conciliation bancaire et rapports trimestriels.</p>
+                    <h3 className="text-sm font-bold text-[#16324F] mt-4">Tenue de Livres complète</h3>
+                    <p className="text-xs text-slate-500 mt-2">Dépôt de vos pièces par photo ou courriel, conciliation bancaire et rapports de taxes.</p>
                     <ul className="text-xs text-slate-600 mt-4 space-y-2 font-medium">
-                      <li>• Importation automatique de factures</li>
-                      <li>• Support prioritaire par chat</li>
-                      <li>• Rapprochement bancaire illimité</li>
+                      <li>• Classement de vos factures et reçus</li>
+                      <li>• Support par écrit, sous 4 h ouvrables</li>
+                      <li>• Rapprochement bancaire de vos comptes</li>
                     </ul>
                   </div>
                   <div className="border-t border-slate-100 mt-6 pt-4 flex justify-between items-center">
-                    <span className="text-lg font-serif font-bold text-[#0F1E36]">199 $ / <span className="text-[10px] text-slate-400">mois</span></span>
+                    <span className="text-lg font-serif font-bold text-[#16324F]">199 $ / <span className="text-[10px] text-slate-400">mois</span></span>
                     <button
-                      onClick={() => toast.success('Votre demande de souscription a été envoyée.')}
+                      onClick={() => toast.info('Pour activer un service, écrivez-nous dans l\'onglet Messagerie — nous vous répondons par écrit sous 4 h ouvrables.')}
                       type="button"
-                      className="px-4 py-2 bg-[#0F1E36] text-white rounded-lg text-[10px] font-bold uppercase tracking-wider"
+                      className="px-4 py-2 bg-[#16324F] text-white rounded-lg text-[10px] font-bold uppercase tracking-wider"
                     >
                       Souscrire
                     </button>
@@ -889,21 +882,21 @@ export function ClientPortalShell({
                 {/* Incorporation Card */}
                 <div className="bg-white border border-slate-200 p-6 rounded-2xl flex flex-col justify-between hover:shadow-md transition-shadow">
                   <div>
-                    <span className="text-[10px] text-[#0F1E36] font-bold border border-slate-200 px-2 py-0.5 rounded-full uppercase">Mission unique</span>
-                    <h3 className="text-sm font-bold text-[#0F1E36] mt-4">Incorporation Provinciale</h3>
+                    <span className="text-[10px] text-[#16324F] font-bold border border-slate-200 px-2 py-0.5 rounded-full uppercase">Mission unique</span>
+                    <h3 className="text-sm font-bold text-[#16324F] mt-4">Incorporation Provinciale</h3>
                     <p className="text-xs text-slate-500 mt-2">Création d\'entreprise, livre de société numérique et numéro de NEQ.</p>
                     <ul className="text-xs text-slate-600 mt-4 space-y-2 font-medium">
                       <li>• Enregistrement gouvernemental complet</li>
-                      <li>• Consultation juridique initiale</li>
+                      <li>• Ouverture des comptes de taxes (TPS/TVQ)</li>
                       <li>• Configuration de compte d\'impôt</li>
                     </ul>
                   </div>
                   <div className="border-t border-slate-100 mt-6 pt-4 flex justify-between items-center">
-                    <span className="text-lg font-serif font-bold text-[#0F1E36]">599 $</span>
+                    <span className="text-lg font-serif font-bold text-[#16324F]">599 $</span>
                     <button
-                      onClick={() => toast.success('Votre demande d\'incorporation a été envoyée.')}
+                      onClick={() => toast.info('Pour commander une mission ponctuelle, écrivez-nous dans l\'onglet Messagerie — nous vous répondons par écrit sous 4 h ouvrables.')}
                       type="button"
-                      className="px-4 py-2 bg-[#0F1E36] text-white rounded-lg text-[10px] font-bold uppercase tracking-wider"
+                      className="px-4 py-2 bg-[#16324F] text-white rounded-lg text-[10px] font-bold uppercase tracking-wider"
                     >
                       Commander
                     </button>
@@ -920,8 +913,8 @@ export function ClientPortalShell({
           {activeTab === 'notes' && (
             <div className="space-y-8 animate-fadeIn">
               <div>
-                <h2 className="text-xl font-serif font-bold text-[#0F1E36]">Mes Notes</h2>
-                <p className="text-xs text-slate-500 mt-1">Notez vos questions à l'avance pour votre prochaine rencontre comptable</p>
+                <h2 className="text-xl font-serif font-bold text-[#16324F]">Mes Notes</h2>
+                <p className="text-xs text-slate-500 mt-1">Notez vos questions et vos idées — elles restent sauvegardées dans votre espace</p>
               </div>
 
               {/* Textarea editor like Apple Notes */}
@@ -980,7 +973,7 @@ export function ClientPortalShell({
                         <span>{calcTaxesResults.tvq.toFixed(2)} $</span>
                       </div>
                     )}
-                    <div className="flex justify-between text-[#0F1E36] font-bold border-t border-slate-200 pt-1 mt-1">
+                    <div className="flex justify-between text-[#16324F] font-bold border-t border-slate-200 pt-1 mt-1">
                       <span>Total TTC:</span>
                       <span>{calcTaxesResults.total.toFixed(2)} $</span>
                     </div>
