@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Users, Receipt, FolderOpen, BarChart3, Calendar as CalendarIcon, 
   MessageSquare, Tags, Calculator, StickyNote as StickyIcon, Lock, Settings as SettingsIcon,
-  Bell, Sun, Cloud, Plus, Search, Trash2, LockOpen, Key, Check, CheckCircle2, 
+  Bell, Plus, Search, Trash2, LockOpen, Key, Check, CheckCircle2, 
   AlertTriangle, TrendingUp, LogOut, Send, Eye, Edit3, Filter, Shield, 
   DollarSign, ChevronRight, Download, RefreshCw, X, FileText, LockKeyhole
 } from 'lucide-react';
@@ -50,16 +50,11 @@ export function SubAdminPortalShell({
   // Active Tab state
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   
-  // Date & Weather simulation
+  // Date
   const [dateStr, setDateStr] = useState<string>('');
-  const [weather, setWeather] = useState({ city: 'Montréal', temp: 22, icon: '☀️', text: 'Ensoleillé' });
 
-  // Notifications state
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'Nouveau reçu Dext', message: 'Marie Tremblay a téléversé un reçu de 172.46 $', time: 'Il y a 5 min', unread: true },
-    { id: 2, title: 'Dépôt Stripe validé', message: 'Sébastien Roy a payé le dépôt de 325.00 $ pour Le Rattrapage', time: 'Il y a 1h', unread: true },
-    { id: 3, title: 'Formulaire étudiant reçu', message: 'Antoine Tremblay a complété son onboarding', time: 'Il y a 3h', unread: false }
-  ]);
+  // Notifications state — vide au départ : aucune notification fictive
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
 
   // Clients tab state
@@ -104,10 +99,10 @@ export function SubAdminPortalShell({
 
   // Services catalog state
   const [services, setServices] = useState<ServiceItem[]>([
-    { id: '1', name: 'Forfaits Mensuels', description: 'Tenue de livres mensuelle complète avec Dext et support régulier.', price: 199, period: 'mois', category: 'Tenue de livres' },
+    { id: '1', name: 'Forfaits Mensuels', description: 'Tenue de livres mensuelle complète, dépôt de pièces par photo ou courriel et support régulier.', price: 199, period: 'mois', category: 'Tenue de livres' },
     { id: '2', name: 'L\'Étudiant', description: 'Déclaration d\'impôt simplifiée pour étudiants admissibles.', price: 49, period: 'unique', category: 'Impôts' },
     { id: '3', name: 'Le Rattrapage', description: 'Mise à jour de tenue de livres en retard, tarif par mois rétroactif.', price: 99, period: 'mois', category: 'Tenue de livres' },
-    { id: '4', name: 'Le Setup Onboarding', description: 'Configuration initiale de Supabase, Stripe, et raccordement bancaire.', price: 299, period: 'unique', category: 'Configuration' },
+    { id: '4', name: 'Le Setup Onboarding', description: 'Configuration initiale du dossier client, des outils comptables et du raccordement bancaire.', price: 299, period: 'unique', category: 'Configuration' },
     { id: '5', name: 'Impôts Personnels', description: 'Déclaration de revenus personnelle standard avec crédits canadiens.', price: 99, period: 'unique', category: 'Impôts' },
     { id: '6', name: 'Corporations (T2/CO-17)', description: 'Production complète des déclarations fiscales d\'entreprises provinciales et fédérales.', price: 599, period: 'unique', category: 'Impôts Corp' },
     { id: '7', name: 'États Financiers Annuels', description: 'Génération de bilan, compte de résultat et notes explicatives.', price: 799, period: 'unique', category: 'Comptabilité' }
@@ -122,20 +117,11 @@ export function SubAdminPortalShell({
   const [marginPrice, setMarginPrice] = useState<number>(100);
 
   // Team Chat state
-  const [activeChatMember, setActiveChatMember] = useState<string>('Marie Tremblay');
+  const [activeChatMember, setActiveChatMember] = useState<string>('Samuel Lahaie');
   const [chatMessages, setChatMessages] = useState<Record<string, Array<{ sender: string; text: string; time: string }>>>({
-    'Marie Tremblay': [
-      { sender: 'Marie Tremblay', text: 'Bonjour, j\'ai déposé mes derniers reçus Bureau en Gros dans mon Dext. Pouvez-vous valider la TPS/TVQ?', time: '14:23' },
-      { sender: 'Cabinet', text: 'Bonjour Marie! Oui, je vois les reçus. Je procède à l\'intégration fiscale dans votre portail dès maintenant.', time: '14:30' }
-    ],
-    'Sylvie Charette': [
-      { sender: 'Sylvie Charette', text: 'Bonjour, as-tu fini d\'analyser les dossiers de rattrapage de Sébastien Roy?', time: '09:15' },
-      { sender: 'Cabinet', text: 'Presque, il manque les relevés Stripe du mois de mars, je viens de lui envoyer une relance.', time: '09:40' }
-    ],
-    'Karim Haddad': [
-      { sender: 'Karim Haddad', text: 'Le client Antoine Tremblay demande s\'il peut avoir son remboursement d\'impôt étudiant par virement Interac direct.', time: 'Hier' },
-      { sender: 'Cabinet', text: 'Oui, son onboarding montre un profil Ontario valide, on peut faire le virement Interac dès la validation de sa T4.', time: 'Hier' }
-    ]
+    'Samuel Lahaie': [],
+    'Simon Gagné': [],
+    'Sylvie Charette': []
   });
   const [newChatMessage, setNewChatMessage] = useState('');
 
@@ -143,9 +129,8 @@ export function SubAdminPortalShell({
   const [themeColor, setThemeColor] = useState<'emerald' | 'gold' | 'sapphire'>('gold');
   const [newPassword, setNewPassword] = useState('');
   const [employeePermissions, setEmployeePermissions] = useState({
-    sylvie: { read: true, write: true, delete: false },
-    karim: { read: true, write: true, delete: false },
-    marie: { read: true, write: false, delete: false }
+    simon: { read: true, write: true, delete: false },
+    sylvie: { read: true, write: true, delete: false }
   });
 
   // Load live data from Supabase
@@ -209,28 +194,10 @@ export function SubAdminPortalShell({
     }).format(new Date());
     setDateStr(date.charAt(0).toUpperCase() + date.slice(1));
 
-    // Simulated Weather variations
-    const hours = new Date().getHours();
-    if (hours > 18 || hours < 6) {
-      setWeather({ city: 'Montréal', temp: 17, icon: '🌙', text: 'Dégagé' });
-    } else if (Math.random() > 0.5) {
-      setWeather({ city: 'Montréal', temp: 22, icon: '☀️', text: 'Ensoleillé' });
-    } else {
-      setWeather({ city: 'Montréal', temp: 19, icon: '🌤️', text: 'Partiellement nuageux' });
-    }
-
-    // Load Sticky Notes from LocalStorage
+    // Load Sticky Notes from LocalStorage — aucune note fictive au départ
     const savedNotes = localStorage.getItem(`comptaflow_notes_${userData?.id || 'default'}`);
     if (savedNotes) {
       setNotes(JSON.parse(savedNotes));
-    } else {
-      const initialNotes: StickyNoteItem[] = [
-        { id: '1', text: 'Appeler Sébastien Roy pour ses relevés Stripe manquants.', color: 'yellow', createdAt: new Date().toISOString() },
-        { id: '2', text: 'Vérifier la déclaration T4 Ontario d\'Antoine Tremblay.', color: 'green', createdAt: new Date().toISOString() },
-        { id: '3', text: 'Préparer la réunion mensuelle de Marie Tremblay le 30 juin.', color: 'pink', createdAt: new Date().toISOString() }
-      ];
-      setNotes(initialNotes);
-      localStorage.setItem(`comptaflow_notes_${userData?.id || 'default'}`, JSON.stringify(initialNotes));
     }
 
     loadLiveData();
@@ -436,28 +403,7 @@ export function SubAdminPortalShell({
     });
 
     setNewChatMessage('');
-    
-    // Simulate auto reply after 1.5 seconds
-    setTimeout(() => {
-      const mockReplies: Record<string, string> = {
-        'Marie Tremblay': 'Merci pour votre réponse rapide! J\'attends la confirmation de déclaration dans mon dossier.',
-        'Sylvie Charette': 'Parfait, tiens-moi au courant dès que Roy t\'envoie ça.',
-        'Karim Haddad': 'Super, je m\'occupe de lui faire signer le mandat électronique.'
-      };
-      
-      const responseText = mockReplies[activeChatMember] || 'Merci pour l\'information.';
-      
-      setChatMessages(prev => {
-        const memberMessages = prev[activeChatMember] || [];
-        return {
-          ...prev,
-          [activeChatMember]: [
-            ...memberMessages,
-            { sender: activeChatMember, text: responseText, time: new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' }) }
-          ]
-        };
-      });
-    }, 1500);
+    // Aucune réponse automatique simulée : les messages restent tels qu'écrits.
   };
 
   // Calculators helper
@@ -521,7 +467,7 @@ export function SubAdminPortalShell({
       </div>
 
       {/* 🧭 SIDEBAR - MENU LATÉRAL */}
-      <nav className="w-80 h-screen bg-[#060606] border-r border-white/5 flex flex-col z-30 shrink-0 select-none">
+      <nav className="w-80 h-screen bg-[#060606] border-r border-white/5 hidden lg:flex flex-col z-30 shrink-0 select-none">
         {/* Brand Header */}
         <div className="p-8 flex items-center justify-between">
           <div className="flex items-center gap-4 text-left">
@@ -547,7 +493,7 @@ export function SubAdminPortalShell({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-black truncate">{userData?.fullName || 'Administrateur'}</p>
-              <span className="text-[9px] uppercase tracking-wider text-gold font-bold">Cabinet Associé</span>
+              <span className="text-[9px] uppercase tracking-wider text-gold font-bold">Équipe Compta-Flow</span>
             </div>
           </div>
         </div>
@@ -592,27 +538,22 @@ export function SubAdminPortalShell({
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative z-10 w-full">
         
         {/* 📋 HEADER - BARRE D'EN-TÊTE */}
-        <header className="h-20 bg-noir/50 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-10 shrink-0">
+        <header className="h-20 bg-noir/50 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-4 md:px-10 shrink-0">
           
           {/* Header Left: Greeting */}
           <div className="flex flex-col">
             <h1 className="text-xl font-serif font-bold text-ivoire">
               Bonjour, <span className={`${activeTheme.accent} ${activeTheme.textGlow}`}>{userData?.fullName || 'Administrateur'}</span>
             </h1>
-            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Cabinet de tenue de livres</p>
+            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Tenue de livres et impôts — 100 % en ligne</p>
           </div>
 
-          {/* Header Right: Date, Weather, Notifications */}
+          {/* Header Right: Date, Notifications */}
           <div className="flex items-center gap-6">
             
-            {/* Elegant Date/Weather Widget */}
-            <div className="flex items-center gap-4 px-4 py-2 bg-white/5 border border-white/5 rounded-2xl text-xs font-medium">
-              <span className="text-slate-400 border-r border-white/10 pr-4">{dateStr}</span>
-              <div className="flex items-center gap-1.5 text-ivoire">
-                <span>{weather.icon}</span>
-                <span className="font-bold">{weather.city}</span>
-                <span className="text-gold font-bold">{weather.temp}°C</span>
-              </div>
+            {/* Date Widget */}
+            <div className="hidden sm:flex items-center gap-4 px-4 py-2 bg-white/5 border border-white/5 rounded-2xl text-xs font-medium">
+              <span className="text-slate-400">{dateStr}</span>
             </div>
 
             {/* Notification Bell */}
@@ -641,6 +582,9 @@ export function SubAdminPortalShell({
                     </button>
                   </div>
                   <div className="space-y-3">
+                    {notifications.length === 0 && (
+                      <p className="text-[11px] text-slate-500 text-center py-3">Aucune notification pour le moment.</p>
+                    )}
                     {notifications.map(n => (
                       <div key={n.id} className={`p-2.5 rounded-xl transition-colors ${n.unread ? 'bg-gold/10' : 'bg-white/5'}`}>
                         <div className="flex justify-between items-start">
@@ -657,8 +601,32 @@ export function SubAdminPortalShell({
           </div>
         </header>
 
+        {/* Navigation mobile (barre d'onglets horizontale) */}
+        <div className="lg:hidden bg-[#0a0a0a] border-b border-white/5 px-3 py-2 flex gap-2 overflow-x-auto custom-scrollbar shrink-0">
+          {menuItems.map((item) => {
+            const IconComp = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => {
+                  setActiveTab(item.id);
+                  if (item.id !== 'vault') setIsVaultUnlocked(false);
+                }}
+                className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-[11px] font-bold whitespace-nowrap transition-colors min-h-[44px] ${
+                  isActive ? 'bg-gold/15 text-gold border border-gold/30' : 'bg-white/5 text-slate-400 border border-transparent'
+                }`}
+              >
+                <IconComp size={14} />
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+
         {/* 📦 CONTENT ZONE */}
-        <main className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
           
           {/* ============================================================
               1. TABLEAU DE BORD (DASHBOARD)
@@ -672,60 +640,60 @@ export function SubAdminPortalShell({
                 <div className="glass-card p-6 rounded-2xl relative overflow-hidden group">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Chiffre d'Affaires</p>
-                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">18 450.00 $</h3>
+                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Dossiers en file</p>
+                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">{dbServices.length}</h3>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold">
                       <TrendingUp size={20} />
                     </div>
                   </div>
-                  <p className="text-xs text-emerald-400 mt-4 flex items-center gap-1">
-                    <span className="font-bold">+12.4%</span> ce mois-ci
+                  <p className="text-xs text-slate-400 mt-4">
+                    Services assignés à traiter
                   </p>
                 </div>
 
                 <div className="glass-card p-6 rounded-2xl relative overflow-hidden group">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Clients Cabinet</p>
+                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Clients du cabinet</p>
                       <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">{adminClients.length} Actifs</h3>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold">
                       <Users size={20} />
                     </div>
                   </div>
-                  <p className="text-xs text-emerald-400 mt-4 flex items-center gap-1">
-                    <span className="font-bold">+3</span> nouveaux dossiers
+                  <p className="text-xs text-slate-400 mt-4">
+                    Dossiers clients suivis dans cet espace
                   </p>
                 </div>
 
                 <div className="glass-card p-6 rounded-2xl relative overflow-hidden group">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Taux de Complétion</p>
-                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">94.8%</h3>
+                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Dossiers terminés</p>
+                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">{dbServices.filter(s => s.status === 'Terminé').length}</h3>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold">
                       <CheckCircle2 size={20} />
                     </div>
                   </div>
                   <p className="text-xs text-slate-400 mt-4">
-                    Objectif de dépôt mensuel : 95%
+                    Dans la file de production
                   </p>
                 </div>
 
                 <div className="glass-card p-6 rounded-2xl relative overflow-hidden group">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">TPS / TVQ Estimée</p>
-                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">1 259.40 $</h3>
+                      <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Dossiers en suspens</p>
+                      <h3 className="text-2xl font-bold mt-2 font-serif text-ivoire">{dbServices.filter(s => s.status === 'En suspens').length}</h3>
                     </div>
                     <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold">
-                      <Calculator size={20} />
+                      <AlertTriangle size={20} />
                     </div>
                   </div>
                   <p className="text-xs text-amber-400 mt-4">
-                    TPS: 420.50 $ | TVQ: 838.90 $
+                    À relancer en priorité
                   </p>
                 </div>
 
@@ -801,67 +769,10 @@ export function SubAdminPortalShell({
                       );
                     })
                   ) : (
-                    <>
-                      {/* Marie Row */}
-                      <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-gold/20 transition-all">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold text-ivoire">Marie Tremblay</span>
-                            <span className="text-[10px] px-2 py-0.5 border border-gold/30 text-gold rounded-full uppercase tracking-wider font-semibold">Forfaits Mensuels</span>
-                          </div>
-                          <p className="text-xs text-slate-500 mt-1">Tremblay Design Inc. • QC • 14 Reçus Dext OCR</p>
-                        </div>
-                        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                          <div className="text-right">
-                            <span className="text-[10px] text-emerald-400 font-bold block">✓ Dext lié</span>
-                            <span className="text-xs font-serif text-slate-400">TPS: 7.50$ | TVQ: 14.96$</span>
-                          </div>
-                          <button type="button" className="px-4 py-2 bg-gold text-noir text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-gold-light transition-colors">
-                            Traiter
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Antoine Row */}
-                      <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-gold/20 transition-all">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold text-ivoire">Antoine Tremblay</span>
-                            <span className="text-[10px] px-2 py-0.5 border border-blue-500/30 text-blue-400 rounded-full uppercase tracking-wider font-semibold">L'Étudiant</span>
-                          </div>
-                          <p className="text-xs text-slate-500 mt-1">Ontario • 2025 • Tremblay_T4_Releve8_2025.zip</p>
-                        </div>
-                        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                          <div className="text-right">
-                            <span className="text-[10px] text-amber-400 font-bold block">⚠️ Fichiers reçus</span>
-                            <span className="text-xs font-serif text-slate-400">Calculateur T4 Ontario</span>
-                          </div>
-                          <button type="button" className="px-4 py-2 bg-white/5 border border-white/10 text-ivoire text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-white/10 transition-colors">
-                            Télécharger
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Sébastien Row */}
-                      <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-gold/20 transition-all">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold text-ivoire">Sébastien Roy</span>
-                            <span className="text-[10px] px-2 py-0.5 border border-purple-500/30 text-purple-400 rounded-full uppercase tracking-wider font-semibold">Le Rattrapage</span>
-                          </div>
-                          <p className="text-xs text-slate-500 mt-1">Roy Rénovation • QC • 6 Mois manquants</p>
-                        </div>
-                        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                          <div className="text-right">
-                            <span className="text-[10px] text-emerald-400 font-bold block">✓ Dépôt Stripe payé</span>
-                            <span className="text-xs font-serif text-slate-400">Google Drive: Roy_Rattrapage_2025</span>
-                          </div>
-                          <button type="button" className="px-4 py-2 bg-gold text-noir text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-gold-light transition-colors">
-                            Reconcilier
-                          </button>
-                        </div>
-                      </div>
-                    </>
+                    <div className="p-8 bg-white/5 border border-white/5 rounded-2xl text-center">
+                      <p className="text-sm font-bold text-ivoire">Aucun dossier en file pour le moment</p>
+                      <p className="text-xs text-slate-500 mt-1">Les services assignés à votre compte apparaîtront ici, prêts à traiter.</p>
+                    </div>
                   )}
                 </div>
               </div>
@@ -911,6 +822,11 @@ export function SubAdminPortalShell({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
+                      {adminClients.length === 0 && (
+                        <tr>
+                          <td colSpan={5} className="p-8 text-center text-xs text-slate-500 font-semibold">Aucun dossier client pour le moment. Ajoutez votre premier client avec le bouton ci-dessus.</td>
+                        </tr>
+                      )}
                       {adminClients
                         .filter(c => c.displayName.toLowerCase().includes(clientSearch.toLowerCase()) || (c.companyName || '').toLowerCase().includes(clientSearch.toLowerCase()))
                         .map(client => (
@@ -976,7 +892,7 @@ export function SubAdminPortalShell({
                           value={newClientName}
                           onChange={(e) => setNewClientName(e.target.value)}
                           className="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-xs outline-none focus:border-gold transition-colors text-ivoire font-bold"
-                          placeholder="ex: Marie Tremblay"
+                          placeholder="ex : Nom complet du client"
                         />
                       </div>
                       <div>
@@ -987,7 +903,7 @@ export function SubAdminPortalShell({
                           value={newClientEmail}
                           onChange={(e) => setNewClientEmail(e.target.value)}
                           className="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-xs outline-none focus:border-gold transition-colors text-ivoire font-bold"
-                          placeholder="ex: marie.tremblay@exemple.ca"
+                          placeholder="ex : client@exemple.ca"
                         />
                       </div>
                       <div>
@@ -997,7 +913,7 @@ export function SubAdminPortalShell({
                           value={newClientCompany}
                           onChange={(e) => setNewClientCompany(e.target.value)}
                           className="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-xs outline-none focus:border-gold transition-colors text-ivoire font-bold"
-                          placeholder="ex: Tremblay Design Inc."
+                          placeholder="ex : Nom de l'entreprise"
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
@@ -1050,16 +966,12 @@ export function SubAdminPortalShell({
               <div className="flex justify-between items-center">
                 <div>
                   <h2 className="text-xl font-serif font-bold text-ivoire">Suivi des Transactions</h2>
-                  <p className="text-xs text-slate-500 mt-1">Dépôts Stripe, remboursements et intégrations de factures fiscales</p>
-                </div>
-                <div className="flex gap-4">
-                  <span className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-xs font-bold">Total Entrées: +24 890 $</span>
-                  <span className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs font-bold">Total Sorties: -4 120 $</span>
+                  <p className="text-xs text-slate-500 mt-1">Virements Interac, dépôts et factures des dossiers du cabinet</p>
                 </div>
               </div>
 
               {/* Transactions List */}
-              <div className="glass-card rounded-3xl overflow-hidden">
+              <div className="glass-card rounded-3xl overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-white/5 bg-white/2">
@@ -1071,53 +983,8 @@ export function SubAdminPortalShell({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 text-xs">
-                    <tr className="hover:bg-white/1">
-                      <td className="p-5 text-slate-400 font-semibold">24 Juin 2026</td>
-                      <td className="p-5 font-bold">
-                        Dépôt Stripe - Sébastien Roy
-                        <span className="text-[10px] text-slate-500 block">Service Le Rattrapage (Acompte)</span>
-                      </td>
-                      <td className="p-5 text-emerald-400 font-bold">Entrée</td>
-                      <td className="p-5 font-bold">325.00 $</td>
-                      <td className="p-5">
-                        <span className="px-2.5 py-0.5 border border-emerald-500/30 text-emerald-400 bg-emerald-500/5 rounded-full font-black uppercase text-[9px] tracking-wider">Payé</span>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-white/1">
-                      <td className="p-5 text-slate-400 font-semibold">23 Juin 2026</td>
-                      <td className="p-5 font-bold">
-                        Abonnement Dext Premium Partner
-                        <span className="text-[10px] text-slate-500 block">Licence mensuelle cabinet</span>
-                      </td>
-                      <td className="p-5 text-red-400 font-bold">Sortie</td>
-                      <td className="p-5 font-bold">149.00 $</td>
-                      <td className="p-5">
-                        <span className="px-2.5 py-0.5 border border-emerald-500/30 text-emerald-400 bg-emerald-500/5 rounded-full font-black uppercase text-[9px] tracking-wider">Payé</span>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-white/1">
-                      <td className="p-5 text-slate-400 font-semibold">22 Juin 2026</td>
-                      <td className="p-5 font-bold">
-                        Facture Honoraires - Marie Tremblay
-                        <span className="text-[10px] text-slate-500 block">Forfaits Mensuels (Tenue de livres Juin)</span>
-                      </td>
-                      <td className="p-5 text-emerald-400 font-bold">Entrée</td>
-                      <td className="p-5 font-bold">199.00 $</td>
-                      <td className="p-5">
-                        <span className="px-2.5 py-0.5 border border-amber-500/30 text-amber-400 bg-amber-500/5 rounded-full font-black uppercase text-[9px] tracking-wider">En attente</span>
-                      </td>
-                    </tr>
-                    <tr className="hover:bg-white/1">
-                      <td className="p-5 text-slate-400 font-semibold">18 Juin 2026</td>
-                      <td className="p-5 font-bold">
-                        Facture - Roy Rénovation
-                        <span className="text-[10px] text-slate-500 block">Rattrapage Comptable (Solde impayé)</span>
-                      </td>
-                      <td className="p-5 text-emerald-400 font-bold">Entrée</td>
-                      <td className="p-5 font-bold">450.00 $</td>
-                      <td className="p-5">
-                        <span className="px-2.5 py-0.5 border border-red-500/30 text-red-400 bg-red-500/5 rounded-full font-black uppercase text-[9px] tracking-wider">En retard</span>
-                      </td>
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-slate-500 font-semibold">Aucune transaction à afficher pour le moment. Les dépôts et factures de vos dossiers apparaîtront ici.</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1142,12 +1009,12 @@ export function SubAdminPortalShell({
                 <div className="glass-card p-6 rounded-2xl hover:border-gold/30 cursor-pointer group">
                   <div className="flex justify-between items-start">
                     <FolderOpen size={40} className="text-gold" />
-                    <span className="text-[10px] text-slate-500 font-bold">14 Fichiers</span>
+                    <span className="text-[10px] text-slate-500 font-bold">Par client</span>
                   </div>
                   <h3 className="text-sm font-bold text-ivoire mt-4">Tenue de Livres Mensuelle</h3>
-                  <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-semibold">Dossier : Dext & Banque</p>
+                  <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-semibold">Dossier : Pièces et relevés</p>
                   <div className="border-t border-white/5 mt-4 pt-4 flex justify-between items-center">
-                    <span className="text-[10px] text-slate-400 font-medium">Marie Tremblay</span>
+                    <span className="text-[10px] text-slate-400 font-medium">Dossiers clients</span>
                     <ChevronRight size={14} className="text-slate-500 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
@@ -1156,12 +1023,12 @@ export function SubAdminPortalShell({
                 <div className="glass-card p-6 rounded-2xl hover:border-gold/30 cursor-pointer group">
                   <div className="flex justify-between items-start">
                     <FolderOpen size={40} className="text-gold" />
-                    <span className="text-[10px] text-slate-500 font-bold">6 Fichiers</span>
+                    <span className="text-[10px] text-slate-500 font-bold">Par exercice</span>
                   </div>
                   <h3 className="text-sm font-bold text-ivoire mt-4">Déclarations Fiscales T4</h3>
                   <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-semibold">Dossier : Impôts Canada</p>
                   <div className="border-t border-white/5 mt-4 pt-4 flex justify-between items-center">
-                    <span className="text-[10px] text-slate-400 font-medium">Antoine Tremblay</span>
+                    <span className="text-[10px] text-slate-400 font-medium">Dossiers clients</span>
                     <ChevronRight size={14} className="text-slate-500 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
@@ -1170,7 +1037,7 @@ export function SubAdminPortalShell({
                 <div className="glass-card p-6 rounded-2xl hover:border-gold/30 cursor-pointer group">
                   <div className="flex justify-between items-start">
                     <FolderOpen size={40} className="text-gold" />
-                    <span className="text-[10px] text-slate-500 font-bold">3 Fichiers</span>
+                    <span className="text-[10px] text-slate-500 font-bold">Signés</span>
                   </div>
                   <h3 className="text-sm font-bold text-ivoire mt-4">Mandats Électroniques</h3>
                   <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-semibold">Dossier : Signatures</p>
@@ -1231,7 +1098,7 @@ export function SubAdminPortalShell({
                     <div className="flex justify-between items-center p-3 bg-white/2 border border-white/5 rounded-xl">
                       <div>
                         <span className="text-xs font-bold block">État de rapprochement bancaire</span>
-                        <span className="text-[9px] text-slate-500">Différence Stripe/Dext vs Soldes</span>
+                        <span className="text-[9px] text-slate-500">Écarts dépôts reçus vs soldes</span>
                       </div>
                       <button type="button" className="p-2 hover:bg-gold/10 text-gold rounded-lg transition-all">
                         <Download size={16} />
@@ -1244,12 +1111,12 @@ export function SubAdminPortalShell({
                 <div className="glass-card p-8 rounded-3xl space-y-6">
                   <h3 className="text-sm font-bold text-ivoire uppercase tracking-wider border-b border-white/5 pb-2">Calculateur de Rapports instantané</h3>
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    Cliquez sur le bouton ci-dessous pour compiler les rapports financiers. Le système compile les données provenant de Dext et de la base de données Supabase automatiquement.
+                    Cliquez sur le bouton ci-dessous pour compiler les rapports financiers à partir des données de vos dossiers clients.
                   </p>
 
                   <button
                     onClick={() => {
-                      toast.success('Rapport généré avec succès ! Le fichier XLS a été préparé.');
+                      toast.info('La génération automatique de rapports n\'est pas encore active dans cet espace.');
                     }}
                     type="button"
                     className="w-full flex items-center justify-center gap-2 py-3 bg-gold text-noir text-xs font-black uppercase tracking-widest rounded-xl hover:bg-gold-light transition-colors"
@@ -1269,7 +1136,7 @@ export function SubAdminPortalShell({
             <div className="space-y-8 animate-fadeIn">
               <div>
                 <h2 className="text-xl font-serif font-bold text-ivoire">Calendrier Fiscal & Réunions</h2>
-                <p className="text-xs text-slate-500 mt-1">Suivi des remises de taxes gouvernementales et rendez-vous clients</p>
+                <p className="text-xs text-slate-500 mt-1">Suivi des remises de taxes gouvernementales et des échéances de vos dossiers</p>
               </div>
 
               {/* Interactive Calendar layout */}
@@ -1280,27 +1147,14 @@ export function SubAdminPortalShell({
                   <h3 className="text-xs font-black uppercase tracking-wider border-b border-white/5 pb-2">Dates de remise</h3>
                   
                   <div className="space-y-3">
-                    <div className="p-3 bg-red-500/10 border-l-2 border-red-500 rounded-r-xl">
-                      <span className="text-[10px] text-slate-400 block font-bold">30 Juin 2026</span>
-                      <span className="text-xs font-bold text-ivoire block">Déclaration TPS/TVQ Q2</span>
-                    </div>
-
-                    <div className="p-3 bg-amber-500/10 border-l-2 border-amber-500 rounded-r-xl">
-                      <span className="text-[10px] text-slate-400 block font-bold">02 Juillet 2026</span>
-                      <span className="text-xs font-bold text-ivoire block">Revue Marie Tremblay</span>
-                    </div>
-
-                    <div className="p-3 bg-blue-500/10 border-l-2 border-blue-500 rounded-r-xl">
-                      <span className="text-[10px] text-slate-400 block font-bold">15 Juillet 2026</span>
-                      <span className="text-xs font-bold text-ivoire block">Rattrapage Roy final</span>
-                    </div>
+                    <p className="text-xs text-slate-500">Aucun événement planifié pour le moment. Les dates de remise de vos dossiers apparaîtront ici.</p>
                   </div>
                 </div>
 
                 {/* Calendar grid */}
                 <div className="glass-card p-6 rounded-3xl md:col-span-3">
                   <div className="flex justify-between items-center mb-6">
-                    <span className="text-sm font-bold text-ivoire">Juin 2026</span>
+                    <span className="text-sm font-bold text-ivoire">{(() => { const s2 = new Date().toLocaleDateString('fr-CA', { month: 'long', year: 'numeric' }); return s2.charAt(0).toUpperCase() + s2.slice(1); })()}</span>
                     <div className="flex gap-2">
                       <button type="button" className="px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-xs font-bold hover:bg-white/10">Préc.</button>
                       <button type="button" className="px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-xs font-bold hover:bg-white/10">Suiv.</button>
@@ -1315,7 +1169,7 @@ export function SubAdminPortalShell({
                   <div className="grid grid-cols-7 gap-2 h-72">
                     {Array.from({ length: 30 }).map((_, idx) => {
                       const day = idx + 1;
-                      const hasEvent = day === 15 || day === 30;
+                      const hasEvent = false;
                       return (
                         <div key={day} className={`p-2 rounded-xl flex flex-col justify-between items-center cursor-pointer transition-colors ${
                           hasEvent ? 'bg-gold/20 border border-gold/40 text-gold' : 'hover:bg-white/5 bg-white/2 text-slate-400'
@@ -1339,7 +1193,7 @@ export function SubAdminPortalShell({
             <div className="space-y-8 animate-fadeIn">
               <div>
                 <h2 className="text-xl font-serif font-bold text-ivoire">Messagerie d'équipe</h2>
-                <p className="text-xs text-slate-500 mt-1">Espace de communication interne avec les partenaires cabinet et collaborateurs</p>
+                <p className="text-xs text-slate-500 mt-1">Espace de communication interne de l'équipe Compta-Flow</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-8 h-[550px] overflow-hidden">
@@ -1348,7 +1202,7 @@ export function SubAdminPortalShell({
                 <div className="glass-card p-4 rounded-3xl space-y-4 md:col-span-1 overflow-y-auto">
                   <h3 className="text-xs font-black uppercase tracking-wider text-slate-500 mb-4 px-2">Collaborateurs</h3>
                   <div className="space-y-2">
-                    {['Marie Tremblay', 'Sylvie Charette', 'Karim Haddad'].map(member => (
+                    {['Samuel Lahaie', 'Simon Gagné', 'Sylvie Charette'].map(member => (
                       <button
                         key={member}
                         type="button"
@@ -1362,7 +1216,7 @@ export function SubAdminPortalShell({
                         <div className={`w-3 h-3 rounded-full bg-emerald-400`} />
                         <div>
                           <p className="text-xs font-bold">{member}</p>
-                          <span className="text-[9px] text-slate-500 block">En ligne</span>
+                          <span className="text-[9px] text-slate-500 block">{member === 'Samuel Lahaie' ? 'Super Admin' : member === 'Simon Gagné' ? 'Saisie de factures' : 'Production comptable'}</span>
                         </div>
                       </button>
                     ))}
@@ -1374,12 +1228,18 @@ export function SubAdminPortalShell({
                   <div className="border-b border-white/5 pb-3 flex justify-between items-center">
                     <div>
                       <h4 className="text-xs font-black uppercase tracking-wider text-ivoire">{activeChatMember}</h4>
-                      <span className="text-[9px] text-emerald-400 font-bold block mt-0.5">Actif(ve) actuellement</span>
+                      <span className="text-[9px] text-slate-500 font-bold block mt-0.5">Équipe Compta-Flow</span>
                     </div>
                   </div>
 
                   {/* Messages log */}
                   <div className="flex-1 overflow-y-auto py-4 space-y-3 custom-scrollbar text-xs">
+                    {(chatMessages[activeChatMember] || []).length === 0 && (
+                      <div className="text-center text-slate-500 py-10">
+                        <p className="font-bold text-slate-400">Aucun message pour le moment</p>
+                        <p className="mt-1">Écrivez le premier message à ce collaborateur.</p>
+                      </div>
+                    )}
                     {(chatMessages[activeChatMember] || []).map((msg, i) => (
                       <div key={i} className={`flex flex-col ${msg.sender === 'Cabinet' ? 'items-end' : 'items-start'}`}>
                         <div className={`p-3 rounded-2xl max-w-md ${
@@ -1645,6 +1505,9 @@ export function SubAdminPortalShell({
               </form>
 
               {/* Sticky Notes Grid Layout */}
+              {notes.length === 0 && (
+                <p className="text-xs text-slate-500">Aucune note pour le moment. Écrivez votre premier rappel ci-dessus.</p>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 {notes.map(note => {
                   const colorClasses = {
@@ -1680,7 +1543,7 @@ export function SubAdminPortalShell({
             <div className="space-y-8 animate-fadeIn">
               <div>
                 <h2 className="text-xl font-serif font-bold text-ivoire">Coffre-fort Sécurisé</h2>
-                <p className="text-xs text-slate-500 mt-1">Accès restreint aux clés API, identifiants Stripe et identifiants Dext clients</p>
+                <p className="text-xs text-slate-500 mt-1">Accès restreint aux informations sensibles du cabinet</p>
               </div>
 
               {!isVaultUnlocked ? (
@@ -1718,7 +1581,7 @@ export function SubAdminPortalShell({
                 <div className="space-y-6 animate-scaleIn">
                   <div className="flex justify-between items-center p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl">
                     <span className="text-xs font-bold flex items-center gap-2">
-                      <LockOpen size={16} /> Session déchiffrée - Vos clés d'accès sont actives.
+                      <LockOpen size={16} /> Session déverrouillée
                     </span>
                     <button
                       type="button"
@@ -1729,34 +1592,13 @@ export function SubAdminPortalShell({
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="glass-card p-6 rounded-2xl space-y-4">
-                      <h4 className="text-xs font-black uppercase tracking-wider border-b border-white/5 pb-2 text-ivoire flex items-center gap-2">
-                        <Key size={14} className="text-gold" /> Identifiants Dext Clients
-                      </h4>
-                      <div className="space-y-3 text-xs">
-                        <div className="flex justify-between p-2 bg-white/2 rounded">
-                          <span className="font-bold text-slate-400">Marie Tremblay :</span>
-                          <span className="font-mono">marie.tremblay@dext.cc (Dext Auto-link)</span>
-                        </div>
-                        <div className="flex justify-between p-2 bg-white/2 rounded">
-                          <span className="font-bold text-slate-400">Sébastien Roy :</span>
-                          <span className="font-mono">roy.renov@dext.cc (Dext-API key check)</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="glass-card p-6 rounded-2xl space-y-4">
-                      <h4 className="text-xs font-black uppercase tracking-wider border-b border-white/5 pb-2 text-ivoire flex items-center gap-2">
-                        <Shield size={14} className="text-gold" /> Intégration Passerelles (Stripe Live API keys)
-                      </h4>
-                      <div className="space-y-3 text-xs font-mono">
-                        <div className="p-3 bg-white/2 rounded relative group">
-                          <span className="text-[10px] text-slate-500 block">STRIPE_SECRET_KEY</span>
-                          <span className="block truncate text-amber-400 mt-1">sk_live_51PcfL...••••••••••••••••</span>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="glass-card p-8 rounded-2xl space-y-3 text-center">
+                    <h4 className="text-xs font-black uppercase tracking-wider text-ivoire flex items-center justify-center gap-2">
+                      <Key size={14} className="text-gold" /> Identifiants enregistrés
+                    </h4>
+                    <p className="text-xs text-slate-400 leading-relaxed max-w-md mx-auto">
+                      Aucun identifiant n'est conservé dans cet espace. Les accès sensibles et les clés de production restent dans le coffre-fort sécurisé de l'entreprise — jamais affichés dans l'interface.
+                    </p>
                   </div>
                 </div>
               )}
@@ -1770,7 +1612,7 @@ export function SubAdminPortalShell({
             <div className="space-y-8 animate-fadeIn">
               <div>
                 <h2 className="text-xl font-serif font-bold text-ivoire">Paramètres Administrateur</h2>
-                <p className="text-xs text-slate-500 mt-1">Personnalisation du cabinet, mot de passe de sécurité et droits collaborateurs</p>
+                <p className="text-xs text-slate-500 mt-1">Personnalisation de l'espace, mot de passe de sécurité et droits des collaborateurs</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -1778,7 +1620,7 @@ export function SubAdminPortalShell({
                 {/* Theme Customizer Card */}
                 <div className="glass-card p-8 rounded-3xl space-y-4">
                   <h3 className="text-sm font-bold text-ivoire uppercase tracking-wider border-b border-white/5 pb-2">Personnalisation visuelle</h3>
-                  <p className="text-xs text-slate-500 leading-normal">Sélectionnez la couleur thématique principale pour adapter la palette du cabinet de finance.</p>
+                  <p className="text-xs text-slate-500 leading-normal">Sélectionnez la couleur thématique principale pour adapter la palette de votre espace.</p>
                   
                   <div className="flex gap-4 pt-2">
                     <button
@@ -1829,7 +1671,7 @@ export function SubAdminPortalShell({
                       if (newPassword.length < 8) {
                         toast.error('Le mot de passe doit faire au moins 8 caractères.');
                       } else {
-                        toast.success('Mot de passe mis à jour avec succès.');
+                        toast.info('Pour modifier votre mot de passe, utilisez « Mot de passe oublié » à la connexion — un lien sécurisé vous sera envoyé par courriel.');
                         setNewPassword('');
                       }
                     }}
@@ -1846,16 +1688,16 @@ export function SubAdminPortalShell({
                   
                   <div className="space-y-3 text-xs font-bold">
                     <div className="flex justify-between items-center">
+                      <span>Samuel Lahaie</span>
+                      <span className="text-[10px] text-gold font-bold">Super Admin — accès complet</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span>Simon Gagné</span>
+                      <span className="text-[10px] text-emerald-400 font-bold">Équipe — Saisie de factures</span>
+                    </div>
+                    <div className="flex justify-between items-center">
                       <span>Sylvie Charette</span>
-                      <span className="text-[10px] text-emerald-400 font-bold">Accès Écrit/Lecture</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Karim Haddad</span>
-                      <span className="text-[10px] text-emerald-400 font-bold">Accès Écrit/Lecture</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Marie Tremblay</span>
-                      <span className="text-[10px] text-amber-400 font-bold">Accès Lecture seule</span>
+                      <span className="text-[10px] text-emerald-400 font-bold">Équipe — Production comptable</span>
                     </div>
                   </div>
                 </div>
