@@ -247,8 +247,8 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
 
     let addons = 0;
     addons += calcCatchUpHours * 60.00;
-    if (calcSoftwareSetup) addons += 225.00;
-    if (calcPayroll) addons += 65.00;
+    if (calcSoftwareSetup) addons += 199.00;
+    if (calcPayroll) addons += 49.00;
 
     const ht = base + addons;
 
@@ -599,7 +599,7 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
                               setTimeout(() => {
                                 handleUpdateServiceStatus(svc.id, 'Prêt à traiter', { plaid_linked: true });
                                 toast.dismiss();
-                                toast.success("Connexion bancaire validée par le CPA. Prêt pour la tenue de livres.");
+                                toast.success("Connexion bancaire validée. Prêt pour la tenue de livres.");
                               }, 1200);
                             }}
                             className="h-10 text-[10px] font-black uppercase tracking-widest px-4 gap-2 shadow-glow-sm"
@@ -858,7 +858,7 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
                     { node: 'Retrieve Customer Meta', duration: '89ms', status: 'Success' },
                     { node: 'Run Gemini Tax Validation', duration: '340ms', status: 'Success' },
                     { node: 'Email Notify (compta-flow@outlook.com)', duration: '190ms', status: 'Success' },
-                    { node: 'Slack Alert / CPA Panel update', duration: '60ms', status: 'Success' }
+                    { node: 'Alerte équipe / Mise à jour du panneau', duration: '60ms', status: 'Success' }
                   ].map((nd, i) => (
                     <div key={i} className="p-4 flex justify-between items-center hover:bg-white/[0.02] font-mono text-[11px]">
                       <div className="flex items-center gap-3">
@@ -993,10 +993,10 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
                     <option value="ON">Ontario (TVH 13%)</option>
                     <option value="BC">Colombie-Britannique (TPS 5% + TVP 7%)</option>
                     <option value="AB">Alberta (TPS 5%)</option>
-                    <option value="MB">Manitoba (TPS 5% + TVP 7%)</option>
+                    <option value="MB">Manitoba (TPS 5 % + TVD 7 %)</option>
                     <option value="NB">Nouveau-Brunswick (TVH 15%)</option>
                     <option value="NL">Terre-Neuve (TVH 15%)</option>
-                    <option value="NS">Nouvelle-Écosse (TVH 15%)</option>
+                    <option value="NS">Nouvelle-Écosse (TVH 14%)</option>
                     <option value="PE">Île-du-Prince-Édouard (TVH 15%)</option>
                     <option value="SK">Saskatchewan (TPS 5% + TVP 6%)</option>
                     <option value="YT">Yukon (TPS 5%)</option>
@@ -1018,7 +1018,7 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
                       className="accent-gold h-4 w-4 rounded border-white/10"
                     />
                     <label htmlFor="calcSoftwareSetup" className="text-xs font-semibold text-ivoire cursor-pointer select-none">
-                      Config. Logiciel (+225.00 $)
+                      Config. Logiciel (+199.00 $)
                     </label>
                   </div>
                   <div className="flex items-center gap-3 p-4 bg-white/5 border border-white/5 rounded-xl hover:border-gold/20 transition-all">
@@ -1030,7 +1030,7 @@ export function AdminOverview({ userData }: AdminOverviewProps) {
                       className="accent-gold h-4 w-4 rounded border-white/10"
                     />
                     <label htmlFor="calcPayroll" className="text-xs font-semibold text-ivoire cursor-pointer select-none">
-                      Traitement Paie (+65.00 $)
+                      Traitement Paie (+49.00 $ + 12 $/employé/mois)
                     </label>
                   </div>
                   <div className="p-4 bg-white/5 border border-white/5 rounded-xl hover:border-gold/20 transition-all space-y-2">

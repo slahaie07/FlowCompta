@@ -47,7 +47,7 @@ const SERVICES: ServiceDefinition[] = [
     name: 'Déclaration T1 / TP-1',
     subtitle: 'Fiscalité des Particuliers',
     code: 'T1',
-    price: '89 $',
+    price: '89,99 $',
     normRef: 'LIR art. 150 · LI Qc art. 1000',
     color: 'sapphire',
     description:
@@ -130,7 +130,7 @@ const SERVICES: ServiceDefinition[] = [
     name: 'Travailleur Autonome',
     subtitle: 'T2125 & TPS/TVH/TVP',
     code: 'TA',
-    price: '199 $',
+    price: '199,99 $',
     normRef: 'LIR art. 9-37 · LTA art. 165 · LTVQ art. 16',
     color: 'gold',
     description:
@@ -216,7 +216,7 @@ const SERVICES: ServiceDefinition[] = [
     name: 'Société Incorporée T2',
     subtitle: 'CO-17 & Structure Corporative',
     code: 'T2',
-    price: '749 $',
+    price: '1 199 $ (livres tenus par Compta-Flow), dès 1 499 $ sinon — société inactive : 499 $',
     normRef: 'LIR art. 150(1.1) · LI Qc art. 1000 · CO-17 MRQ',
     color: 'sapphire',
     description:
@@ -301,7 +301,7 @@ const SERVICES: ServiceDefinition[] = [
     name: 'Tenue de Livres',
     subtitle: 'Mensuelle & Réconciliation',
     code: 'BK',
-    price: 'Sur devis',
+    price: '149,99 $ à 999,99 $+/mois selon le volume de transactions',
     normRef: 'NCECF · Manuel CPA Canada · IFRS PME',
     color: 'gold',
     description:
@@ -375,7 +375,7 @@ const SERVICES: ServiceDefinition[] = [
     name: 'Revenus de Placement',
     subtitle: 'T5008 · Gains en Capital',
     code: 'INV',
-    price: '149 $',
+    price: '+50 $ (supplément à la déclaration)',
     normRef: 'LIR art. 38-55 · Bulletin IT-479R · T5008',
     color: 'sapphire',
     description:
