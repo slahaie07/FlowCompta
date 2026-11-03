@@ -710,6 +710,135 @@ Books closed every month mean a T2125 that takes hours instead of weeks — no c
 **Want the same rhythm for your business?** Estimate your package in one minute at compta-flow.net/estimate: fixed price, no surprises, written reply within 4 business hours.
 `,
   },
+  {
+    slug: 'prix-tenue-de-livres-quebec-forfait-mensuel',
+    titleFr: 'Prix de la tenue de livres au Québec : ce que couvre vraiment un forfait mensuel',
+    titleEn: 'Bookkeeping Prices in Quebec: What a Monthly Package Really Covers',
+    excerptFr: 'Combien coûte la tenue de livres au Québec ? La grille complète, forfait par forfait : ce qui est inclus, ce qui est en extra, et trois exemples de profils avec leur prix réel.',
+    excerptEn: 'How much does bookkeeping cost in Quebec? The full price grid, package by package: what is included, what costs extra, and three sample profiles with their real price.',
+    dateIso: '2026-11-02',
+    readingMin: 6,
+    category: 'comptabilite',
+    keywordsFr: ['prix tenue de livres Québec', 'combien coûte la tenue de livres', 'forfait mensuel tenue de livres', 'tenue de livres PME Québec'],
+    bodyFr: `
+## La réponse courte
+
+Au Québec, un forfait mensuel de tenue de livres chez Compta-Flow coûte entre **149,99 $ et 999,99 $ et plus par mois**, selon le nombre de transactions de votre entreprise. Le forfait d’entrée, Micro, est à **149,99 $/mois** pour 0 à 30 transactions, avec des livrables trimestriels. Pour les très petits dossiers, l’option à l’heure est à **35 $/h**. Tous les prix sont avant taxes applicables — et ils sont publics : pas de « prix sur demande », pas de surprise après un appel de vente.
+
+Compta-Flow est un service de tenue de livres et d’impôts entièrement en ligne, qui sert des clients partout au Canada. La grille ci-dessous est celle publiée sur notre page de tarifs.
+
+## Ce qu’un forfait mensuel couvre
+
+- **Saisie des transactions** : vos factures, reçus et dépenses sont saisis et classés au fur et à mesure — vous déposez vos pièces par photo ou par courriel.
+- **Conciliations bancaires et de cartes** : chaque compte est concilié chaque mois, et chaque écart est expliqué.
+- **Rapports de taxes TPS/TVQ** : préparés selon votre période de déclaration, avec les crédits de taxe sur intrants repérés au fil des saisies.
+- **Un sommaire clair** : encaissements, dépenses par catégorie, taxes à remettre estimées — vous savez où vous en êtes, sans devoir lire un grand livre.
+- **Réponse écrite rapide** : une réponse à vos questions sous 4 heures ouvrables, par écrit.
+
+### Ce qui n’est pas inclus (et reste en extra)
+
+- **Le rattrapage** de mois en retard (voir plus bas : dès 75 $ par mois à reprendre).
+- **La paie** et les remises aux gouvernements.
+- **La fin d’année** : fermeture de l’exercice et préparation des déclarations de la société.
+
+Rien de tout cela n’est facturé en cachette : chaque extra est chiffré avant de commencer.
+
+## La grille, sans détour
+
+| Transactions par mois | Forfait | Prix |
+|---|---|---|
+| 0 à 30 | Micro — livrables trimestriels | 149,99 $/mois |
+| 31 à 75 | Mensuel | 249,99 $/mois |
+| 76 à 150 | Mensuel | 349,99 $/mois |
+| 151 à 200 | Mensuel | 449,99 $/mois |
+| 201 à 300 | Mensuel | 599,99 $/mois |
+| 301 à 450 | Mensuel | 799,99 $/mois |
+| 451 et plus | Mensuel | 999,99 $/mois et plus |
+
+À cela s’ajoutent deux avantages de départ : le **frais d’ouverture de dossier de 149 $ est offert aux 10 premiers clients**, et les **feuillets T4/RL-1 sont offerts la première année** aux clients de tenue de livres qui ont des employés. Et pour un très petit dossier — quelques heures par mois tout au plus — l’option à l’heure à **35 $/h** peut coûter moins cher qu’un forfait.
+
+## Trois profils, trois forfaits
+
+### Le travailleur autonome organisé
+
+Consultant, designer ou autre professionnel autonome avec environ 25 transactions par mois : le forfait **Micro à 149,99 $/mois** suffit. Ses conciliations, son sommaire et ses rapports de taxes sont livrés chaque trimestre, et quand vient le temps des impôts, tout est déjà classé.
+
+### La petite entreprise de services
+
+Une entreprise de services de trois personnes, environ 120 transactions par mois (factures clients, fournisseurs, deux cartes, un compte bancaire) : forfait mensuel à **349,99 $/mois** (76 à 150 transactions). Livrables chaque mois, rapports TPS/TVQ à jour, et feuillets T4/RL-1 offerts la première année.
+
+### La société qui grandit
+
+Une société de services d’environ 180 transactions par mois : forfait à **449,99 $/mois** (151 à 200 transactions). La fermeture de fin d’année et les déclarations de la société restent en extra, chiffrées d’avance.
+
+## Pourquoi un dossier en retard coûte plus cher
+
+Reprendre huit mois de tenue de livres, ce n’est pas refaire huit fois le même mois : les pièces arrivent en vrac, certains relevés manquent, les taxes des périodes passées doivent être recalculées une à une et les écarts expliqués un par un. C’est pour cela que le rattrapage est facturé en sus, **dès 75 $ par mois à reprendre**, en plus du forfait mensuel. Un dossier tenu au mois coûte presque toujours moins cher qu’un dossier repris en bloc — et il évite les mauvaises surprises quand une période de taxes est déjà échue.
+
+## Estimez votre forfait en une minute
+
+**Vous voulez votre prix exact, pas une fourchette ?** L’estimateur en ligne vous le donne en une minute, à partir de votre nombre de transactions : https://compta-flow.net/estimate — prix fixe, sans surprise, et réponse écrite sous 4 heures ouvrables.
+`,
+    bodyEn: `
+## The short answer
+
+In Quebec, a monthly bookkeeping package at Compta-Flow costs between **$149.99 and $999.99 and up per month**, depending on your business's transaction volume. The entry package, Micro, is **$149.99/month** for 0 to 30 transactions, with quarterly deliverables. For very small files, the hourly option is **$35/hr**. All prices are before applicable taxes — and they are public: no "price on request", no surprises after a sales call.
+
+Compta-Flow is a fully online bookkeeping and tax service serving clients across Canada. The grid below is the one published on our pricing page.
+
+## What a monthly package covers
+
+- **Transaction entry**: your invoices, receipts and expenses are entered and categorized as they come in — you submit documents by photo or email.
+- **Bank and card reconciliations**: every account is reconciled monthly, and every difference is explained.
+- **GST/QST tax reports**: prepared on your filing schedule, with input tax credits flagged during entry.
+- **A clear summary**: collections, expenses by category, estimated taxes payable — you know where you stand without reading a general ledger.
+- **Fast written replies**: an answer to your questions within 4 business hours, in writing.
+
+### What is not included (and stays extra)
+
+- **Catch-up work** for months in arrears (see below: from $75 per month to rebuild).
+- **Payroll** and government remittances.
+- **Year-end**: closing the fiscal year and preparing the corporation's returns.
+
+None of this is billed in secret: every extra is priced before work starts.
+
+## The grid, plainly
+
+| Transactions per month | Package | Price |
+|---|---|---|
+| 0 to 30 | Micro — quarterly deliverables | $149.99/month |
+| 31 to 75 | Monthly | $249.99/month |
+| 76 to 150 | Monthly | $349.99/month |
+| 151 to 200 | Monthly | $449.99/month |
+| 201 to 300 | Monthly | $599.99/month |
+| 301 to 450 | Monthly | $799.99/month |
+| 451 and up | Monthly | $999.99/month and up |
+
+Two launch advantages come on top: the **$149 account-opening fee is offered to the first 10 clients**, and **T4/RL-1 slips are offered for the first year** to bookkeeping clients with employees. And for a very small file — a few hours a month at most — the hourly option at **$35/hr** can cost less than a package.
+
+## Three profiles, three packages
+
+### The organized self-employed worker
+
+A consultant, designer or other self-employed professional with about 25 transactions a month: the **Micro package at $149.99/month** is enough. Reconciliations, summary and tax reports are delivered every quarter, and when tax time comes, everything is already sorted.
+
+### The small service business
+
+A three-person service business with about 120 transactions a month (client invoices, suppliers, two cards, one bank account): monthly package at **$349.99/month** (76 to 150 transactions). Monthly deliverables, GST/QST reports up to date, and T4/RL-1 slips offered for the first year.
+
+### The growing corporation
+
+A service corporation with about 180 transactions a month: package at **$449.99/month** (151 to 200 transactions). Year-end closing and the corporation's returns stay extra, priced in advance.
+
+## Why a late file costs more
+
+Rebuilding eight months of bookkeeping is not doing the same month eight times: documents arrive in bulk, some statements are missing, past tax periods must be recalculated one by one and every difference explained. That is why catch-up work is billed on top, **from $75 per month to rebuild**, in addition to the monthly package. A file kept up monthly almost always costs less than a file rebuilt in one block — and it avoids bad surprises when a tax period is already overdue.
+
+## Estimate your package in one minute
+
+**Want your exact price, not a range?** The online estimator gives it to you in one minute, from your transaction count: https://compta-flow.net/estimate — fixed price, no surprises, and a written reply within 4 business hours.
+`,
+  },
 ];
 
 export function getArticle(slug: string): BlogArticle | undefined {
