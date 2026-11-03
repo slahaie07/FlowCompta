@@ -94,7 +94,7 @@ export function ConfiancePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {blocks.map((b) => (
             <div key={b.title} className="border border-gold/20 rounded-2xl p-7 space-y-3 bg-surface h-full">
-              <b.icon size={26} className="text-gold" />
+              <b.icon size={26} className="text-gold" aria-hidden="true" />
               <h2 className="text-lg font-serif font-bold">{b.title}</h2>
               <p className="text-sm text-silver font-light leading-relaxed">{b.text}</p>
             </div>
@@ -102,7 +102,7 @@ export function ConfiancePage() {
         </div>
 
         <div className="border border-gold/30 rounded-2xl p-7 flex gap-4 items-start bg-gold/[0.03]">
-          <ShieldCheck size={26} className="text-gold shrink-0 mt-1" />
+          <ShieldCheck size={26} className="text-gold shrink-0 mt-1" aria-hidden="true" />
           <p className="text-sm text-silver font-light leading-relaxed">
             {isFr
               ? 'Transparence complète : Compta-Flow est un service de tenue de livres et de préparation d’impôts — pas un cabinet de CPA. Les mandats qui exigent un titre réservé (audit, mission d’examen, opinion) sont confiés à des CPA partenaires, avec votre accord.'
@@ -110,15 +110,26 @@ export function ConfiancePage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-4 pb-8">
-          <Button variant="gold" size="lg" onClick={() => navigate('/estimate')}>
-            {isFr ? 'Estimer mon forfait' : 'Estimate my package'} <ArrowRight size={16} className="ml-2" />
-          </Button>
-          <Button variant="secondary" size="lg" asChild>
-            <a href={`mailto:${CONFIG.APP.SUPPORT_EMAIL}`}>
-              {isFr ? 'Une question ? Écrivez-nous' : 'Questions? Write to us'}
+        <div className="text-center space-y-6 pb-8">
+          <h2 className="text-2xl md:text-3xl font-serif font-bold">
+            {isFr ? 'Prêt à passer à l’étape suivante ?' : 'Ready for the next step?'}
+          </h2>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button variant="gold" size="lg" onClick={() => navigate('/estimate')}>
+              {isFr ? 'Estimer mon forfait' : 'Estimate my package'} <ArrowRight size={16} className="ml-2" />
+            </Button>
+            <Button variant="secondary" size="lg" asChild>
+              <a href={CONFIG.APP.INTAKE_FORM_URL} target="_blank" rel="noreferrer">
+                {isFr ? 'Devenir client (2 minutes)' : 'Become a client (2 minutes)'}
+              </a>
+            </Button>
+          </div>
+          <p className="text-sm text-silver font-light">
+            {isFr ? 'Une question avant de commencer ? Écrivez-nous : ' : 'A question before you start? Write to us: '}
+            <a href={`mailto:${CONFIG.APP.SUPPORT_EMAIL}`} className="text-gold hover:underline whitespace-nowrap focus-ring">
+              {CONFIG.APP.SUPPORT_EMAIL}
             </a>
-          </Button>
+          </p>
         </div>
       </div>
       <SiteFooter />

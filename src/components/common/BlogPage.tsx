@@ -6,6 +6,7 @@ import { SITE } from '../../lib/canadaNetwork';
 import { useLanguage } from '../../hooks/useLanguage';
 import { usePageMeta } from '../../hooks/usePageMeta';
 import { BLOG_ARTICLES, getArticle } from '../../lib/blogContent';
+import { CONFIG } from '../../lib/config';
 import { SiteHeader } from './SiteHeader';
 import { SiteFooter } from './SiteFooter';
 
@@ -233,11 +234,18 @@ export function BlogListPage() {
             {isFr ? 'Prêt à déléguer votre comptabilité ?' : 'Ready to delegate your accounting?'}
           </h2>
           <p className="text-silver text-sm mb-6">
-            {isFr ? 'Nos experts comptables s\'occupent de tout — TPS, TVQ, paie, états financiers.' : 'Our accounting experts handle everything — GST, HST, payroll, financial statements.'}
+            {isFr ? 'Notre équipe s’occupe de tout — tenue de livres, TPS, TVQ, paie et impôts, 100 % en ligne, partout au Canada.' : 'Our team handles everything — bookkeeping, GST, HST, payroll and taxes, 100% online, across Canada.'}
           </p>
-          <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="gold">
-            {isFr ? 'Ouvrir mon dossier (Gratuit) →' : 'Open My File (Free) →'}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button onClick={() => navigate('/estimate')} variant="gold">
+              {isFr ? 'Estimer mon forfait' : 'Estimate my package'}
+            </Button>
+            <Button variant="secondary" asChild>
+              <a href={CONFIG.APP.INTAKE_FORM_URL} target="_blank" rel="noreferrer">
+                {isFr ? 'Devenir client (2 minutes)' : 'Become a client (2 minutes)'}
+              </a>
+            </Button>
+          </div>
         </div>
       </div>
       <SiteFooter />
@@ -293,6 +301,11 @@ export function BlogArticlePage() {
     ],
   };
 
+  const related = [
+    ...BLOG_ARTICLES.filter((a) => a.slug !== article.slug && a.category === article.category),
+    ...BLOG_ARTICLES.filter((a) => a.slug !== article.slug && a.category !== article.category),
+  ].slice(0, 2);
+
   return (
     <div className="min-h-screen bg-noir text-ivoire font-sans">
       <SiteHeader />
@@ -332,20 +345,47 @@ export function BlogArticlePage() {
 
         <div className="mt-14 p-8 rounded-2xl border border-gold/15 bg-gold/5 text-center">
           <h2 className="text-xl font-serif font-bold text-white mb-2">
-            {isFr ? 'Besoin d\'un expert comptable ?' : 'Need an accounting expert?'}
+            {isFr ? 'Prêt à passer à l’étape suivante ?' : 'Ready for the next step?'}
           </h2>
           <p className="text-silver text-sm mb-5">
-            {isFr ? 'ComptaFlow gère votre comptabilité, vos taxes et votre paie — 100 % en ligne, données au Canada.' : 'ComptaFlow handles your accounting, taxes and payroll — 100% online, Canadian data.'}
+            {isFr ? 'Estimez votre forfait en une minute, puis remplissez la fiche nouveau client — nous vous répondons par écrit sous 4 h ouvrables. 100 % en ligne, partout au Canada.' : 'Estimate your package in one minute, then complete the new client form — we reply in writing within 4 business hours. 100% online, across Canada.'}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="gold" size="lg">
-              {isFr ? 'Ouvrir mon dossier (Gratuit) →' : 'Open My File (Free) →'}
+            <Button onClick={() => navigate('/estimate')} variant="gold" size="lg">
+              {isFr ? 'Estimer mon forfait' : 'Estimate my package'}
             </Button>
-            <Button onClick={() => navigate('/estimate')} variant="secondary" size="lg">
-              {isFr ? 'Obtenir un devis' : 'Get a Quote'}
+            <Button variant="secondary" size="lg" asChild>
+              <a href={CONFIG.APP.INTAKE_FORM_URL} target="_blank" rel="noreferrer">
+                {isFr ? 'Devenir client (2 minutes)' : 'Become a client (2 minutes)'}
+              </a>
             </Button>
           </div>
         </div>
+
+        {related.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-xl font-serif font-bold text-white mb-4">
+              {isFr ? 'Poursuivre votre lecture' : 'Keep reading'}
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {related.map((rel) => (
+                <article
+                  key={rel.slug}
+                  className="p-5 rounded-2xl border border-white/8 bg-white/[0.02] hover:border-gold/20 transition-colors cursor-pointer group"
+                  onClick={() => navigate(`/ressources/${rel.slug}`)}
+                >
+                  <h3 className="font-serif font-bold text-white mb-2 group-hover:text-gold transition-colors">
+                    {isFr ? rel.titleFr : rel.titleEn}
+                  </h3>
+                  <p className="text-silver text-sm leading-relaxed mb-3">{isFr ? rel.excerptFr : rel.excerptEn}</p>
+                  <span className="text-gold text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                    {isFr ? 'Lire l’article' : 'Read article'} <ArrowRight size={14} />
+                  </span>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mt-8 pt-8 border-t border-white/5">
           <button

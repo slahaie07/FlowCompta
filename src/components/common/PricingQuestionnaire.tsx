@@ -391,6 +391,15 @@ export function PricingQuestionnaire({
                 {pricingKey(t, variant, 'disclaimer')}
               </p>
 
+              {showSignupCta && variant === 'client' && (
+                <p className="text-sm text-silver leading-relaxed">
+                  <span className="text-gold font-semibold">{lang === 'en' ? 'Next step: ' : 'Prochaine étape : '}</span>
+                  {lang === 'en'
+                    ? 'complete the new client form (2 minutes) — we reply in writing within 4 business hours.'
+                    : 'remplissez la fiche nouveau client (2 minutes) — nous vous répondons par écrit sous 4 h ouvrables.'}
+                </p>
+              )}
+
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
                 {onContinue && (
                   <Button variant="gold" className="flex-1 h-12 whitespace-nowrap gap-2" onClick={() => onContinue(result.serviceId)}>
@@ -414,11 +423,18 @@ export function PricingQuestionnaire({
                     </Button>
                   </>
                 )}
-                <Button variant="secondary" className="flex-1 h-12 whitespace-nowrap" onClick={reset}>
+              </div>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={reset}
+                  className="text-xs text-slate-500 hover:text-gold underline underline-offset-4 transition-colors"
+                >
                   {variant === 'staff'
                     ? pricingKey(t, variant, 'cta.restart')
                     : t('pricingQuestionnaire.cta.restart')}
-                </Button>
+                </button>
               </div>
             </motion.div>
           )}

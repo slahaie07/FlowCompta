@@ -15,7 +15,7 @@ export function PricingGrid() {
   const tiers = [
     {
       name: lang === 'en' ? 'Students' : lang === 'ar' ? 'الطلاب' : 'Étudiants',
-      price: lang === 'en' ? '$49.99' : '49.99 $',
+      price: lang === 'en' ? '$49.99' : '49,99 $',
       period: lang === 'en' ? '/ filing' : lang === 'ar' ? '/ الإقرار' : '/ déclaration',
       desc: lang === 'en'
         ? 'Ideal for college or university students with simple income structures.'
@@ -49,7 +49,7 @@ export function PricingGrid() {
     },
     {
       name: lang === 'en' ? 'Individuals' : lang === 'ar' ? 'الأفراد' : 'Particuliers',
-      price: lang === 'en' ? '$89.99' : '89.99 $',
+      price: lang === 'en' ? '$89.99' : '89,99 $',
       period: lang === 'en' ? '/ filing' : lang === 'ar' ? '/ الإقرار' : '/ déclaration',
       desc: lang === 'en'
         ? 'Designed for employees, retirees, and families with standard returns.'
@@ -83,7 +83,7 @@ export function PricingGrid() {
     },
     {
       name: lang === 'en' ? 'Self-Employed' : lang === 'ar' ? 'العاملون لحسابهم الخاص' : 'Travailleurs Autonomes',
-      price: lang === 'en' ? '$199.99' : '199.99 $',
+      price: lang === 'en' ? '$199.99' : '199,99 $',
       period: lang === 'en' ? '/ filing' : lang === 'ar' ? '/ الإقرار' : '/ déclaration',
       desc: lang === 'en'
         ? 'Our most popular package for freelancers and independent professionals.'
@@ -117,7 +117,7 @@ export function PricingGrid() {
     },
     {
       name: lang === 'en' ? 'Micro — Bookkeeping' : lang === 'ar' ? 'ميكرو — مسك الدفاتر' : 'Micro — Tenue de livres',
-      price: lang === 'en' ? '$149.99' : '149.99 $',
+      price: lang === 'en' ? '$149.99' : '149,99 $',
       period: lang === 'en' ? '/ month' : lang === 'ar' ? '/ شهر' : '/ mois',
       desc: lang === 'en'
         ? 'For very small businesses: up to 30 transactions per month, quarterly deliverables.'
@@ -151,7 +151,7 @@ export function PricingGrid() {
     },
     {
       name: lang === 'en' ? 'Bookkeeping & Taxes' : lang === 'ar' ? 'مسك الدفاتر والضرائب' : 'Tenue de livres & Taxes',
-      price: lang === 'en' ? '$249.99' : '249.99 $',
+      price: lang === 'en' ? '$249.99' : '249,99 $',
       period: lang === 'en' ? '/ month' : lang === 'ar' ? '/ شهر' : '/ mois',
       desc: lang === 'en'
         ? 'For SMEs and sole proprietorships looking to delegate their monthly management.'
@@ -186,7 +186,7 @@ export function PricingGrid() {
   ];
 
   return (
-    <section className="py-16 relative overflow-hidden bg-noir">
+    <section className="py-20 md:py-24 relative overflow-hidden bg-noir">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gold/5 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 space-y-12">
@@ -218,11 +218,12 @@ export function PricingGrid() {
               key={tier.name}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -6 }}
               viewport={{ once: true }}
               className={`rounded-3xl p-8 flex flex-col justify-between relative transition-all duration-500 ${
                 tier.popular
-                  ? 'glass-card premium-border-gold shadow-[0_0_50px_rgba(212,175,55,0.15)] z-10'
-                  : 'glass-card'
+                  ? 'glass-card card-hover premium-border-gold shadow-[0_0_50px_rgba(212,175,55,0.15)] z-10'
+                  : 'glass-card card-hover'
               }`}
             >
               {tier.popular && (
@@ -235,7 +236,7 @@ export function PricingGrid() {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-2xl font-serif text-ivoire font-bold">{tier.name}</h3>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed min-h-[40px]">{tier.desc}</p>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed min-h-[40px]">{tier.desc}</p>
                 </div>
 
                 <div className="flex items-baseline gap-1">
@@ -245,7 +246,7 @@ export function PricingGrid() {
                     </span>
                   )}
                   <span className="text-3xl md:text-4xl font-serif font-bold text-gold whitespace-nowrap">{tier.price}</span>
-                  <span className="text-xs text-slate-500 font-bold uppercase tracking-wider whitespace-nowrap">{tier.period}</span>
+                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider whitespace-nowrap">{tier.period}</span>
                 </div>
 
                 <ul className="space-y-3 pt-4 border-t border-white/5">
@@ -287,7 +288,7 @@ export function PricingGrid() {
           </div>
           <a
             href="mailto:contact@compta-flow.net"
-            className="px-6 py-4 rounded-2xl border border-gold/30 bg-gold/5 text-xs font-bold uppercase tracking-widest text-gold hover:bg-gold/10 hover:border-gold/60 transition-all duration-300 shrink-0 max-w-full text-center [overflow-wrap:anywhere]"
+            className="px-6 py-4 rounded-2xl border border-gold/30 bg-gold/5 text-xs font-bold uppercase tracking-widest text-gold hover:bg-gold/10 hover:border-gold/60 transition-all duration-300 shrink-0 max-w-full text-center [overflow-wrap:anywhere] focus-ring"
           >
             {lang === 'en' ? 'Contact' : lang === 'ar' ? 'اتصل بـ' : 'Contacter'} contact@compta-flow.net
           </a>
@@ -305,7 +306,7 @@ export function PricingGrid() {
             </span>
             <button
               onClick={() => navigate('/login')}
-              className="text-gold font-bold hover:underline hover:text-gold-light flex items-center gap-1.5 cursor-pointer focus:outline-none transition-colors"
+              className="text-gold font-bold hover:underline hover:text-gold-light flex items-center gap-1.5 cursor-pointer focus-ring transition-colors"
             >
               <LogIn size={12} />
               {lang === 'en' ? 'Sign in to your Portal' : lang === 'ar' ? 'سجل الدخول إلى حسابك' : 'Connectez-vous à votre Espace'}

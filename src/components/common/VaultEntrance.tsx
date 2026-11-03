@@ -95,7 +95,7 @@ export function VaultEntrance({
           {isUnlocked && (
             <button 
               onClick={onLock}
-              className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/5 hover:border-gold/30 rounded-xl text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-gold transition-all"
+              className="flex items-center gap-2 px-3 min-h-11 py-1.5 bg-white/5 border border-white/5 hover:border-gold/30 rounded-xl text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-gold transition-all"
             >
               <Lock size={10} /> {isEn ? 'Lock portal' : 'Verrouiller le portail'}
             </button>
@@ -158,8 +158,12 @@ export function VaultEntrance({
 
               {/* Interactive Safe Wheel (3D-like Custom SVG) */}
               <div 
-                className="relative cursor-pointer select-none group"
+                className="relative cursor-pointer select-none group focus-ring rounded-full"
                 onClick={triggerUnlockSequence}
+                role="button"
+                tabIndex={0}
+                aria-label={isEn ? 'Unlock the secure vault' : 'Déverrouiller le coffre-fort'}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); triggerUnlockSequence(); } }}
               >
                 {/* Outer shadow aura */}
                 <div className="absolute inset-[-15px] rounded-full bg-gradient-to-tr from-gold/10 to-transparent blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
@@ -252,7 +256,7 @@ export function VaultEntrance({
               </Button>
               <button 
                 onClick={onUnlock}
-                className="text-[9px] text-slate-500 uppercase tracking-widest hover:text-ivoire transition-colors cursor-pointer pt-2"
+                className="text-[9px] text-slate-500 uppercase tracking-widest hover:text-ivoire transition-colors cursor-pointer mt-2 min-h-11 px-4 inline-flex items-center justify-center"
               >
                 {isEn ? 'Skip opening animation' : "Passer l'animation d'ouverture"}
               </button>
@@ -358,7 +362,7 @@ export function VaultEntrance({
                   </div>
                   <h4 className="text-base font-bold text-ivoire">{isEn ? 'PME Monthly Plan' : 'Formule Mensuelle PME'}</h4>
                   <div className="space-y-1">
-                    <div className="text-2xl font-serif text-gold font-bold">449,00 $ <span className="text-xs font-sans text-slate-400 font-light">/ {isEn ? 'month' : 'mois'}</span></div>
+                    <div className="text-2xl font-serif text-gold font-bold">449,99 $ <span className="text-xs font-sans text-slate-400 font-light">/ {isEn ? 'month' : 'mois'}</span></div>
                     <div className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">
                       {isEn ? 'Initial setup fee' : 'Frais de dossier initial'} : {CONFIG.FEES.SETUP.toFixed(2)} $
                     </div>

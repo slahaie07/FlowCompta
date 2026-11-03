@@ -7,9 +7,9 @@ import { usePageMeta } from '../../hooks/usePageMeta';
 import { getCity } from '../../lib/cityData';
 import { CityLanding } from './CityLanding';
 
-const PROVINCE_FAQ: Record<string, { q: string; a: string }[]> = {
+const PROVINCE_FAQ_FR: Record<string, { q: string; a: string }[]> = {
   QC: [
-    { q: 'Dois-je m\'inscrire à la TVQ en plus de la TPS ?', a: 'Oui. Au Québec, la TPS fédérale (5 %) et la TVQ provinciale (9,975 %) sont deux taxes distinctes. Vous faites deux déclarations séparées — à l\'ARC et à Revenu Québec. ComptaFlow gère les deux.' },
+    { q: 'Dois-je m\'inscrire à la TVQ en plus de la TPS ?', a: 'Oui. Au Québec, la TPS fédérale (5 %) et la TVQ provinciale (9,975 %) sont deux taxes distinctes, mais elles sont généralement déclarées ensemble, dans une seule déclaration combinée auprès de Revenu Québec. ComptaFlow gère les deux.' },
     { q: 'Qu\'est-ce que la Loi 25 et comment m\'affecte-t-elle ?', a: 'La Loi 25 impose aux entreprises québécoises de protéger les données personnelles de leurs clients et d\'avoir une politique de confidentialité claire. ComptaFlow est entièrement conforme et héberge vos données au Canada (ca-central-1).' },
     { q: 'Puis-je déduire mes frais comptables ?', a: 'Oui. Les honoraires comptables sont une dépense d\'entreprise déductible. En les confiant à ComptaFlow, vous réduisez votre revenu imposable et optimisez votre charge fiscale.' },
   ],
@@ -20,7 +20,7 @@ const PROVINCE_FAQ: Record<string, { q: string; a: string }[]> = {
   ],
   BC: [
     { q: 'Quelle est la différence entre TPS et TVP en Colombie-Britannique ?', a: 'La C.-B. n\'a pas harmonisé sa taxe. TPS (5 %) à l\'ARC + TVP/PST (7 %) séparément au gouvernement provincial. ComptaFlow gère les deux déclarations.' },
-    { q: 'Tous les biens et services sont-ils assujettis à la TVP en C.-B. ?', a: 'Non. La TVP de la C.-B. a de nombreuses exemptions (aliments, médicaments sur ordonnance, certains services). Nos comptables vous précisent exactement ce qui est taxable selon votre secteur.' },
+    { q: 'Tous les biens et services sont-ils assujettis à la TVP en C.-B. ?', a: 'Non. La TVP de la C.-B. a de nombreuses exemptions (aliments, médicaments sur ordonnance, certains services). Notre équipe vous précise exactement ce qui est taxable selon votre secteur.' },
     { q: 'ComptaFlow dessert-il Vancouver, Victoria et l\'intérieur de la province ?', a: 'Absolument. Notre service est 100 % en ligne — nous accompagnons les entrepreneurs de tout le territoire de la Colombie-Britannique.' },
   ],
   AB: [
@@ -30,19 +30,48 @@ const PROVINCE_FAQ: Record<string, { q: string; a: string }[]> = {
   ],
 };
 
-const DEFAULT_FAQ = [
-  { q: 'Combien coûte la tenue de livres avec ComptaFlow ?', a: 'La tenue de livres mensuelle démarre à 149,99 $ pour les micro-entreprises et va de 249,99 $ à 999,99 $ selon le volume pour les PME. Les mandats ponctuels sont facturés 35 $/h. Ouverture de dossier : 149 $, offerte aux 10 premiers clients.' },
+const PROVINCE_FAQ_EN: Record<string, { q: string; a: string }[]> = {
+  QC: [
+    { q: 'Do I need to register for the QST in addition to the GST?', a: 'Yes. In Quebec, the federal GST (5%) and the provincial QST (9.975%) are two separate taxes, but they are generally filed together, in a single combined return with Revenu Québec. ComptaFlow handles both.' },
+    { q: 'What is Law 25 and how does it affect me?', a: 'Law 25 requires Quebec businesses to protect their clients\' personal data and to have a clear privacy policy. ComptaFlow is fully compliant and hosts your data in Canada (ca-central-1).' },
+    { q: 'Can I deduct my accounting fees?', a: 'Yes. Accounting fees are a deductible business expense. By entrusting them to ComptaFlow, you reduce your taxable income and optimize your tax burden.' },
+  ],
+  ON: [
+    { q: 'What is the HST rate in Ontario?', a: 'The HST rate in Ontario is 13% (5% federal + 8% provincial). A single return is filed with the Canada Revenue Agency. ComptaFlow manages your quarterly HST remittances.' },
+    { q: 'Does my Ontario business need to file separate provincial returns?', a: 'For HST, no — everything has been filed with the CRA since 2009. ComptaFlow takes care of all your filings.' },
+    { q: 'Does ComptaFlow serve all regions of Ontario?', a: 'Yes. Since we are 100% online, we serve Toronto, Ottawa, Mississauga, Hamilton, Kitchener, London, Windsor and every other Ontario city at no extra cost.' },
+  ],
+  BC: [
+    { q: 'What is the difference between GST and PST in British Columbia?', a: 'B.C. did not harmonize its tax. GST (5%) goes to the CRA, plus PST (7%) filed separately with the provincial government. ComptaFlow handles both filings.' },
+    { q: 'Are all goods and services subject to PST in B.C.?', a: 'No. B.C.\'s PST has many exemptions (food, prescription drugs, certain services). Our team will tell you exactly what is taxable in your industry.' },
+    { q: 'Does ComptaFlow serve Vancouver, Victoria and the province\'s interior?', a: 'Absolutely. Our service is 100% online — we support entrepreneurs across all of British Columbia.' },
+  ],
+  AB: [
+    { q: 'Does Alberta have a provincial sales tax?', a: 'No. Alberta is the only Canadian province with no provincial sales tax. You only pay the 5% federal GST — a significant competitive advantage.' },
+    { q: 'Do I need to register for GST if I am in Alberta?', a: 'Yes, if your taxable revenues exceed $30,000 over 4 consecutive quarters. Below that, registration is voluntary but often worthwhile to recover input tax credits.' },
+    { q: 'Does ComptaFlow cover Calgary and Edmonton?', a: 'Yes, and the entire province. Our online portal has no geographic boundaries.' },
+  ],
+};
+
+const DEFAULT_FAQ_FR = [
+  { q: 'Combien coûte la tenue de livres avec ComptaFlow ?', a: 'La tenue de livres mensuelle démarre à 149,99 $/mois pour les micro-entreprises et va de 249,99 $ à 999,99 $ selon le volume pour les PME. Les mandats ponctuels sont facturés 35 $/h. Ouverture de dossier : 149 $, offerte aux 10 premiers clients.' },
   { q: 'Puis-je accéder à mon dossier à tout moment ?', a: 'Oui. Votre portail client est accessible 24h/24, 7j/7, depuis n\'importe quel appareil. Consultez vos états financiers, téléversez des documents et suivez vos mandats en temps réel.' },
   { q: 'Mes données sont-elles hébergées au Canada ?', a: 'Absolument. Toutes vos données sont hébergées dans des serveurs canadiens (région ca-central-1), conformément à la loi PIPEDA et à la Loi 25 pour les clients québécois.' },
 ];
 
+const DEFAULT_FAQ_EN = [
+  { q: 'How much does bookkeeping with ComptaFlow cost?', a: 'Monthly bookkeeping starts at $149.99/month for micro-businesses and ranges from $249.99 to $999.99 depending on volume for SMBs. One-time mandates are billed at $35/hour. Account setup: $149, free for the first 10 clients.' },
+  { q: 'Can I access my file at any time?', a: 'Yes. Your client portal is accessible 24/7, from any device. View your financial statements, upload documents and track your mandates in real time.' },
+  { q: 'Is my data hosted in Canada?', a: 'Absolutely. All your data is hosted on Canadian servers (ca-central-1 region), in compliance with PIPEDA and Law 25 for Quebec clients.' },
+];
+
 const SERVICES_FR = [
   { icon: '📊', title: 'Tenue de livres', desc: 'Saisie, classement, conciliation bancaire mensuelle' },
-  { icon: '🧾', title: 'Taxes (TPS/TVQ/TVH)', desc: 'Déclarations trimestrielles, CTI et remboursements' },
+  { icon: '🧾', title: 'Taxes (TPS/TVQ/TVH)', desc: 'Déclarations mensuelles ou trimestrielles, CTI et remboursements' },
   { icon: '👥', title: 'Paie & T4', desc: 'Calcul des retenues, remises ARC, feuillets T4 / Relevé 1' },
   { icon: '📋', title: 'États financiers', desc: 'Bilan, compte de résultat et flux de trésorerie' },
   { icon: '⚙️', title: 'Configuration logiciel', desc: 'QuickBooks, Sage, Wave — mise en place et formation' },
-  { icon: '⚖️', title: 'Comptable Dédié & Automatisation', desc: 'Processus automatisés et sécurisés, validés par votre comptable attitré' },
+  { icon: '⚖️', title: 'Suivi dédié & automatisation', desc: 'Processus automatisés et sécurisés — chaque dossier est révisé par notre équipe avant livraison' },
 ];
 
 const SERVICES_EN = [
@@ -51,7 +80,7 @@ const SERVICES_EN = [
   { icon: '👥', title: 'Payroll & T4', desc: 'Deduction calculations, CRA remittances, T4 slips' },
   { icon: '📋', title: 'Financial Statements', desc: 'Balance sheet, income statement and cash flow' },
   { icon: '⚙️', title: 'Software Setup', desc: 'QuickBooks, Sage, Wave — setup and training' },
-  { icon: '⚖️', title: 'Dedicated Accountant & Automation', desc: 'Secure automated workflows validated by your dedicated accountant' },
+  { icon: '⚖️', title: 'Dedicated Follow-up & Automation', desc: 'Secure automated workflows — every file is reviewed by our team before delivery' },
 ];
 
 const TRUST_FR = ['💼 Ouverture 149 $ — offerte aux 10 premiers clients', '🔒 Données au Canada', '⚡ Portail 24/7', '✅ PIPEDA conforme'];
@@ -70,14 +99,14 @@ function ProvinceLanding({ slug }: { slug?: string }) {
 
   const region = getActiveRegions().find((r) => r.seoSlug === slug) ?? getRegion('QC');
   const regionName = isFr ? region.nameFr : region.nameEn;
-  const faq = PROVINCE_FAQ[region.code] ?? DEFAULT_FAQ;
+  const faq = (isFr ? PROVINCE_FAQ_FR : PROVINCE_FAQ_EN)[region.code] ?? (isFr ? DEFAULT_FAQ_FR : DEFAULT_FAQ_EN);
   const services = isFr ? SERVICES_FR : SERVICES_EN;
   const trust = isFr ? TRUST_FR : TRUST_EN;
 
   const titleFr = `Tenue de livres en ligne — ${region.nameFr} | ComptaFlow`;
   const titleEn = `Online Bookkeeping — ${region.nameEn} | ComptaFlow`;
   const descFr = `ComptaFlow : comptabilité et tenue de livres pour entrepreneurs de ${region.nameFr}. ${region.taxLabelFr}, paie, T4. Portail client sécurisé, données au Canada. Ouverture 149 $, offerte aux 10 premiers clients.`;
-  const descEn = `ComptaFlow: accounting and bookkeeping for ${region.nameEn} entrepreneurs. ${region.taxLabelEn} filings, payroll, T4. Secure client portal, Canadian data. Free account opening.`;
+  const descEn = `ComptaFlow: accounting and bookkeeping for ${region.nameEn} entrepreneurs. ${region.taxLabelEn} filings, payroll, T4. Secure client portal, Canadian data. Setup $149, free for the first 10 clients.`;
 
   usePageMeta({
     title: isFr ? titleFr : titleEn,
@@ -171,11 +200,11 @@ function ProvinceLanding({ slug }: { slug?: string }) {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="gold" size="lg">
-              {isFr ? 'Ouvrir mon dossier (Gratuit)' : 'Open My File (Free)'} <ArrowRight size={16} />
+            <Button onClick={() => navigate('/estimate')} variant="gold" size="lg">
+              {isFr ? 'Estimer mon forfait' : 'Estimate My Package'} <ArrowRight size={16} />
             </Button>
-            <Button onClick={() => navigate('/estimate')} variant="secondary" size="lg">
-              {isFr ? 'Obtenir un devis' : 'Get a Quote'}
+            <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="secondary" size="lg">
+              {isFr ? 'Devenir client (2 minutes)' : 'Become a Client (2 minutes)'}
             </Button>
           </div>
         </div>
@@ -233,9 +262,9 @@ function ProvinceLanding({ slug }: { slug?: string }) {
           </h2>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { label: isFr ? 'Horaire' : 'Hourly', price: '35$', unit: isFr ? '/h' : '/hr', desc: isFr ? 'Mandats ponctuels, saisie, conciliation' : 'One-time mandates, data entry, reconciliation' },
-              { label: isFr ? 'Micro-entreprise' : 'Micro-business', price: '149,99$', unit: isFr ? '/mois' : '/month', desc: isFr ? 'Volume faible, sans employé' : 'Low volume, no employees', highlight: true },
-              { label: isFr ? 'PME' : 'SMB', price: '249,99–999,99$+', unit: isFr ? '/mois' : '/month', desc: isFr ? 'Volume élevé, paie, états financiers' : 'High volume, payroll, financial statements' },
+              { label: isFr ? 'Horaire' : 'Hourly', price: isFr ? '35 $' : '$35', unit: isFr ? '/h' : '/hr', desc: isFr ? 'Mandats ponctuels, saisie, conciliation' : 'One-time mandates, data entry, reconciliation' },
+              { label: isFr ? 'Micro-entreprise' : 'Micro-business', price: isFr ? '149,99 $' : '$149.99', unit: isFr ? '/mois' : '/month', desc: isFr ? 'Volume faible, sans employé' : 'Low volume, no employees', highlight: true },
+              { label: isFr ? 'PME' : 'SMB', price: isFr ? '249,99–999,99 $+' : '$249.99–$999.99+', unit: isFr ? '/mois' : '/month', desc: isFr ? 'Volume élevé, paie, états financiers' : 'High volume, payroll, financial statements' },
             ].map((p) => (
               <div key={p.label} className={`p-6 rounded-2xl border ${p.highlight ? 'border-gold/40 bg-gold/5' : 'border-white/10 bg-white/[0.02]'}`}>
                 <p className="text-xs font-bold uppercase tracking-widest text-gold mb-1">{p.label}</p>
@@ -280,9 +309,14 @@ function ProvinceLanding({ slug }: { slug?: string }) {
           <p className="text-silver mb-8">
             {isFr ? 'Ouverture 149 $, offerte aux 10 premiers clients · Aucun engagement · Données au Canada' : 'Setup $149, free for the first 10 clients · No commitment · Canadian data'}
           </p>
-          <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="gold" size="lg">
-            {isFr ? 'Ouvrir mon dossier →' : 'Open My File →'}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button onClick={() => navigate('/estimate')} variant="gold" size="lg">
+              {isFr ? 'Estimer mon forfait' : 'Estimate My Package'} <ArrowRight size={16} />
+            </Button>
+            <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="secondary" size="lg">
+              {isFr ? 'Devenir client (2 minutes)' : 'Become a Client (2 minutes)'}
+            </Button>
+          </div>
         </div>
       </section>
 

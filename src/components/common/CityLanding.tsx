@@ -13,11 +13,11 @@ interface Props {
 
 const SERVICES_FR = [
   { icon: '📊', title: 'Tenue de livres', desc: 'Saisie, classement, conciliation bancaire mensuelle' },
-  { icon: '🧾', title: 'Taxes', desc: 'Déclarations trimestrielles, CTI et remboursements' },
+  { icon: '🧾', title: 'Taxes', desc: 'Déclarations mensuelles ou trimestrielles, CTI et remboursements' },
   { icon: '👥', title: 'Paie & T4', desc: 'Retenues, remises ARC, feuillets T4 / Relevé 1' },
   { icon: '📋', title: 'États financiers', desc: 'Bilan, compte de résultat, flux de trésorerie' },
   { icon: '⚙️', title: 'Configuration logiciel', desc: 'QuickBooks, Sage, Wave — mise en place incluse' },
-  { icon: '⚖️', title: 'Comptable Dédié & Automatisation', desc: 'Processus automatisés et sécurisés, validés par votre comptable attitré' },
+  { icon: '⚖️', title: 'Suivi dédié & automatisation', desc: 'Processus automatisés et sécurisés — chaque dossier est révisé par notre équipe avant livraison' },
 ];
 
 const SERVICES_EN = [
@@ -26,7 +26,7 @@ const SERVICES_EN = [
   { icon: '👥', title: 'Payroll & T4', desc: 'Deductions, CRA remittances, T4 slips' },
   { icon: '📋', title: 'Financial Statements', desc: 'Balance sheet, income statement, cash flow' },
   { icon: '⚙️', title: 'Software Setup', desc: 'QuickBooks, Sage, Wave — setup included' },
-  { icon: '⚖️', title: 'Dedicated Accountant & Automation', desc: 'Secure automated workflows validated by your dedicated accountant' },
+  { icon: '⚖️', title: 'Dedicated Follow-up & Automation', desc: 'Secure automated workflows — every file is reviewed by our team before delivery' },
 ];
 
 export function CityLanding({ city }: Props) {
@@ -42,7 +42,7 @@ export function CityLanding({ city }: Props) {
   const titleFr = `Comptabilité en ligne ${city.nameFr} | ComptaFlow`;
   const titleEn = `Online Accounting ${city.nameEn} | ComptaFlow`;
   const descFr = `ComptaFlow : tenue de livres, ${city.taxNoteFr} et paie pour entrepreneurs de ${city.nameFr} (${city.provinceNameFr}). Portail client sécurisé, données au Canada. Ouverture 149 $, offerte aux 10 premiers clients.`;
-  const descEn = `ComptaFlow: bookkeeping, ${city.taxNoteEn} filings and payroll for ${city.nameEn} (${city.provinceNameEn}) entrepreneurs. Secure portal, Canadian data. Free account opening.`;
+  const descEn = `ComptaFlow: bookkeeping, ${city.taxNoteEn} filings and payroll for ${city.nameEn} (${city.provinceNameEn}) entrepreneurs. Secure portal, Canadian data. Setup $149, free for the first 10 clients.`;
 
   usePageMeta({
     title: isFr ? titleFr : titleEn,
@@ -148,8 +148,8 @@ export function CityLanding({ city }: Props) {
 
           <h1 className="text-4xl md:text-5xl font-serif font-bold leading-tight mb-4">
             {isFr
-              ? <>Comptable en ligne à <span className="text-gold italic">{city.nameFr}</span></>
-              : <>Online Accountant in <span className="text-gold italic">{city.nameEn}</span></>
+              ? <>Comptabilité en ligne à <span className="text-gold italic">{city.nameFr}</span></>
+              : <>Online Accounting in <span className="text-gold italic">{city.nameEn}</span></>
             }
           </h1>
 
@@ -169,11 +169,11 @@ export function CityLanding({ city }: Props) {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="gold" size="lg">
-              {isFr ? 'Ouvrir mon dossier (Gratuit)' : 'Open My File (Free)'} <ArrowRight size={16} />
+            <Button onClick={() => navigate('/estimate')} variant="gold" size="lg">
+              {isFr ? 'Estimer mon forfait' : 'Estimate My Package'} <ArrowRight size={16} />
             </Button>
-            <Button onClick={() => navigate('/estimate')} variant="secondary" size="lg">
-              {isFr ? 'Obtenir un devis' : 'Get a Quote'}
+            <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="secondary" size="lg">
+              {isFr ? 'Devenir client (2 minutes)' : 'Become a Client (2 minutes)'}
             </Button>
           </div>
         </div>
@@ -261,9 +261,14 @@ export function CityLanding({ city }: Props) {
           <p className="text-silver mb-8">
             {isFr ? 'Ouverture 149 $, offerte aux 10 premiers clients · Aucun engagement · Données au Canada' : 'Setup $149, free for the first 10 clients · No commitment · Canadian data'}
           </p>
-          <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="gold" size="lg">
-            {isFr ? 'Ouvrir mon dossier →' : 'Open My File →'}
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button onClick={() => navigate('/estimate')} variant="gold" size="lg">
+              {isFr ? 'Estimer mon forfait' : 'Estimate My Package'} <ArrowRight size={16} />
+            </Button>
+            <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="secondary" size="lg">
+              {isFr ? 'Devenir client (2 minutes)' : 'Become a Client (2 minutes)'}
+            </Button>
+          </div>
         </div>
       </section>
 

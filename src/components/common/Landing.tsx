@@ -1,11 +1,14 @@
 import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
+import {
   ArrowRight,
   LogIn,
   Laptop,
-  Download
+  Download,
+  Clock3,
+  Globe,
+  Tag
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -88,7 +91,7 @@ export function Landing() {
                 ? 'Fin d’année 2026 : faites fermer vos livres avant le 31 décembre — rattrapage dès 75 $/mois, feuillets T4 et RL-1 offerts la 1re année aux clients tenue de livres.'
                 : 'Year-end 2026: get your books closed before December 31 — catch-up from $75/month, T4 & RL-1 slips included in year 1 for bookkeeping clients.'}
             </span>
-            <button onClick={() => navigate('/estimate')} className="text-sm font-black underline underline-offset-4 hover:opacity-70 transition-opacity">
+            <button onClick={() => navigate('/estimate')} className="text-sm font-black underline underline-offset-4 hover:opacity-70 transition-opacity px-1 py-2">
               {lang === 'fr' ? 'Estimer mon forfait →' : 'Estimate my package →'}
             </button>
           </div>
@@ -114,13 +117,13 @@ export function Landing() {
                 {t('hero.title1')}<br />
                 <span className="italic animated-gradient-text">{t('hero.title2')}</span>
               </h1>
-              <p className="text-silver text-lg font-light max-w-lg leading-relaxed">
+              <p className="text-silver text-lg md:text-xl font-light max-w-lg leading-relaxed">
                 {t('hero.subtitle')}
               </p>
               <div className="flex flex-wrap gap-3 text-[11px] font-bold uppercase tracking-widest text-gold/90">
-                <span className="border border-gold/30 rounded-full px-4 py-2">{lang === 'fr' ? 'Réponse écrite sous 4 h ouvrables' : 'Written reply within 4 business hours'}</span>
-                <span className="border border-gold/30 rounded-full px-4 py-2">{lang === 'fr' ? '100 % en ligne, partout au Canada' : '100% online, across Canada'}</span>
-                <span className="border border-gold/30 rounded-full px-4 py-2">{lang === 'fr' ? 'Prix fixes, sans surprise' : 'Fixed prices, no surprises'}</span>
+                <span className="flex items-center gap-2 border border-gold/30 bg-gold/[0.06] rounded-full px-4 py-2"><Clock3 size={13} className="shrink-0 text-gold" aria-hidden />{lang === 'fr' ? 'Réponse écrite sous 4 h ouvrables' : 'Written reply within 4 business hours'}</span>
+                <span className="flex items-center gap-2 border border-gold/30 bg-gold/[0.06] rounded-full px-4 py-2"><Globe size={13} className="shrink-0 text-gold" aria-hidden />{lang === 'fr' ? '100 % en ligne, partout au Canada' : '100% online, across Canada'}</span>
+                <span className="flex items-center gap-2 border border-gold/30 bg-gold/[0.06] rounded-full px-4 py-2"><Tag size={13} className="shrink-0 text-gold" aria-hidden />{lang === 'fr' ? 'Prix fixes, sans surprise' : 'Fixed prices, no surprises'}</span>
               </div>
               <div className="flex flex-wrap gap-4">
                 <Button variant="gold" size="lg" onClick={goToSignup} className="px-10 py-7 text-lg group">
@@ -168,8 +171,8 @@ export function Landing() {
                       CF
                     </div>
                     <div>
-                      <div className="text-[11px] font-mono tracking-widest text-slate-500 uppercase">Espace Client</div>
-                      <div className="text-sm font-serif font-bold text-ivoire">Cabinet ComptaFlow</div>
+                      <div className="text-[11px] font-mono tracking-widest text-slate-400 uppercase">Espace Client</div>
+                      <div className="text-sm font-serif font-bold text-ivoire">Espace client Compta-Flow</div>
                     </div>
                   </div>
                   <Badge variant="gold" className="font-bold tracking-widest uppercase text-[9px] px-2.5 py-1 bg-gold/10 border-gold/25">
@@ -226,7 +229,7 @@ export function Landing() {
                       </div>
                       <div className="text-left">
                         <div className="text-xs font-semibold text-ivoire">Virement Interac Reçu</div>
-                        <div className="text-[10px] text-slate-500 font-mono">1,250.00 $ · RBC Banque</div>
+                        <div className="text-[10px] text-slate-400 font-mono">1,250.00 $ · RBC Banque</div>
                       </div>
                     </div>
                     <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[9px] font-bold uppercase tracking-wider flex items-center gap-1">
@@ -248,20 +251,20 @@ export function Landing() {
                       </div>
                       <p className="text-[10px] text-slate-400 leading-relaxed">
                         {lang === 'en'
-                          ? "Your Q2 GST/HST declarations are optimized and ready for electronic signature."
-                          : "Vos déclarations de TPS/TVQ du T2 sont optimisées et prêtes pour signature électronique."}
+                          ? "Your quarterly tax report is ready for review."
+                          : "Rapport de taxes du trimestre prêt à réviser."}
                       </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Footer Status */}
-                <div className="flex justify-between items-center border-t border-white/5 pt-4 mt-5 text-[10px] font-mono text-slate-500">
+                <div className="flex justify-between items-center border-t border-white/5 pt-4 mt-5 text-[10px] font-mono text-slate-400">
                   <span className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     {lang === 'en' ? 'Server: Connected' : 'Serveur : Connecté'}
                   </span>
-                  <span>PIPEDA &amp; Loi 25 Compliant</span>
+                  <span>{lang === 'en' ? 'PIPEDA & Law 25 compliant' : 'Conforme à la Loi 25 et à la LPRPDE'}</span>
                 </div>
               </div>
             </motion.div>
@@ -273,7 +276,7 @@ export function Landing() {
               { val: t('hero.stat2Val'), unit: t('hero.stat2Unit'), desc: t('hero.stat2Desc') },
               { val: t('hero.stat3Val'), unit: t('hero.stat3Unit'), desc: t('hero.stat3Desc') },
             ].map((stat, i) => (
-              <div key={i} className="p-10 flex flex-col gap-2 border-b border-gold/10 last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0">
+              <div key={i} className="p-10 flex flex-col gap-2 border-b border-gold/10 last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0 transition-colors duration-500 hover:bg-gold/[0.03]">
                 <div className="flex items-baseline gap-1">
                   <span className="text-5xl font-serif text-gold font-bold">{stat.val}</span>
                   <span className="text-2xl font-serif text-gold/60">{stat.unit}</span>
@@ -286,7 +289,7 @@ export function Landing() {
       </header>
 
       {/* Ticker */}
-      <div className="border-y border-gold/20 py-5 bg-gold/[0.02] overflow-hidden whitespace-nowrap">
+      <div className="marquee-pause border-y border-gold/20 py-5 bg-gold/[0.02] overflow-hidden whitespace-nowrap">
         <div className="flex animate-marquee">
           {[1, 2].map((i) => (
             <div key={i} className="flex shrink-0">
@@ -301,7 +304,7 @@ export function Landing() {
       </div>
 
       {/* Services & Pricing Section */}
-      <section id="services">
+      <section id="services" className="scroll-mt-28 md:scroll-mt-32">
         <PricingGrid />
       </section>
 
@@ -309,12 +312,12 @@ export function Landing() {
       <TeamAndTools />
 
       {/* Process Section */}
-      <section id="processus" className="py-24 bg-surface relative overflow-hidden">
+      <section id="processus" className="py-24 bg-surface relative overflow-hidden scroll-mt-28 md:scroll-mt-32">
         <div className="absolute inset-0 brand-hero-glow pointer-events-none opacity-50" />
         <div className="max-w-7xl mx-auto px-6 text-center space-y-20 relative z-10">
           <div className="space-y-4">
             <span className="text-gold text-xs font-bold tracking-[0.4em] uppercase">{t('process.tagline')}</span>
-            <h2 className="text-5xl font-serif font-bold tracking-tight italic">{t('process.title')}</h2>
+            <h2 className="text-4xl md:text-5xl font-serif font-bold tracking-tight italic">{t('process.title')}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-left relative">
@@ -355,11 +358,11 @@ export function Landing() {
         </div>
       </section>
 
-      <section id="faq" className="py-24">
+      <section id="faq" className="py-24 scroll-mt-28 md:scroll-mt-32">
         <div className="max-w-3xl mx-auto px-6 space-y-16">
           <div className="text-center space-y-4">
             <span className="text-gold text-xs font-bold tracking-[0.4em] uppercase">{t('faq.tagline')}</span>
-            <h2 className="text-5xl font-serif font-bold tracking-tight">{t('faq.title')}</h2>
+            <h2 className="text-4xl md:text-5xl font-serif font-bold tracking-tight">{t('faq.title')}</h2>
           </div>
 
           <div className="space-y-4">
@@ -423,7 +426,7 @@ export function Landing() {
             <h4 className="font-serif font-bold text-ivoire text-lg tracking-wider">
               {lang === 'en' ? 'Bookkeeping Services across Canada' : 'Services de tenue de livres partout au Canada'}
             </h4>
-            <p className="text-slate-500 text-xs max-w-2xl mx-auto leading-relaxed">
+            <p className="text-slate-400 text-xs max-w-2xl mx-auto leading-relaxed">
               {lang === 'en'
                 ? 'Our secure client portal and automated bookkeeping system is compliant with local regulations across all provinces.'
                 : 'Notre portail sécurisé et notre système de tenue de livres s\'adaptent aux réglementations fiscales et à la protection des données de chaque province.'}
@@ -444,7 +447,7 @@ export function Landing() {
 
           {/* Cities */}
           <div className="text-center space-y-3">
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-gold/50">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-gold/70">
               {lang === 'en' ? 'Major cities' : 'Grandes villes'}
             </p>
             <div className="flex flex-wrap justify-center gap-2">
@@ -465,7 +468,7 @@ export function Landing() {
                 <button
                   key={city.slug}
                   onClick={() => navigate(`/ca/${city.slug}`)}
-                  className="text-xs text-slate-500 hover:text-gold transition-colors px-3 py-1 rounded-full hover:bg-white/[0.03] border border-transparent hover:border-gold/15"
+                  className="text-xs text-slate-400 hover:text-gold transition-colors px-3 py-1 rounded-full hover:bg-white/[0.03] border border-transparent hover:border-gold/15"
                 >
                   {lang === 'en' ? city.en : city.fr}
                 </button>
@@ -475,7 +478,7 @@ export function Landing() {
 
           {/* Blog link */}
           <div className="text-center pt-2 border-t border-white/5">
-            <p className="text-xs text-slate-500 mb-3">
+            <p className="text-xs text-slate-400 mb-3">
               {lang === 'en' ? 'Accounting guides for Canadian entrepreneurs' : 'Guides comptables pour entrepreneurs canadiens'}
             </p>
             <button

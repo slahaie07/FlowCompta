@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { useLanguage } from '../../hooks/useLanguage';
 import { getAuthRedirectUrl } from '../../lib/authOAuth';
 import { mapSupabaseAuthError } from '../../lib/authErrors';
+import { CONFIG } from '../../lib/config';
 import { buildClientSignupMetadata } from '../../lib/clientSignup';
 import { VaultEntrance } from './VaultEntrance';
 
@@ -41,6 +42,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
   const [fullNameInput, setFullNameInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [nameError, setNameError] = useState('');
   const [emailNotConfirmed, setEmailNotConfirmed] = useState(false);
   const [resending, setResending] = useState(false);
 
@@ -119,7 +121,9 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
 
       if (view === 'register') {
         if (!fullNameInput.trim()) {
-          throw new Error(lang === 'en' ? 'Please enter your full name.' : 'Veuillez saisir votre nom complet.');
+          const nameMsg = lang === 'en' ? 'Please enter your full name.' : 'Veuillez saisir votre nom complet.';
+          setNameError(nameMsg);
+          throw new Error(nameMsg);
         }
 
         const { data, error: signUpError } = await supabase.auth.signUp({
@@ -174,7 +178,15 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
       }
     } catch (err: unknown) {
       if (err instanceof Error && err.message) {
-        setError(err.message);
+        if (/failed to fetch|networkerror|network request failed|load failed/i.test(err.message)) {
+          setError(
+            lang === 'en'
+              ? 'Connection problem. Check your internet access, then try again.'
+              : 'Problème de connexion. Vérifiez votre accès Internet, puis réessayez.'
+          );
+        } else {
+          setError(err.message);
+        }
       } else {
         const mapped = mapSupabaseAuthError(
           err && typeof err === 'object' && 'message' in err
@@ -228,8 +240,8 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
             <Card className="p-10 relative bg-surface border-gold/20 shadow-2xl" glow="gold">
               <button
                 type="button"
-                onClick={() => { setView('choice'); setError(''); setEmailNotConfirmed(false); }}
-                className="absolute left-6 top-6 text-slate-500 hover:text-ivoire flex items-center gap-2 text-xs uppercase font-bold tracking-widest transition-colors z-20 cursor-pointer"
+                onClick={() => { setView('choice'); setError(''); setEmailNotConfirmed(false); setNameError(''); }}
+                className="absolute left-3 top-4 min-h-11 px-3 text-slate-500 hover:text-ivoire flex items-center gap-2 text-xs uppercase font-bold tracking-widest transition-colors z-20 cursor-pointer"
               >
                  <ArrowLeft size={14} /> {t('back')}
               </button>
@@ -258,7 +270,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                   </div>
 
                   {error && (
-                    <div className="p-4 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl flex flex-col gap-3 text-left">
+                    <div role="alert" className="p-4 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl flex flex-col gap-3 text-left">
                       <div className="flex items-center gap-2">
                         <ShieldAlert size={18} className="shrink-0 text-red-500" />
                         <span>{error}</span>
@@ -270,7 +282,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                           size="sm" 
                           onClick={handleResendConfirmation}
                           isLoading={resending}
-                          className="w-full h-10 text-[10px] mt-2 border-red-500/30 text-red-400 font-bold uppercase tracking-widest"
+                          className="w-full h-11 text-[10px] mt-2 border-red-500/30 text-red-400 font-bold uppercase tracking-widest"
                         >
                           <RefreshCw size={12} className="mr-1" /> {t('auth.resendEmail')}
                         </Button>
@@ -279,15 +291,21 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                   )}
 
                   <form onSubmit={handleAuthSubmit} className="space-y-5 text-left">
+                    <p className="text-[11px] text-slate-500">* {lang === 'en' ? 'Required field' : 'Champ requis'}</p>
                     {view === 'register' && (
                       <>
                         <Input
                           type="text"
-                          label={t('auth.fullName')}
+                          label={`${t('auth.fullName')} *`}
                           placeholder={t('name_placeholder')}
                           icon={<User size={18} className="text-gold/40" />}
                           value={fullNameInput}
-                          onChange={e => setFullNameInput(e.target.value)}
+                          onChange={e => {
+                            setFullNameInput(e.target.value);
+                            if (nameError) setNameError('');
+                          }}
+                          error={nameError || undefined}
+                          autoComplete="name"
                           required
                           className="bg-noir border-white/5 focus:border-gold/50"
                         />
@@ -299,7 +317,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
 
                     <Input
                       type="email"
-                      label={t('auth.email')}
+                      label={`${t('auth.email')} *`}
                       placeholder="courriel@exemple.com"
                       icon={<Mail size={18} className="text-gold/40" />}
                       value={emailInput}
@@ -313,7 +331,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                       <>
                         <Input
                           type="password"
-                          label={t('auth.password')}
+                          label={`${t('auth.password')} *`}
                           placeholder="••••••••"
                           icon={<Key size={18} className="text-gold/40" />}
                           value={password}
@@ -324,6 +342,12 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                           className="bg-noir border-white/5 focus:border-gold/50"
                         />
 
+                        {view === 'register' && (
+                          <p className="text-[11px] text-slate-500 -mt-2">
+                            {lang === 'en' ? 'At least 6 characters.' : 'Au moins 6 caractères.'}
+                          </p>
+                        )}
+
                         {view === 'login' && (
                           <div className="text-right -mt-2">
                             <button
@@ -333,7 +357,7 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                                 setError('');
                                 setEmailNotConfirmed(false);
                               }}
-                              className="text-[11px] text-slate-400 hover:text-gold transition-colors font-medium cursor-pointer"
+                              className="text-[11px] text-slate-400 hover:text-gold transition-colors font-medium cursor-pointer inline-flex items-center min-h-11 px-2 -mr-2"
                             >
                               {lang === 'en' ? 'Forgot password?' : 'Mot de passe oublié ?'}
                             </button>
@@ -365,8 +389,9 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                           setView('login');
                           setError('');
                           setEmailNotConfirmed(false);
+                          setNameError('');
                         }}
-                        className="text-[10px] text-slate-500 hover:text-gold uppercase tracking-widest font-black transition-colors cursor-pointer"
+                        className="text-[10px] text-slate-500 hover:text-gold uppercase tracking-widest font-black transition-colors cursor-pointer inline-flex items-center justify-center min-h-11 px-3"
                       >
                         {lang === 'en' ? 'Back to sign in' : 'Retour à la connexion'}
                       </button>
@@ -377,13 +402,25 @@ export function Auth({ onAuthentication, mockLogin }: AuthProps) {
                           setView(view === 'login' ? 'register' : 'login');
                           setError('');
                           setEmailNotConfirmed(false);
+                          setNameError('');
                         }}
-                        className="text-[10px] text-slate-500 hover:text-gold uppercase tracking-widest font-black transition-colors cursor-pointer"
+                        className="text-[10px] text-slate-500 hover:text-gold uppercase tracking-widest font-black transition-colors cursor-pointer inline-flex items-center justify-center min-h-11 px-3"
                       >
                         {view === 'login' ? t('auth.switchToRegister') : t('auth.switchToLogin')}
                       </button>
                     )}
                   </div>
+
+                  <p className="pt-2 text-center text-xs text-slate-500">
+                    {lang === 'en' ? 'Stuck? Write to us at ' : 'Vous êtes bloqué ? Écrivez-nous à '}
+                    <a
+                      href={`mailto:${CONFIG.APP.SUPPORT_EMAIL}`}
+                      className="inline-flex items-center min-h-11 px-1 font-bold text-gold hover:text-gold-light transition-colors"
+                    >
+                      {CONFIG.APP.SUPPORT_EMAIL}
+                    </a>
+                    {lang === 'en' ? ' — written reply within 4 business hours.' : ' — réponse écrite sous 4 h ouvrables.'}
+                  </p>
                 </div>
               </div>
             </Card>

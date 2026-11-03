@@ -28,6 +28,7 @@ export function TarifsPage() {
   return (
     <div className="min-h-screen bg-noir text-ivoire">
       <SiteHeader />
+      <h1 className="sr-only">{isFr ? 'Tarifs et forfaits — tenue de livres et impôts' : 'Pricing & Packages — Bookkeeping and Taxes'}</h1>
       <div className="max-w-7xl mx-auto px-6 pt-32">
         <Button variant="ghost" className="gap-2" onClick={() => navigate('/')}>
           <ArrowLeft size={16} /> {t('back')}
@@ -69,6 +70,17 @@ export function TarifsPage() {
             ? 'Taxes applicables en sus. Paie : 49 $ + 12 $ par employé par mois ; feuillets T4 et RL-1 à 15 $ par employé, offerts la première année aux clients tenue de livres.'
             : 'Applicable taxes extra. Payroll: $49 + $12 per employee per month; T4 and RL-1 slips at $15 per employee, included in year 1 for bookkeeping clients.'}
         </p>
+
+        <div className="text-center space-y-3">
+          <h2 className="text-2xl md:text-3xl font-serif font-bold">
+            {isFr ? 'Prêt à passer à l’étape suivante ?' : 'Ready for the next step?'}
+          </h2>
+          <p className="text-silver font-light max-w-xl mx-auto">
+            {isFr
+              ? 'Estimez votre forfait en une minute, ou devenez client dès maintenant — nous vous répondons par écrit sous 4 h ouvrables.'
+              : 'Estimate your package in one minute, or become a client right now — we reply in writing within 4 business hours.'}
+          </p>
+        </div>
 
         <div className="flex flex-wrap justify-center gap-4">
           <Button variant="gold" size="lg" className="whitespace-nowrap" onClick={() => navigate('/estimate')}>
