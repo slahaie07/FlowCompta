@@ -8,6 +8,7 @@ import { Input } from '../ui/Input';
 import { Badge } from '../ui/Badge';
 import { t, LanguageCode } from '../../lib/i18n';
 import { useLanguage } from '../../hooks/useLanguage';
+import { CONFIG } from '../../lib/config';
 
 interface OnboardingProps {
   initialEmail: string;
@@ -18,6 +19,7 @@ interface OnboardingProps {
 export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }: OnboardingProps) {
   const [step, setStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{ name?: string; company?: string; neq?: string }>({});
   const [profileType, setProfileType] = useState<'personal' | 'business' | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,7 +63,14 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
         activeMode: profileType === 'business' ? 'business' : 'personal',
       });
     } catch (err: any) {
-      toast.error(err.message || tr('onboarding.accountError'));
+      console.error(err);
+      toast.error(
+        `${tr('onboarding.accountError')} ${
+          selectedLang === 'en'
+            ? `Please try again — if the problem persists, write to us at ${CONFIG.APP.SUPPORT_EMAIL}.`
+            : `Veuillez réessayer — si le problème persiste, écrivez-nous à ${CONFIG.APP.SUPPORT_EMAIL}.`
+        }`
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -70,14 +79,28 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
   const nextStep = () => {
     if (step === 1) {
       if (!data.displayName?.trim()) {
+        setFieldErrors({ name: tr('onboarding.nameRequired') });
         toast.warning(tr('onboarding.nameRequired'));
         return;
       }
       if (profileType === 'business' && (!data.companyName || !data.neq)) {
+        setFieldErrors({
+          company: !data.companyName
+            ? selectedLang === 'en'
+              ? 'Business name is required.'
+              : 'Le nom de l’entreprise est requis.'
+            : undefined,
+          neq: !data.neq
+            ? selectedLang === 'en'
+              ? 'The NEQ is required for a business account.'
+              : 'Le NEQ est requis pour un compte entreprise.'
+            : undefined,
+        });
         toast.warning(tr('onboarding.businessRequired'));
         return;
       }
     }
+    setFieldErrors({});
     setStep((p) => p + 1);
   };
 
@@ -147,11 +170,12 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
                         <button
                           key={langItem.id}
                           type="button"
+                          aria-pressed={selectedLang === langItem.id}
                           onClick={() => {
                             setSelectedLang(langItem.id as LanguageCode);
                             changeLanguage(langItem.id as LanguageCode);
                           }}
-                          className={`px-8 py-3 rounded-full border font-bold text-xs uppercase tracking-widest transition-all focus-ring ${
+                          className={`px-8 py-3 min-h-11 rounded-full border font-bold text-xs uppercase tracking-widest transition-all focus-ring ${
                             selectedLang === langItem.id
                               ? 'bg-gold text-noir border-gold shadow-gold/20'
                               : 'bg-white/5 border-white/10 text-slate-500 hover:border-gold/30'
@@ -208,11 +232,17 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
                   <p className="text-silver font-light text-base leading-relaxed italic">{tr('onboarding.coordsDesc')}</p>
                 </div>
                 <div className="p-10 rounded-3xl bg-surface border border-gold/20 space-y-6">
+                  <p className="text-[11px] text-slate-500">* {selectedLang === 'en' ? 'Required field' : 'Champ requis'}</p>
                   <Input
-                    label={tr('onboarding.fullName')}
+                    label={`${tr('onboarding.fullName')} *`}
                     placeholder={tr('name_placeholder')}
                     value={data.displayName}
-                    onChange={(e) => setData({ ...data, displayName: e.target.value })}
+                    onChange={(e) => {
+                      setData({ ...data, displayName: e.target.value });
+                      if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: undefined }));
+                    }}
+                    error={fieldErrors.name}
+                    autoComplete="name"
                     required
                   />
                   <div>
@@ -227,10 +257,10 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
                       <option value="ON">Ontario (TVH 13 %)</option>
                       <option value="BC">Colombie-Britannique (TPS + TVP 7 %)</option>
                       <option value="AB">Alberta (TPS 5 %)</option>
-                      <option value="MB">Manitoba (TPS + TVP 7 %)</option>
+                      <option value="MB">Manitoba (TPS + TVD 7 %)</option>
                       <option value="NB">Nouveau-Brunswick (TVH 15 %)</option>
                       <option value="NL">Terre-Neuve-et-Labrador (TVH 15 %)</option>
-                      <option value="NS">Nouvelle-Écosse (TVH 15 %)</option>
+                      <option value="NS">Nouvelle-Écosse (TVH 14 %)</option>
                       <option value="PE">Île-du-Prince-Édouard (TVH 15 %)</option>
                       <option value="SK">Saskatchewan (TPS + TVP 6 %)</option>
                       <option value="YT">Yukon (TPS 5 %)</option>
@@ -240,8 +270,32 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
                   </div>
                   {profileType === 'business' && (
                     <>
-                      <Input label={tr('onboarding.companyName')} placeholder={tr('company_placeholder')} value={data.companyName} onChange={(e) => setData({ ...data, companyName: e.target.value })} required />
-                      <Input label={tr('onboarding.neq')} placeholder="116XXXXXXX" maxLength={10} value={data.neq} onChange={(e) => setData({ ...data, neq: e.target.value })} required />
+                      <Input
+                        label={`${tr('onboarding.companyName')} *`}
+                        placeholder={tr('company_placeholder')}
+                        value={data.companyName}
+                        onChange={(e) => {
+                          setData({ ...data, companyName: e.target.value });
+                          if (fieldErrors.company) setFieldErrors((prev) => ({ ...prev, company: undefined }));
+                        }}
+                        error={fieldErrors.company}
+                        autoComplete="organization"
+                        required
+                      />
+                      <Input
+                        label={`${tr('onboarding.neq')} *`}
+                        placeholder="116XXXXXXX"
+                        maxLength={10}
+                        value={data.neq}
+                        onChange={(e) => {
+                          setData({ ...data, neq: e.target.value });
+                          if (fieldErrors.neq) setFieldErrors((prev) => ({ ...prev, neq: undefined }));
+                        }}
+                        error={fieldErrors.neq}
+                        inputMode="numeric"
+                        autoComplete="off"
+                        required
+                      />
                     </>
                   )}
                 </div>
@@ -312,8 +366,8 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
                             {selectedLang === 'en' ? expert.descEn : expert.desc}
                           </p>
                         </div>
-                        <div className="pt-4 border-t border-white/5 text-[10px] font-mono text-slate-500 truncate w-full">
-                          {expert.email}
+                        <div className="pt-4 border-t border-white/5 text-[10px] font-bold uppercase tracking-widest text-slate-500 w-full">
+                          {selectedLang === 'en' ? 'Written follow-up — reply within 4 business hours' : 'Suivi par écrit — réponse sous 4 h ouvrables'}
                         </div>
                       </button>
                     );
@@ -382,6 +436,17 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
             </Button>
           )}
         </footer>
+
+        <p className="text-center text-xs text-slate-500">
+          {selectedLang === 'en' ? 'Stuck on a step? Write to us at ' : 'Un souci pour continuer ? Écrivez-nous à '}
+          <a
+            href={`mailto:${CONFIG.APP.SUPPORT_EMAIL}`}
+            className="inline-flex items-center min-h-11 px-1 font-bold text-gold hover:text-gold-light transition-colors"
+          >
+            {CONFIG.APP.SUPPORT_EMAIL}
+          </a>
+          {selectedLang === 'en' ? ' — we reply in writing.' : ' — on vous répond par écrit.'}
+        </p>
       </div>
     </div>
   );

@@ -3,10 +3,17 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '../../lib/supabase';
 import { OrganicLoader } from '../ui/OrganicLoader';
+import { useLanguage } from '../../hooks/useLanguage';
+import { mapSupabaseAuthError } from '../../lib/authErrors';
+import { CONFIG } from '../../lib/config';
+
+const SESSION_NOT_FOUND_FR = 'Session introuvable après la confirmation du courriel.';
+const SESSION_NOT_FOUND_EN = 'Session not found after email confirmation.';
 
 export function AuthCallback() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { lang } = useLanguage();
   const nextPath = searchParams.get('next') || '/portal';
 
   useEffect(() => {
@@ -19,7 +26,12 @@ export function AuthCallback() {
       const authErrorDescription = params.get('error_description');
 
       if (authError) {
-        toast.error(authErrorDescription || 'Connexion annulée.');
+        console.warn('Auth callback error:', authError, authErrorDescription);
+        toast.error(
+          lang === 'en'
+            ? `Sign-in did not complete. Try again, or write to us at ${CONFIG.APP.SUPPORT_EMAIL}.`
+            : `La connexion n’a pas abouti. Réessayez, ou écrivez-nous à ${CONFIG.APP.SUPPORT_EMAIL}.`
+        );
         if (!cancelled) navigate('/login', { replace: true });
         return;
       }
@@ -35,7 +47,7 @@ export function AuthCallback() {
             error,
           } = await supabase.auth.getSession();
           if (error) throw error;
-          if (!session) throw new Error('Session introuvable après la confirmation du courriel.');
+          if (!session) throw new Error(lang === 'en' ? SESSION_NOT_FOUND_EN : SESSION_NOT_FOUND_FR);
           currentSession = session;
         }
 
@@ -60,11 +72,20 @@ export function AuthCallback() {
         }
 
         if (!cancelled) {
-          toast.success('Connexion réussie.');
+          toast.success(lang === 'en' ? 'Signed in successfully.' : 'Connexion réussie.');
           navigate(nextPath.startsWith('/') ? nextPath : `/${nextPath}`, { replace: true });
         }
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Erreur de connexion.';
+        const rawMessage = err instanceof Error ? err.message : '';
+        const message =
+          rawMessage === SESSION_NOT_FOUND_FR || rawMessage === SESSION_NOT_FOUND_EN
+            ? rawMessage
+            : mapSupabaseAuthError(
+                err && typeof err === 'object' && 'message' in err
+                  ? (err as { message?: string; status?: number })
+                  : undefined,
+                lang
+              ).message;
         toast.error(message);
         if (!cancelled) navigate('/login', { replace: true });
       }
@@ -80,7 +101,7 @@ export function AuthCallback() {
     <div className="min-h-screen bg-noir text-ivoire flex flex-col items-center justify-center gap-8">
       <OrganicLoader label="FLOW" size="md" />
       <p className="text-slate-500 font-serif italic text-lg animate-pulse">
-        Finalisation de votre connexion…
+        {lang === 'en' ? 'Completing your sign-in…' : 'Finalisation de votre connexion…'}
       </p>
     </div>
   );
