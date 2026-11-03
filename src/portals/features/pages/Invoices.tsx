@@ -19,6 +19,21 @@ import {
   type ProvinceCode,
 } from '../../../lib/financeUtils';
 
+// ─── Échappement HTML (protection XSS — impression) ──────────────────────────
+// Le HTML d’impression est injecté par document.write dans une fenêtre de
+// même origine : toute donnée saisie par un humain (nom du client, courriel,
+// question de sécurité Interac, référence de paiement…) doit être échappée
+// avant interpolation, sinon elle s’exécuterait comme du code dans la
+// session de la personne qui imprime. Couvre le texte et les attributs.
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function buildPrintTaxRows(invoice: { montantHt?: number; tps?: number; tvq?: number; tvh?: number; amount?: number }) {
   const subtotal = invoice.montantHt ?? invoice.amount ?? 0;
   const rows = [
@@ -55,7 +70,7 @@ function printInvoice(invoice: any, subAdminInterac: any) {
 <html lang="fr">
 <head>
   <meta charset="UTF-8"/>
-  <title>Facture ${invoice.number}</title>
+  <title>Facture ${escapeHtml(invoice.number)}</title>
   <style>
     @page { size: A4; margin: 20mm; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -96,10 +111,10 @@ function printInvoice(invoice: any, subAdminInterac: any) {
       <div class="brand-sub">PLATEFORME COMPTABLE CERTIFIÉE · CANADA</div>
     </div>
     <div class="invoice-meta">
-      <div class="invoice-num">${invoice.number}</div>
-      <div><span class="badge">${statusLabel}</span></div>
+      <div class="invoice-num">${escapeHtml(invoice.number)}</div>
+      <div><span class="badge">${escapeHtml(statusLabel)}</span></div>
       <div style="font-size:11px;color:#888;font-family:Arial,sans-serif;margin-top:8px;">
-        Émise le ${dateEmission}<br/>Échéance : ${dateEcheance}
+        Émise le ${escapeHtml(dateEmission)}<br/>Échéance : ${escapeHtml(dateEcheance)}
       </div>
     </div>
   </div>
@@ -107,12 +122,12 @@ function printInvoice(invoice: any, subAdminInterac: any) {
   <div class="client-section">
     <div class="client-block">
       <div class="section-title">Facturé à</div>
-      <div class="client-name">${invoice.clientName}</div>
+      <div class="client-name">${escapeHtml(invoice.clientName)}</div>
     </div>
     ${subAdminInterac?.full_name ? `<div class="client-block" style="text-align:right">
       <div class="section-title">Émis par</div>
-      <div class="client-name">${subAdminInterac.full_name}</div>
-      ${subAdminInterac.interac_email ? `<div style="font-size:12px;color:#888;font-family:Arial,sans-serif;margin-top:4px;">${subAdminInterac.interac_email}</div>` : ''}
+      <div class="client-name">${escapeHtml(subAdminInterac.full_name)}</div>
+      ${subAdminInterac.interac_email ? `<div style="font-size:12px;color:#888;font-family:Arial,sans-serif;margin-top:4px;">${escapeHtml(subAdminInterac.interac_email)}</div>` : ''}
     </div>` : ''}
   </div>
 
@@ -139,16 +154,16 @@ function printInvoice(invoice: any, subAdminInterac: any) {
   ${invoice.status !== 'paid' && subAdminInterac?.interac_email ? `
   <div class="interac-box">
     <div class="interac-title">Instructions de paiement — Virement Interac</div>
-    <div class="interac-row"><strong>Destinataire :</strong> ${subAdminInterac.full_name || 'Votre comptable'}</div>
-    <div class="interac-row"><strong>Adresse de virement :</strong> ${subAdminInterac.interac_email}</div>
+    <div class="interac-row"><strong>Destinataire :</strong> ${escapeHtml(subAdminInterac.full_name || 'Votre comptable')}</div>
+    <div class="interac-row"><strong>Adresse de virement :</strong> ${escapeHtml(subAdminInterac.interac_email)}</div>
     <div class="interac-row"><strong>Montant exact :</strong> ${(invoice.montantTotal ?? invoice.amount).toFixed(2)} $ CAD</div>
     <div class="interac-row"><strong>Dépôt automatique :</strong> ${subAdminInterac.interac_autodepot ? 'Oui (aucune question requise)' : 'Non'}</div>
-    ${!subAdminInterac.interac_autodepot && subAdminInterac.interac_question ? `<div class="interac-row"><strong>Question de sécurité :</strong> ${subAdminInterac.interac_question}</div>` : ''}
+    ${!subAdminInterac.interac_autodepot && subAdminInterac.interac_question ? `<div class="interac-row"><strong>Question de sécurité :</strong> ${escapeHtml(subAdminInterac.interac_question)}</div>` : ''}
   </div>` : ''}
 
   ${invoice.status === 'paid' ? `
   <div class="ref-box">
-    ✅ Facture acquittée — Référence Interac : <strong>${invoice.interacReference || 'Dépôt direct'}</strong>
+    ✅ Facture acquittée — Référence Interac : <strong>${escapeHtml(invoice.interacReference || 'Dépôt direct')}</strong>
     ${invoice.datePaiement ? ` — Payée le ${new Date(invoice.datePaiement).toLocaleDateString('fr-CA')}` : ''}
   </div>` : ''}
 
