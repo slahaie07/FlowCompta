@@ -5,6 +5,8 @@ import { useLanguage } from '../../hooks/useLanguage';
 import { usePageMeta } from '../../hooks/usePageMeta';
 import { SITE } from '../../lib/canadaNetwork';
 import { CONFIG } from '../../lib/config';
+import { SiteHeader } from './SiteHeader';
+import { SiteFooter } from './SiteFooter';
 
 export function ConfiancePage() {
   const navigate = useNavigate();
@@ -68,8 +70,9 @@ export function ConfiancePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-noir text-ivoire py-12 px-6">
-      <div className="max-w-4xl mx-auto space-y-12">
+    <div className="min-h-screen bg-noir text-ivoire">
+      <SiteHeader />
+      <div className="max-w-4xl mx-auto space-y-12 px-6 pt-32 pb-16">
         <Button variant="ghost" className="gap-2" onClick={() => navigate('/')}>
           <ArrowLeft size={16} /> {t('back')}
         </Button>
@@ -90,7 +93,7 @@ export function ConfiancePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {blocks.map((b) => (
-            <div key={b.title} className="border border-gold/20 rounded-2xl p-7 space-y-3 bg-surface">
+            <div key={b.title} className="border border-gold/20 rounded-2xl p-7 space-y-3 bg-surface h-full">
               <b.icon size={26} className="text-gold" />
               <h2 className="text-lg font-serif font-bold">{b.title}</h2>
               <p className="text-sm text-silver font-light leading-relaxed">{b.text}</p>
@@ -118,6 +121,7 @@ export function ConfiancePage() {
           </Button>
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }

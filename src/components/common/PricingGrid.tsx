@@ -186,10 +186,10 @@ export function PricingGrid() {
   ];
 
   return (
-    <section className="py-24 relative overflow-hidden bg-noir">
+    <section className="py-16 relative overflow-hidden bg-noir">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gold/5 rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10 space-y-16">
+      <div className="max-w-7xl mx-auto px-6 relative z-10 space-y-12">
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <span className="text-gold text-xs font-black tracking-[0.4em] uppercase">
             {lang === 'en' ? 'Transparent Pricing' : lang === 'ar' ? 'أسعار شفافة' : 'Tarifs Transparents'}
@@ -212,7 +212,7 @@ export function PricingGrid() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
           {tiers.map((tier) => (
             <motion.div
               key={tier.name}
@@ -221,7 +221,7 @@ export function PricingGrid() {
               viewport={{ once: true }}
               className={`rounded-3xl p-8 flex flex-col justify-between relative transition-all duration-500 ${
                 tier.popular
-                  ? 'glass-card premium-border-gold shadow-[0_0_50px_rgba(212,175,55,0.15)] scale-105 md:scale-105 z-10'
+                  ? 'glass-card premium-border-gold shadow-[0_0_50px_rgba(212,175,55,0.15)] z-10'
                   : 'glass-card'
               }`}
             >
@@ -244,8 +244,8 @@ export function PricingGrid() {
                       {lang === 'en' ? 'From' : lang === 'ar' ? 'ابتداءً من' : 'À partir de'}
                     </span>
                   )}
-                  <span className="text-3xl md:text-4xl font-serif font-bold text-gold">{tier.price}</span>
-                  <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">{tier.period}</span>
+                  <span className="text-3xl md:text-4xl font-serif font-bold text-gold whitespace-nowrap">{tier.price}</span>
+                  <span className="text-xs text-slate-500 font-bold uppercase tracking-wider whitespace-nowrap">{tier.period}</span>
                 </div>
 
                 <ul className="space-y-3 pt-4 border-t border-white/5">
@@ -287,9 +287,9 @@ export function PricingGrid() {
           </div>
           <a
             href="mailto:contact@compta-flow.net"
-            className="px-6 py-4 rounded-2xl border border-gold/30 bg-gold/5 text-xs font-bold uppercase tracking-widest text-gold hover:bg-gold/10 hover:border-gold/60 transition-all duration-300 shrink-0"
+            className="px-6 py-4 rounded-2xl border border-gold/30 bg-gold/5 text-xs font-bold uppercase tracking-widest text-gold hover:bg-gold/10 hover:border-gold/60 transition-all duration-300 shrink-0 max-w-full text-center [overflow-wrap:anywhere]"
           >
-            {lang === 'en' ? 'Contact' : lang === 'ar' ? 'اتصل بـ' : 'Contacter'} compta-flow@outlook.com
+            {lang === 'en' ? 'Contact' : lang === 'ar' ? 'اتصل بـ' : 'Contacter'} contact@compta-flow.net
           </a>
         </div>
 

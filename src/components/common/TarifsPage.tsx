@@ -6,6 +6,8 @@ import { useLanguage } from '../../hooks/useLanguage';
 import { usePageMeta } from '../../hooks/usePageMeta';
 import { SITE } from '../../lib/canadaNetwork';
 import { CONFIG } from '../../lib/config';
+import { SiteHeader } from './SiteHeader';
+import { SiteFooter } from './SiteFooter';
 
 export function TarifsPage() {
   const navigate = useNavigate();
@@ -25,7 +27,8 @@ export function TarifsPage() {
 
   return (
     <div className="min-h-screen bg-noir text-ivoire">
-      <div className="max-w-7xl mx-auto px-6 pt-12">
+      <SiteHeader />
+      <div className="max-w-7xl mx-auto px-6 pt-32">
         <Button variant="ghost" className="gap-2" onClick={() => navigate('/')}>
           <ArrowLeft size={16} /> {t('back')}
         </Button>
@@ -36,7 +39,7 @@ export function TarifsPage() {
       <div className="max-w-5xl mx-auto px-6 pb-24 space-y-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
           <div className="border border-gold/20 rounded-2xl p-6 space-y-2">
-            <p className="text-gold font-serif font-bold text-2xl">35 $/h</p>
+            <p className="text-gold font-serif font-bold text-2xl whitespace-nowrap">35 $/h</p>
             <p className="text-sm text-silver font-light">
               {isFr
                 ? 'Service à l’heure pour les petits dossiers : estimation écrite avant de commencer, dépôt de 50 %.'
@@ -44,7 +47,7 @@ export function TarifsPage() {
             </p>
           </div>
           <div className="border border-gold/20 rounded-2xl p-6 space-y-2">
-            <p className="text-gold font-serif font-bold text-2xl">{isFr ? 'Dès 75 $/mois' : 'From $75/month'}</p>
+            <p className="text-gold font-serif font-bold text-2xl whitespace-nowrap">{isFr ? 'Dès 75 $/mois' : 'From $75/month'}</p>
             <p className="text-sm text-silver font-light">
               {isFr
                 ? 'Rattrapage de livres en retard : 75 $/mois (1 à 6 mois), 65 $ (7 à 12), 60 $ (13 et plus).'
@@ -52,7 +55,7 @@ export function TarifsPage() {
             </p>
           </div>
           <div className="border border-gold/20 rounded-2xl p-6 space-y-2">
-            <p className="text-gold font-serif font-bold text-2xl">149 $</p>
+            <p className="text-gold font-serif font-bold text-2xl whitespace-nowrap">149 $</p>
             <p className="text-sm text-silver font-light">
               {isFr
                 ? 'Ouverture de dossier — offerte aux 10 premiers clients. Aucun frais d’ouverture pour les impôts seulement.'
@@ -68,7 +71,7 @@ export function TarifsPage() {
         </p>
 
         <div className="flex flex-wrap justify-center gap-4">
-          <Button variant="gold" size="lg" onClick={() => navigate('/estimate')}>
+          <Button variant="gold" size="lg" className="whitespace-nowrap" onClick={() => navigate('/estimate')}>
             {isFr ? 'Estimer mon forfait' : 'Estimate my package'} <ArrowRight size={16} className="ml-2" />
           </Button>
           <Button variant="secondary" size="lg" asChild>
@@ -78,6 +81,7 @@ export function TarifsPage() {
           </Button>
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }

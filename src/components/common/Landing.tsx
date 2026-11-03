@@ -3,9 +3,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight,
-  Menu,
-  X,
-  Globe,
   LogIn,
   Laptop,
   Download
@@ -15,25 +12,18 @@ import { Badge } from '../ui/Badge';
 import { useLanguage } from '../../hooks/useLanguage';
 import { ServicesCatalogSection } from './ServicesCatalogSection';
 import { PricingGrid } from './PricingGrid';
+import { SiteHeader } from './SiteHeader';
+import { SiteFooter } from './SiteFooter';
 import { TeamAndTools } from './TeamAndTools';
-import { CONFIG } from '../../lib/config';
 import { usePwaInstall } from '../../hooks/usePwaInstall';
 import { getActiveRegions } from '../../lib/canadaNetwork';
 
 export function Landing() {
   const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const { lang, toggleLanguage, t } = useLanguage();
   const { isInstallable, install } = usePwaInstall();
 
   const goToSignup = () => navigate('/login?next=/onboarding&register=1');
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const tickerItems =
     lang === 'en'
@@ -54,90 +44,22 @@ export function Landing() {
           'Coffre-fort chiffré',
         ];
 
+  useEffect(() => {
+    const target = sessionStorage.getItem('comptaflow-scroll-target');
+    if (target) {
+      sessionStorage.removeItem('comptaflow-scroll-target');
+      const timer = setTimeout(() => {
+        document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' });
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-noir text-ivoire font-sans selection:bg-gold selection:text-noir overflow-x-hidden relative">
       <div className="aurora-bg opacity-30 pointer-events-none fixed inset-0" />
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${scrolled ? 'bg-noir/90 backdrop-blur-xl border-b border-gold/15 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.4)]' : 'bg-transparent py-6'}`}>
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
-            <div className="w-10 h-10 border-2 border-gold rounded-full flex items-center justify-center text-gold font-serif font-bold text-xl group-hover:bg-gold group-hover:text-noir transition-all duration-300">C</div>
-            <span className="text-2xl font-serif font-bold tracking-tight">Compta<em className="text-gold not-italic">flow</em></span>
-          </div>
-
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#services" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.services')}</a>
-            <button onClick={() => navigate('/tarifs')} className="text-sm font-medium text-silver hover:text-gold transition-colors">{lang === 'fr' ? 'Tarifs' : 'Pricing'}</button>
-            <button onClick={() => navigate('/ressources')} className="text-sm font-medium text-silver hover:text-gold transition-colors">{lang === 'fr' ? 'Ressources' : 'Resources'}</button>
-            <button onClick={() => navigate('/estimate')} className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.getEstimate')}</button>
-            <a href="#processus" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.processus')}</a>
-            <a href="#faq" className="text-sm font-medium text-silver hover:text-gold transition-colors">{t('nav.faq')}</a>
-            
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => navigate('/login')}
-              className="glass-button border-gold/20 flex gap-2 items-center group cursor-pointer"
-            >
-              <LogIn size={13} className="text-gold group-hover:scale-110 transition-transform" />
-              <span>{lang === 'en' ? 'Client Login' : lang === 'ar' ? 'تسجيل الدخول' : 'Connexion Client'}</span>
-            </Button>
-            
-            <button 
-              onClick={toggleLanguage} 
-              aria-label={t('portal.changeLanguage')}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gold/20 bg-white/5 text-xs font-bold text-silver uppercase hover:border-gold hover:text-gold transition-all duration-300 cursor-pointer focus-ring"
-            >
-              <Globe size={12} className="text-gold" />
-              <span>{lang.toUpperCase()}</span>
-            </button>
-
-            <Button variant="gold" size="sm" onClick={goToSignup} className="shadow-gold/20">{t('nav.becomeClient')}</Button>
-          </div>
-
-          <div className="flex items-center gap-4 md:hidden">
-            {/* Language Switcher for Mobile */}
-            <button 
-              onClick={toggleLanguage} 
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-gold/20 bg-white/5 text-[10px] font-bold text-silver uppercase"
-            >
-              <Globe size={10} className="text-gold" />
-              <span>{lang.toUpperCase()}</span>
-            </button>
-
-            <button
-              className="text-gold focus-ring rounded-lg p-1"
-              aria-label={isMenuOpen ? t('portal.closeMenu') : t('portal.openMenu')}
-              aria-expanded={isMenuOpen}
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            className="md:hidden absolute top-full left-0 right-0 bg-noir border-b border-gold/20 p-6 flex flex-col gap-6"
-          >
-            <a href="#services" onClick={() => setIsMenuOpen(false)} className="text-lg font-serif">{t('nav.mobileMenuTitle')}</a>
-            <a href="#processus" onClick={() => setIsMenuOpen(false)} className="text-lg font-serif">{t('nav.mobileFlux')}</a>
-            <a href="#faq" onClick={() => setIsMenuOpen(false)} className="text-lg font-serif">{t('nav.mobileFaq')}</a>
-            <Button
-              variant="secondary"
-              onClick={() => { setIsMenuOpen(false); navigate('/login'); }}
-              className="w-full flex gap-3 justify-center items-center py-4 cursor-pointer"
-            >
-              <LogIn size={18} className="text-gold" />
-              {lang === 'en' ? 'Client Login' : lang === 'ar' ? 'تسجيل الدخول' : 'Connexion Client'}
-            </Button>
-            <Button variant="gold" onClick={goToSignup} className="py-4 shadow-gold/20">{t('nav.mobileOpen')}</Button>
-          </motion.div>
-        )}
-      </nav>
+      <SiteHeader />
 
       {/* Hero Section */}
       <header className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
@@ -334,7 +256,7 @@ export function Landing() {
               { val: t('hero.stat2Val'), unit: t('hero.stat2Unit'), desc: t('hero.stat2Desc') },
               { val: t('hero.stat3Val'), unit: t('hero.stat3Unit'), desc: t('hero.stat3Desc') },
             ].map((stat, i) => (
-              <div key={i} className="p-10 flex flex-col gap-2 border-r border-gold/10 last:border-r-0">
+              <div key={i} className="p-10 flex flex-col gap-2 border-b border-gold/10 last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0">
                 <div className="flex items-baseline gap-1">
                   <span className="text-5xl font-serif text-gold font-bold">{stat.val}</span>
                   <span className="text-2xl font-serif text-gold/60">{stat.unit}</span>
@@ -370,7 +292,7 @@ export function Landing() {
       <TeamAndTools />
 
       {/* Process Section */}
-      <section id="processus" className="py-32 bg-surface relative overflow-hidden">
+      <section id="processus" className="py-24 bg-surface relative overflow-hidden">
         <div className="absolute inset-0 brand-hero-glow pointer-events-none opacity-50" />
         <div className="max-w-7xl mx-auto px-6 text-center space-y-20 relative z-10">
           <div className="space-y-4">
@@ -416,7 +338,7 @@ export function Landing() {
         </div>
       </section>
 
-      <section id="faq" className="py-32">
+      <section id="faq" className="py-24">
         <div className="max-w-3xl mx-auto px-6 space-y-16">
           <div className="text-center space-y-4">
             <span className="text-gold text-xs font-bold tracking-[0.4em] uppercase">{t('faq.tagline')}</span>
@@ -550,59 +472,7 @@ export function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="py-20 border-t border-gold/20 bg-noir">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 border border-gold rounded-full flex items-center justify-center text-gold font-serif font-bold text-sm">C</div>
-                <span className="text-xl font-serif font-bold tracking-tight">Compta<em className="text-gold not-italic">flow</em></span>
-              </div>
-              <p className="text-sm text-silver/80 font-light leading-relaxed">
-                {lang === 'fr' ? 'Tenue de livres et impôts, 100 % en ligne, partout au Canada. Pas un cabinet de CPA.' : 'Bookkeeping and taxes, 100% online, across Canada. Not a CPA firm.'}
-              </p>
-              <p className="text-sm text-silver/80 font-light">
-                <a href={`mailto:${CONFIG.APP.SUPPORT_EMAIL}`} className="text-gold/90 hover:text-gold transition-colors">{CONFIG.APP.SUPPORT_EMAIL}</a>
-                <br />
-                <a href="tel:+18736552473" className="hover:text-gold transition-colors">873-655-2473</a>
-                <br />
-                {lang === 'fr' ? 'Lun–ven, 9 h à 17 h (HE) · Réponse écrite sous 4 h ouvrables' : 'Mon–Fri, 9 a.m.–5 p.m. (ET) · Written reply within 4 business hours'}
-              </p>
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold">{lang === 'fr' ? 'Services' : 'Services'}</h3>
-              <ul className="space-y-3 text-sm text-silver/85 font-light">
-                <li><a href="/tarifs" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Tarifs et forfaits' : 'Pricing & packages'}</a></li>
-                <li><a href="/estimate" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Estimation gratuite' : 'Free estimate'}</a></li>
-                <li><a href="/calculateur-taxes" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Calculateur de taxes' : 'Tax calculator'}</a></li>
-                <li><a href="/ressources" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Ressources et guides' : 'Resources & guides'}</a></li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold">{lang === 'fr' ? 'Démarrer' : 'Get started'}</h3>
-              <ul className="space-y-3 text-sm text-silver/85 font-light">
-                <li><a href={CONFIG.APP.INTAKE_FORM_URL} target="_blank" rel="noreferrer" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Fiche nouveau client (2 min)' : 'New client form (2 min)'}</a></li>
-                <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSfwVqeQNjcgGwNtcmjoKzNE2jPdYsvCGAP2B8Bw_MHiSkUUug/viewform" target="_blank" rel="noreferrer" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Pré-inscription impôts 2027' : '2027 tax season pre-registration'}</a></li>
-                <li><a href="/confiance" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Confiance et sécurité' : 'Trust & security'}</a></li>
-                <li><a href="/login" className="hover:text-gold transition-colors">{lang === 'fr' ? 'Connexion client' : 'Client login'}</a></li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gold">{lang === 'fr' ? 'Légal' : 'Legal'}</h3>
-              <ul className="space-y-3 text-sm text-silver/85 font-light">
-                <li><a href="/privacy" className="hover:text-gold transition-colors">{t('footer.privacy')}</a></li>
-                <li><a href="/terms" className="hover:text-gold transition-colors">{t('footer.terms')}</a></li>
-                <li><a href="/legal" className="hover:text-gold transition-colors">{t('footer.legal')}</a></li>
-                <li><a href="/cookies" className="hover:text-gold transition-colors">Cookies</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-14 pt-8 border-t border-gold/10 flex flex-col md:flex-row justify-between gap-4 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">
-            <span>{t('footer.copyright')}</span>
-            <span>{t('footer.taxDisclaimer')}</span>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

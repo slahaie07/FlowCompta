@@ -6,6 +6,8 @@ import { SITE } from '../../lib/canadaNetwork';
 import { useLanguage } from '../../hooks/useLanguage';
 import { usePageMeta } from '../../hooks/usePageMeta';
 import { BLOG_ARTICLES, getArticle } from '../../lib/blogContent';
+import { SiteHeader } from './SiteHeader';
+import { SiteFooter } from './SiteFooter';
 
 const CATEGORY_LABELS_FR: Record<string, string> = {
   fiscal: 'Fiscal',
@@ -65,8 +67,51 @@ function renderBody(body: string) {
       continue;
     } else if (line.startsWith('---')) {
       els.push(<hr key={i} className="border-white/10 my-8" />);
-    } else if (line.startsWith('| ')) {
-      // table — skip for simplicity
+    } else if (line.startsWith('|')) {
+      const rows: string[][] = [];
+      while (i < lines.length && lines[i].startsWith('|')) {
+        const cells = lines[i]
+          .split('|')
+          .slice(1, -1)
+          .map((c) => c.trim());
+        const isSeparator = cells.length > 0 && cells.every((c) => /^:?-{3,}:?$/.test(c));
+        if (!isSeparator && cells.length > 0) rows.push(cells);
+        i++;
+      }
+      if (rows.length > 0) {
+        const [head, ...bodyRows] = rows;
+        els.push(
+          <div key={`table-${i}`} className="overflow-x-auto my-6 rounded-xl border border-white/10">
+            <table className="w-full min-w-[480px] border-collapse text-sm text-silver">
+              <thead>
+                <tr className="bg-white/5">
+                  {head.map((cell, j) => (
+                    <th
+                      key={j}
+                      className="px-4 py-3 text-left font-semibold text-white border-b border-white/10"
+                      dangerouslySetInnerHTML={{ __html: inlineFormat(cell) }}
+                    />
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {bodyRows.map((row, r) => (
+                  <tr key={r} className="border-b border-white/5 last:border-b-0">
+                    {row.map((cell, j) => (
+                      <td
+                        key={j}
+                        className="px-4 py-3 align-top leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: inlineFormat(cell) }}
+                      />
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      }
+      continue;
     } else if (line.trim() === '') {
       // skip blank lines
     } else {
@@ -125,9 +170,10 @@ export function BlogListPage() {
 
   return (
     <div className="min-h-screen bg-noir text-ivoire font-sans">
+      <SiteHeader />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
-      <div className="bg-gradient-to-b from-[#111008] to-noir pt-8 pb-14 px-4">
+      <div className="bg-gradient-to-b from-[#111008] to-noir pt-28 pb-14 px-4">
         <div className="max-w-4xl mx-auto">
           <button
             onClick={() => navigate('/')}
@@ -190,10 +236,11 @@ export function BlogListPage() {
             {isFr ? 'Nos experts comptables s\'occupent de tout — TPS, TVQ, paie, états financiers.' : 'Our accounting experts handle everything — GST, HST, payroll, financial statements.'}
           </p>
           <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="gold">
-            {isFr ? 'Ouvrir mon dossier (Gratuit) →' : 'Open My File (Free) →'}
+            {isFr ? 'Ouvrir mon dossier (Gratuit) →' : 'Open My File (Free) →'}
           </Button>
         </div>
       </div>
+      <SiteFooter />
     </div>
   );
 }
@@ -248,10 +295,11 @@ export function BlogArticlePage() {
 
   return (
     <div className="min-h-screen bg-noir text-ivoire font-sans">
+      <SiteHeader />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
-      <div className="bg-gradient-to-b from-[#111008] to-noir pt-8 pb-12 px-4">
+      <div className="bg-gradient-to-b from-[#111008] to-noir pt-28 pb-12 px-4">
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center gap-2 text-sm text-silver mb-8">
             <button onClick={() => navigate('/')} className="hover:text-gold transition-colors">ComptaFlow</button>
@@ -291,7 +339,7 @@ export function BlogArticlePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button onClick={() => navigate('/login?next=/onboarding&register=1')} variant="gold" size="lg">
-              {isFr ? 'Ouvrir mon dossier (Gratuit) →' : 'Open My File (Free) →'}
+              {isFr ? 'Ouvrir mon dossier (Gratuit) →' : 'Open My File (Free) →'}
             </Button>
             <Button onClick={() => navigate('/estimate')} variant="secondary" size="lg">
               {isFr ? 'Obtenir un devis' : 'Get a Quote'}
@@ -309,6 +357,7 @@ export function BlogArticlePage() {
           </button>
         </div>
       </article>
+      <SiteFooter />
     </div>
   );
 }

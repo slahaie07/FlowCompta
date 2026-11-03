@@ -107,15 +107,15 @@ export function Privacy() {
               Pour toute question relative à cette politique, pour modifier vos consentements ou pour exercer vos droits d'accès et de rectification, veuillez contacter le responsable :
             </p>
             <div className="p-6 rounded-xl bg-white/[0.02] border border-gold/10 space-y-2 mt-4 text-sm font-light">
-              <div className="flex justify-between border-b border-white/5 pb-2">
+              <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:gap-4 border-b border-white/5 pb-2">
                 <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Responsable :</span>
                 <span className="text-ivoire font-medium">Compta-Flow (direction)</span>
               </div>
-              <div className="flex justify-between border-b border-white/5 pb-2">
+              <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:gap-4 border-b border-white/5 pb-2">
                 <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Titre :</span>
                 <span className="text-ivoire">Directeur et Responsable de la Protection des Données</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:gap-4">
                 <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Courriel :</span>
                 <a href={`mailto:${CONFIG.APP.SUPPORT_EMAIL}`} className="text-gold hover:underline">{CONFIG.APP.SUPPORT_EMAIL}</a>
               </div>

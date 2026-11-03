@@ -42,19 +42,19 @@ export function Legal() {
               La plateforme ComptaFlow est éditée et exploitée par :
             </p>
             <div className="p-6 rounded-xl bg-white/[0.02] border border-white/5 space-y-3 text-sm font-light">
-              <div className="flex justify-between border-b border-white/5 pb-2">
+              <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:gap-4 border-b border-white/5 pb-2">
                 <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Nom Commercial :</span>
                 <span className="text-ivoire font-bold">ComptaFlow (Services de tenue de livres)</span>
               </div>
-              <div className="flex justify-between border-b border-white/5 pb-2">
+              <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:gap-4 border-b border-white/5 pb-2">
                 <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Directeur de la publication :</span>
                 <span className="text-ivoire font-medium">Compta-Flow</span>
               </div>
-              <div className="flex justify-between border-b border-white/5 pb-2">
+              <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:gap-4 border-b border-white/5 pb-2">
                 <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Numéro d'entreprise :</span>
                 <span className="text-ivoire font-mono">2276543210</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex flex-col gap-1 sm:flex-row sm:justify-between sm:gap-4">
                 <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Siège social :</span>
                 <span className="text-ivoire">Canada</span>
               </div>

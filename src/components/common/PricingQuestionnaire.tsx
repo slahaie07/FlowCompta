@@ -222,7 +222,7 @@ export function PricingQuestionnaire({
           {step === 0 && (
             <motion.div key="q-service" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} className="space-y-4">
               <h3 className="font-serif text-xl text-ivoire">{t('pricingQuestionnaire.q.service')}</h3>
-              <div className="space-y-4 max-h-[360px] overflow-y-auto pr-1">
+              <div className="space-y-4 max-h-[560px] overflow-y-auto pr-1">
                 {SERVICE_CATEGORIES.map((category) => (
                   <div key={category} className="space-y-2">
                     <p className="text-xs font-bold uppercase tracking-widest text-gold/80">
@@ -391,9 +391,9 @@ export function PricingQuestionnaire({
                 {pricingKey(t, variant, 'disclaimer')}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
                 {onContinue && (
-                  <Button variant="gold" className="flex-1 h-12" onClick={() => onContinue(result.serviceId)}>
+                  <Button variant="gold" className="flex-1 h-12 whitespace-nowrap" onClick={() => onContinue(result.serviceId)}>
                     {variant === 'staff'
                       ? pricingKey(t, variant, 'cta.invoices')
                       : t('pricingQuestionnaire.cta.continue')}{' '}
@@ -402,19 +402,19 @@ export function PricingQuestionnaire({
                 )}
                 {showSignupCta && variant === 'client' && (
                   <>
-                    <Button variant="gold" className="flex-1 h-12" asChild>
+                    <Button variant="gold" className="flex-1 h-12 whitespace-nowrap" asChild>
                       <a href="/login?next=/onboarding&register=1">
                         {t('pricingQuestionnaire.cta.signup')} <ArrowRight size={16} className="ml-2" />
                       </a>
                     </Button>
-                    <Button variant="secondary" className="flex-1 h-12" asChild>
+                    <Button variant="secondary" className="flex-1 h-12 whitespace-nowrap" asChild>
                       <a href={CONFIG.APP.INTAKE_FORM_URL} target="_blank" rel="noreferrer">
                         {t('pricingQuestionnaire.cta.requestQuote')} <Mail size={16} className="ml-2 inline" />
                       </a>
                     </Button>
                   </>
                 )}
-                <Button variant="secondary" className="flex-1 h-12" onClick={reset}>
+                <Button variant="secondary" className="flex-1 h-12 whitespace-nowrap" onClick={reset}>
                   {variant === 'staff'
                     ? pricingKey(t, variant, 'cta.restart')
                     : t('pricingQuestionnaire.cta.restart')}
@@ -428,7 +428,7 @@ export function PricingQuestionnaire({
           <div className="flex gap-3 pt-2">
             <Button
               variant="secondary"
-              className="flex-1"
+              className="flex-1 whitespace-nowrap"
               onClick={handlePrev}
               disabled={stepIndex <= 0}
             >
@@ -436,7 +436,7 @@ export function PricingQuestionnaire({
             </Button>
             <Button
               variant="gold"
-              className="flex-1"
+              className="flex-1 whitespace-nowrap"
               onClick={handleNext}
               disabled={!canProceed()}
             >

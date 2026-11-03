@@ -10,6 +10,8 @@ import {
   formatCAD 
 } from '../../lib/financeUtils';
 import { CANADIAN_REGIONS, SITE } from '../../lib/canadaNetwork';
+import { SiteHeader } from './SiteHeader';
+import { SiteFooter } from './SiteFooter';
 import { useLanguage } from '../../hooks/useLanguage';
 import { usePageMeta } from '../../hooks/usePageMeta';
 
@@ -117,6 +119,7 @@ Total: ${formatCAD(results.total)}`;
 
   return (
     <div className="min-h-screen bg-noir text-ivoire font-sans pt-28 pb-16">
+      <SiteHeader />
       <div className="max-w-4xl mx-auto px-6">
         <button
           onClick={() => navigate('/')}
@@ -291,7 +294,7 @@ Total: ${formatCAD(results.total)}`;
 
                 <div className="flex justify-between pt-4 text-lg font-bold font-serif">
                   <span className="text-gold">{isFr ? 'Total TTC' : 'Total (with taxes)'}</span>
-                  <span className="text-gold border-b border-gold/40 pb-0.5">{formatCAD(results.total)}</span>
+                  <span className="text-gold">{formatCAD(results.total)}</span>
                 </div>
               </div>
             </div>
@@ -318,6 +321,7 @@ Total: ${formatCAD(results.total)}`;
           </div>
         </main>
       </div>
+      <SiteFooter />
     </div>
   );
 }
