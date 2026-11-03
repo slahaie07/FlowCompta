@@ -48,31 +48,27 @@ export function Landing() {
         ];
 
   useEffect(() => {
-    // Défilement d'ancre inter-pages : SiteHeader stocke la section visée dans
-    // sessionStorage avant de naviguer vers l'accueil. On réessaie jusqu'à ce
-    // que la section soit réellement rendue (montage parfois différé juste
-    // après la navigation) et on ne consomme la cible qu'après un défilement
-    // réussi — l'ancien essai unique à 150 ms, clé supprimée d'avance et
-    // échec silencieux (?.), se perdait sans aucun recours.
+    // Défilement d’ancre inter-pages : SiteHeader stocke la section visée dans
+    // sessionStorage avant de naviguer vers l’accueil. La cible est retirée
+    // immédiatement afin qu’elle ne puisse jamais relancer le défilement. On
+    // fait une tentative au prochain cadre d’affichage et, au besoin, une
+    // seule autre après 400 ms pour laisser la section finir de se rendre.
     const target = sessionStorage.getItem('comptaflow-scroll-target');
     if (!target) return;
-    let attempts = 0;
-    const maxAttempts = 25; // ~2,5 s de réessais
-    const tryScroll = () => {
-      attempts += 1;
-      const el = document.getElementById(target);
-      if (el) {
-        sessionStorage.removeItem('comptaflow-scroll-target');
-        window.clearInterval(interval);
-        el.scrollIntoView({ behavior: 'smooth' });
-      } else if (attempts >= maxAttempts) {
-        sessionStorage.removeItem('comptaflow-scroll-target');
-        window.clearInterval(interval);
-      }
+
+    sessionStorage.removeItem('comptaflow-scroll-target');
+
+    const scrollToTarget = () => {
+      document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' });
     };
-    const interval = window.setInterval(tryScroll, 100);
-    tryScroll();
-    return () => window.clearInterval(interval);
+
+    const frame = window.requestAnimationFrame(scrollToTarget);
+    const timeout = window.setTimeout(scrollToTarget, 400);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timeout);
+    };
   }, []);
 
   return (
