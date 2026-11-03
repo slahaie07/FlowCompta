@@ -1757,6 +1757,7 @@ const BLOG_SLUGS = [
   'paie-t4-guide-employeurs-canada',
   'demarrer-entreprise-canada-obligations-comptables',
   'exemple-mois-tenue-livres-plombier-autonome',
+  'prix-tenue-de-livres-quebec-forfait-mensuel',
 ];
 
 app.get('/sitemap.xml', (_req, res) => {
