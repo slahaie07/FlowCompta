@@ -150,7 +150,7 @@ export function PricingGrid() {
       popular: false
     },
     {
-      name: lang === 'en' ? 'Bookkeeping & Taxes' : lang === 'ar' ? 'مسك الدفاتر والضرائب' : 'Tenue de livres & Taxes',
+      name: lang === 'en' ? 'Essential' : lang === 'ar' ? 'الأساسي' : 'Essentiel',
       price: lang === 'en' ? '$249.99' : '249,99 $',
       period: lang === 'en' ? '/ month' : lang === 'ar' ? '/ شهر' : '/ mois',
       desc: lang === 'en'
@@ -240,7 +240,7 @@ export function PricingGrid() {
                 </div>
 
                 <div className="flex items-baseline gap-1">
-                  {(tier.name === 'Tenue de livres & Taxes' || tier.name === 'Bookkeeping & Taxes' || tier.name === 'مسك الدفاتر والضرائب') && (
+                  {(tier.name === 'Essentiel' || tier.name === 'Essential' || tier.name === 'الأساسي') && (
                     <span className="text-slate-400 text-xs font-semibold mr-1">
                       {lang === 'en' ? 'From' : lang === 'ar' ? 'ابتداءً من' : 'À partir de'}
                     </span>

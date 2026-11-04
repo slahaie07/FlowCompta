@@ -27,7 +27,7 @@ export function TeamAndTools() {
   ];
 
   return (
-    <div className="py-24 relative bg-[#030303]">
+    <div className="py-24 relative overflow-hidden bg-[#030303]">
       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gold/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gold/5 rounded-full blur-[120px] pointer-events-none" />
       <section id="outils" className="max-w-7xl mx-auto px-6 relative z-10 space-y-16">

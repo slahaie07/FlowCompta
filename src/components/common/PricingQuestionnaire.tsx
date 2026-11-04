@@ -1,4 +1,4 @@
-import { useMemo, type FC, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, type FC, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, ArrowRight, Calculator, CheckCircle2, Mail } from 'lucide-react';
 import { Button } from '../ui/Button';
@@ -181,8 +181,21 @@ export function PricingQuestionnaire({
 
   const taxLang = lang === 'ar' ? 'fr' : lang;
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isFirstStepRender = useRef(true);
+
+  // Au changement d'étape, ramener le haut de la carte juste sous l'en-tête fixe
+  // (le conteneur porte scroll-mt-28) pour que le titre de la question reste visible.
+  useEffect(() => {
+    if (isFirstStepRender.current) {
+      isFirstStepRender.current = false;
+      return;
+    }
+    containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [step]);
+
   return (
-    <div className={`space-y-8 ${compact ? '' : 'max-w-2xl mx-auto'}`}>
+    <div ref={containerRef} className={`space-y-8 scroll-mt-28 ${compact ? '' : 'max-w-2xl mx-auto'}`}>
       <div className="space-y-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl border border-gold/30 flex items-center justify-center text-gold">

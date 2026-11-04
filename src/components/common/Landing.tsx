@@ -87,7 +87,7 @@ export function Landing() {
                 ? 'Fin d’année 2026 : faites fermer vos livres avant le 31 décembre — rattrapage dès 75 $/mois, feuillets T4 et RL-1 offerts la 1re année aux clients tenue de livres.'
                 : 'Year-end 2026: get your books closed before December 31 — catch-up from $75/month, T4 & RL-1 slips included in year 1 for bookkeeping clients.'}
             </span>
-            <button onClick={() => navigate('/estimate')} className="text-sm font-black underline underline-offset-4 hover:opacity-70 transition-opacity px-1 py-2">
+            <button onClick={() => navigate('/estimate')} className="text-sm font-black underline underline-offset-4 hover:opacity-70 transition-opacity px-1 py-2 focus-ring">
               {lang === 'fr' ? 'Estimer mon forfait →' : 'Estimate my package →'}
             </button>
           </div>
@@ -432,7 +432,7 @@ export function Landing() {
                 <button
                   key={region.code}
                   onClick={() => navigate(`/ca/${region.seoSlug}`)}
-                  className="text-xs font-mono text-silver hover:text-gold transition-colors flex items-center gap-1.5 border border-white/5 hover:border-gold/30 px-3 py-1.5 rounded-full bg-white/[0.01] cursor-pointer"
+                  className="text-xs font-mono text-silver hover:text-gold transition-colors flex items-center gap-1.5 border border-white/5 hover:border-gold/30 px-3 py-1.5 rounded-full bg-white/[0.01] cursor-pointer focus-ring"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-gold" />
                   {lang === 'en' ? region.nameEn : region.nameFr}
@@ -464,7 +464,7 @@ export function Landing() {
                 <button
                   key={city.slug}
                   onClick={() => navigate(`/ca/${city.slug}`)}
-                  className="text-xs text-slate-400 hover:text-gold transition-colors px-3 py-1 rounded-full hover:bg-white/[0.03] border border-transparent hover:border-gold/15"
+                  className="text-xs text-slate-400 hover:text-gold transition-colors px-3 py-1 rounded-full hover:bg-white/[0.03] border border-transparent hover:border-gold/15 focus-ring"
                 >
                   {lang === 'en' ? city.en : city.fr}
                 </button>
@@ -479,7 +479,7 @@ export function Landing() {
             </p>
             <button
               onClick={() => navigate('/ressources')}
-              className="text-xs text-gold hover:underline font-semibold"
+              className="text-xs text-gold hover:underline font-semibold focus-ring"
             >
               {lang === 'en' ? '📚 Browse accounting resources →' : '📚 Consulter les ressources comptables →'}
             </button>
