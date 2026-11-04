@@ -1849,10 +1849,10 @@ app.post('/api/quote/create', async (req, res) => {
     let clientEmail = email.toLowerCase().trim();
     let selectedAgentId = assignedAgentId;
 
-    // Si pas d'agent désigné, on en assigne un par défaut (Sylvie ou Eya selon la langue/préférence)
+    // Si pas d'agent désigné, on en assigne un par défaut (Sylvie ou Compta-Flow selon la langue/préférence)
     const isArabic = answers.language === 'ar' || normProv === 'QC' && answers.preferred_language === 'ar';
-    const defaultAgentEmail = isArabic ? 'eya-cpa@outlook.com' : 'viviee28@hotmail.com';
-    const defaultAgentName = isArabic ? 'Eya (Sous-Admin)' : 'Sylvie Charette-Clément';
+    const defaultAgentEmail = isArabic ? 's.lahaie07@gmail.com' : 'viviee28@hotmail.com';
+    const defaultAgentName = isArabic ? 'Compta-Flow' : 'Sylvie Charette-Clément';
 
     let agentName = defaultAgentName;
     let agentEmail = defaultAgentEmail;

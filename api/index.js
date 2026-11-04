@@ -3709,8 +3709,8 @@ app.post("/api/quote/create", async (req, res) => {
     let clientEmail = email.toLowerCase().trim();
     let selectedAgentId = assignedAgentId;
     const isArabic = answers.language === "ar" || normProv === "QC" && answers.preferred_language === "ar";
-    const defaultAgentEmail = isArabic ? "eya-cpa@outlook.com" : "viviee28@hotmail.com";
-    const defaultAgentName = isArabic ? "Eya (Sous-Admin)" : "Sylvie Charette-Cl\xE9ment";
+    const defaultAgentEmail = isArabic ? "s.lahaie07@gmail.com" : "viviee28@hotmail.com";
+    const defaultAgentName = isArabic ? "Compta-Flow" : "Sylvie Charette-Cl\xE9ment";
     let agentName = defaultAgentName;
     let agentEmail = defaultAgentEmail;
     if (serviceRoleKey && !clientProfileId.startsWith("mock_")) {
