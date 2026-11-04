@@ -76,7 +76,7 @@ export function PortalShell({
     ...routeContext,
   };
 
-  const currentContract = generateContract('fr', 'Gestion Comptable ComptaFlow', 249, 'CAD');
+  const currentContract = generateContract('fr', 'Gestion Comptable ComptaFlow', 249.99, 'CAD');
 
   return (
     <div className="min-h-screen flex bg-noir relative overflow-hidden w-full">
