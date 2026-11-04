@@ -153,6 +153,10 @@
   }
 }
 
+html {
+  scroll-padding-top: 7rem;
+}
+
 @keyframes shine {
   to {
     background-position: 200% center;
