@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  FileText, User, Building2, BookOpen, BarChart3, Briefcase,
+  FileText, User, Building2, BookOpen, BarChart3,
   CheckCircle, Clock, AlertCircle, ChevronDown, ChevronRight,
   Download, Calendar, Shield, Star, TrendingUp, ArrowRight,
   FileCheck, Layers, DollarSign, ClipboardList, Zap
@@ -443,81 +443,6 @@ const SERVICES: ServiceDefinition[] = [
       { label: 'Feuillets T5008 disponibles', date: '28 février', critical: false },
       { label: 'Déclaration T1 (placements)', date: '30 avril', critical: true },
       { label: 'Récolte de pertes fiscales', date: '31 décembre', critical: false },
-    ],
-  },
-  {
-    id: 'cfo',
-    icon: <Briefcase size={22} />,
-    name: 'CFO Virtuel',
-    subtitle: 'Stratégie & Intelligence Financière',
-    code: 'CFO',
-    price: 'Sur devis',
-    normRef: 'NCECF · Loi sur les sociétés canadiennes · IFRS',
-    color: 'gold',
-    description:
-      'Service de Directeur Financier Virtuel (CFO) pour les entreprises en croissance : analyses stratégiques, tableaux de bord BI, budgets prévisionnels et accompagnement décisionnel.',
-    scope: [
-      'Budget annuel et prévisions financières sur 3–5 ans',
-      'Tableau de bord KPI mensuel (marges, liquidités, EBITDA)',
-      'Analyse de rentabilité par produit, service ou département',
-      'Optimisation du fonds de roulement et gestion des liquidités',
-      'Préparation de dossiers de financement (banques, investisseurs)',
-      'Analyse de viabilité pour nouvelles lignes d\'affaires',
-      'Rapport de conseil mensuel avec recommandations stratégiques',
-      'Représentation lors de rencontres avec banquiers ou investisseurs',
-    ],
-    exclusions: [
-      'Gestion opérationnelle quotidienne',
-      'Recrutement ou ressources humaines',
-      'Services juridiques (collaboration avec notaire/avocat recommandée)',
-    ],
-    pipeline: [
-      {
-        phase: '01',
-        title: 'Diagnostic Financier',
-        description: 'Analyse en profondeur de la santé financière et des processus.',
-        deliverables: ['Rapport de diagnostic complet', 'Identification des fuites de liquidité', 'Benchmark sectoriel'],
-        timeline: 'Semaines 1–2',
-        status: 'complete',
-      },
-      {
-        phase: '02',
-        title: 'Plan Financier',
-        description: 'Élaboration du budget et des projections sur 3 ans.',
-        deliverables: ['Budget annuel détaillé', 'Projections 3 ans (3 scénarios)', 'Plan de trésorerie'],
-        timeline: 'Semaines 3–5',
-        status: 'active',
-      },
-      {
-        phase: '03',
-        title: 'Mise en place BI',
-        description: 'Déploiement des tableaux de bord et indicateurs de performance.',
-        deliverables: ['Dashboard KPI mensuel', 'Alertes automatiques', 'Accès ComptaFlow BI'],
-        timeline: 'Semaine 6',
-        status: 'pending',
-      },
-      {
-        phase: '04',
-        title: 'Accompagnement Mensuel',
-        description: 'Réunion mensuelle, analyse des résultats vs budget, recommandations.',
-        deliverables: ['Compte-rendu mensuel', 'Rapport de variance', 'Recommandations prioritaires'],
-        timeline: 'Mensuel (1er lundi)',
-        status: 'pending',
-      },
-    ],
-    reportSections: [
-      'Tableau de bord exécutif (KPIs clés — 1 page)',
-      'Analyse de variance Budget vs Réel',
-      'Flux de trésorerie prévisionnels 90 jours',
-      'Analyse de rentabilité par segment',
-      'Ratio d\'endettement et capacité de remboursement',
-      'Recommandations stratégiques du mois',
-      'Risques identifiés et plan d\'atténuation',
-    ],
-    deadlines: [
-      { label: 'Rapport mensuel CFO', date: '5e du mois', critical: true },
-      { label: 'Révision budgétaire trimestrielle', date: 'Trimestrielle', critical: false },
-      { label: 'Budget annuel N+1', date: 'Novembre', critical: false },
     ],
   },
 ];
