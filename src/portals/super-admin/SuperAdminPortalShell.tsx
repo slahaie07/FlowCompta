@@ -82,11 +82,11 @@ export function SuperAdminPortalShell({
 
   // Services catalog state
   const [services, setServices] = useState<ServiceItem[]>([
-    { id: '1', name: 'Forfaits Mensuels', description: 'Tenue de livres mensuelle complète, dépôt de pièces par photo ou courriel et support régulier.', price: 199, period: 'mois', category: 'Tenue de livres' },
-    { id: '2', name: 'L\'Étudiant', description: 'Déclaration d\'impôt simplifiée pour étudiants admissibles.', price: 49, period: 'unique', category: 'Impôts' },
-    { id: '3', name: 'Le Rattrapage', description: 'Mise à jour de tenue de livres en retard, tarif par mois rétroactif.', price: 99, period: 'mois', category: 'Tenue de livres' },
-    { id: '4', name: 'Le Setup Onboarding', description: 'Configuration initiale du dossier client, des outils comptables et du raccordement bancaire.', price: 299, period: 'unique', category: 'Configuration' },
-    { id: '5', name: 'Impôts Personnels', description: 'Déclaration de revenus personnelle standard avec crédits canadiens.', price: 99, period: 'unique', category: 'Impôts' }
+    { id: '1', name: 'Forfaits Mensuels', description: 'Tenue de livres mensuelle complète, dépôt de pièces par photo ou courriel et support régulier. Grille selon le volume de transactions : Micro 149,99 $ (0-30), Essentiel 249,99 $ (31-75), 349,99 $ (76-150), Croissance 449,99 $ (151-200), 599,99 $ (201-300), 799,99 $ (301-450), 999,99 $ (451+).', price: 249.99, period: 'mois', category: 'Tenue de livres' },
+    { id: '2', name: 'L\'Étudiant', description: 'Déclaration d\'impôt simplifiée pour étudiants admissibles.', price: 49.99, period: 'unique', category: 'Impôts' },
+    { id: '3', name: 'Le Rattrapage', description: 'Mise à jour de tenue de livres en retard, tarif par mois rétroactif : 75 $ (1-6 mois), 65 $ (7-12 mois), 60 $ (13 mois et plus, minimum 900 $).', price: 75, period: 'mois', category: 'Tenue de livres' },
+    { id: '4', name: 'Le Setup Onboarding', description: 'Configuration initiale du dossier client, des outils comptables et du raccordement bancaire.', price: 199, period: 'unique', category: 'Configuration' },
+    { id: '5', name: 'Impôts Personnels', description: 'Déclaration de revenus personnelle standard avec crédits canadiens.', price: 89.99, period: 'unique', category: 'Impôts' }
   ]);
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState<number>(0);
