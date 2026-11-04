@@ -51,10 +51,6 @@ export function ClientPortalShell({
   // Invoices list state — vide au départ, rempli par les vraies données (loadLiveData)
   const [invoices, setInvoices] = useState<any[]>([]);
   const [showPaymentModal, setShowPaymentModal] = useState<any | null>(null);
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardExpiry, setCardExpiry] = useState('');
-  const [cardCvc, setCardCvc] = useState('');
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   // Documents/Vault list state
   const [clientDocuments, setClientDocuments] = useState<Array<{ id: string; name: string; size: string; date: string }>>([]);
@@ -89,7 +85,7 @@ export function ClientPortalShell({
           id: inv.id,
           desc: inv.number + ' - ' + (inv.client_name || 'Service Comptable'),
           amount: Number(inv.amount),
-          status: inv.status === 'paid' ? 'Payé' : 'À payer',
+          status: inv.status === 'paid' ? 'Payé' : inv.client_a_declare_paye ? 'Déclaré — en validation' : 'À payer',
           date: new Date(Number(inv.date)).toLocaleDateString('fr-CA')
         })));
       }
@@ -100,10 +96,10 @@ export function ClientPortalShell({
     // 2. Fetch Documents
     try {
       const { data, error } = await supabase
-        .from('documents_uploades')
+        .from('documents')
         .select('*')
-        .eq('client_id', userData.id)
-        .order('created_at', { ascending: false });
+        .eq('user_id', userData.id)
+        .order('upload_date', { ascending: false });
       if (!error && data && data.length > 0) {
         setClientDocuments(data.map(doc => ({
           id: doc.id,
@@ -192,37 +188,24 @@ export function ClientPortalShell({
     if (onRefreshProfile) onRefreshProfile();
   };
 
-  // Payment handler with DB update
-  const handlePaymentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!cardNumber || !cardExpiry || !cardCvc) {
-      toast.error('Veuillez remplir tous les champs de paiement.');
-      return;
-    }
-    setIsProcessingPayment(true);
-    
+  // Règlement par virement Interac seulement — aucune carte n'est recueillie.
+  // Le client déclare son virement (client_a_declare_paye, comme useInvoices) ;
+  // le statut « Payé » n'est jamais écrit ici : la validation finale appartient
+  // au comptable, à la réception du virement.
+  const handleDeclarePaid = async () => {
+    if (!showPaymentModal) return;
     try {
       const { error } = await supabase
         .from('invoices')
-        .update({ status: 'paid' })
+        .update({ client_a_declare_paye: true })
         .eq('id', showPaymentModal.id);
-        
       if (error) throw error;
-      
-      toast.success('Paiement validé avec succès! Merci pour votre confiance.');
-      setShowPaymentModal(null);
-      loadLiveData();
     } catch (err) {
-      // Fallback local state update
-      setInvoices(prev => prev.map(inv => inv.id === showPaymentModal.id ? { ...inv, status: 'Payé' } : inv));
-      toast.success('Paiement simulé en mode local.');
-      setShowPaymentModal(null);
-    } finally {
-      setIsProcessingPayment(false);
-      setCardNumber('');
-      setCardExpiry('');
-      setCardCvc('');
+      // Mode local : la déclaration reste affichée dans la liste.
     }
+    setInvoices(prev => prev.map(inv => inv.id === showPaymentModal.id ? { ...inv, status: 'Déclaré — en validation' } : inv));
+    toast.success('Virement déclaré. Votre comptable valide le paiement dès sa réception.');
+    setShowPaymentModal(null);
   };
 
   // File upload — vrai flux via useDocuments : les octets partent dans le bucket
@@ -250,14 +233,23 @@ export function ClientPortalShell({
     }
   };
 
-  // Document deletion with DB sync
+  // Document deletion with DB sync — table « documents » (même source que les
+  // dépôts via useDocuments) ; l'objet du bucket « vault » est retiré au passage.
   const handleDeleteDocument = async (id: string) => {
     try {
+      const { data: docRow } = await supabase
+        .from('documents')
+        .select('url')
+        .eq('id', id)
+        .maybeSingle();
       const { error } = await supabase
-        .from('documents_uploades')
+        .from('documents')
         .delete()
         .eq('id', id);
       if (error) throw error;
+      if (docRow?.url) {
+        await supabase.storage.from('vault').remove([docRow.url]).catch(() => undefined);
+      }
       toast.success('Document supprimé du coffre-fort.');
       loadLiveData();
     } catch (e) {
@@ -584,7 +576,7 @@ export function ClientPortalShell({
               {/* Interactive Mandate Sign Modal */}
               {showMandateSigning && (
                 <EliteSignature
-                  contract={generateContract('fr', 'Mandat de Gestion Comptable - ComptaFlow', 199, 'CAD')}
+                  contract={generateContract('fr', 'Mandat de Gestion Comptable - ComptaFlow', 149, 'CAD')}
                   onComplete={handleSignatureComplete}
                 />
               )}
@@ -756,7 +748,9 @@ export function ClientPortalShell({
                           <span className={`inline-flex px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-full border ${
                             inv.status === 'Payé'
                               ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
-                              : 'bg-red-50 border-red-200 text-red-600'
+                              : inv.status === 'À payer'
+                                ? 'bg-red-50 border-red-200 text-red-600'
+                                : 'bg-amber-50 border-amber-200 text-amber-600'
                           }`}>
                             {inv.status}
                           </span>
@@ -768,8 +762,10 @@ export function ClientPortalShell({
                               onClick={() => setShowPaymentModal(inv)}
                               className="px-4 py-2 bg-[#16324F] hover:bg-slate-800 text-white rounded-lg font-bold text-[10px] uppercase tracking-wider"
                             >
-                              Payer maintenant
+                              Régler par Interac
                             </button>
+                          ) : inv.status === 'Déclaré — en validation' ? (
+                            <span className="text-amber-600 font-semibold">En validation</span>
                           ) : (
                             <span className="text-slate-400 font-semibold">Réglé ✓</span>
                           )}
@@ -791,51 +787,26 @@ export function ClientPortalShell({
                     <h3 className="text-sm font-black uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2 mb-4">Règlement de la facture</h3>
                     <p className="text-xs text-slate-600 font-semibold mb-6">{showPaymentModal.desc} — <span className="text-emerald-500 font-bold">{showPaymentModal.amount.toFixed(2)} $</span></p>
 
-                    <form onSubmit={handlePaymentSubmit} className="space-y-4 text-xs font-bold text-slate-800">
-                      <div>
-                        <label className="block text-[10px] text-slate-400 uppercase tracking-wider mb-2">Numéro de carte</label>
-                        <input
-                          type="text"
-                          required
-                          value={cardNumber}
-                          onChange={(e) => setCardNumber(e.target.value)}
-                          placeholder="4242 4242 4242 4242"
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs outline-none"
-                        />
+                    <div className="space-y-4 text-xs font-bold text-slate-800">
+                      <p className="font-semibold text-slate-600 leading-relaxed">
+                        Les paiements Compta-Flow se font uniquement par virement Interac — aucune carte n'est demandée.
+                      </p>
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 space-y-2">
+                        <p>Envoyez votre virement à : <span className="text-[#16324F]">compta-flow@outlook.com</span></p>
+                        <p>Indiquez en référence : <span className="text-[#16324F]">{showPaymentModal.desc}</span></p>
+                        <p>Montant : <span className="text-[#16324F]">{showPaymentModal.amount.toFixed(2)} $</span></p>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-[10px] text-slate-400 uppercase tracking-wider mb-2">Expiration</label>
-                          <input
-                            type="text"
-                            required
-                            value={cardExpiry}
-                            onChange={(e) => setCardExpiry(e.target.value)}
-                            placeholder="MM / AA"
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] text-slate-400 uppercase tracking-wider mb-2">CVC</label>
-                          <input
-                            type="password"
-                            required
-                            value={cardCvc}
-                            onChange={(e) => setCardCvc(e.target.value)}
-                            placeholder="123"
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs"
-                          />
-                        </div>
-                      </div>
-
+                      <p className="font-medium text-slate-500 leading-relaxed">
+                        Une fois le virement envoyé, déclarez-le ici : votre facture passe en cours de validation par votre comptable, qui la marque « Payé » à la réception des fonds.
+                      </p>
                       <button
-                        type="submit"
-                        disabled={isProcessingPayment}
+                        type="button"
+                        onClick={handleDeclarePaid}
                         className="w-full py-3 mt-4 bg-emerald-500 hover:bg-emerald-600 text-[#16324F] font-black uppercase tracking-wider rounded-xl transition-all shadow"
                       >
-                        {isProcessingPayment ? 'Traitement...' : 'Confirmer le règlement'}
+                        Déclarer payée après virement
                       </button>
-                    </form>
+                    </div>
                   </div>
                 </div>
               )}
@@ -868,7 +839,7 @@ export function ClientPortalShell({
                     </ul>
                   </div>
                   <div className="border-t border-slate-100 mt-6 pt-4 flex justify-between items-center">
-                    <span className="text-lg font-serif font-bold text-[#16324F]">199 $ / <span className="text-[10px] text-slate-400">mois</span></span>
+                    <span className="text-lg font-serif font-bold text-[#16324F]">Dès 149,99 $ / <span className="text-[10px] text-slate-400">mois</span></span>
                     <button
                       onClick={() => toast.info('Pour activer un service, écrivez-nous dans l\'onglet Messagerie — nous vous répondons par écrit sous 4 h ouvrables.')}
                       type="button"
