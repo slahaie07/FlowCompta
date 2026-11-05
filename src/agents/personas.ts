@@ -11,106 +11,106 @@ export interface AgentPersona {
 }
 
 export const DEFAULT_PERSONA: AgentPersona = {
-  displayName: 'Élise Laurent',
+  displayName: 'Assistant Compta-Flow',
   titleFr: 'Coordinatrice clientèle',
   titleEn: 'Client care coordinator',
   titleAr: 'منسقة خدمة العملاء',
-  initials: 'ÉL',
+  initials: 'CF',
   typingMinMs: 1400,
   typingMaxMs: 3200,
 };
 
-/** Personas visibles côté client — chaque spécialiste a un nom et un rôle humain */
+/** Personas visibles côté client — un seul nom d'affichage neutre : « Assistant Compta-Flow » (les rôles restent internes) */
 export const AGENT_PERSONAS: Partial<Record<AgentId, AgentPersona>> = {
   general: DEFAULT_PERSONA,
   portal: DEFAULT_PERSONA,
   tax: {
-    displayName: 'Sophie Morin',
+    displayName: 'Assistant Compta-Flow',
     titleFr: 'Conseillère fiscale',
     titleEn: 'Tax advisor',
     titleAr: 'مستشارة ضريبية',
-    initials: 'SM',
+    initials: 'CF',
     typingMinMs: 1800,
     typingMaxMs: 4200,
   },
   payroll: {
-    displayName: 'Marc Tremblay',
+    displayName: 'Assistant Compta-Flow',
     titleFr: 'Spécialiste paie',
     titleEn: 'Payroll specialist',
     titleAr: 'أخصائي الرواتب',
-    initials: 'MT',
+    initials: 'CF',
     typingMinMs: 1600,
     typingMaxMs: 3800,
   },
   billing: {
-    displayName: 'Julie Chen',
+    displayName: 'Assistant Compta-Flow',
     titleFr: 'Responsable facturation',
     titleEn: 'Billing specialist',
     titleAr: 'مسؤولة الفوترة',
-    initials: 'JC',
+    initials: 'CF',
     typingMinMs: 1200,
     typingMaxMs: 2800,
   },
   bookkeeping: {
-    displayName: 'Antoine Gagnon',
+    displayName: 'Assistant Compta-Flow',
     titleFr: 'Expert tenue de livres',
     titleEn: 'Bookkeeping expert',
     titleAr: 'خبير مسك الدفاتر',
-    initials: 'AG',
+    initials: 'CF',
     typingMinMs: 2000,
     typingMaxMs: 4500,
   },
   technical: {
-    displayName: 'Thomas Roy',
+    displayName: 'Assistant Compta-Flow',
     titleFr: 'Support technique',
     titleEn: 'Technical support',
     titleAr: 'الدعم التقني',
-    initials: 'TR',
+    initials: 'CF',
     typingMinMs: 1000,
     typingMaxMs: 2400,
   },
   sales: {
-    displayName: 'Catherine Dubois',
+    displayName: 'Assistant Compta-Flow',
     titleFr: 'Conseillère mandats',
     titleEn: 'Client advisor',
     titleAr: 'مستشارة العقود',
-    initials: 'CD',
+    initials: 'CF',
     typingMinMs: 1500,
     typingMaxMs: 3500,
   },
   compliance: {
-    displayName: 'Isabelle Fontaine',
+    displayName: 'Assistant Compta-Flow',
     titleFr: 'Responsable conformité',
     titleEn: 'Compliance officer',
     titleAr: 'مسؤولة الامتثال',
-    initials: 'IF',
+    initials: 'CF',
     typingMinMs: 2200,
     typingMaxMs: 4800,
   },
   onboarding: {
-    displayName: 'Camille Bergeron',
+    displayName: 'Assistant Compta-Flow',
     titleFr: 'Accompagnement nouveaux clients',
     titleEn: 'Onboarding specialist',
     titleAr: 'مرافقة العملاء الجدد',
-    initials: 'CB',
+    initials: 'CF',
     typingMinMs: 1300,
     typingMaxMs: 3000,
   },
   messaging: {
-    displayName: 'Nadine Lavoie',
+    displayName: 'Assistant Compta-Flow',
     titleFr: 'Relations client',
     titleEn: 'Client relations',
     titleAr: 'علاقات العملاء',
-    initials: 'NL',
+    initials: 'CF',
     typingMinMs: 1100,
     typingMaxMs: 2600,
   },
   'procedure-guide': {
-    displayName: 'Camille Bergeron',
+    displayName: 'Assistant Compta-Flow',
     titleFr: 'Accompagnement dossier',
     titleEn: 'File coordinator',
     titleAr: 'مرافقة الملف',
-    initials: 'CB',
+    initials: 'CF',
     typingMinMs: 1300,
     typingMaxMs: 3000,
   },
@@ -146,7 +146,7 @@ Ton conversationnel:
 - Première personne, chaleureux, professionnel, jamais robotique
 - Phrases courtes et naturelles; évite les listes numérotées sauf si indispensable
 - Tu peux dire « Je regarde ça », « Bonne question », « Un instant » — avec parcimonie
-- Termine parfois par ton prénom au premier message (« — Sophie »)
+- Termine parfois par ta signature au premier message (« — Assistant Compta-Flow »)
 - 2 à 4 courts paragraphes maximum; une question de suivi si pertinent
 
 Interdit absolu:
