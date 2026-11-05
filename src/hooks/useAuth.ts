@@ -51,6 +51,23 @@ export function useAuth() {
         const finalRole = (data.role || 'client') as UserData['role'];
         const metadata = (data.metadata as Record<string, unknown>) || {};
         const needs = data.needs as UserData['needs'];
+
+        // Province : la source normale est profiles.metadata.province. Si
+        // elle est absente (écart de schéma côté production — voir
+        // handleOnboardingComplete dans App.tsx), on retombe sur les
+        // métadonnées du compte Auth, où l'onboarding écrit aussi la
+        // province : sans ce repli, la porte de complétion du profil ne
+        // pourrait jamais s'ouvrir pour un client.
+        let province = metadata.province as string | undefined;
+        if (!province) {
+          try {
+            const { data: authData } = await supabase.auth.getUser();
+            province =
+              (authData.user?.user_metadata?.province as string | undefined) || undefined;
+          } catch {
+            /* repli silencieux : la province reste indéfinie */
+          }
+        }
         let selectedServiceId = metadata.selectedServiceId as string | undefined;
 
         if (!selectedServiceId && needs && typeof needs === 'object' && !Array.isArray(needs)) {
@@ -71,7 +88,7 @@ export function useAuth() {
           interacAutodepot: data.interac_autodepot,
           needs,
           selectedServiceId,
-          province: metadata.province as string | undefined,
+          province,
           isAdmin: finalRole === 'super_admin' || finalRole === 'sub_admin',
           createdAt: new Date(data.created_at).getTime(),
         });
