@@ -133,45 +133,49 @@ function AppContent() {
   }, [isAuthenticated, userData, navigate, portalHome, searchParams]);
 
   const handleOnboardingComplete = async (data: UserData) => {
-    if (!user?.id) return;
-
-    let subAdminId: string | null = null;
-    const selectedExpertEmail = (data as any).selectedExpertEmail;
-    if (selectedExpertEmail) {
-      try {
-        const { data: adminProfile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('email', selectedExpertEmail)
-          .single();
-        if (adminProfile) {
-          subAdminId = adminProfile.id;
-        }
-      } catch (err) {
-        console.error('Failed to lookup assigned expert:', err);
-      }
+    if (!user?.id) {
+      throw new Error('Session utilisateur absente — impossible de créer le profil.');
     }
 
-    const { error } = await supabase.from('profiles').upsert({
-      id: user.id,
-      display_name: data.displayName,
-      full_name: data.displayName,
-      company_name: data.companyName || null,
-      email: data.email || user.email,
-      neq: data.neq || null,
-      initial_profile_type: data.initialProfileType,
-      active_mode: data.activeMode,
-      preferred_language: data.language || 'fr',
-      status: 'active',
-      role: 'client',
-      sub_admin_id: subAdminId,
-      needs: createEmptyUserNeeds(),
-      metadata: { province: data.province },
-    });
+    const selectedExpertEmail = (data as any).selectedExpertEmail;
+
+    // La ligne de profil est créée à l'inscription par le déclencheur
+    // handle_new_user (SECURITY DEFINER) : on la MET À JOUR, jamais d'upsert.
+    // Un upsert PostgREST exige une politique INSERT sur profiles, qui
+    // n'existe pas (RLS) — il échouait donc systématiquement et le profil
+    // n'était jamais persisté. On n'écrit ni « role » ni « sub_admin_id » :
+    // ces champs sont immuables côté client (déclencheur
+    // guard_profile_privileged_fields + politique « Modif propre profil ») ;
+    // l'assignation de l'expert choisi relève de l'administrateur — le choix
+    // du client lui est transmis par le webhook ci-dessous.
+    const { data: updatedRows, error } = await supabase
+      .from('profiles')
+      .update({
+        display_name: data.displayName,
+        full_name: data.displayName,
+        company_name: data.companyName || null,
+        email: data.email || user.email,
+        neq: data.neq || null,
+        initial_profile_type: data.initialProfileType,
+        active_mode: data.activeMode,
+        preferred_language: data.language || 'fr',
+        status: 'active',
+        needs: createEmptyUserNeeds(),
+        metadata: { province: data.province },
+      })
+      .eq('id', user.id)
+      .select('id');
 
     if (error) {
-      toast.error('La création de votre profil a échoué. Veuillez réessayer. / Your profile could not be created. Please try again.');
+      // Aucun toast ici : le catch de l'écran d'onboarding affiche le seul
+      // message d'erreur (avant, deux messages contradictoires partaient).
+      console.error('Échec de la mise à jour du profil (onboarding) :', error);
       throw error;
+    }
+
+    if (!updatedRows || updatedRows.length === 0) {
+      console.error('Aucune ligne de profil mise à jour pour', user.id);
+      throw new Error('Profil introuvable — la création du profil a échoué.');
     }
 
     await refreshProfile();
