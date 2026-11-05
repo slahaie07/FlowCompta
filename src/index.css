@@ -40,6 +40,15 @@
 }
 
 @layer base {
+  /* Garde-fou mobile : aucun débordement horizontal de page, même si un
+     composant dépasse ponctuellement la largeur du téléphone. « clip »
+     plutôt que « hidden » : ne crée pas de conteneur de défilement et
+     n'affecte ni le défilement vertical ni l'en-tête fixe. */
+  html,
+  body {
+    overflow-x: clip;
+  }
+
   /* Ancrage de défilement : comportement par défaut du navigateur.
      Ne pas désactiver (overflow-anchor: none) : l'ancrage compense les
      changements de hauteur du contenu (polices, sections tardives) et
