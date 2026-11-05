@@ -15,7 +15,7 @@ const SERVICES_FR = [
   { icon: '📊', title: 'Tenue de livres', desc: 'Saisie, classement, conciliation bancaire mensuelle' },
   { icon: '🧾', title: 'Taxes', desc: 'Déclarations mensuelles ou trimestrielles, CTI et remboursements' },
   { icon: '👥', title: 'Paie & T4', desc: 'Retenues, remises ARC, feuillets T4 / Relevé 1' },
-  { icon: '📋', title: 'États financiers', desc: 'Bilan, compte de résultat, flux de trésorerie' },
+  { icon: '📋', title: 'Sommaires et rapports internes', desc: 'Rapports de tenue de livres pour la gestion interne' },
   { icon: '⚙️', title: 'Configuration logiciel', desc: 'QuickBooks, Sage, Wave — mise en place incluse' },
   { icon: '⚖️', title: 'Suivi dédié & automatisation', desc: 'Processus automatisés et sécurisés — chaque dossier est révisé par notre équipe avant livraison' },
 ];
@@ -24,7 +24,7 @@ const SERVICES_EN = [
   { icon: '📊', title: 'Bookkeeping', desc: 'Data entry, filing, monthly bank reconciliation' },
   { icon: '🧾', title: 'Taxes', desc: 'Quarterly or monthly filings, ITC claims and refunds' },
   { icon: '👥', title: 'Payroll & T4', desc: 'Deductions, CRA remittances, T4 slips' },
-  { icon: '📋', title: 'Financial Statements', desc: 'Balance sheet, income statement, cash flow' },
+  { icon: '📋', title: 'Internal summaries', desc: 'Bookkeeping reports for management use' },
   { icon: '⚙️', title: 'Software Setup', desc: 'QuickBooks, Sage, Wave — setup included' },
   { icon: '⚖️', title: 'Dedicated Follow-up & Automation', desc: 'Secure automated workflows — every file is reviewed by our team before delivery' },
 ];
