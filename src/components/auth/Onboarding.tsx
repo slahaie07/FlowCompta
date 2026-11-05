@@ -83,14 +83,14 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
         toast.warning(tr('onboarding.nameRequired'));
         return;
       }
-      if (profileType === 'business' && (!data.companyName || !data.neq)) {
+      if (profileType === 'business' && (!data.companyName?.trim() || !data.neq?.trim())) {
         setFieldErrors({
-          company: !data.companyName
+          company: !data.companyName?.trim()
             ? selectedLang === 'en'
               ? 'Business name is required.'
               : 'Le nom de l’entreprise est requis.'
             : undefined,
-          neq: !data.neq
+          neq: !data.neq?.trim()
             ? selectedLang === 'en'
               ? 'The NEQ is required for a business account.'
               : 'Le NEQ est requis pour un compte entreprise.'
@@ -101,6 +101,11 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
       }
     }
     setFieldErrors({});
+    // Efface tout avertissement encore affiché (ex. « Infos entreprise
+    // manquantes » d'un clic précédent) : sans cela, la notification globale
+    // restait visible pendant les étapes suivantes alors que les champs
+    // étaient remplis et conservés.
+    toast.dismiss();
     setStep((p) => p + 1);
   };
 
@@ -431,7 +436,7 @@ export function Onboarding({ initialEmail, initialDisplayName = '', onComplete }
             ← {tr('back')}
           </Button>
           {step > 0 && step < 4 && (
-            <Button variant="gold" className="gap-2 px-12 h-14 shadow-gold/10 font-bold uppercase tracking-widest text-xs" onClick={step === 3 ? () => setStep(4) : nextStep}>
+            <Button variant="gold" className="gap-2 px-12 h-14 shadow-gold/10 font-bold uppercase tracking-widest text-xs" onClick={step === 3 ? () => { toast.dismiss(); setStep(4); } : nextStep}>
               {step === 3 ? tr('onboarding.skip') : tr('continue')} <ChevronRight size={18} />
             </Button>
           )}
