@@ -19,10 +19,14 @@ export function useAuth() {
     });
 
     // Écouteur de changements d'état (Login, Logout, Token refresh)
+    // Toujours en mode « arrière-plan » : un rafraîchissement de jeton ou un
+    // retour au premier plan ne doit JAMAIS repasser l'app en chargement,
+    // sinon App.tsx démonte tout l'arbre et la page perd sa position de
+    // défilement (retour instantané en haut de page sur mobile).
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser(session.user);
-        fetchProfile(session.user.id, session.user.email!);
+        fetchProfile(session.user.id, session.user.email!, true);
       } else {
         setUser(null);
         setUserData(null);
@@ -33,8 +37,8 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchProfile = async (uid: string, email: string) => {
-    setLoading(true);
+  const fetchProfile = async (uid: string, email: string, background = false) => {
+    if (!background) setLoading(true);
 
     try {
       const { data, error } = await supabase
@@ -82,7 +86,7 @@ export function useAuth() {
     } catch (e) {
       console.error("Erreur critique de récupération de profil :", e);
     } finally {
-      setLoading(false);
+      if (!background) setLoading(false);
     }
   };
 
