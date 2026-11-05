@@ -1,41 +1,41 @@
 /**
- * 📄 Moteur de Génération de Contrats ComptaFlow (Elite Engagement Letters)
+ * 📄 Moteur de Génération de Contrats ComptaFlow
  * Supporte les mandats T1/T2 et les langues FR/EN/AR.
  */
 
 export const contracts = {
   fr: {
     title: "Lettre de Mandat Professionnel",
-    introduction: "Le présent contrat lie le Cabinet AGY (ci-après le 'Cabinet') et l'Utilisateur (ci-après le 'Client').",
+    introduction: "Le présent contrat lie Compta-Flow (ci-après le 'Cabinet') et l'Utilisateur (ci-après le 'Client').",
     clauses: [
       "Services : Le Cabinet s'engage à fournir des services de {service_name} selon les normes en vigueur.",
       "Honoraires : Le Client accepte de payer la somme de {amount} {currency} pour la réalisation du mandat.",
       "Confidentialité : Toutes les données déposées dans le Vault sont protégées par chiffrement AES-256.",
       "Responsabilité : Le Client demeure responsable de l'exactitude des pièces fournies (ARC/RQ)."
     ],
-    signature: "Certifié numériquement par ComptaFlow Elite Core."
+    signature: "Signature électronique effectuée via la plateforme Compta-Flow."
   },
   en: {
     title: "Professional Engagement Letter",
-    introduction: "This agreement is between AGY Firm (hereinafter 'Firm') and the User (hereinafter 'Client').",
+    introduction: "This agreement is between Compta-Flow (hereinafter 'Firm') and the User (hereinafter 'Client').",
     clauses: [
       "Services: The Firm agrees to provide {service_name} services in accordance with professional standards.",
       "Fees: The Client agrees to pay the amount of {amount} {currency} for the completion of the mandate.",
       "Confidentiality: All data uploaded to the Vault is protected by AES-256 encryption.",
       "Liability: The Client remains responsible for the accuracy of provided documents (CRA/RQ)."
     ],
-    signature: "Digitally certified by ComptaFlow Elite Core."
+    signature: "Electronically signed through the Compta-Flow platform."
   },
   ar: {
     title: "خطاب تكليف مهني",
-    introduction: "هذه الاتفاقية بين شركة AGY (يشار إليها فيما يلي بـ 'المحاسب') والمستخدم (يشار إليه فيما يلي بـ 'العميل').",
+    introduction: "هذه الاتفاقية بين Compta-Flow (يشار إليها فيما يلي بـ 'المحاسب') والمستخدم (يشار إليه فيما يلي بـ 'العميل').",
     clauses: [
       "الخدمات: يوافق المحاسب على تقديم خدمات {service_name} وفقًا للمعايير المهنية.",
       "الرسوم: يوافق العميل على دفع مبلغ {amount} {currency} لإكمال التكليف.",
       "السرية: جميع البيانات المرفوعة إلى الخزنة محمية بتشفير AES-256.",
       "المسؤولية: يظل العميل مسؤولاً عن دقة المستندات المقدمة."
     ],
-    signature: "معتمد رقميًا بواسطة ComptaFlow Elite Core."
+    signature: "تم التوقيع إلكترونيًا عبر منصة Compta-Flow."
   }
 };
 
