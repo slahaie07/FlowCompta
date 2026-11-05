@@ -71,6 +71,46 @@ export function TarifsPage() {
             : 'Applicable taxes extra. Payroll: $49 + $12 per employee per month; T4 and RL-1 slips at $15 per employee, included in year 1 for bookkeeping clients.'}
         </p>
 
+        <section className="space-y-6">
+          <h2 className="text-2xl md:text-3xl font-serif font-bold text-center">
+            {isFr ? 'Impôts de sociétés et fin d’année' : 'Corporate Taxes & Year-End'}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="border border-gold/20 rounded-2xl p-6 space-y-2 text-center">
+              <p className="text-gold font-serif font-bold text-2xl whitespace-nowrap">499 $</p>
+              <p className="font-semibold text-ivoire">{isFr ? 'Société inactive' : 'Inactive corporation'}</p>
+              <p className="text-sm text-silver font-light">
+                {isFr
+                  ? 'Déclaration annuelle d’une société sans activité. T2 et CO-17 inclus.'
+                  : 'Annual return for a corporation with no activity. T2 and CO-17 included.'}
+              </p>
+            </div>
+            <div className="border border-gold/20 rounded-2xl p-6 space-y-2 text-center">
+              <p className="text-gold font-serif font-bold text-2xl whitespace-nowrap">{isFr ? '1 199 $' : '$1,199'}</p>
+              <p className="font-semibold text-ivoire">{isFr ? 'Fin d’année — société active' : 'Year-end — active corporation'}</p>
+              <p className="text-sm text-silver font-light">
+                {isFr
+                  ? 'Fin d’année complète si vos livres sont tenus par Compta-Flow ; dès 1 499 $ sinon. T2 et CO-17 inclus.'
+                  : 'Full year-end if your books are kept by Compta-Flow; from $1,499 otherwise. T2 and CO-17 included.'}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-6">
+          <h2 className="text-2xl md:text-3xl font-serif font-bold text-center">
+            {isFr ? 'Démarrage d’entreprise' : 'Business Start-Up'}
+          </h2>
+          <div className="border border-gold/20 rounded-2xl p-6 space-y-2 text-center max-w-2xl mx-auto">
+            <p className="text-gold font-serif font-bold text-2xl whitespace-nowrap">{isFr ? 'Dès 199 $' : 'From $199'}</p>
+            <p className="text-sm text-silver font-light">
+              {isFr
+                ? 'Aide à l’ouverture de compagnie : immatriculation, numéros de taxes et mise en place comptable, pour partir sur des bases propres.'
+                : 'Help opening your company: registration, tax numbers and accounting setup, so you start on solid ground.'}
+            </p>
+          </div>
+        </section>
+
         <div className="text-center space-y-3">
           <h2 className="text-2xl md:text-3xl font-serif font-bold">
             {isFr ? 'Prêt à passer à l’étape suivante ?' : 'Ready for the next step?'}
