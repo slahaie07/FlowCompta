@@ -100,6 +100,11 @@ export const i18n = {
           desc: "Installation, paramétrage et formation initiale pour les nouveaux clients.",
           price: "199 $"
         },
+        businessStart: {
+          name: "Démarrage d'entreprise",
+          desc: "Aide à l'ouverture de compagnie : immatriculation, numéros de taxes et mise en place comptable.",
+          price: "Dès 199 $"
+        },
         taxHelpAutonomous: {
           name: "Aide impôt travailleur autonome",
           desc: "Rassembler et structurer vos chiffres avant transmission à votre comptable.",
@@ -545,7 +550,7 @@ export const i18n = {
         steps: {
           mandate: { title: "Mandat & profil", desc: "Signez votre mandat et complétez votre profil (province, entreprise)." },
           documents: { title: "Dépôt des documents", desc: "Téléversez les pièces requises dans votre coffre-fort sécurisé." },
-          cpaReview: { title: "Revue comptable", desc: "Votre comptable valide les informations et répond à vos questions." },
+          cpaReview: { title: "Révision par Compta-Flow", desc: "Votre comptable valide les informations et répond à vos questions." },
           delivery: { title: "Clôture & facturation", desc: "Réception du livrable et règlement des honoraires." }
         },
         docs: { signedMandate: "Mandat signé" },
@@ -577,6 +582,8 @@ export const i18n = {
         allReceipts: "Toutes les pièces justificatives",
         priorReturns: "Déclarations antérieures",
         openingBalances: "Balances d'ouverture",
+        idDocument: "Pièce d'identité",
+        registrationCert: "Certificat d'immatriculation",
         vendorList: "Liste fournisseurs / clients",
         t2125Support: "Revenus et dépenses d'entreprise (T2125)",
         incomeSlips: "Relevés T4/Relevé 1 reçus",
@@ -600,6 +607,7 @@ export const i18n = {
         monthsBehind: "Nombre de mois en retard",
         lastFiledPeriod: "Dernière période produite",
         softwareName: "Logiciel comptable",
+        businessName: "Nom de l'entreprise",
         chartOfAccounts: "Plan comptable souhaité",
         selfEmploymentType: "Type d'activité autonome"
       },
@@ -650,6 +658,12 @@ export const i18n = {
         steps: {
           choice: { title: "Choix logiciel", desc: "QuickBooks, Sage ou autre — paramètres initiaux." },
           session: { title: "Session configuration", desc: "Installation et formation avec le support." }
+        }
+      },
+      businessStart: {
+        steps: {
+          registration: { title: "Immatriculation", desc: "Enregistrement de l'entreprise et ouverture des comptes de taxes (TPS/TVH, TVQ)." },
+          setup: { title: "Mise en place comptable", desc: "Plan comptable, logiciel et premiers paramètres de votre dossier." }
         }
       },
       taxHelpAutonomous: {
@@ -981,7 +995,7 @@ export const i18n = {
           subtitle: "Ideal for client retention and peace of mind."
         },
         alacarte: {
-          title: "3. À la carte services",
+          title: "3. À la carte / pay-as-you-go services",
           subtitle: "Specific recurring needs at fixed or custom rates."
         }
       },
@@ -1030,6 +1044,11 @@ export const i18n = {
           name: "Software setup (QuickBooks, Sage…)",
           desc: "Installation, configuration and initial training for new clients.",
           price: "$199"
+        },
+        businessStart: {
+          name: "Business Start-Up",
+          desc: "Help opening your company: registration, tax numbers and accounting setup.",
+          price: "From $199"
         },
         taxHelpAutonomous: {
           name: "Self-employed tax prep help",
@@ -1476,7 +1495,7 @@ export const i18n = {
         steps: {
           mandate: { title: "Mandate & profile", desc: "Sign your mandate and complete your profile (province, business)." },
           documents: { title: "Document upload", desc: "Upload required files to your secure vault." },
-          cpaReview: { title: "Accounting review", desc: "Your bookkeeper validates information and answers questions." },
+          cpaReview: { title: "Review by Compta-Flow", desc: "Your bookkeeper validates information and answers questions." },
           delivery: { title: "Closure & billing", desc: "Receive deliverables and settle fees." }
         },
         docs: { signedMandate: "Signed mandate" },
@@ -1508,6 +1527,8 @@ export const i18n = {
         allReceipts: "All supporting documents",
         priorReturns: "Prior returns",
         openingBalances: "Opening balances",
+        idDocument: "ID document",
+        registrationCert: "Registration certificate",
         vendorList: "Vendor / customer list",
         t2125Support: "Business income & expenses (T2125)",
         incomeSlips: "T4/RL-1 slips received",
@@ -1531,6 +1552,7 @@ export const i18n = {
         monthsBehind: "Months behind",
         lastFiledPeriod: "Last filed period",
         softwareName: "Accounting software",
+        businessName: "Business name",
         chartOfAccounts: "Chart of accounts",
         selfEmploymentType: "Self-employment activity type"
       },
@@ -1577,6 +1599,12 @@ export const i18n = {
         steps: {
           choice: { title: "Software choice", desc: "QuickBooks, Sage or other — initial setup." },
           session: { title: "Setup session", desc: "Installation and training with support." }
+        }
+      },
+      businessStart: {
+        steps: {
+          registration: { title: "Registration", desc: "Business registration and opening of tax accounts (GST/HST, QST)." },
+          setup: { title: "Accounting setup", desc: "Chart of accounts, software and initial settings for your file." }
         }
       },
       taxHelpAutonomous: {
@@ -1891,18 +1919,6 @@ export const i18n = {
       subtitle: "يتم تسجيل كل تفويض بسعره الثابت.",
       composer: "تكوين تفويضي",
       perMandate: "صافي لكل تفويض",
-      t1_name: "ضريبة T1 - شخصي",
-      t1_desc: "إقرار ضريبي كامل وتحسين الائتمانات.",
-      t1_price: "89,99 $",
-      ta_name: "ضريبة T2125 - مستقل",
-      ta_desc: "الدخل التجاري والنفقات المسموح بها.",
-      ta_price: "199,99 $",
-      t2_name: "ضريبة T2 - شركات",
-      t2_desc: "الإقرارات الضريبية الفيدرالية والإقليمية.",
-      t2_price: "1 199 $",
-      gl_name: "مسك الدفاتر",
-      gl_desc: "التصنيف الشهري للمعاملات والتسويات.",
-      gl_price: "249,99 $",
       categories: {
         hourly: { title: "1. Tarif horaire", subtitle: "Mandats ponctuels." },
         monthly: { title: "2. Forfaits mensuels", subtitle: "Tenue de livres." },
@@ -1918,6 +1934,7 @@ export const i18n = {
         t4Releve1: { name: "T4 / Relevé 1", desc: "Feuillets fin d'année.", price: "15 $ / employé / an" },
         catchUp: { name: "Compta en retard", desc: "Mise à jour.", price: "60 $ – 75 $ / mois de retard" },
         softwareSetup: { name: "Config. logiciel", desc: "QuickBooks, Sage.", price: "199 $" },
+        businessStart: { name: "Business Start-Up", desc: "Help opening your company: registration, tax numbers and accounting setup.", price: "From $199" },
         taxHelpAutonomous: { name: "Aide impôt autonome", desc: "Rassembler chiffres.", price: "199,99 $" }
       },
       perHour: "À l'heure",
@@ -2055,11 +2072,16 @@ export const i18n = {
       submitRegister: "إنشاء الحساب",
       switchToRegister: "لست مسجلاً؟ افتح ملفاً",
       switchToLogin: "مسجل مسبقاً؟ تسجيل الدخول",
+      roleLabel: "نوع الوصول",
+      roleClient: "عميل نهائي (شركة / فرد)",
+      roleSubAdmin: "محاسب شريك (مسك الدفاتر)",
       footer: "بوابة ComptaFlow · كندا · MMXXVI"
     },
 
     portal: {
       brand: "ComptaFlow",
+      search: "ابحث في البوابة…",
+      notifications: "الإشعارات",
       logout: "تسجيل الخروج",
       signMandate: "توقيع التفويض",
       openMenu: "فتح القائمة",
@@ -2090,6 +2112,7 @@ export const i18n = {
         service_reports: "تقارير الخدمات",
         overview: "وضعي",
         quote: "تقدير السعر",
+        quote_calculator: "حاسبة التسعير",
         services: "الخدمات والأسعار",
         transactions: "سجل المعاملات",
         invoices: "فواتيري",
@@ -2100,6 +2123,32 @@ export const i18n = {
         procedure: "مسار ملفي"
       },
       roles: { client: "بوابة العميل", sub_admin: "محاسب شريك", super_admin: "المالك الأعلى" },
+      overview: {
+        greeting: "مرحباً",
+        subtitle: "لوحة التحكم",
+        contactCpa: "الاتصال بمحاسبي",
+        help: "مركز المساعدة",
+        pendingInvoices: "فواتير مستحقة",
+        pendingCount: "فاتورة (فواتير) معلقة",
+        totalPaid: "إجمالي الرسوم المدفوعة",
+        paidCount: "فاتورة (فواتير) مدفوعة",
+        vault: "الخزنة الرقمية",
+        vaultDocs: "المستندات",
+        vaultEncryption: "تشفير AES-256 مفعَّل",
+        uploadTitle: "إيداع فوري للمستندات",
+        uploadDesc: "حمِّل إيصالاتك أو كشوفك أو إشعارات التقييم لمحاسبك.",
+        uploadCta: "تحميل مستند داعم",
+        uploading: "جارٍ التحميل…",
+        uploadHint: "PDF أو صورة أو Excel • بحد أقصى 4 ميغابايت",
+        mandateTitle: "تفويض الإدارة الإلكتروني",
+        mandateDesc: "تفويض مسك الدفاتر والمساعدة المحاسبية الخاص بك موقَّع ومتوافق مع متطلبات وكالة الإيرادات الكندية (ARC) وسلطات الضرائب الإقليمية.",
+        viewMandate: "عرض التفويض الموقَّع",
+        billing: "الفوترة وInterac",
+        upToDate: "ملفك محدَّث",
+        noPending: "لا توجد مدفوعات معلقة",
+        declarePaid: "إعلان الدفع بعد التحويل",
+        paymentPending: "الدفع قيد التحقق من محاسبك"
+      },
       loading: "جاري تحميل الصفحة…"
     },
 
@@ -2237,6 +2286,15 @@ export const i18n = {
         signup: "إنشاء حسابي",
         requestQuote: "إرسال طلب التسعير",
         restart: "إعادة البدء"
+      },
+      staff: {
+        badge: "أداة المكتب",
+        title: "حاسبة تسعير العميل",
+        subtitle: "أجب عن بعض الأسئلة لتقدير نطاق سعري قبل إرسال عرض أو فاتورة.",
+        disclaimer: "تقدير إرشادي فقط — عدِّل حسب التعقيد الفعلي للملف قبل الفوترة.",
+        toastReady: "التقدير جاهز — أنشئ الفاتورة أو عدِّلها بهذه المبالغ.",
+        result: { title: "تقدير للعميل" },
+        cta: { invoices: "إنشاء فاتورة", restart: "تقدير جديد" }
       }
     },
 
@@ -2333,6 +2391,8 @@ export const i18n = {
         allReceipts: "جميع المستندات الداعمة",
         priorReturns: "إقرارات سابقة",
         openingBalances: "أرصدة افتتاحية",
+        idDocument: "ID document",
+        registrationCert: "Registration certificate",
         vendorList: "قائمة الموردين / العملاء",
         t2125Support: "إيرادات ومصروفات الأعمال (T2125)",
         incomeSlips: "نماذج T4/Relevé 1 المستلمة",
@@ -2356,6 +2416,7 @@ export const i18n = {
         monthsBehind: "عدد الأشهر المتأخرة",
         lastFiledPeriod: "آخر فترة مُقدَّمة",
         softwareName: "برنامج المحاسبة",
+        businessName: "Business name",
         chartOfAccounts: "دليل الحسابات",
         selfEmploymentType: "نوع النشاط المستقل"
       },
@@ -2406,6 +2467,12 @@ export const i18n = {
         steps: {
           choice: { title: "اختيار البرنامج", desc: "QuickBooks أو Sage أو غيره — الإعداد الأولي." },
           session: { title: "جلسة الإعداد", desc: "التثبيت والتدريب مع الدعم." }
+        }
+      },
+      businessStart: {
+        steps: {
+          registration: { title: "Registration", desc: "Business registration and opening of tax accounts (GST/HST, QST)." },
+          setup: { title: "Accounting setup", desc: "Chart of accounts, software and initial settings for your file." }
         }
       },
       taxHelpAutonomous: {
@@ -2566,7 +2633,10 @@ export const i18n = {
       pendingInvoices: "فواتير معلقة",
       byProvince: "العملاء حسب المقاطعة",
       byService: "الانتدابات حسب الخدمة",
-      noBreakdown: "لا توجد بيانات متاحة حالياً."
+      noBreakdown: "لا توجد بيانات متاحة حالياً.",
+      calculatorTitle: "حاسبة تسعير الشبكة",
+      calculatorDesc: "قدِّر تفويضاً لأي مكتب قبل العرض أو الفوترة الشاملة.",
+      openCalculator: "فتح الحاسبة"
     },
 
     superAdminClients: {
@@ -2664,7 +2734,10 @@ export const i18n = {
       reportsGenerated: "الذكاء يعمل: تم تنسيق البيانات.",
       statusActive: "نشط",
       statusOnline: "متصل",
-      statusStandby: "استعداد"
+      statusStandby: "استعداد",
+      calculatorTitle: "حاسبة التسعير",
+      calculatorDesc: "قدِّر نطاقاً سعرياً مع ضرائب المقاطعات قبل إرسال عرض.",
+      openCalculator: "فتح الحاسبة"
     },
 
     adminClients: {
