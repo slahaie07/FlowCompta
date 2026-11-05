@@ -1,6 +1,5 @@
-const CACHE_NAME = 'comptaflow-pwa-v5';
+const CACHE_NAME = 'comptaflow-pwa-v6';
 const ASSETS_TO_CACHE = [
-  './',
   './index.html',
   './manifest.json',
   './icon-192.jpg',
@@ -34,8 +33,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   // Only handle GET requests and skip Supabase/API calls to avoid breaking DB sync
   if (
-    event.request.method !== 'GET' || 
-    event.request.url.includes('/api/') || 
+    event.request.method !== 'GET' ||
+    event.request.url.includes('/api/') ||
     event.request.url.includes('supabase.co') ||
     event.request.url.includes('hotjar') ||
     event.request.url.includes('google-analytics')
@@ -43,6 +42,28 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Navigations : réseau d'abord. Le HTML frais pointe toujours vers le
+  // bundle courant ; le cache ne sert qu'en repli hors-ligne. (Avant, le
+  // stale-while-revalidate servait la page de la visite précédente, ce qui
+  // figeait d'anciennes versions du site sur les téléphones.)
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put('./index.html', responseToCache);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  // Actifs statiques (hachés, immuables) : stale-while-revalidate.
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -54,7 +75,7 @@ self.addEventListener('fetch', (event) => {
             });
           }
         }).catch(() => {/* Ignore network errors during stale updates */});
-        
+
         return cachedResponse;
       }
 
@@ -70,10 +91,8 @@ self.addEventListener('fetch', (event) => {
 
         return response;
       }).catch(() => {
-        // Fallback for document navigation if offline
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
+        // No cached copy and network failed: nothing to serve for assets.
+        return Response.error();
       });
     })
   );
