@@ -36,6 +36,18 @@ export interface PricingBreakdownLine {
 
 export type BillingUnit = 'hourly' | 'monthly' | 'oneTime' | 'perDeclaration';
 
+export interface ApplicablePackage {
+  /** Palier de transactions de la grille auquel ce forfait correspond */
+  transactionsBand: TransactionsBand;
+  /** Prix mensuel exact de la grille (aucun montant calculé ni médian) */
+  monthlyPrice: number;
+  /**
+   * Étiquette précise (clé pricingQuestionnaire.packages.*) quand deux
+   * forfaits partagent le même palier — p. ex. Micro et Essentiel en 0-30.
+   */
+  noteKey?: 'micro' | 'essential';
+}
+
 export interface PricingEstimateResult {
   serviceId: ServiceId;
   billingUnit: BillingUnit;
@@ -43,6 +55,13 @@ export interface PricingEstimateResult {
   amountMax: number;
   amountTypical: number;
   breakdown: PricingBreakdownLine[];
+  /**
+   * Forfaits mensuels de la grille applicables à la bande de volume déclarée.
+   * Renseigné quand la question posée porte sur un volume de transactions
+   * (parcours horaire) : l'écran de résultat affiche ces forfaits nommés et
+   * leurs prix réels plutôt qu'une fourchette calculée.
+   */
+  packages?: ApplicablePackage[];
 }
 
 /** Grille Compta-Flow — taux horaire ($/h) */
@@ -62,11 +81,33 @@ export const MONTHLY_LADDER: Record<TransactionsBand, number> = {
 /** Grille Compta-Flow — forfait Micro (0 à 30 transactions, livrables trimestriels) */
 export const MICRO_PRICE = 149.99;
 
-/** Heures indicatives d'un mandat horaire selon le volume déclaré */
-const HOURLY_HOURS: Record<VolumeBand, number> = {
-  low: 3,
-  medium: 6,
-  high: 12,
+/**
+ * Forfaits mensuels applicables à chaque bande de volume de l'estimateur.
+ * Les bandes de volume (« moins de 20 », « 20 à 100 », « plus de 100 »
+ * transactions/mois) chevauchent les paliers de la grille : on liste donc
+ * les paliers touchés, avec leurs prix exacts tirés de MONTHLY_LADDER / du
+ * forfait Micro — jamais de prix interpolé ni de médian.
+ */
+export const VOLUME_BAND_PACKAGES: Record<VolumeBand, ApplicablePackage[]> = {
+  // Moins de 20 transactions/mois : entièrement dans le palier 0-30.
+  low: [
+    { transactionsBand: 't0_30', monthlyPrice: MICRO_PRICE, noteKey: 'micro' },
+    { transactionsBand: 't0_30', monthlyPrice: MONTHLY_LADDER.t0_30, noteKey: 'essential' },
+  ],
+  // 20 à 100 transactions/mois : paliers 31-75 (Essentiel) et 76-150.
+  // (Le segment 20-30 relève du même prix mensuel Essentiel, 249,99 $.)
+  medium: [
+    { transactionsBand: 't31_75', monthlyPrice: MONTHLY_LADDER.t31_75 },
+    { transactionsBand: 't76_150', monthlyPrice: MONTHLY_LADDER.t76_150 },
+  ],
+  // Plus de 100 transactions/mois : du palier 76-150 jusqu'au plus élevé.
+  high: [
+    { transactionsBand: 't76_150', monthlyPrice: MONTHLY_LADDER.t76_150 },
+    { transactionsBand: 't151_200', monthlyPrice: MONTHLY_LADDER.t151_200 },
+    { transactionsBand: 't201_300', monthlyPrice: MONTHLY_LADDER.t201_300 },
+    { transactionsBand: 't301_450', monthlyPrice: MONTHLY_LADDER.t301_450 },
+    { transactionsBand: 't451_plus', monthlyPrice: MONTHLY_LADDER.t451_plus },
+  ],
 };
 
 const EMPLOYEE_COUNT: Record<EmployeeBand, number> = {
@@ -134,9 +175,15 @@ function computeServiceFee(
 
   switch (serviceId) {
     case 'hourlyBookkeeping': {
-      const hours = HOURLY_HOURS[answers.volumeBand];
-      breakdown.push({ labelKey: 'hours', amount: hours });
-      return { amount: HOURLY_RATE * hours, billingUnit: 'hourly', fixed: false, breakdown };
+      // Le tarif horaire de la grille est un prix ferme : 35 $/h, avec
+      // estimation écrite selon le dossier. On ne multiplie plus par un
+      // nombre d'heures deviné (cela produisait un « prix médian » —
+      // 210 $ pour la bande modérée — qui n'existe pas dans la grille).
+      // Les forfaits mensuels applicables à la bande de volume déclarée
+      // sont joints au résultat (voir VOLUME_BAND_PACKAGES) et affichés
+      // nommément par l'écran de résultat.
+      breakdown.push({ labelKey: 'hours', amount: HOURLY_RATE });
+      return { amount: HOURLY_RATE, billingUnit: 'hourly', fixed: true, breakdown };
     }
     case 'monthlyMicro':
     case 'monthlySmall':
@@ -188,7 +235,9 @@ function computeCoreEstimate(answers: PricingQuestionnaireAnswers): {
   let typical = core.amount;
   const breakdown = [...core.breakdown];
 
-  if (answers.urgency === 'priority') {
+  // La majoration express s'applique au mandat, pas au taux horaire affiché :
+  // le tarif de 35 $/h reste le prix de grille dans tous les cas.
+  if (answers.urgency === 'priority' && core.billingUnit !== 'hourly') {
     typical *= URGENCY_MULTIPLIER.priority;
     breakdown.push({ labelKey: 'urgency', amount: URGENCY_MULTIPLIER.priority });
   }
@@ -218,6 +267,9 @@ export function calculatePricingEstimate(
     amountMax: max,
     amountTypical,
     breakdown,
+    ...(answers.serviceId === 'hourlyBookkeeping'
+      ? { packages: VOLUME_BAND_PACKAGES[answers.volumeBand] }
+      : {}),
   };
 }
 
