@@ -13,7 +13,7 @@ import {
   type ServiceId,
 } from '../../lib/servicesCatalog';
 import { formatCAD, getTaxDisplayLines, calculateCanadianTaxes, type ProvinceCode } from '../../lib/financeUtils';
-import type { BillingUnit } from '../../lib/pricingEstimator';
+import type { ApplicablePackage, BillingUnit } from '../../lib/pricingEstimator';
 import type { PricingStep } from '../../hooks/usePricingEstimate';
 import { CONFIG } from '../../lib/config';
 
@@ -82,6 +82,12 @@ function billingUnitSuffix(unit: BillingUnit, t: (key: string) => string): strin
   return map[unit];
 }
 
+function packageLabel(pkg: ApplicablePackage, t: (key: string) => string): string {
+  return pkg.noteKey
+    ? t(`pricingQuestionnaire.packages.${pkg.noteKey}`)
+    : t(`pricingQuestionnaire.transactions.${pkg.transactionsBand}.desc`);
+}
+
 function buildQuoteMailto(
   result: {
     serviceId: ServiceId;
@@ -89,6 +95,7 @@ function buildQuoteMailto(
     amountMax: number;
     amountTypical: number;
     billingUnit: BillingUnit;
+    packages?: ApplicablePackage[];
   },
   answers: { province: ProvinceCode },
   t: (key: string) => string,
@@ -100,19 +107,37 @@ function buildQuoteMailto(
       : lang === 'ar'
         ? 'ComptaFlow — طلب عرض سعر'
         : 'ComptaFlow — demande de soumission';
-  const body = [
+  const lines = [
     lang === 'en' ? 'Hello,' : lang === 'ar' ? 'مرحباً،' : 'Bonjour,',
     '',
     lang === 'en' ? 'I completed the price estimator on compta-flow.net.' : 'J\'ai complété l\'estimateur sur compta-flow.net.',
     '',
     `${lang === 'en' ? 'Service' : 'Service'}: ${getServiceLabel(result.serviceId, t)}`,
     `${lang === 'en' ? 'Province' : 'Province'}: ${answers.province}`,
-    `${lang === 'en' ? 'Estimated range' : 'Fourchette estimée'}: ${formatCAD(result.amountMin)} – ${formatCAD(result.amountMax)}`,
-    `${lang === 'en' ? 'Typical amount' : 'Montant typique'}: ${formatCAD(result.amountTypical)} ${billingUnitSuffix(result.billingUnit, t)}`,
+  ];
+  if (result.packages?.length) {
+    // Parcours par volume : on cite les forfaits réels de la grille, pas une fourchette.
+    lines.push(`${t('pricingQuestionnaire.result.packagesTitle')}:`);
+    for (const pkg of result.packages) {
+      const total = calculateCanadianTaxes(pkg.monthlyPrice, answers.province).total;
+      lines.push(
+        `- ${t(`pricingQuestionnaire.transactions.${pkg.transactionsBand}.title`)} — ${packageLabel(pkg, t)}: ${formatCAD(pkg.monthlyPrice)} ${t('pricingQuestionnaire.units.monthly')} (${t('pricingQuestionnaire.result.totalWithTax')}: ${formatCAD(total)})`
+      );
+    }
+    lines.push(
+      t('pricingQuestionnaire.result.hourlyOption').replace('{rate}', formatCAD(result.amountTypical))
+    );
+  } else {
+    lines.push(
+      `${lang === 'en' ? 'Estimated range' : 'Fourchette estimée'}: ${formatCAD(result.amountMin)} – ${formatCAD(result.amountMax)}`,
+      `${lang === 'en' ? 'Typical amount' : 'Montant typique'}: ${formatCAD(result.amountTypical)} ${billingUnitSuffix(result.billingUnit, t)}`
+    );
+  }
+  lines.push(
     '',
-    lang === 'en' ? 'Please contact me to finalize a quote.' : 'Merci de me contacter pour finaliser une soumission.',
-  ].join('\n');
-  return `mailto:${CONFIG.APP.SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    lang === 'en' ? 'Please contact me to finalize a quote.' : 'Merci de me contacter pour finaliser une soumission.'
+  );
+  return `mailto:${CONFIG.APP.SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join('\n'))}`;
 }
 
 export function PricingQuestionnaire({
@@ -175,9 +200,15 @@ export function PricingQuestionnaire({
     return true;
   };
 
-  const taxPreview = result
-    ? calculateCanadianTaxes(result.amountTypical, answers.province)
-    : null;
+  const resultPackages = result?.packages?.length ? result.packages : null;
+
+  // Quand le résultat joint les forfaits de la grille (parcours par volume),
+  // les totaux avec taxes sont calculés par forfait ; le bloc « montant
+  // médian » générique ne s'applique pas.
+  const taxPreview =
+    result && !resultPackages
+      ? calculateCanadianTaxes(result.amountTypical, answers.province)
+      : null;
 
   const taxLang = lang === 'ar' ? 'fr' : lang;
 
@@ -371,21 +402,69 @@ export function PricingQuestionnaire({
                 <p className="text-sm text-slate-500">{getServiceLabel(result.serviceId, t)}</p>
               </div>
 
-              <div className="p-6 rounded-2xl bg-gold/5 border border-gold/20 text-center space-y-2">
-                <p className="text-xs uppercase tracking-widest text-gold font-bold">{t('pricingQuestionnaire.result.range')}</p>
-                <p className="text-2xl sm:text-3xl md:text-4xl font-serif text-ivoire break-words">
-                  {formatCAD(result.amountMin)} – {formatCAD(result.amountMax)}
-                </p>
-                <p className="text-sm text-slate-400">
-                  {t('pricingQuestionnaire.result.typical')}: {formatCAD(result.amountTypical)}{' '}
-                  {billingUnitSuffix(result.billingUnit, t)}
-                </p>
-                <p className="text-xs text-gold/80 font-semibold">
-                  {lang === 'en'
-                    ? 'Fixed prices, posted upfront — adjustable to your needs.'
-                    : 'Prix fixes affichés — ajustables selon vos besoins.'}
-                </p>
-              </div>
+              {resultPackages ? (
+                <div className="space-y-4">
+                  <div className="p-6 rounded-2xl bg-gold/5 border border-gold/20 space-y-4">
+                    <p className="text-xs uppercase tracking-widest text-gold font-bold text-center">
+                      {t('pricingQuestionnaire.result.packagesTitle')}
+                    </p>
+                    <div className="space-y-3">
+                      {resultPackages.map((pkg, i) => {
+                        const pkgTotal = calculateCanadianTaxes(pkg.monthlyPrice, answers.province).total;
+                        return (
+                          <div
+                            key={`${pkg.transactionsBand}-${pkg.monthlyPrice}-${i}`}
+                            className="flex flex-wrap justify-between items-baseline gap-x-4 gap-y-1 border-b border-white/5 pb-3 last:border-0 last:pb-0"
+                          >
+                            <div className="min-w-0">
+                              <p className="text-ivoire font-medium">
+                                {t(`pricingQuestionnaire.transactions.${pkg.transactionsBand}.title`)}
+                              </p>
+                              <p className="text-xs text-slate-400">{packageLabel(pkg, t)}</p>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <p className="text-xl font-serif text-ivoire">
+                                {formatCAD(pkg.monthlyPrice)}
+                                <span className="text-sm text-slate-400"> {t('pricingQuestionnaire.units.monthly')}</span>
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                {t('pricingQuestionnaire.result.totalWithTax')}: {formatCAD(pkgTotal)}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <p className="text-xs text-gold/80 font-semibold text-center">
+                      {lang === 'en'
+                        ? 'Fixed prices, posted upfront — adjustable to your needs.'
+                        : 'Prix fixes affichés — ajustables selon vos besoins.'}
+                    </p>
+                  </div>
+                  <p className="text-sm text-slate-400 text-center">
+                    {t('pricingQuestionnaire.result.hourlyOption').replace(
+                      '{rate}',
+                      formatCAD(result.amountTypical)
+                    )}
+                  </p>
+                </div>
+              ) : (
+                <div className="p-6 rounded-2xl bg-gold/5 border border-gold/20 text-center space-y-2">
+                  <p className="text-xs uppercase tracking-widest text-gold font-bold">{t('pricingQuestionnaire.result.range')}</p>
+                  <p className="text-2xl sm:text-3xl md:text-4xl font-serif text-ivoire break-words">
+                    {formatCAD(result.amountMin)} – {formatCAD(result.amountMax)}
+                  </p>
+                  <p className="text-sm text-slate-400">
+                    {t('pricingQuestionnaire.result.typical')}: {formatCAD(result.amountTypical)}{' '}
+                    {billingUnitSuffix(result.billingUnit, t)}
+                  </p>
+                  <p className="text-xs text-gold/80 font-semibold">
+                    {lang === 'en'
+                      ? 'Fixed prices, posted upfront — adjustable to your needs.'
+                      : 'Prix fixes affichés — ajustables selon vos besoins.'}
+                  </p>
+                </div>
+              )}
 
               {taxPreview && (
                 <div className="space-y-2 text-sm">
