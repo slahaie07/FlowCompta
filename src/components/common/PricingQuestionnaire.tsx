@@ -380,6 +380,11 @@ export function PricingQuestionnaire({
                   {t('pricingQuestionnaire.result.typical')}: {formatCAD(result.amountTypical)}{' '}
                   {billingUnitSuffix(result.billingUnit, t)}
                 </p>
+                <p className="text-xs text-gold/80 font-semibold">
+                  {lang === 'en'
+                    ? 'Fixed prices, posted upfront — adjustable to your needs.'
+                    : 'Prix fixes affichés — ajustables selon vos besoins.'}
+                </p>
               </div>
 
               {taxPreview && (
@@ -423,22 +428,25 @@ export function PricingQuestionnaire({
                   </Button>
                 )}
                 {showSignupCta && variant === 'client' && (
-                  <>
-                    <Button variant="gold" className="flex-1 h-12 whitespace-nowrap" asChild>
-                      <a href="/login?next=/onboarding&register=1" className="flex items-center justify-center gap-2 whitespace-nowrap">
-                        {t('pricingQuestionnaire.cta.signup')} <ArrowRight size={16} className="shrink-0" />
-                      </a>
-                    </Button>
-                    <Button variant="secondary" className="flex-1 h-12 whitespace-nowrap" asChild>
-                      <a href={CONFIG.APP.INTAKE_FORM_URL} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 whitespace-nowrap">
-                        {t('pricingQuestionnaire.cta.requestQuote')} <Mail size={16} className="shrink-0" />
-                      </a>
-                    </Button>
-                  </>
+                  <Button variant="gold" className="flex-1 h-12 whitespace-nowrap" asChild>
+                    <a href={CONFIG.APP.INTAKE_FORM_URL} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 whitespace-nowrap">
+                      {t('pricingQuestionnaire.cta.requestQuote')} <Mail size={16} className="shrink-0" />
+                    </a>
+                  </Button>
                 )}
               </div>
 
-              <div className="text-center">
+              <div className="text-center space-y-2">
+                {showSignupCta && variant === 'client' && (
+                  <p>
+                    <a
+                      href="/login?next=/onboarding&register=1"
+                      className="text-xs text-slate-400 hover:text-gold underline underline-offset-4 transition-colors"
+                    >
+                      {lang === 'en' ? 'Already a client? Create your portal account' : 'Déjà client ? Créez votre compte portail'}
+                    </a>
+                  </p>
+                )}
                 <button
                   type="button"
                   onClick={reset}
