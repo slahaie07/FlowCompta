@@ -270,7 +270,7 @@ export function PricingGrid() {
                   <p className="text-xs text-slate-400 mt-1 leading-relaxed min-h-[40px]">{tier.desc}</p>
                 </div>
 
-                <div className="flex items-baseline gap-1">
+                <div className="flex flex-wrap items-baseline gap-1">
                   {(tier.name === 'Essentiel' || tier.name === 'Essential' || tier.name === 'الأساسي') && (
                     <span className="text-slate-400 text-xs font-semibold mr-1">
                       {lang === 'en' ? 'From' : lang === 'ar' ? 'ابتداءً من' : 'À partir de'}
