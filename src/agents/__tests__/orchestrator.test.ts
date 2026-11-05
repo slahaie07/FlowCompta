@@ -75,16 +75,16 @@ describe('runAgentOrchestrator', () => {
 });
 
 describe('toPublicSupportReply', () => {
-  it('exposes human advisor persona without agentId', () => {
+  it('exposes the assistant identity without agentId', () => {
     const publicReply = toPublicSupportReply(
       { answer: 'Bonjour', agentId: 'tax' },
       'fr'
     );
 
     expect(publicReply.answer).toBe('Bonjour');
-    expect(publicReply.advisor.name).toBe('Sophie Morin');
+    expect(publicReply.advisor.name).toBe('Assistant Compta-Flow');
     expect(publicReply.advisor.title).toBe('Conseillère fiscale');
-    expect(publicReply.advisor.initials).toBe('SM');
+    expect(publicReply.advisor.initials).toBe('CF');
     expect(publicReply.typingDelayMs).toBeGreaterThan(1000);
     expect(publicReply.respondedAt).toBeTruthy();
     expect(publicReply).not.toHaveProperty('agentId');
