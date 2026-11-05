@@ -398,7 +398,13 @@ export const i18n = {
         range: "Fourchette indicative",
         typical: "Montant médian",
         taxesHint: "Taxes applicables (sur le montant médian)",
-        totalWithTax: "Total estimé avec taxes"
+        totalWithTax: "Total estimé avec taxes",
+        packagesTitle: "Forfaits mensuels pour votre volume",
+        hourlyOption: "Ou à l'heure : {rate}/h — estimation écrite selon votre dossier."
+      },
+      packages: {
+        micro: "Micro — livrables trimestriels",
+        essential: "Essentiel — livrables mensuels"
       },
       cta: {
         continue: "Continuer vers mon espace",
@@ -1343,7 +1349,13 @@ export const i18n = {
         range: "Indicative range",
         typical: "Midpoint amount",
         taxesHint: "Applicable taxes (on midpoint amount)",
-        totalWithTax: "Estimated total with taxes"
+        totalWithTax: "Estimated total with taxes",
+        packagesTitle: "Monthly packages for your volume",
+        hourlyOption: "Or hourly: {rate}/h — written estimate based on your file."
+      },
+      packages: {
+        micro: "Micro — quarterly deliverables",
+        essential: "Essential — monthly deliverables"
       },
       cta: {
         continue: "Continue to my portal",
@@ -2279,7 +2291,13 @@ export const i18n = {
         range: "نطاق تقديري",
         typical: "المبلغ الوسطي",
         taxesHint: "الضرائب المطبقة (على المبلغ الوسطي)",
-        totalWithTax: "الإجمالي المقدر مع الضرائب"
+        totalWithTax: "الإجمالي المقدر مع الضرائب",
+        packagesTitle: "الباقات الشهرية المناسبة لحجم معاملاتك",
+        hourlyOption: "أو بالساعة: {rate}/ساعة — تقدير مكتوب حسب ملفك."
+      },
+      packages: {
+        micro: "مايكرو — تسليمات فصلية",
+        essential: "الأساسي — تسليمات شهرية"
       },
       cta: {
         continue: "المتابعة إلى بوابتي",
