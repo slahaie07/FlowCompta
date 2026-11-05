@@ -182,6 +182,37 @@ export function PricingGrid() {
             'Support prioritaire par SMS/Courriel'
           ],
       popular: false
+    },
+    {
+      name: lang === 'en' ? 'Payroll' : lang === 'ar' ? 'الرواتب' : 'Paie',
+      price: lang === 'en' ? '$49 + $12' : '49 $ + 12 $',
+      period: lang === 'en' ? 'per employee/month' : lang === 'ar' ? '/ موظف / شهر' : '/employé/mois',
+      desc: lang === 'en'
+        ? 'Full payroll management for your team, government remittances included.'
+        : lang === 'ar'
+        ? 'إدارة كاملة لرواتب فريقك، مع التحويلات الحكومية.'
+        : 'Gestion complète de la paie de votre équipe, remises gouvernementales incluses.',
+      features: lang === 'en'
+        ? [
+            'Payroll processed every period',
+            'Pay stubs and remittances',
+            'T4 and RL-1 slips included in year 1 for bookkeeping clients',
+            'Email support included'
+          ]
+        : lang === 'ar'
+        ? [
+            'معالجة الرواتب في كل فترة',
+            'كشوف الرواتب والتحويلات',
+            'نماذج T4 وRL-1 مجانية في السنة الأولى لعملاء مسك الدفاتر',
+            'الدعم عبر البريد الإلكتروني مشمول'
+          ]
+        : [
+            'Paie périodique traitée pour vous',
+            'Relevés de paie et remises gouvernementales',
+            'T4 et RL-1 offerts la 1re année aux clients de tenue de livres',
+            'Support courriel inclus'
+          ],
+      popular: false
     }
   ];
 
@@ -196,11 +227,11 @@ export function PricingGrid() {
           </span>
           <h2 className="text-4xl md:text-5xl font-serif font-bold text-ivoire tracking-tight italic">
             {lang === 'en' ? (
-              <>Fixed prices, <span className="text-gold">no surprises.</span></>
+              <>Fixed prices, posted upfront — <span className="text-gold">adjustable to your needs.</span></>
             ) : lang === 'ar' ? (
               <>أسعار ثابتة، <span className="text-gold">بلا مفاجآت.</span></>
             ) : (
-              <>Des prix fixes, <span className="text-gold">sans surprise.</span></>
+              <>Prix fixes affichés — <span className="text-gold">ajustables selon vos besoins.</span></>
             )}
           </h2>
           <p className="text-silver font-light text-base leading-relaxed">
@@ -212,7 +243,7 @@ export function PricingGrid() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {tiers.map((tier) => (
             <motion.div
               key={tier.name}
@@ -280,10 +311,10 @@ export function PricingGrid() {
             </h4>
             <p className="text-xs text-slate-400 leading-relaxed max-w-xl">
               {lang === 'en'
-                ? 'Whether for multi-employee payroll, corporate registration, or advanced tax advisory, our team is ready to adapt to your challenges.'
+                ? 'Whether for multi-employee payroll, corporate registration, or help with your taxes and filings, our team is ready to adapt to your challenges.'
                 : lang === 'ar'
-                ? 'سواء كان ذلك لإدارة كشوف المرتبات لعدة موظفين، أو تسجيل الشركات، أو الاستشارات الضريبية المتقدمة، فإن فريقنا مستعد للتكيف مع تحدياتك.'
-                : 'Que ce soit pour la gestion de la paie multi-employés, l’incorporation d’entreprise ou un accompagnement fiscal avancé, notre équipe est prête à s’adapter à vos défis.'}
+                ? 'سواء كان ذلك لإدارة كشوف المرتبات لعدة موظفين، أو تسجيل الشركات، أو المساعدة في ضرائبك وإقراراتك، فإن فريقنا مستعد للتكيف مع تحدياتك.'
+                : 'Que ce soit pour la gestion de la paie multi-employés, l’incorporation d’entreprise ou un accompagnement pour vos impôts et vos taxes, notre équipe est prête à s’adapter à vos défis.'}
             </p>
           </div>
           <a
