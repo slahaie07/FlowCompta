@@ -50,16 +50,34 @@ describe('pricingEstimator (grille Compta-Flow)', () => {
     expect(high.amountTypical).toBe(599.99);
   });
 
-  it('calculates hourly bookkeeping at 35 $/h from estimated hours', () => {
+  it('prices hourly bookkeeping at the fixed grid rate (35 $/h, no invented range)', () => {
     const result = calculatePricingEstimate({
       ...baseAnswers,
       serviceId: 'hourlyBookkeeping',
       volumeBand: 'medium',
     });
     expect(result.billingUnit).toBe('hourly');
-    expect(result.amountTypical).toBe(210); // 35 $ x 6 h
-    expect(result.amountMin).toBeLessThan(result.amountTypical);
-    expect(result.amountMax).toBeGreaterThan(result.amountTypical);
+    expect(result.amountTypical).toBe(35); // taux de grille, pas 35 $ x heures devinées
+    expect(result.amountMin).toBe(35);
+    expect(result.amountMax).toBe(35);
+  });
+
+  it('attaches the real grid packages overlapping the declared volume band', () => {
+    const medium = calculatePricingEstimate({
+      ...baseAnswers,
+      serviceId: 'hourlyBookkeeping',
+      volumeBand: 'medium', // 20 à 100 transactions/mois
+    });
+    // Paliers 31-75 (Essentiel) et 76-150 de la grille, prix exacts.
+    expect(medium.packages?.map((p) => p.monthlyPrice)).toEqual([249.99, 349.99]);
+
+    const low = calculatePricingEstimate({
+      ...baseAnswers,
+      serviceId: 'hourlyBookkeeping',
+      volumeBand: 'low',
+    });
+    // Palier 0-30 : Micro (trimestriel) et Essentiel (mensuel).
+    expect(low.packages?.map((p) => p.monthlyPrice)).toEqual([149.99, 249.99]);
   });
 
   it('scales payroll as 49 $ + 12 $ per employee', () => {
