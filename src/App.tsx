@@ -148,20 +148,23 @@ function AppContent() {
     // guard_profile_privileged_fields + politique « Modif propre profil ») ;
     // l'assignation de l'expert choisi relève de l'administrateur — le choix
     // du client lui est transmis par le webhook ci-dessous.
+    //
+    // Écriture en DEUX temps (correctif du 2026-11-04, étape 2) : PostgREST
+    // refuse ATOMIQUEMENT tout payload contenant une colonne absente du
+    // schéma réel. Or les colonnes « étendues » ci-dessous n'existent que
+    // dans database.sql — jamais ajoutées par la chaîne de migrations
+    // appliquée (comptaflow_migration.sql + supabase/migrations/) — donc un
+    // seul payload mêlant cœur + étendu échouait en entier en production :
+    // rien ne persistait et la porte du portail (nom + province) restait
+    // fermée. On écrit donc d'abord le cœur prouvé, puis l'étendu en
+    // best-effort isolé, pour qu'un écart de schéma ne bloque plus jamais
+    // l'entrée du client dans son portail.
     const { data: updatedRows, error } = await supabase
       .from('profiles')
       .update({
         display_name: data.displayName,
         full_name: data.displayName,
-        company_name: data.companyName || null,
         email: data.email || user.email,
-        neq: data.neq || null,
-        initial_profile_type: data.initialProfileType,
-        active_mode: data.activeMode,
-        preferred_language: data.language || 'fr',
-        status: 'active',
-        needs: createEmptyUserNeeds(),
-        metadata: { province: data.province },
       })
       .eq('id', user.id)
       .select('id');
@@ -176,6 +179,53 @@ function AppContent() {
     if (!updatedRows || updatedRows.length === 0) {
       console.error('Aucune ligne de profil mise à jour pour', user.id);
       throw new Error('Profil introuvable — la création du profil a échoué.');
+    }
+
+    // Écriture étendue : entreprise, NEQ, préférences, besoins, province.
+    // Si une colonne manque encore côté production, l'erreur est journalisée
+    // et ignorée — la migration d'alignement du schéma
+    // (supabase/migrations/20261105_profiles_onboarding_columns.sql) réglera
+    // la persistance complète de ces champs ; en attendant, le filet Auth
+    // ci-dessous garantit la complétion du parcours.
+    const { error: extendedError } = await supabase
+      .from('profiles')
+      .update({
+        company_name: data.companyName || null,
+        neq: data.neq || null,
+        initial_profile_type: data.initialProfileType,
+        active_mode: data.activeMode,
+        preferred_language: data.language || 'fr',
+        status: 'active',
+        needs: createEmptyUserNeeds(),
+        metadata: { province: data.province },
+      })
+      .eq('id', user.id);
+
+    if (extendedError) {
+      console.error(
+        'Écriture étendue du profil ignorée (écart de schéma production) :',
+        extendedError
+      );
+    }
+
+    // Filet de persistance garanti : la province et le nom sont aussi écrits
+    // dans les métadonnées du compte Auth (aucune dépendance au schéma de
+    // profiles). fetchProfile s'en sert en repli quand metadata.province est
+    // absent, donc la porte isClientProfileComplete peut s'ouvrir même si
+    // l'écriture étendue ci-dessus a été refusée.
+    try {
+      const { error: filetError } = await supabase.auth.updateUser({
+        data: {
+          province: data.province,
+          full_name: data.displayName,
+          display_name: data.displayName,
+        },
+      });
+      if (filetError) {
+        console.error('Métadonnées Auth (filet onboarding) non écrites :', filetError);
+      }
+    } catch (filetError) {
+      console.error('Métadonnées Auth (filet onboarding) non écrites :', filetError);
     }
 
     await refreshProfile();
