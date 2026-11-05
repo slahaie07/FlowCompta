@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
-  LogIn,
   Laptop,
   Download,
   Clock3,
@@ -73,25 +72,11 @@ export function Landing() {
 
   return (
     <div className="min-h-screen bg-noir text-ivoire font-sans selection:bg-gold selection:text-noir overflow-x-hidden relative">
-      <div className="aurora-bg opacity-30 pointer-events-none fixed inset-0" />
       {/* Navigation */}
       <SiteHeader />
 
       {/* Hero Section */}
       <header className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
-        {/* Bandeau saisonnier — fin d'année */}
-        <div className="relative z-10 max-w-5xl mx-auto px-6 mb-12">
-          <div className="bg-gold text-noir rounded-2xl px-6 py-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-center shadow-[0_16px_48px_rgba(212,175,55,0.25)]">
-            <span className="text-sm font-bold">
-              {lang === 'fr'
-                ? 'Fin d’année 2026 : faites fermer vos livres avant le 31 décembre — rattrapage dès 75 $/mois, feuillets T4 et RL-1 offerts la 1re année aux clients tenue de livres.'
-                : 'Year-end 2026: get your books closed before December 31 — catch-up from $75/month, T4 & RL-1 slips included in year 1 for bookkeeping clients.'}
-            </span>
-            <button onClick={() => navigate('/estimate')} className="text-sm font-black underline underline-offset-4 hover:opacity-70 transition-opacity px-1 py-2 focus-ring">
-              {lang === 'fr' ? 'Estimer mon forfait →' : 'Estimate my package →'}
-            </button>
-          </div>
-        </div>
         <div className="absolute left-6 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-2 items-center opacity-30">
           <div className="w-[1px] h-32 bg-gradient-to-b from-transparent to-gold" />
           <span className="rotate-180 [writing-mode:vertical-lr] text-[10px] tracking-[0.6em] uppercase font-bold text-slate-500">
@@ -119,28 +104,19 @@ export function Landing() {
               <div className="flex flex-wrap gap-3 text-[11px] font-bold uppercase tracking-widest text-gold/90">
                 <span className="flex items-center gap-2 border border-gold/30 bg-gold/[0.06] rounded-full px-4 py-2"><Clock3 size={13} className="shrink-0 text-gold" aria-hidden />{lang === 'fr' ? 'Réponse écrite sous 4 h ouvrables' : 'Written reply within 4 business hours'}</span>
                 <span className="flex items-center gap-2 border border-gold/30 bg-gold/[0.06] rounded-full px-4 py-2"><Globe size={13} className="shrink-0 text-gold" aria-hidden />{lang === 'fr' ? '100 % en ligne, partout au Canada' : '100% online, across Canada'}</span>
-                <span className="flex items-center gap-2 border border-gold/30 bg-gold/[0.06] rounded-full px-4 py-2"><Tag size={13} className="shrink-0 text-gold" aria-hidden />{lang === 'fr' ? 'Prix fixes, sans surprise' : 'Fixed prices, no surprises'}</span>
+                <span className="flex items-center gap-2 border border-gold/30 bg-gold/[0.06] rounded-full px-4 py-2"><Tag size={13} className="shrink-0 text-gold" aria-hidden />{lang === 'fr' ? 'Prix fixes affichés — ajustables selon vos besoins' : 'Fixed prices, posted upfront — adjustable to your needs'}</span>
               </div>
               <div className="flex flex-wrap gap-4">
-                <Button variant="gold" size="lg" onClick={goToSignup} className="px-10 py-7 text-lg group">
-                  {t('hero.cta')} <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                <Button variant="gold" size="lg" onClick={() => navigate('/estimate')} className="px-10 py-7 text-lg group">
+                  {lang === 'en' ? 'Estimate my package' : lang === 'ar' ? 'تقدير باقتي' : 'Estimer mon forfait'} <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
                 <Button
                   variant="secondary"
                   size="lg"
-                  onClick={() => navigate('/estimate')}
+                  onClick={goToSignup}
                   className="px-8 py-7 text-lg glass-button border-gold/20"
                 >
-                  {t('hero.estimateCta')}
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="lg" 
-                  onClick={() => navigate('/login')} 
-                  className="px-8 py-7 text-lg glass-button border-gold/20 flex gap-3 items-center group"
-                >
-                  <LogIn size={20} className="group-hover:scale-110 transition-transform text-gold" />
-                  {lang === 'en' ? 'Client Login' : 'Connexion Client'}
+                  {lang === 'en' ? 'Open my file' : lang === 'ar' ? 'فتح ملفي' : 'Ouvrir mon dossier'}
                 </Button>
               </div>
             </motion.div>
@@ -149,7 +125,7 @@ export function Landing() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }} 
               animate={{ opacity: 1, scale: 1, y: 0 }} 
               transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-              className="hidden lg:block relative"
+              className="relative mt-10 lg:mt-0"
             >
               {/* Outer decorative ambient glow */}
               <div className="absolute -inset-4 bg-gradient-to-r from-gold/15 to-indigo-500/10 rounded-[32px] blur-3xl opacity-60 pointer-events-none" />
@@ -284,6 +260,20 @@ export function Landing() {
         </div>
       </header>
 
+      {/* Bandeau saisonnier — fin d'année (sous le hero) */}
+      <div className="relative z-10 max-w-5xl mx-auto px-6 mt-10">
+        <div className="bg-gold text-noir rounded-2xl px-6 py-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-center shadow-[0_16px_48px_rgba(212,175,55,0.25)]">
+          <span className="text-sm font-bold">
+            {lang === 'fr'
+              ? 'Fin d’année 2026 : faites fermer vos livres avant le 31 décembre — rattrapage dès 75 $/mois, feuillets T4 et RL-1 offerts la 1re année aux clients tenue de livres.'
+              : 'Year-end 2026: get your books closed before December 31 — catch-up from $75/month, T4 & RL-1 slips included in year 1 for bookkeeping clients.'}
+          </span>
+          <button onClick={() => navigate('/estimate')} className="text-sm font-black underline underline-offset-4 hover:opacity-70 transition-opacity px-1 py-2 focus-ring">
+            {lang === 'fr' ? 'Estimer mon forfait →' : 'Estimate my package →'}
+          </button>
+        </div>
+      </div>
+
       {/* Ticker */}
       <div className="marquee-pause border-y border-gold/20 py-5 bg-gold/[0.02] overflow-hidden whitespace-nowrap">
         <div className="flex animate-marquee">
@@ -380,40 +370,6 @@ export function Landing() {
         </div>
       </section>
 
-      {/* App Install Callout (PWA) */}
-      {isInstallable && (
-        <section className="py-16 border-t border-gold/15 bg-gold/[0.01] relative overflow-hidden">
-          <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gold/5 rounded-full blur-[80px] pointer-events-none" />
-          <div className="max-w-4xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="w-14 h-14 rounded-2xl border border-gold/30 bg-gold/5 flex items-center justify-center text-gold shrink-0 shadow-[0_0_20px_rgba(212,175,55,0.1)]">
-                <Laptop size={28} />
-              </div>
-              <div className="space-y-1">
-                <h4 className="font-serif font-bold text-ivoire text-xl">
-                  {lang === 'en' ? 'Install the ComptaFlow App' : lang === 'ar' ? 'تثبيت تطبيق ComptaFlow' : 'Installer l\'application ComptaFlow'}
-                </h4>
-                <p className="text-xs text-silver max-w-lg leading-relaxed">
-                  {lang === 'en' 
-                    ? 'Get instant secure access directly from your desktop dock or mobile homescreen. Optimized offline capabilities.' 
-                    : lang === 'ar' 
-                    ? 'احصل على وصول آمن وسريع مباشرة من شاشة جهازك المحمول أو سطح المكتب.' 
-                    : 'Accédez instantanément à votre espace sécurisé depuis votre PC ou votre écran d\'accueil mobile. Fluidité optimale.'}
-                </p>
-              </div>
-            </div>
-            <Button
-              variant="gold"
-              onClick={install}
-              className="gap-2 text-xs font-bold uppercase tracking-widest px-8 h-14 rounded-2xl cursor-pointer shadow-gold/20 hover:scale-[1.02] transition-transform shrink-0"
-            >
-              <Download size={15} />
-              {lang === 'en' ? 'Install App' : lang === 'ar' ? 'تثبيت التطبيق' : 'Installer l\'App'}
-            </Button>
-          </div>
-        </section>
-      )}
-
       {/* Canada Network SEO Section */}
       <section className="py-16 border-t border-gold/15 bg-noir relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 space-y-10">
@@ -486,6 +442,40 @@ export function Landing() {
           </div>
         </div>
       </section>
+
+      {/* App Install Callout (PWA) — en toute fin de page pour ne pas déplacer le contenu en cours de lecture */}
+      {isInstallable && (
+        <section className="py-16 border-t border-gold/15 bg-gold/[0.01] relative overflow-hidden">
+          <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gold/5 rounded-full blur-[80px] pointer-events-none" />
+          <div className="max-w-4xl mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="w-14 h-14 rounded-2xl border border-gold/30 bg-gold/5 flex items-center justify-center text-gold shrink-0 shadow-[0_0_20px_rgba(212,175,55,0.1)]">
+                <Laptop size={28} />
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-serif font-bold text-ivoire text-xl">
+                  {lang === 'en' ? 'Install the ComptaFlow App' : lang === 'ar' ? 'تثبيت تطبيق ComptaFlow' : 'Installer l\'application ComptaFlow'}
+                </h4>
+                <p className="text-xs text-silver max-w-lg leading-relaxed">
+                  {lang === 'en'
+                    ? 'Get instant secure access directly from your desktop dock or mobile homescreen. Optimized offline capabilities.'
+                    : lang === 'ar'
+                    ? 'احصل على وصول آمن وسريع مباشرة من شاشة جهازك المحمول أو سطح المكتب.'
+                    : 'Accédez instantanément à votre espace sécurisé depuis votre PC ou votre écran d\'accueil mobile. Fluidité optimale.'}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="gold"
+              onClick={install}
+              className="gap-2 text-xs font-bold uppercase tracking-widest px-8 h-14 rounded-2xl cursor-pointer shadow-gold/20 hover:scale-[1.02] transition-transform shrink-0"
+            >
+              <Download size={15} />
+              {lang === 'en' ? 'Install App' : lang === 'ar' ? 'تثبيت التطبيق' : 'Installer l\'App'}
+            </Button>
+          </div>
+        </section>
+      )}
 
       {/* Footer */}
       <SiteFooter />
