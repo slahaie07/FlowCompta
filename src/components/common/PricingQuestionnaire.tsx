@@ -373,7 +373,7 @@ export function PricingQuestionnaire({
 
               <div className="p-6 rounded-2xl bg-gold/5 border border-gold/20 text-center space-y-2">
                 <p className="text-xs uppercase tracking-widest text-gold font-bold">{t('pricingQuestionnaire.result.range')}</p>
-                <p className="text-3xl md:text-4xl font-serif text-ivoire">
+                <p className="text-2xl sm:text-3xl md:text-4xl font-serif text-ivoire break-words">
                   {formatCAD(result.amountMin)} – {formatCAD(result.amountMax)}
                 </p>
                 <p className="text-sm text-slate-400">
@@ -393,12 +393,12 @@ export function PricingQuestionnaire({
                     {t('pricingQuestionnaire.result.taxesHint')}
                   </p>
                   {getTaxDisplayLines(taxPreview, answers.province, taxLang).map((line) => (
-                    <div key={line.label} className="flex justify-between text-slate-400">
+                    <div key={line.label} className="flex justify-between gap-4 text-slate-400">
                       <span>{line.label}</span>
-                      <span>{formatCAD(line.amount)}</span>
+                      <span className="shrink-0">{formatCAD(line.amount)}</span>
                     </div>
                   ))}
-                  <div className="flex justify-between text-ivoire font-medium pt-2 border-t border-white/5">
+                  <div className="flex justify-between gap-4 text-ivoire font-medium pt-2 border-t border-white/5">
                     <span>{t('pricingQuestionnaire.result.totalWithTax')}</span>
                     <span>{formatCAD(taxPreview.total)}</span>
                   </div>
@@ -420,7 +420,7 @@ export function PricingQuestionnaire({
 
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
                 {onContinue && (
-                  <Button variant="gold" className="flex-1 h-12 whitespace-nowrap gap-2" onClick={() => onContinue(result.serviceId)}>
+                  <Button variant="gold" className="flex-1 min-h-12 gap-2 text-center" onClick={() => onContinue(result.serviceId)}>
                     {variant === 'staff'
                       ? pricingKey(t, variant, 'cta.invoices')
                       : t('pricingQuestionnaire.cta.continue')}
@@ -428,8 +428,8 @@ export function PricingQuestionnaire({
                   </Button>
                 )}
                 {showSignupCta && variant === 'client' && (
-                  <Button variant="gold" className="flex-1 h-12 whitespace-nowrap" asChild>
-                    <a href={CONFIG.APP.INTAKE_FORM_URL} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 whitespace-nowrap">
+                  <Button variant="gold" className="flex-1 min-h-12" asChild>
+                    <a href={CONFIG.APP.INTAKE_FORM_URL} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 px-2 text-center">
                       {t('pricingQuestionnaire.cta.requestQuote')} <Mail size={16} className="shrink-0" />
                     </a>
                   </Button>
@@ -462,10 +462,10 @@ export function PricingQuestionnaire({
         </AnimatePresence>
 
         {step !== 'result' && (
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
             <Button
               variant="secondary"
-              className="flex-1 whitespace-nowrap"
+              className="flex-1 min-h-12"
               onClick={handlePrev}
               disabled={stepIndex <= 0}
             >
@@ -473,7 +473,7 @@ export function PricingQuestionnaire({
             </Button>
             <Button
               variant="gold"
-              className="flex-1 whitespace-nowrap"
+              className="flex-1 min-h-12"
               onClick={handleNext}
               disabled={!canProceed()}
             >
