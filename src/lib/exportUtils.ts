@@ -26,7 +26,7 @@ export const ExportService = {
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Comptaflow_Export");
-    XLSX.writeFile(wb, `AGY_Export_Excel_${Date.now()}.xlsx`);
+    XLSX.writeFile(wb, `ComptaFlow_Export_Excel_${Date.now()}.xlsx`);
   },
 
   /**
@@ -41,7 +41,7 @@ export const ExportService = {
       return `${d.metadata?.date || ''},${d.metadata?.emetteur || ''},${amount},${tax},Expense`;
     }).join("\n");
 
-    this.downloadFile(headers + rows, "AGY_QuickBooks_Import.csv", "text/csv");
+    this.downloadFile(headers + rows, "ComptaFlow_QuickBooks_Import.csv", "text/csv");
   },
 
   /**
@@ -53,7 +53,7 @@ export const ExportService = {
       return `JOURNAL,${d.metadata?.date || ''},${d.metadata?.emetteur || ''},${d.metadata?.montant_total || 0},${d.metadata?.tps || 0},${d.metadata?.tvq || 0}`;
     }).join("\n");
 
-    this.downloadFile(rows, "AGY_Sage_Import.csv", "text/csv");
+    this.downloadFile(rows, "ComptaFlow_Sage_Import.csv", "text/csv");
   },
 
   exportTransactions(transactions: any[], clientName: string) {
