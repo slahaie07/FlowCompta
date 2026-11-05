@@ -77,6 +77,7 @@ export interface UserNeeds {
   catchUp: boolean;
   softwareSetup: boolean;
   taxHelpAutonomous: boolean;
+  businessStart: boolean;
 }
 
 export interface UserData {
