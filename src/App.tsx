@@ -159,6 +159,48 @@ function AppContent() {
     // fermée. On écrit donc d'abord le cœur prouvé, puis l'étendu en
     // best-effort isolé, pour qu'un écart de schéma ne bloque plus jamais
     // l'entrée du client dans son portail.
+    // Rattrapage (correctif du 2026-11-04, étape 3) : si le déclencheur
+    // handle_new_user n'a pas créé la ligne à l'inscription — cas prouvé en
+    // production : aucune ligne profiles pour des comptes Auth pourtant
+    // valides — la mise à jour ci-dessous ne touche 0 ligne et le parcours
+    // meurt. On tente donc d'abord de CRÉER la ligne complète. Si elle
+    // existe déjà (cas normal), l'insertion échoue en conflit (23505) et on
+    // enchaîne sur la mise à jour en deux temps, inchangée. Si la création
+    // est refusée par la RLS (42501) ou par un écart de schéma résiduel,
+    // on enchaîne aussi : la mise à jour tranchera, et son erreur explicite
+    // (« Profil introuvable ») s'affichera — jamais un bouton inerte.
+    // On n'écrit ni « role » (défaut base : 'client') ni « sub_admin_id ».
+    let profileRowCreated = false;
+    {
+      const { error: insertError } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          email: data.email || user.email,
+          display_name: data.displayName,
+          full_name: data.displayName,
+          company_name: data.companyName || null,
+          neq: data.neq || null,
+          initial_profile_type: data.initialProfileType,
+          active_mode: data.activeMode,
+          preferred_language: data.language || 'fr',
+          status: 'active',
+          needs: createEmptyUserNeeds(),
+          metadata: { province: data.province },
+        })
+        .select('id');
+
+      if (!insertError) {
+        profileRowCreated = true;
+      } else if (insertError.code !== '23505' && insertError.code !== '42501') {
+        console.error(
+          'Création de rattrapage du profil refusée, mise à jour tentée ensuite :',
+          insertError
+        );
+      }
+    }
+
+    if (!profileRowCreated) {
     const { data: updatedRows, error } = await supabase
       .from('profiles')
       .update({
@@ -207,6 +249,7 @@ function AppContent() {
         extendedError
       );
     }
+    } // fin du bloc « ligne non créée au rattrapage » (mise à jour en deux temps)
 
     // Filet de persistance garanti : la province et le nom sont aussi écrits
     // dans les métadonnées du compte Auth (aucune dépendance au schéma de
