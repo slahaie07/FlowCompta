@@ -102,19 +102,19 @@ export function Landing() {
                 {t('hero.subtitle')}
               </p>
               <div className="flex flex-wrap gap-3 text-[11px] font-bold uppercase tracking-widest text-gold/90">
-                <span className="flex items-center gap-2 border border-gold/30 bg-gold/[0.06] rounded-full px-4 py-2"><Clock3 size={13} className="shrink-0 text-gold" aria-hidden />{lang === 'fr' ? 'Réponse écrite sous 4 h ouvrables' : 'Written reply within 4 business hours'}</span>
-                <span className="flex items-center gap-2 border border-gold/30 bg-gold/[0.06] rounded-full px-4 py-2"><Globe size={13} className="shrink-0 text-gold" aria-hidden />{lang === 'fr' ? '100 % en ligne, partout au Canada' : '100% online, across Canada'}</span>
-                <span className="flex items-center gap-2 border border-gold/30 bg-gold/[0.06] rounded-full px-4 py-2"><Tag size={13} className="shrink-0 text-gold" aria-hidden />{lang === 'fr' ? 'Prix fixes affichés — ajustables selon vos besoins' : 'Fixed prices, posted upfront — adjustable to your needs'}</span>
+                <span className="flex items-center gap-2 max-w-full border border-gold/30 bg-gold/[0.06] rounded-full px-4 py-2"><Clock3 size={13} className="shrink-0 text-gold" aria-hidden />{lang === 'fr' ? 'Réponse écrite sous 4 h ouvrables' : 'Written reply within 4 business hours'}</span>
+                <span className="flex items-center gap-2 max-w-full border border-gold/30 bg-gold/[0.06] rounded-full px-4 py-2"><Globe size={13} className="shrink-0 text-gold" aria-hidden />{lang === 'fr' ? '100 % en ligne, partout au Canada' : '100% online, across Canada'}</span>
+                <span className="flex items-center gap-2 max-w-full border border-gold/30 bg-gold/[0.06] rounded-full px-4 py-2"><Tag size={13} className="shrink-0 text-gold" aria-hidden />{lang === 'fr' ? 'Prix fixes affichés — ajustables selon vos besoins' : 'Fixed prices, posted upfront — adjustable to your needs'}</span>
               </div>
               <div className="flex flex-wrap gap-4">
-                <Button variant="gold" size="lg" onClick={() => navigate('/estimate')} className="px-10 py-7 text-lg group">
+                <Button variant="gold" size="lg" onClick={() => navigate('/estimate')} className="w-full sm:w-auto px-10 py-7 text-lg group">
                   {lang === 'en' ? 'Estimate my package' : lang === 'ar' ? 'تقدير باقتي' : 'Estimer mon forfait'} <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
                 <Button
                   variant="secondary"
                   size="lg"
                   onClick={goToSignup}
-                  className="px-8 py-7 text-lg glass-button border-gold/20"
+                  className="w-full sm:w-auto px-8 py-7 text-lg glass-button border-gold/20"
                 >
                   {lang === 'en' ? 'Open my file' : lang === 'ar' ? 'فتح ملفي' : 'Ouvrir mon dossier'}
                 </Button>
@@ -131,14 +131,14 @@ export function Landing() {
               <div className="absolute -inset-4 bg-gradient-to-r from-gold/15 to-indigo-500/10 rounded-[32px] blur-3xl opacity-60 pointer-events-none" />
 
               {/* Main Mock Portal Card */}
-              <div className="p-8 rounded-[28px] glass-card premium-border-gold relative overflow-hidden group select-none">
+              <div className="p-5 sm:p-8 rounded-[28px] glass-card premium-border-gold relative overflow-hidden group select-none">
                 {/* Corner Accents */}
                 <div className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-gold/40 rounded-tl-[28px]" />
                 <div className="absolute bottom-0 right-0 w-10 h-10 border-b-2 border-r-2 border-gold/40 rounded-br-[28px]" />
                 
                 {/* Mock Portal Header */}
-                <div className="flex justify-between items-center border-b border-white/5 pb-5 mb-6">
-                  <div className="flex items-center gap-3">
+                <div className="flex flex-wrap justify-between items-center gap-3 border-b border-white/5 pb-5 mb-6">
+                  <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold font-mono text-sm font-bold shadow-[0_0_15px_rgba(212,175,55,0.15)] animate-pulse">
                       CF
                     </div>
@@ -195,16 +195,16 @@ export function Landing() {
 
                   {/* Smart Reconciliation Row */}
                   <div className="p-4 rounded-xl bg-white/[0.01] border border-white/5 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-gold/5 border border-gold/10 flex items-center justify-center text-gold">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-gold/5 border border-gold/10 flex items-center justify-center text-gold shrink-0">
                         <span className="text-[10px] font-mono font-bold">$</span>
                       </div>
-                      <div className="text-left">
+                      <div className="text-left min-w-0">
                         <div className="text-xs font-semibold text-ivoire">Virement Interac Reçu</div>
                         <div className="text-[10px] text-slate-400 font-mono">1,250.00 $ · RBC Banque</div>
                       </div>
                     </div>
-                    <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[9px] font-bold uppercase tracking-wider flex items-center gap-1">
+                    <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
                       <span className="w-1 h-1 rounded-full bg-emerald-400" />
                       Rapproché
                     </span>
@@ -215,8 +215,8 @@ export function Landing() {
                     <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-gold flex items-center justify-center text-[10px] font-bold text-white shrink-0 shadow-md">
                       CF
                     </div>
-                    <div className="text-left space-y-1">
-                      <div className="text-xs font-bold text-ivoire flex items-center gap-1.5">
+                    <div className="text-left space-y-1 min-w-0">
+                      <div className="text-xs font-bold text-ivoire flex flex-wrap items-center gap-1.5">
                         <span>Équipe Compta-Flow</span>
                         <span className="w-1.5 h-1.5 rounded-full bg-gold" />
                         <span className="text-[9px] text-gold uppercase tracking-wider font-mono">Tenue de livres</span>
@@ -231,7 +231,7 @@ export function Landing() {
                 </div>
 
                 {/* Footer Status */}
-                <div className="flex justify-between items-center border-t border-white/5 pt-4 mt-5 text-[10px] font-mono text-slate-400">
+                <div className="flex flex-wrap justify-between items-center gap-x-4 gap-y-1 border-t border-white/5 pt-4 mt-5 text-[10px] font-mono text-slate-400">
                   <span className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     {lang === 'en' ? 'Server: Connected' : 'Serveur : Connecté'}
