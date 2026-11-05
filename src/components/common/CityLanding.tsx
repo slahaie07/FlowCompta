@@ -129,7 +129,7 @@ export function CityLanding({ city }: Props) {
       {/* Hero */}
       <div className="bg-gradient-to-b from-[#111008] to-noir pt-8 pb-16 px-4">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center gap-2 mb-8 text-sm text-silver">
+          <div className="flex flex-wrap items-center gap-2 mb-8 text-sm text-silver">
             <button onClick={() => navigate('/')} className="hover:text-gold transition-colors">ComptaFlow</button>
             <span>/</span>
             <button onClick={() => navigate(`/ca/${city.provinceSlug}`)} className="hover:text-gold transition-colors">{provinceName}</button>
