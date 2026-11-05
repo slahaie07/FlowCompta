@@ -422,6 +422,43 @@ export const SERVICE_PROCEDURES: Record<ServiceId, ServiceProcedure> = {
     ],
   },
 
+  businessStart: {
+    serviceId: 'businessStart',
+    estimatedDays: 10,
+    steps: [
+      baseMandateStep(1),
+      {
+        id: 'registration',
+        order: 2,
+        titleKey: 'procedure.businessStart.steps.registration.title',
+        descKey: 'procedure.businessStart.steps.registration.desc',
+        portalPath: 'messaging',
+        documents: [],
+        fields: [
+          { id: 'business_name', labelKey: 'procedure.fields.businessName', required: true },
+        ],
+      },
+      baseVaultDocsStep(3, [
+        { id: 'id_document', labelKey: 'procedure.docs.idDocument', required: true },
+        { id: 'registration_cert', labelKey: 'procedure.docs.registrationCert', required: false },
+      ]),
+      {
+        id: 'setup',
+        order: 4,
+        titleKey: 'procedure.businessStart.steps.setup.title',
+        descKey: 'procedure.businessStart.steps.setup.desc',
+        portalPath: 'support',
+        documents: [],
+        fields: [
+          { id: 'gst_account', labelKey: 'procedure.fields.gstAccount', required: false },
+          { id: 'provincial_tax_account', labelKey: 'procedure.fields.provincialTaxAccount', required: false },
+        ],
+      },
+      baseCpaReviewStep(5),
+      baseDeliveryStep(6),
+    ],
+  },
+
   taxHelpAutonomous: {
     serviceId: 'taxHelpAutonomous',
     estimatedDays: 14,
