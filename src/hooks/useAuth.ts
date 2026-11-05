@@ -93,9 +93,27 @@ export function useAuth() {
           createdAt: new Date(data.created_at).getTime(),
         });
       } else {
+        // Aucune ligne profiles pour ce compte (déclencheur d'inscription
+        // absent ou fautif côté base — cas prouvé en production à l'étape 3
+        // du diagnostic portail). Avant ce correctif, on retombait sur un
+        // userData vide (ni nom, ni province) et le repli métadonnées Auth
+        // ci-dessus ne servait jamais : il est DANS la branche « ligne
+        // présente ». On lit donc ici les métadonnées Auth — nom inscrit à
+        // l'inscription, province écrite par le filet de l'onboarding —
+        // pour que la porte de complétion s'évalue sur des données réelles.
+        let authMeta: Record<string, any> = {};
+        try {
+          const { data: authData } = await supabase.auth.getUser();
+          authMeta = (authData.user?.user_metadata as Record<string, any>) || {};
+        } catch {
+          /* repli silencieux : métadonnées Auth illisibles */
+        }
         setUserData({
           id: uid,
           email: email,
+          fullName: authMeta.full_name || authMeta.display_name || authMeta.name,
+          displayName: authMeta.display_name || authMeta.full_name || authMeta.name,
+          province: authMeta.province as string | undefined,
           role: 'client',
           isAdmin: false,
         } as UserData);
