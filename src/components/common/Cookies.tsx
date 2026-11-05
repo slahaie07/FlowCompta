@@ -13,8 +13,8 @@ export function Cookies() {
   usePageMeta({
     title: isFr ? 'Témoins (cookies) — Compta-Flow' : 'Cookies — Compta-Flow',
     description: isFr
-      ? 'Quels témoins (cookies) Compta-Flow dépose sur votre appareil et pourquoi : des témoins essentiels au fonctionnement du site et du portail, et des témoins analytiques seulement avec votre consentement.'
-      : 'Which cookies Compta-Flow places on your device and why: essential cookies that keep the site and portal working, and analytics cookies only with your consent.',
+      ? 'Quels témoins (cookies) Compta-Flow dépose sur votre appareil et pourquoi : des témoins essentiels au fonctionnement du site et du portail. La mesure d’audience est anonyme et ne dépose aucun témoin.'
+      : 'Which cookies Compta-Flow places on your device and why: essential cookies that keep the site and portal working. Audience measurement is anonymous and places no cookie.',
     lang: isFr ? 'fr' : 'en',
     canonical: `${SITE.url}/cookies`,
   });
@@ -47,12 +47,12 @@ export function Cookies() {
             <p className="text-silver text-sm font-light leading-relaxed">
               {isFr ? (
                 <>Un témoin (cookie) est un petit fichier texte déposé sur votre appareil lors de la visite de {SITE.url}.
-              ComptaFlow utilise des témoins essentiels au fonctionnement du portail et, avec votre consentement,
-              des témoins analytiques pour améliorer l'expérience utilisateur.</>
+              ComptaFlow utilise uniquement des témoins essentiels au fonctionnement du portail.
+              La mesure d’audience du site est anonyme et ne dépose aucun témoin (voir la section 3).</>
               ) : (
                 <>A cookie is a small text file placed on your device when you visit {SITE.url}.
-              ComptaFlow uses cookies essential to the portal's operation and, with your consent,
-              analytics cookies to improve the user experience.</>
+              ComptaFlow uses only cookies essential to the portal's operation.
+              Site audience measurement is anonymous and places no cookie (see section 3).</>
               )}
             </p>
           </section>
@@ -67,14 +67,18 @@ export function Cookies() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-serif text-gold">{isFr ? '3. Témoins analytiques (optionnels)' : '3. Analytics cookies (optional)'}</h2>
+            <h2 className="text-xl font-serif text-gold">{isFr ? '3. Mesure d’audience anonyme (sans témoins)' : '3. Anonymous audience measurement (cookieless)'}</h2>
             <p className="text-silver text-sm font-light">
               {isFr ? (
-                <>Déployés uniquement après votre consentement explicite via la bannière affichée à votre première visite.
-              Vous pouvez retirer votre consentement en supprimant les témoins de votre navigateur ou en nous écrivant à{' '}</>
+                <>Nous utilisons Vercel Web Analytics pour mesurer l’audience du site de façon anonyme et agrégée
+              (pages visitées, provenance générale). Cet outil ne dépose aucun témoin sur votre appareil, ne recueille
+              aucune donnée permettant de vous identifier et ne requiert donc aucun consentement.
+              Pour toute question, écrivez-nous à{' '}</>
               ) : (
-                <>Deployed only after your explicit consent via the banner shown on your first visit.
-              You can withdraw your consent by deleting your browser cookies or by writing to us at{' '}</>
+                <>We use Vercel Web Analytics to measure site traffic anonymously and in aggregate
+              (pages visited, general origin). This tool places no cookie on your device, collects no data
+              that can identify you, and therefore requires no consent.
+              For any question, write to us at{' '}</>
               )}
               <a href={`mailto:${SITE.privacyEmail}`} className="text-gold hover:underline">{SITE.privacyEmail}</a>.
             </p>
