@@ -40,9 +40,10 @@
 }
 
 @layer base {
-  html, body {
-    overflow-anchor: none;
-  }
+  /* Ancrage de défilement : comportement par défaut du navigateur.
+     Ne pas désactiver (overflow-anchor: none) : l'ancrage compense les
+     changements de hauteur du contenu (polices, sections tardives) et
+     empêche les sauts de position pendant le défilement. */
 
   body {
     background-color: var(--color-midnight);
