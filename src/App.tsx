@@ -206,7 +206,10 @@ function AppContent() {
     navigate('/portal/client/overview');
   };
 
-  if (loading) {
+  // Écran de chargement seulement tant que la première résolution d'auth
+  // n'a pas eu lieu. Ensuite, l'arbre reste monté en permanence : l'échanger
+  // contre l'écran de chargement ferait perdre la position de défilement.
+  if (loading && !user && !userData) {
     return (
       <div className="min-h-screen bg-noir text-ivoire flex flex-col items-center justify-center gap-8">
         <OrganicLoader label="FLOW" size="md" />
