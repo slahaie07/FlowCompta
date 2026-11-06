@@ -1,14 +1,21 @@
+import { useEffect } from 'react';
 import { PricingQuestionnaire } from './PricingQuestionnaire';
+import { FreeDiagnosticSection } from './FreeDiagnosticSection';
 import { SiteHeader } from './SiteHeader';
 import { SiteFooter } from './SiteFooter';
 import { useLanguage } from '../../hooks/useLanguage';
 import { usePageMeta } from '../../hooks/usePageMeta';
 import { SITE } from '../../lib/canadaNetwork';
 import { CONFIG } from '../../lib/config';
+import { trackEventOnce } from '../../lib/trackEvent';
 
 export function EstimatePage() {
   const { lang } = useLanguage();
   const isFr = lang === 'fr';
+
+  useEffect(() => {
+    trackEventOnce('estimate_view', { lang });
+  }, [lang]);
 
   usePageMeta({
     title: isFr
@@ -29,6 +36,7 @@ export function EstimatePage() {
           {isFr ? 'Estimez votre forfait en 1 minute' : 'Estimate your plan in 1 minute'}
         </h1>
         <PricingQuestionnaire showSignupCta />
+        <FreeDiagnosticSection />
         <p className="mt-10 pt-8 border-t border-white/5 text-center text-sm text-silver font-light leading-relaxed">
           {isFr ? 'Vous préférez nous écrire directement ? Écrivez à ' : 'Prefer to write to us directly? Email '}
           <a href={`mailto:${CONFIG.APP.SUPPORT_EMAIL}`} className="text-gold hover:underline whitespace-nowrap">
