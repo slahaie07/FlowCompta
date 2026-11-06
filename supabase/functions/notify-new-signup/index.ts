@@ -37,7 +37,7 @@ serve(async (req) => {
             <p style="margin: 0;"><strong style="color: #888;">Date :</strong> ${createdAt}</p>
           </div>
           <p style="color: #888;">Connecte-toi au portail admin pour voir le dossier du client et lui assigner un comptable.</p>
-          <p style="color: #555; font-size: 12px; margin-top: 40px;">ComptaFlow — Plateforme comptable certifiée Québec</p>
+          <p style="color: #555; font-size: 12px; margin-top: 40px;">ComptaFlow — Tenue de livres et impôts — Québec</p>
         </div>
       </body>
       </html>
@@ -51,7 +51,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: 'ComptaFlow <noreply@compta-flow.net>',
-        to: ['compta-flow@outlook.com'],
+        to: ['contact@compta-flow.net'],
         subject: `🆕 Nouvelle inscription : ${fullName} (${email})`,
         html: emailBody,
       }),
