@@ -11,6 +11,7 @@
     "start": "node dist/server.cjs",
     "lint": "tsc --noEmit",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "verify:canada-module": "tsx scripts/verify-canada-module.ts",
     "promotion:check": "tsx scripts/promotion-check.ts",
     "db:migrate": "tsx scripts/apply-supabase-migrations.ts",
@@ -36,8 +37,8 @@
     "@google/generative-ai": "^0.21.0",
     "@radix-ui/react-slot": "^1.2.5",
     "@supabase/supabase-js": "^2.108.1",
-    "@vercel/analytics": "^1.6.1",
     "@tailwindcss/vite": "^4.1.14",
+    "@vercel/analytics": "^1.6.1",
     "@vitejs/plugin-react": "^5.0.4",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -56,6 +57,7 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
