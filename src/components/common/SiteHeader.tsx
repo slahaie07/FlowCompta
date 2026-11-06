@@ -4,6 +4,8 @@ import { motion } from 'motion/react';
 import { Globe, LogIn, Menu, X } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useLanguage } from '../../hooks/useLanguage';
+import { CONFIG } from '../../lib/config';
+import { trackEvent } from '../../lib/trackEvent';
 
 export function SiteHeader() {
   const { lang, toggleLanguage, t } = useLanguage();
@@ -32,7 +34,11 @@ export function SiteHeader() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isMenuOpen]);
 
-  const goToSignup = () => navigate('/login?next=/onboarding&register=1');
+  // Lot A12 : le parcours principal est la fiche ; le portail passe par « Connexion Client ».
+  const goToIntake = () => {
+    trackEvent('intake_click', { source: 'site_header', lang });
+    window.open(CONFIG.APP.INTAKE_FORM_URL, '_blank', 'noopener,noreferrer');
+  };
 
   const goHome = () => {
     setIsMenuOpen(false);
@@ -101,7 +107,7 @@ export function SiteHeader() {
               <span>{lang.toUpperCase()}</span>
             </button>
 
-            <Button variant="gold" size="sm" onClick={goToSignup} className="shadow-gold/20">{t('nav.becomeClient')}</Button>
+            <Button variant="gold" size="sm" onClick={goToIntake} className="shadow-gold/20">{t('nav.becomeClient')}</Button>
           </div>
 
           <div className="flex items-center gap-4 lg:hidden">
@@ -148,7 +154,7 @@ export function SiteHeader() {
               <LogIn size={18} className="text-gold" />
               {lang === 'en' ? 'Client Login' : lang === 'ar' ? 'تسجيل الدخول' : 'Connexion Client'}
             </Button>
-            <Button variant="gold" onClick={goToSignup} className="py-4 shadow-gold/20">{t('nav.mobileOpen')}</Button>
+            <Button variant="gold" onClick={goToIntake} className="py-4 shadow-gold/20">{t('nav.mobileOpen')}</Button>
           </motion.div>
         )}
       </nav>
