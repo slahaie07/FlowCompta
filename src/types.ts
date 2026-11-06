@@ -78,6 +78,7 @@ export interface UserNeeds {
   softwareSetup: boolean;
   taxHelpAutonomous: boolean;
   businessStart: boolean;
+  corporateYearEnd: boolean;
 }
 
 export interface UserData {
