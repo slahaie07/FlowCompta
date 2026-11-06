@@ -3,13 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, Sparkles, LogIn } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useLanguage } from '../../hooks/useLanguage';
+import { CONFIG } from '../../lib/config';
+import { trackEvent } from '../../lib/trackEvent';
 
 export function PricingGrid() {
   const navigate = useNavigate();
   const { lang } = useLanguage();
 
+  // Lot A12 : un seul parcours principal — la fiche nouveau client.
+  // Le portail reste joignable par l'encadré « déjà un compte client ? » en bas de grille.
   const handleCtaClick = () => {
-    navigate('/login?next=/onboarding&register=1');
+    trackEvent('intake_click', { source: 'pricing_grid', lang });
+    window.open(CONFIG.APP.INTAKE_FORM_URL, '_blank', 'noopener,noreferrer');
   };
 
   const tiers = [
@@ -229,7 +234,7 @@ export function PricingGrid() {
             {lang === 'en' ? (
               <>Fixed prices, posted upfront — <span className="text-gold">adjustable to your needs.</span></>
             ) : lang === 'ar' ? (
-              <>أسعار ثابتة، <span className="text-gold">بلا مفاجآت.</span></>
+              <>أسعار ثابتة معلنة — <span className="text-gold">قابلة للتعديل حسب احتياجاتك.</span></>
             ) : (
               <>Prix fixes affichés — <span className="text-gold">ajustables selon vos besoins.</span></>
             )}
