@@ -39,7 +39,7 @@ serve(async (req) => {
       <p style="margin: 0;"><strong style="color: #888;">Signé le :</strong> ${dateStr}</p>
     </div>
     <p style="color: #888;">Le dossier est maintenant actif. Connecte-toi au portail admin pour commencer le traitement.</p>
-    <p style="color: #555; font-size: 12px; margin-top: 40px;">ComptaFlow — Plateforme comptable certifiée Québec</p>
+    <p style="color: #555; font-size: 12px; margin-top: 40px;">ComptaFlow — Tenue de livres et impôts — Québec</p>
   </div>
 </body>
 </html>`
@@ -49,7 +49,7 @@ serve(async (req) => {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${resendApiKey}` },
       body: JSON.stringify({
         from: 'ComptaFlow <noreply@compta-flow.net>',
-        to: ['compta-flow@outlook.com'],
+        to: ['contact@compta-flow.net'],
         subject: `✅ Mandat signé par ${clientName || clientEmail}`,
         html: emailBody,
       }),
