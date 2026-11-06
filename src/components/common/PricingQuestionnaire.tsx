@@ -16,6 +16,7 @@ import { formatCAD, getTaxDisplayLines, calculateCanadianTaxes, type ProvinceCod
 import type { ApplicablePackage, BillingUnit } from '../../lib/pricingEstimator';
 import type { PricingStep } from '../../hooks/usePricingEstimate';
 import { CONFIG } from '../../lib/config';
+import { trackEvent } from '../../lib/trackEvent';
 
 const PROVINCES: ProvinceCode[] = ['QC', 'ON', 'BC', 'AB', 'MB', 'NB', 'NL', 'NS', 'PE', 'SK'];
 
@@ -165,6 +166,17 @@ export function PricingQuestionnaire({
     toggleAddOn,
     reset,
   } = usePricingEstimate(initialServiceId);
+
+  // Lot A11 : l'estimateur terminé n'est mesuré que sur le parcours public
+  // (showSignupCta), une fois par résultat distinct affiché.
+  const trackedResultKey = useRef<string | null>(null);
+  useEffect(() => {
+    if (!showSignupCta || step !== 'result' || !result) return;
+    const key = `${result.serviceId}:${result.amountTypical}`;
+    if (trackedResultKey.current === key) return;
+    trackedResultKey.current = key;
+    trackEvent('estimate_completed', { serviceId: result.serviceId, lang });
+  }, [showSignupCta, step, result, lang]);
 
   const questionSteps = useMemo(() => buildQuestionSteps(answers.serviceId), [answers.serviceId]);
   const totalSteps = questionSteps.length;
@@ -508,7 +520,7 @@ export function PricingQuestionnaire({
                 )}
                 {showSignupCta && variant === 'client' && (
                   <Button variant="gold" className="flex-1 min-h-12" asChild>
-                    <a href={CONFIG.APP.INTAKE_FORM_URL} target="_blank" rel="noreferrer" className="flex items-center justify-center gap-2 px-2 text-center">
+                    <a href={CONFIG.APP.INTAKE_FORM_URL} target="_blank" rel="noreferrer" onClick={() => trackEvent('intake_click', { serviceId: result.serviceId, source: 'estimate_result', lang })} className="flex items-center justify-center gap-2 px-2 text-center">
                       {t('pricingQuestionnaire.cta.requestQuote')} <Mail size={16} className="shrink-0" />
                     </a>
                   </Button>
