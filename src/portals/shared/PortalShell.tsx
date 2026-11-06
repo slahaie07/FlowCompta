@@ -13,6 +13,7 @@ import { getPortalNav, isPathAllowedForRole } from '../config';
 import { getPortalBasePath, getActiveSegment } from '../config/paths';
 import type { PortalShellProps, PortalRole, PortalRouteContext } from '../types';
 import { supabase } from '../../lib/supabase';
+import { trackEvent } from '../../lib/trackEvent';
 import { ThreeDMatrixAmbiance } from '../../components/ui/ThreeDMatrixAmbiance';
 
 interface PortalShellComponentProps extends PortalShellProps {
@@ -261,6 +262,8 @@ export function PortalShell({
               signature_data: signatureData ?? null,
               signed_at: new Date().toISOString(),
             });
+            // Lot A11 : événement de conversion (la table mandates reste la source de vérité).
+            trackEvent('mandate_signed', { serviceId: userData.selectedServiceId ?? undefined });
             // Notifier l'admin
             await supabase.functions.invoke('notify-mandate-signed', {
               body: {
