@@ -10,7 +10,7 @@ export function SiteFooter() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <img src="/logo-comptaflow-transparent.png" alt="Compta-Flow" className="h-5 w-auto shrink-0" />
+                <img src="/logo-comptaflow-transparent-sm.webp" alt="Compta-Flow" width={264} height={83} className="h-5 w-auto shrink-0" />
                 <span className="text-xl font-serif font-bold tracking-tight">Compta<em className="text-gold not-italic">flow</em></span>
               </div>
               <p className="text-sm text-silver/80 font-light leading-relaxed">
