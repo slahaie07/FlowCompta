@@ -220,6 +220,10 @@ function computeServiceFee(
       return { amount: 199, billingUnit: 'oneTime', fixed: true, breakdown };
     case 'taxHelpAutonomous':
       return { amount: 199.99, billingUnit: 'oneTime', fixed: true, breakdown };
+    case 'corporateYearEnd':
+      // 499 $ (inactive) à 1 499 $ et plus (active, livres non tenus par Compta-Flow) :
+      // fourchette assumée, jamais un prix ferme à l'estimateur.
+      return { amount: 1199, billingUnit: 'oneTime', fixed: false, breakdown };
     default:
       return { amount: base, billingUnit: 'oneTime', fixed: true, breakdown };
   }
