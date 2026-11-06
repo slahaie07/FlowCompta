@@ -58,6 +58,10 @@ export const CONFIG = {
     SUB_ADMIN_EMAILS: ['comptable@compta-flow.net', 'partenaire@compta-flow.net'],
     SUPPORT_EMAIL: 'contact@compta-flow.net',
     INTAKE_FORM_URL: 'https://docs.google.com/forms/d/e/1FAIpQLSdF_7Sfi0fbRwGezELWVdGZ9QzUtQnY-FTI5ROmVXB0sooPHg/viewform',
+    // Lot A12-5 : formulaire Google du diagnostic gratuit (8 questions).
+    // URL publique collée le 2026-11-06. Chaîne vide = la section ne
+    // s'affiche pas (garde-fou du composant FreeDiagnosticSection).
+    DIAGNOSTIC_FORM_URL: 'https://docs.google.com/forms/d/e/1FAIpQLScd38id-Z2JkEWkwweE7PTDNFzdV2I4MApfJOAPUKek-efHOA/viewform',
     SITE_URL: 'https://compta-flow.net',
     /** Destinataire par défaut des virements Interac plateforme (distinct des comptes auth admin). */
     INTERAC_EMAIL: 'compta-flow@outlook.com',
