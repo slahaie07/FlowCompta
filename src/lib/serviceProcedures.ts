@@ -496,6 +496,20 @@ export const SERVICE_PROCEDURES: Record<ServiceId, ServiceProcedure> = {
       baseDeliveryStep(6),
     ],
   },
+
+  corporateYearEnd: {
+    serviceId: 'corporateYearEnd',
+    estimatedDays: 21,
+    steps: [
+      baseMandateStep(1),
+      baseVaultDocsStep(2, [
+        { id: 'all_bank_statements', labelKey: 'procedure.docs.allBankStatements', required: true },
+        { id: 'prior_ledger', labelKey: 'procedure.docs.priorLedger', required: false },
+        { id: 'prior_returns', labelKey: 'procedure.docs.priorReturns', required: false },
+      ]),
+      baseDeliveryStep(3),
+    ],
+  },
 };
 
 export function getServiceProcedure(serviceId: ServiceId): ServiceProcedure {
