@@ -49,7 +49,7 @@ serve(async (req) => {
             <p style="margin: 0;"><strong style="color: #888;">Montant déclaré :</strong> <span style="color: #C6A15B; font-size: 18px; font-family: Georgia, serif;">${amount} $ CAD</span></p>
           </div>
           <p style="color: #888;">Veuillez vérifier votre compte bancaire et confirmer la réception dans votre portail ComptaFlow pour acquitter la facture.</p>
-          <p style="color: #555; font-size: 12px; margin-top: 40px;">ComptaFlow — Plateforme comptable certifiée Québec</p>
+          <p style="color: #555; font-size: 12px; margin-top: 40px;">ComptaFlow — Tenue de livres et impôts — Québec</p>
         </div>
       </body>
       </html>
