@@ -105,6 +105,11 @@ export const i18n = {
           desc: "Aide à l'ouverture de compagnie : immatriculation, numéros de taxes et mise en place comptable.",
           price: "Dès 199 $"
         },
+        corporateYearEnd: {
+          name: "Fin d'année de société",
+          desc: "T2 et CO-17 : société inactive 499 $ ; active dès 1 199 $ si vos livres sont tenus par Compta-Flow.",
+          price: "Dès 1 199 $"
+        },
         taxHelpAutonomous: {
           name: "Aide impôt travailleur autonome",
           desc: "Rassembler et structurer vos chiffres avant transmission à votre comptable.",
@@ -1056,6 +1061,11 @@ export const i18n = {
           desc: "Help opening your company: registration, tax numbers and accounting setup.",
           price: "From $199"
         },
+        corporateYearEnd: {
+          name: "Corporate Year-End",
+          desc: "T2 and CO-17: inactive corporation $499; active from $1,199 if your books are kept by Compta-Flow.",
+          price: "From $1,199"
+        },
         taxHelpAutonomous: {
           name: "Self-employed tax prep help",
           desc: "Gather and organize your numbers before sending to your accountant.",
@@ -1947,6 +1957,7 @@ export const i18n = {
         catchUp: { name: "Compta en retard", desc: "Mise à jour.", price: "60 $ – 75 $ / mois de retard" },
         softwareSetup: { name: "Config. logiciel", desc: "QuickBooks, Sage.", price: "199 $" },
         businessStart: { name: "Business Start-Up", desc: "Help opening your company: registration, tax numbers and accounting setup.", price: "From $199" },
+        corporateYearEnd: { name: "Corporate Year-End", desc: "T2 and CO-17: inactive corporation $499; active from $1,199 if your books are kept by Compta-Flow.", price: "From $1,199" },
         taxHelpAutonomous: { name: "Aide impôt autonome", desc: "Rassembler chiffres.", price: "199,99 $" }
       },
       perHour: "À l'heure",
