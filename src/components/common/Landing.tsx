@@ -19,13 +19,19 @@ import { SiteFooter } from './SiteFooter';
 import { TeamAndTools } from './TeamAndTools';
 import { usePwaInstall } from '../../hooks/usePwaInstall';
 import { getActiveRegions } from '../../lib/canadaNetwork';
+import { CONFIG } from '../../lib/config';
+import { trackEvent } from '../../lib/trackEvent';
 
 export function Landing() {
   const navigate = useNavigate();
   const { lang, toggleLanguage, t } = useLanguage();
   const { isInstallable, install } = usePwaInstall();
 
-  const goToSignup = () => navigate('/login?next=/onboarding&register=1');
+  // Lot A12 : le parcours principal est la fiche ; le portail passe par « Connexion Client » de l'en-tête.
+  const goToIntake = () => {
+    trackEvent('intake_click', { source: 'landing_hero', lang });
+    window.open(CONFIG.APP.INTAKE_FORM_URL, '_blank', 'noopener,noreferrer');
+  };
 
   const tickerItems =
     lang === 'en'
@@ -113,7 +119,7 @@ export function Landing() {
                 <Button
                   variant="secondary"
                   size="lg"
-                  onClick={goToSignup}
+                  onClick={goToIntake}
                   className="w-full sm:w-auto px-8 py-7 text-lg glass-button border-gold/20"
                 >
                   {lang === 'en' ? 'Open my file' : lang === 'ar' ? 'فتح ملفي' : 'Ouvrir mon dossier'}
