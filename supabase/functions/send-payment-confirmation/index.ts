@@ -29,7 +29,7 @@ serve(async (req) => {
 
     const clientEmail = invoice.client?.email
     const clientName = invoice.client?.full_name || 'Client'
-    const subAdminName = invoice.sub_admin?.full_name || 'Votre CPA'
+    const subAdminName = invoice.sub_admin?.full_name || 'Compta-Flow'
     const total = parseFloat(invoice.montant_total).toFixed(2)
     const number = invoice.numero
     const ref = invoice.interac_reference || 'Dépôt direct'
@@ -44,7 +44,7 @@ serve(async (req) => {
   <div style="max-width:600px;margin:40px auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 32px rgba(0,0,0,0.08);">
     <div style="background:#0a0a0a;padding:32px 40px;text-align:center;">
       <div style="font-family:Georgia,serif;font-size:28px;color:#C6A15B;letter-spacing:4px;">ComptaFlow</div>
-      <div style="font-size:9px;letter-spacing:4px;color:#666;margin-top:4px;text-transform:uppercase;">Plateforme Comptable Certifiée Québec</div>
+      <div style="font-size:9px;letter-spacing:4px;color:#666;margin-top:4px;text-transform:uppercase;">Tenue de livres et impôts — Québec</div>
     </div>
     <div style="padding:40px;">
       <div style="background:#d1fae5;border:1px solid #6ee7b7;border-radius:12px;padding:20px;text-align:center;margin-bottom:32px;">
