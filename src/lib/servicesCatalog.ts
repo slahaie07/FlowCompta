@@ -10,6 +10,7 @@ import {
   Monitor,
   HelpCircle,
   Rocket,
+  Landmark,
   type LucideIcon,
 } from 'lucide-react';
 import type { UserNeeds } from '../types';
@@ -105,6 +106,13 @@ export const SERVICE_CATALOG: ServiceDefinition[] = [
     estimateFee: 199,
     icon: Rocket,
   },
+  {
+    id: 'corporateYearEnd',
+    code: 'AC-08',
+    category: 'alacarte',
+    estimateFee: 1199,
+    icon: Landmark,
+  },
 ];
 
 export const SERVICE_CATEGORIES: ServiceCategory[] = ['hourly', 'monthly', 'alacarte'];
@@ -122,6 +130,7 @@ export function createEmptyUserNeeds(): UserNeeds {
     softwareSetup: false,
     taxHelpAutonomous: false,
     businessStart: false,
+    corporateYearEnd: false,
   };
 }
 
