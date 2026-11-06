@@ -152,7 +152,7 @@ serve(async (req) => {
 
     <div style="background: linear-gradient(135deg, #C6A15B22, #0a0a0a); padding: 40px; border-bottom: 1px solid #C6A15B22;">
       <h1 style="color: #C6A15B; font-family: Georgia, serif; margin: 0 0 8px; font-size: 24px;">Compta<span style="color:#fff">Flow</span></h1>
-      <p style="color: #888; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin: 0;">Cabinet Comptable Certifié — Québec</p>
+      <p style="color: #888; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin: 0;">Tenue de livres et impôts — Québec</p>
     </div>
 
     <div style="padding: 40px;">
@@ -193,7 +193,7 @@ serve(async (req) => {
 
       <p style="color: #555; font-size: 13px; line-height: 1.6; border-top: 1px solid #1a1a1a; padding-top: 24px; margin-top: 24px;">
         Des questions ? Répondez directement à ce courriel ou écrivez-nous à
-        <a href="mailto:compta-flow@outlook.com" style="color: #C6A15B;">compta-flow@outlook.com</a>.
+        <a href="mailto:contact@compta-flow.net" style="color: #C6A15B;">contact@compta-flow.net</a>.
         Nous vous répondons sous 24 h ouvrables.
       </p>
     </div>
@@ -221,7 +221,7 @@ serve(async (req) => {
       body: JSON.stringify({
         from: 'ComptaFlow <noreply@compta-flow.net>',
         to: [clientEmail],
-        reply_to: 'compta-flow@outlook.com',
+        reply_to: 'contact@compta-flow.net',
         subject: `🔐 Action requise — Votre dossier ${serviceInfo.name} est prêt`,
         html: emailBody,
       }),
