@@ -70,7 +70,7 @@ export function SiteHeader() {
               }
             }}
           >
-            <img src="/logo-comptaflow-transparent.png" alt="Compta-Flow" className="h-6 sm:h-7 w-auto shrink-0" />
+            <img src="/logo-comptaflow-transparent-sm.webp" alt="Compta-Flow" width={264} height={83} className="h-6 sm:h-7 w-auto shrink-0" />
             <span className="hidden min-[380px]:block text-xl sm:text-2xl font-serif font-bold tracking-tight">Compta<em className="text-gold not-italic">flow</em></span>
           </div>
 
